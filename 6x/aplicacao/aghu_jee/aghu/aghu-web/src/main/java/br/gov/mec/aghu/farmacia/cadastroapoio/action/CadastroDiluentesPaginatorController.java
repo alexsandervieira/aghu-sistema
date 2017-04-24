@@ -21,6 +21,7 @@ public class CadastroDiluentesPaginatorController extends ActionController imple
 	
 	private AfaMedicamento medicamentoSelecionado;
 	private Boolean fromList;
+	private String voltar = RetornoAcaoStrEnum.CANCELADO.toString();
 	
 	@Inject @Paginator
 	private DynamicDataModel<CadastroDiluentesVO> dataModel;
@@ -94,14 +95,15 @@ public class CadastroDiluentesPaginatorController extends ActionController imple
 	}
 	
 	public String cancelarPesquisa() {
-		return RetornoAcaoStrEnum.CANCELADO.toString();
+		return voltar;
 	}
 	
 	public static enum RetornoAcaoStrEnum {
 
 		VISUALIZAR_HISTORICO("farmacia-visualizarHistorico"),
 		CANCELADO("farmacia-cancelar"),
-		DILUENTE_CRUD("farmacia-incluirDiluente");		
+		DILUENTE_CRUD("farmacia-incluirDiluente"),
+		MEDICAMENTO_CRUD("medicamentoCRUD");
 
 		private final String str;
 
@@ -117,6 +119,15 @@ public class CadastroDiluentesPaginatorController extends ActionController imple
 		}
 
 	}
+
+	public String getVoltar() {
+		return voltar;
+	}
+
+	public void setVoltar(String voltar) {
+		this.voltar = voltar;
+	}
+	
 	
 
 }

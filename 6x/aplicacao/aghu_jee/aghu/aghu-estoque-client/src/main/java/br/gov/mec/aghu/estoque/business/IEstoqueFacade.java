@@ -190,6 +190,8 @@ public interface IEstoqueFacade extends Serializable {
 	Long pesquisaRequisicoesMateriaisEstornarCount(SceReqMaterial sceReqMateriais);
 
 	List<SceAlmoxarifado> obterAlmoxarifadoPorSeqDescricao(String param);
+	
+	public List<SceAlmoxarifado> obterAlmoxarifadoPorSeqDescricao(String param,SceAlmoxarifado almox);
 
 	SceEstoqueAlmoxarifado obterEstoqueAlmoxarifadoEstocavelPorMaterialAlmoxarifadoFornecedor(Short seqAlmoxarifadoOrigem,
 			Integer codigoMaterial, Integer fornecedor);
@@ -267,8 +269,6 @@ public interface IEstoqueFacade extends Serializable {
 
 	List<SceMotivoProblema> pesquisaMotivosProblemasPorSeqDescricao(String paramPesq, DominioSituacao situacao);
 
-	List<SceEstoqueAlmoxarifado> pesquisarEstoqueAlmoxarifadoPorPacote(Integer codigoGrupo, ScePacoteMateriaisId pacote);
-
 	void preencheConsumoMedioItemRequisicao(SceItemRms itemRms, Integer codigoCCAplicacao) throws ApplicationBusinessException;
 
 	List<SceFornecedorEventual> obterFornecedorEventual(Object param);
@@ -290,7 +290,7 @@ public interface IEstoqueFacade extends Serializable {
 	RequisicaoMaterialVO buscaMateriaisItensImprimir(Integer reqMat, DominioOrderBy orderBy, boolean inserirMedia) throws BaseException;
 
 	List<PosicaoFinalEstoqueVO> buscaDadosPosicaoFinalEstoque(Date dtCompetencia, Integer codigoGrupo, String estocavel, String orderBy,
-			Integer fornecedor, String siglaTipoUsoMdto, Short almoxSeq) throws BaseException;
+			Integer fornecedor, String siglaTipoUsoMdto, Short almoxSeq, boolean mostrarSoAtivos) throws BaseException;
 
 	NotaRecebimentoVO pesquisaDadosNotaRecebimento(Integer numNotaRec, boolean isConsiderarNotaEmpenho) throws BaseException;
 
@@ -1928,8 +1928,8 @@ public interface IEstoqueFacade extends Serializable {
 
 	public Long pesquisarUltimasComprasMateriasHistoricoCount(String modl, Integer matCodigo);
 
-	public abstract void validarInsercaoPacoteRequisicaoMaterial(SceReqMaterial reqMaterial, List<SceEstoqueAlmoxarifado> lstItemToAdd,
-			Boolean isAlmoxarife) throws ApplicationBusinessException;
+	public abstract void validarInsercaoPacoteRequisicaoMaterial(SceReqMaterial reqMaterial, Integer codigoGrupoMaterial,
+			Boolean isAlmoxarife,String nomeMicrocomputador) throws ApplicationBusinessException;
 
 	public abstract void popularConsumosItemPacoteVO(ItemPacoteMateriaisVO itemPacoteMateriaisVO) throws ApplicationBusinessException;
 

@@ -360,8 +360,10 @@ public class RelatorioPacienteVO {
 	public String getCepFormatado() {
 		String retorno = null;
 		if(cep != null && cep != 0) {
-			retorno = cep.toString();			
-			retorno = retorno.substring(0, retorno.length() - 3) + "-" + retorno.substring(retorno.length() - 3, retorno.length());
+			retorno = cep.toString();
+			if(retorno.length() > 3) {
+				retorno = retorno.substring(0, retorno.length() - 3) + "-" + retorno.substring(retorno.length() - 3, retorno.length());
+			}
 		}
 		return retorno;
 	}

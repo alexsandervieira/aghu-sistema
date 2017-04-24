@@ -102,4 +102,13 @@ public class MpmHorarioInicAprazamentoDAO extends
 		}
 		return criteria;
 	}
+	
+	public MpmHorarioInicAprazamento pesquisarHorarioAprazamentoDieta(Short unfSeq, DominioSituacao situacao,Short frequencia, MpmTipoFrequenciaAprazamento tfqSeq) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(MpmHorarioInicAprazamento.class);
+		criteria.add(Restrictions.eq(MpmHorarioInicAprazamento.Fields.TIPO_FREQ_APRAZAMENTO.toString(), tfqSeq));
+		criteria.add(Restrictions.eq(MpmHorarioInicAprazamento.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
+		criteria.add(Restrictions.eq(MpmHorarioInicAprazamento.Fields.ID_UNIDADE_FUNCIONAL.toString(), unfSeq));
+		criteria.add(Restrictions.eq(MpmHorarioInicAprazamento.Fields.FREQUENCIA.toString(), frequencia));
+		return (MpmHorarioInicAprazamento) executeCriteriaUniqueResult(criteria);
+	}
 }

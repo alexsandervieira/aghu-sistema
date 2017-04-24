@@ -44,9 +44,9 @@
 			<mec:commandButton id="bt_gerarDisponibilidade"
 				rendered="#{not empty manterGradeAgendamentoController.seqCaracteristica and not empty manterGradeAgendamentoController.horarioGradeConsultaList and manterGradeAgendamentoController.gradeAgendamenConsultaCopia == null}"
 				value="#{messages.TITLE_MANTER_GRADE_AGENDAMENTO_GERAR_DISPONIBILIDADE}"
-				oncomplete="PF('modalGerarDisponibilidadeWG').show();"
 				profile="ok" ajax="true" render="modalGerarDisponibilidadePanel"
-				process="@this">
+				process="@this"
+				action="#{manterGradeAgendamentoController.validarHorariosAtivos()}">
 			</mec:commandButton>
 
 			<mec:commandButton id="bt_copiarGrade"
@@ -122,7 +122,26 @@
         </h:form> 
       </h:panelGroup> 
     </p:dialog> 
-	 </p:outputPanel> 
+	 </p:outputPanel>
+
+        <p:outputPanel id="panelModalConfirmarGradesSobrepostas" layout="inline"> 
+          <p:dialog id="modalConfirmarGradesSobrepostas" width="400" height="150" modal="true" resizable="false" widgetVar="modalMensagemGradesSobrepostasWG"> 
+            <f:facet name="header"> 
+              <h:panelGroup> 
+                <h:outputText value="#{messages.TITLE_MODAL_CONFIRMACAO_HORARIOS_SOBREPOSTOS}"/> 
+              </h:panelGroup> 
+            </f:facet> 
+            #{manterGradeAgendamentoController.mensagemGradesSobrepostas}
+            <br clear="none"/>  <br clear="none"/>  <br clear="none"/>  
+            <h:panelGroup> 
+		        <h:form prependId="false" id="formModalConfirmarGradesSobrepostas"> 
+        	      <mec:commandButton id="bt_GradesSobrepostas_sim" value="#{messages.LABEL_SIM}" immediate="true" onclick="PF('modalMensagemGradesSobrepostasWG').hide();" oncomplete="PF('modalGerarDisponibilidadeWG').hide();" action="#{manterGradeAgendamentoController.gerarDisponibilidade()}" profile="ok" ajax="true" process="@this" render="modalGerarDisponibilidadePanel, listHorarioGrade"/>
+            	  <mec:commandButton id="bt_GradesSobrepostas_nao" value="#{messages.LABEL_NAO}" immediate="true" onclick="PF('modalMensagemGradesSobrepostasWG').hide();" profile="cancel" ajax="true" process="@this"/>
+            	 </h:form> 
+            </h:panelGroup> 
+          </p:dialog> 
+        </p:outputPanel> 
+        	  
     </ui:define> 
   </ui:composition> 
 </html>      

@@ -149,6 +149,12 @@ public class AacFormaAgendamentoDAO extends br.gov.mec.aghu.core.persistence.dao
 		DetachedCriteria criteria = createFormasAgendamentosCriteria(pagador, tipoAgendamento, condicaoAtendimento);
 		return executeCriteriaCount(criteria);
 	}
+	
+	public Long listarFormasAgendamentosFiltroSisreg(AacPagador pagador, AacTipoAgendamento tipoAgendamento,
+			AacCondicaoAtendimento condicaoAtendimento) {
+		DetachedCriteria criteria = createFormasAgendamentosCriteria(pagador, tipoAgendamento, condicaoAtendimento);
+		return executeCriteriaCount(criteria);
+	}
 
 	private DetachedCriteria createFormasAgendamentosCriteria(AacPagador pagador, AacTipoAgendamento tipoAgendamento,
 			AacCondicaoAtendimento condicaoAtendimento) {

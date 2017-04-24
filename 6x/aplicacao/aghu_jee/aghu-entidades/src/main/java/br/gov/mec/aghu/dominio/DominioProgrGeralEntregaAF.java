@@ -160,7 +160,7 @@ public enum DominioProgrGeralEntregaAF implements Dominio {
 	},
 	CENTRO_DE_CUSTO_SOLICITANTE {
 		public String getDescricao() {
-			return "Centro de Custo Solicitante";
+			return "Centro de Atividade Solicitante";
 		}
 	},
 	SOLICITACAO_DE_COMPRA_SERVICO {
@@ -195,7 +195,7 @@ public enum DominioProgrGeralEntregaAF implements Dominio {
 	},
 	CENTRO_DE_CUSTO_APLICACAO {
 		public String getDescricao() {
-			return "Centro de Custo Aplicação";
+			return "Centro de Atividade Aplicação";
 		}
 	},
 	OBSERVACAO {

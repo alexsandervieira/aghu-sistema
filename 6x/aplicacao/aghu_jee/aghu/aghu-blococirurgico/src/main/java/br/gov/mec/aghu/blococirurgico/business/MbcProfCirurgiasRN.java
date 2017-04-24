@@ -869,7 +869,7 @@ RapServidores servidorLogado = servidorLogadoFacade.obterServidorLogado();
 			throw new ApplicationBusinessException(MbcProfCirurgiasRNExceptionCode.MBC_00332);
 		}
 
-		DominioFuncaoProfissional[] funcoes = new DominioFuncaoProfissional[] { DominioFuncaoProfissional.MCO, DominioFuncaoProfissional.MPF };
+		DominioFuncaoProfissional[] funcoes = new DominioFuncaoProfissional[] { DominioFuncaoProfissional.MCO, DominioFuncaoProfissional.MPF, DominioFuncaoProfissional.OPF, DominioFuncaoProfissional.ORE };
 		List<MbcProfCirurgias> listProfCirurgiasFuncoes = this.getMbcProfCirurgiasDAO().obterProfCirurgiasPorCrgSeq(crgSeq, funcoes);
 		if (listProfCirurgiasFuncoes == null || listProfCirurgiasFuncoes.isEmpty()) {
 			/* O profissional com indicador de responsável deve ser médico contratado ou professor */
@@ -881,7 +881,9 @@ RapServidores servidorLogado = servidorLogadoFacade.obterServidorLogado();
 	public boolean validaProfissionalResp(List<CirurgiaTelaProfissionalVO> listaProfissionaisVO){
 		CirurgiaTelaProfissionalVO responsavel = getProfissionalVoResponsavel(listaProfissionaisVO);
 		if(responsavel.getFuncaoProfissional().getCodigo().equals(DominioFuncaoProfissional.MCO.getCodigo()) ||
-		   responsavel.getFuncaoProfissional().getCodigo().equals(DominioFuncaoProfissional.MPF.getCodigo())){
+		   responsavel.getFuncaoProfissional().getCodigo().equals(DominioFuncaoProfissional.MPF.getCodigo()) ||
+		   responsavel.getFuncaoProfissional().getCodigo().equals(DominioFuncaoProfissional.OPF.getCodigo()) ||
+		   responsavel.getFuncaoProfissional().getCodigo().equals(DominioFuncaoProfissional.ORE.getCodigo())) {
 		   return true;
 		}
 		return false;

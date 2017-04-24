@@ -217,7 +217,6 @@ public class CadastroInternacaoController extends ActionController {
 	 * Lista de responsáveis do paciente que excluídos.
 	 */
 	private List<AinResponsaveisPaciente> listaResponsaveisPacienteExcluidos = new ArrayList<AinResponsaveisPaciente>();
-
 	private String mensagemModal;
 
 	/**
@@ -247,37 +246,29 @@ public class CadastroInternacaoController extends ActionController {
 
 	/* PROCEDIMENTOS */
 	private FatItensProcedHospitalar itemProcedHospitalar;
+	private FatItensProcedHospitalar itemProcedHospitalarOld;
 
 	/* CONVÊNIO/PLANO */
 	// private ConvenioPlanoVO convenioPlanoPesq;
 	private FatConvenioSaudePlano convenioSaudePlano;
 	private Short convenioId;
 	private Byte planoId;
-	
 	private List<AinLeitos> listaLeitos = new ArrayList<AinLeitos>();
 	private AinLeitos leitos = null;
-	
 
 	/* CIDS */
-
 	private AghCid itemCid;
-
-	
-
 	private List<AinCidsInternacao> cidsInternacao = new ArrayList<AinCidsInternacao>();
 	private List<AinCidsInternacao> cidsInternacaoExcluidos = new ArrayList<AinCidsInternacao>();
 	private Integer cidInternacaoSeq;
 	private Object retornouTelaAssociada;
-
 	private Integer codigoClinicaPesq;
 	private List<AghClinicas> listaClinicasPesq;
 	private String descricaoClinicaBuscaLov;
 
 	// Variáveis de controle de mensagens de confirmação da tela
 	private Boolean mostrarAlerta = false;
-
 	private Date dataCirurgia = null;
-
 	private Boolean perguntouCirurgia = false;
 	private Boolean verificouProcedimento = false;
 	private Boolean verificouUF = false;
@@ -287,10 +278,8 @@ public class CadastroInternacaoController extends ActionController {
 	private Boolean verificouAtualizarAcomodacao = false;
 	private Boolean verificouMatriculaConvenio = false;
 	private Boolean verificouCnrac = false;
-
 	private Boolean isInclusao = true;
 	private AghUnidadesFuncionais unidadeFuncional;
-
 	private boolean considerarCidFiltro = true;
 
 	@Inject
@@ -301,12 +290,9 @@ public class CadastroInternacaoController extends ActionController {
 	private DisponibilidadeLeitoPaginatorController disponibilidadeLeitoPaginatorController;
 
 	private ParametrosTelaVO parametrosTela;
-	
 	private Boolean indDifClasse = Boolean.FALSE;
 	private Boolean indEnvProntUnidInt = Boolean.FALSE;
 	private String justificativaAltDel;
-	
-	
 
 	@PostConstruct
 	public void init() {
@@ -316,7 +302,7 @@ public class CadastroInternacaoController extends ActionController {
 	@SuppressWarnings({"PMD.ExcessiveMethodLength", "PMD.NPathComplexity"})
 	public void inicio() {
 	 
-
+		
 		if (INTERNACAO.equalsIgnoreCase(disponibilidadeLeitoPaginatorController.getCameFrom())) {
 
 			if(this.aipPacCodigo == null) {
@@ -328,7 +314,7 @@ public class CadastroInternacaoController extends ActionController {
 			}
 			// this.ainAtendimentoUrgenciaSeq =
 			// disponibilidadeLeitoPaginatorController.get;
-			if (!this.cameFrom.equalsIgnoreCase(PAGE_PESQUISAR_DISPONIBILIDADE_UNIDADE)) {
+			if (this.cameFrom == null || !this.cameFrom.equalsIgnoreCase(PAGE_PESQUISAR_DISPONIBILIDADE_UNIDADE)) {
 				this.cameFrom = disponibilidadeLeitoPaginatorController.getCameFrom();
 			}
 		}	
@@ -475,12 +461,16 @@ public class CadastroInternacaoController extends ActionController {
 					} catch (ApplicationBusinessException e) {
 						apresentarExcecaoNegocio(e);
 						return;
-
 					}
 				}
 				// Recupera valores quando for Solicitacao de internacao
 				if (ainSolicitacaoInternacaoSeq != null) {
 					AinSolicitacoesInternacao solicitacaoInternacao = recuperarSolicitacaoInternacao();
+					
+						if(solicitacaoInternacao != null && solicitacaoInternacao.getCid() != null){
+							adicionarCidInternacao(solicitacaoInternacao.getCid());
+						}	
+						
 						AinLeitos leito = solicitacaoInternacao.getLeito();
 						if (leito != null) {
 							internacao.setLeito(leito);
@@ -580,6 +570,7 @@ public class CadastroInternacaoController extends ActionController {
 
 				this.itemProcedHospitalar = internacaoFacade.obterItemProcedimentoHospitalar(internacao.getIphPhoSeq(),
 						internacao.getIphSeq());
+				this.itemProcedHospitalarOld = this.itemProcedHospitalar;
 
 				// Recupera a lista de Cids da internação
 				if (cidInternacaoSeq == null && cidsInternacao.size() == 0) {
@@ -587,7 +578,6 @@ public class CadastroInternacaoController extends ActionController {
 					this.cidsInternacao.addAll(aghuFacade.pesquisarCidsInternacao(internacao.getSeq()));
 
 				}
-
 			}
 		} else {
 
@@ -595,10 +585,8 @@ public class CadastroInternacaoController extends ActionController {
 			// CIDs
 			// da internação, independente de estar editando ou criando uma
 			// internação.
-
 			if (this.cidInternacaoSeq != null) {
 				Boolean adicionaCid = true;
-
 				// Verifica se cidSeq (recebido por parametro) já existe na
 				// lista
 				// "cidsInternacao" da internacao
@@ -608,13 +596,11 @@ public class CadastroInternacaoController extends ActionController {
 						break;
 					}
 				}
-
 				if (adicionaCid) {
 					AghCid cid = aghuFacade.obterCid(this.cidInternacaoSeq);
 					this.adicionarCidInternacao(cid);
 					cidInternacaoSeq = null;
 				}
-
 			}
 
 			// Verifica novamente o convênio, caso tenha sido alterado.
@@ -677,8 +663,7 @@ public class CadastroInternacaoController extends ActionController {
 	}
 	
 	private AinSolicitacoesInternacao recuperarSolicitacaoInternacao() {
-		return solicitacaoInternacaoFacade
-				.obterAinSolicitacoesInternacao(ainSolicitacaoInternacaoSeq);
+		return solicitacaoInternacaoFacade.obterAinSolicitacoesInternacao(ainSolicitacaoInternacaoSeq);
 	}
 
 	/**
@@ -773,7 +758,7 @@ public class CadastroInternacaoController extends ActionController {
 
 	public String cancelar() {
 		
-		String retorno = PAGE_PESQUISAR_PACIENTES;
+		String retorno = PAGE_CENSO_DIARIO_PACIENTES;
 		if (PAGE_LISTA_CIRURGIAS.equalsIgnoreCase(cameFromBegin) && this.gravouCirurgia) {
 			retorno = PAGE_LISTA_CIRURGIAS;
 		}else if ("pesquisarPaciente".equalsIgnoreCase(cameFrom)) {
@@ -875,9 +860,9 @@ public class CadastroInternacaoController extends ActionController {
 	 */
 	@SuppressWarnings("PMD.ExcessiveMethodLength")
 	public String internarPaciente() {
-
 		try {
 			Boolean isEdicao = internacao.getSeq() != null;
+			Boolean isSolicitarProntuario = validarGerarSolicitacaoProntuario(isEdicao);
 			// Limpa variáveis de controle de mensagens de alerta
 			this.mostrarAlerta = false;
 			this.verificouProcedimento = false;
@@ -888,14 +873,12 @@ public class CadastroInternacaoController extends ActionController {
 			this.verificouAtualizarAcomodacao = false;
 			this.verificouMatriculaConvenio = false;
 			this.verificouCnrac = false;
-
 			// Associa especialidade
 			internacao.setEspecialidade(especialidadePesq);
 			// Associa projeto de pesquisa
 			internacao.setProjetoPesquisa(projetoPesquisaPesq);
 			// Associa convênio/plano
 			if (convenioSaudePlano != null) {
-
 				FatConvenioSaudePlanoId idFatConvenio = new FatConvenioSaudePlanoId();
 				idFatConvenio.setCnvCodigo(convenioSaudePlano.getId().getCnvCodigo());
 				idFatConvenio.setSeq(convenioSaudePlano.getId().getSeq());
@@ -904,7 +887,6 @@ public class CadastroInternacaoController extends ActionController {
 			} else {
 				internacao.setConvenioSaudePlano(null);
 			}
-
 			// Associa CRM Professor
 			if (professorPesq != null) {
 				RapServidoresId idRapServidorProfessor = new RapServidoresId();
@@ -915,7 +897,6 @@ public class CadastroInternacaoController extends ActionController {
 			} else {
 				internacao.setServidorProfessor(null);
 			}
-
 			// Associa caráter de internação
 			internacao.setTipoCaracterInternacao(caraterInternacaoPesq);
 			// Associa origem de internação
@@ -924,11 +905,9 @@ public class CadastroInternacaoController extends ActionController {
 			verificarMedicoExternoSeq();
 			// Associa hospital de origem
 			internacao.setInstituicaoHospitalar(hospitalOrigemPesq);
-			
 			internacao.setJustificativaAltDel(justificativaAltDel);
-			
+			internacao.setIndDifClasse(indDifClasse);
 			internacao.setEnvProntUnidInt(indEnvProntUnidInt);
-
 			// Associa procedimento
 			if (itemProcedHospitalar != null && itemProcedHospitalar.getId() != null) {
 				internacao.setIphSeq(itemProcedHospitalar.getId().getSeq());
@@ -940,7 +919,6 @@ public class CadastroInternacaoController extends ActionController {
 				internacao.setIphSeq(null);
 				internacao.setIphPhoSeq(null);
 			}
-
 			// Recupera a lista de Responsáveis de Paciente da internação
 			if (listaResponsaveisPaciente == null || listaResponsaveisPaciente.isEmpty() && (listaResponsaveisPacienteExcluidos == null || listaResponsaveisPacienteExcluidos.isEmpty())) {
 				listaResponsaveisPaciente = new ArrayList<AinResponsaveisPaciente>();
@@ -951,58 +929,70 @@ public class CadastroInternacaoController extends ActionController {
 				}
 				limparListaResponsaveisPacienteExcluidos();
 			}
-
 			String nomeMicrocomputador = null;
 			try {
 				nomeMicrocomputador = super.getEnderecoIPv4HostRemoto().toString();
 			} catch (UnknownHostException e) {
 				LOG.error(e.getMessage(), e);
 			}
-
 			final Date dataFimVinculoServidor = new Date();
-
 			internacao = this.internacaoFacade.persistirInternacao(internacao, cidsInternacao, cidsInternacaoExcluidos,
-					listaResponsaveisPaciente, listaResponsaveisPacienteExcluidos, nomeMicrocomputador, dataFimVinculoServidor, false);
-
+					listaResponsaveisPaciente, listaResponsaveisPacienteExcluidos, nomeMicrocomputador, dataFimVinculoServidor, false,itemProcedHospitalarOld);
 			cidsInternacaoExcluidos.clear();
-
-			if (isEdicao) {
-				this.isInclusao = false;
-			}
+			if (isEdicao) { this.isInclusao = false; }
 			this.apresentarMsgNegocio(Severity.INFO, "MENSAGEM_OPERACAO_REALIZADA");
 			this.gravouCirurgia= true;
 			clearListaResponsaveisPaciente();
-			
-			
-			// Verifica se deve mostrar mensagem de incluir CNRAC para paciente
-			// de outro Estado
+			// Verifica se deve mostrar mensagem de incluir CNRAC para paciente de outro Estado
 			if (!internacaoFacade.validarPacienteOutroEstado(internacao.getPaciente(), internacao.getIphSeq(), internacao.getIphPhoSeq())) {
-
 				this.labelBotaoConfirmacao = "OK";
 				this.mostrarAlerta = true;
 				this.verificouCnrac = true;
 				this.mensagemModal = getBundle().getString("FAT_01168");
 			}
-			// Verifica se deve mostrar mensagem de informar a acomodação
-			// autorizada
+			// Verifica se deve mostrar mensagem de informar a acomodação -- autorizada
 			else {
 				this.verificouCnrac = false;
 				this.mostrarAlerta = false;
 				this.verificarAcomodacaoAutorizada();
 			}
-
 			retornouTelaAssociada = null;
 			this.modoEdicao = true;
-
+			this.gerarSolicitacaoProntuario(isSolicitarProntuario);
 		} catch (BaseException e) {
 			apresentarExcecaoNegocio(e);
 		}
-
 		//this.dataModel.reiniciarPaginator();
-
 		return "internacao-cadastroInternacao";
 	}
 
+	private boolean validarGerarSolicitacaoProntuario(Boolean isEdicao) {
+		boolean gerarSolicitacao = (!isEdicao && this.indEnvProntUnidInt) || (isEdicao && !internacao.getEnvProntUnidInt() && indEnvProntUnidInt); 
+		if (gerarSolicitacao && internacao.getOrigemEvento() != null && this.pacienteFacade.pesquisarSolicitantesProntuarioPorOrigemEventos(internacao.getOrigemEvento().getSeq()) == null){
+			this.apresentarMsgNegocio(Severity.WARN, "MSG_WARNING_SOLICITANTE_INEXISTENTE_ORIGEM_INTERNACAO");
+			gerarSolicitacao = false;
+			this.indEnvProntUnidInt = false;
+		}
+		return gerarSolicitacao;
+	}
+
+
+	/*private RapServidores recuperarServidorLogado() throws ApplicationBusinessException {
+		return registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado(), new Date());
+	}*/
+	
+	public void gerarSolicitacaoProntuario(Boolean gerarSolicitacaoProntuario){
+		if (gerarSolicitacaoProntuario){
+			try{
+				this.pacienteFacade.gerarSolicitacaoProntuario(this.internacao);	
+				apresentarMsgNegocio(Severity.INFO, "SOLICITACAO_MOVIMENTACAO_PRONTUARIO_SUCESSO");
+			} catch(BaseException exception){
+				this.apresentarExcecaoNegocio(exception);
+				LOG.error("Exceção capturada: ", exception);
+			}
+		}
+	}
+	
 	private void verificarMedicoExternoSeq() {
 		
 		if(medicoExternoPesq != null){
@@ -1065,7 +1055,6 @@ public class CadastroInternacaoController extends ActionController {
 			String nome = responsaveisPacienteFacade.obterNomeResponsavelPacienteTipoConta(internacao.getSeq());
 			retorno = "O responsável que está salvo no banco e irá constar no contrato é: "+nome+". Deseja prosseguir?";
 		}
-
 		return retorno;
 	}
 
@@ -1075,15 +1064,12 @@ public class CadastroInternacaoController extends ActionController {
 
 	public List<ConvenioPlanoVO> pesquisarConvenioPlano(Object strParam) {
 		List<ConvenioPlanoVO> retorno;
-
 		retorno = internacaoFacade.pesquisarConvenioPlanoInternacao(strParam);
-
 		return retorno;
 	}
 
 	public List<AghEspecialidades> pesquisarEspecialidade(String objParam) {
 		List<AghEspecialidades> retorno;
-
 		String strPesquisa = (String) objParam;
 		retorno = cadastrosBasicosInternacaoFacade.pesquisarEspecialidadeInternacao(strPesquisa, paciente.getIdade().shortValue(),
 				unidadeFuncional.getIndUnidEmergencia());
@@ -1092,12 +1078,9 @@ public class CadastroInternacaoController extends ActionController {
 
 	public List<AelProjetoPesquisas> pesquisarProjetoPesquisa(String objParam) {
 		List<AelProjetoPesquisas> retorno;
-
 		String strPesquisa = (String) objParam;
 		retorno = internacaoFacade.pesquisarProjetosPesquisaInternacao(strPesquisa, paciente.getCodigo());
-
 		return retorno;
-
 	}
 
 	public List<ProfessorCrmInternacaoVO> pesquisarProfessor(String strParam) {
@@ -1120,16 +1103,13 @@ public class CadastroInternacaoController extends ActionController {
 
 	public List<AinTiposCaraterInternacao> pesquisarCaraterInternacao(String objParam) {
 		List<AinTiposCaraterInternacao> retorno;
-
 		String strPesquisa = (String) objParam;
 		retorno = internacaoFacade.pesquisarCaraterInternacao(strPesquisa);
 		return retorno;
-
 	}
 
 	public List<AghOrigemEventos> pesquisarOrigemInternacao(String objParam) {
 		List<AghOrigemEventos> retorno;
-
 		String strPesquisa = (String) objParam;
 		retorno = cadastrosBasicosInternacaoFacade.pesquisarOrigemEventoPorCodigoEDescricao(strPesquisa);
 		return retorno;
@@ -1144,12 +1124,9 @@ public class CadastroInternacaoController extends ActionController {
 	
 	public List<AghInstituicoesHospitalares> pesquisarHospitalOrigem(String objParam) {
 		List<AghInstituicoesHospitalares> retorno;
-
 		String strPesquisa = (String) objParam;
 		retorno = aghuFacade.pesquisarInstituicaoHospitalarPorCodigoOuDescricaoOrdenado(strPesquisa);
-
 		return retorno;
-
 	}
 
 	/**
@@ -1406,7 +1383,6 @@ public class CadastroInternacaoController extends ActionController {
 		} else {
 			retorno = this.verificarCidProcedimento();
 		}
-
 		return retorno;
 	}
 
@@ -2331,4 +2307,13 @@ public class CadastroInternacaoController extends ActionController {
 	public void setCameFromBegin(String cameFromBegin) {
 		this.cameFromBegin = cameFromBegin;
 	}
+
+	public FatItensProcedHospitalar getItemProcedHospitalarOld() {
+		return itemProcedHospitalarOld;
+	}
+
+	public void setItemProcedHospitalarOld(FatItensProcedHospitalar itemProcedHospitalarOld) {
+		this.itemProcedHospitalarOld = itemProcedHospitalarOld;
+	}
+	
 }

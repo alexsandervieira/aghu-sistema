@@ -4,18 +4,21 @@
   <ui:composition> 
         <mec:serverDataTable id="resultListAb3" list="#{pesquisarPacientesAgendadosController.pacientesAtendimentoList}" scrollable="true" scrollHeight="#{pesquisarPacientesAgendadosController.percPanel}" selection="consultaSelecionadaAba3" controller="#{pesquisarPacientesAgendadosController}">  
           <p:ajax event="rowSelect" process="@this" update="@(#botoesAcao)" />
-          <p:column style="text-align:center;#{pesquisarPacientesAgendadosController.consultaSelecionada eq item?'background-color:PapayaWhip;':''}" sortBy="#{item.atender}" sortable="true"> 
+          <p:column style="text-align:center;#{pesquisarPacientesAgendadosController.consultaSelecionada eq item?'background-color:PapayaWhip;':''}" sortBy="#{item.atender}" sortable="true"
+                    rendered="#{mf:hasPermission(securityController,'atenderConsulta,atender')}"> 
             <f:facet name="header"> 
               <h:outputText value="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_REABRIR}"/> 
             </f:facet>  
             <p:outputPanel id="checkid_Ab3" layout="inline">
-	           	<p:selectBooleanCheckbox value="#{item.reaberto}" style="border:0px;vertical-align:middle;" rendered="#{item.controleSituacao ne 'U'}">
+	           	<p:selectBooleanCheckbox value="#{item.reaberto}" style="border:0px;vertical-align:middle;" 
+	           	                      rendered="#{item.controleSituacao ne 'U'}">
 					<p:ajax event="change" 
 						update="@(#checkid_Ab3)" process="@this"
 						listener="#{pesquisarPacientesAgendadosController.atender(item)}" />
 				</p:selectBooleanCheckbox>  
 			</p:outputPanel>
-            <p:selectBooleanCheckbox id="checkidp_Ab3" style="border:0px;vertical-align:middle;" rendered="#{item.controleSituacao eq 'U'}" disabled="#{ mf:hasPermission(securityController, 'paciente, somenteLeitura')}">
+            <p:selectBooleanCheckbox id="checkidp_Ab3" style="border:0px;vertical-align:middle;" 
+                               rendered="#{item.controleSituacao eq 'U'}" disabled="#{mf:hasPermission(securityController, 'paciente, somenteLeitura')}">
 				<p:ajax event="change"
 					listener="#{pesquisarPacientesAgendadosController.selecionarConsulta(item)}"
 					oncomplete="PF('modalConfirmacaoAtendimentoWG').show();"
@@ -26,8 +29,20 @@
           <p:column sortBy="#{item.pacienteNome}" sortable="true" style="width:160px;#{pesquisarPacientesAgendadosController.obterEstiloCampos(item)}"> 
             <f:facet name="header"> 
               <h:outputText value="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_PACIENTE}"/> 
-            </f:facet>  
-            <h:outputText style="#{(item.pacienteNroCartaoSaude == null)?'font-weight:bold':''}" id="colunaPaciente" value="#{item.pacienteNome}" title="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_VER_DETALHES}"/>  
+            </f:facet>
+            
+            <h:outputText 
+            	style="#{(item.pacienteNroCartaoSaude == null)?'font-weight:bold':''}" 
+            	id="colunaPaciente" 
+            	value="#{not empty item.nomeSocial ? item.nomeSocial : item.pacienteNome}" 
+            	title="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_VER_DETALHES}"/>
+            	
+			<h:graphicImage 
+				title="#{messages.LABEL_NOME_CIVIL}: #{item.pacienteNome}"  
+				value="/resources/img/icons/nome-civil-paciente.png" 
+				style="border:0px; float:right;" 
+				rendered="#{not empty item.nomeSocial}" />
+            	  
              <p:overlayPanel for="colunaPaciente" hideEvent="mouseout" appendToBody="true">
               #{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_GRADE}: #{item.gradeSeq} 
               <br clear="none"/> #{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_ESPECIALIDADE_AGENDA}: #{item.gradeEspNome} 

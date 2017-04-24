@@ -61,32 +61,6 @@
               <f:selectItem itemValue="false" itemLabel="Não"/> 
             </mec:selectOneRadio> 
           </aghu:linha>
-          <p:outputPanel rendered="#{menucrudController.menu.id != null}"> 
-	          <aghu:linha>
-	          <aghu:panelGeral legend="Cadastrar Palavra Chave"> 
-		        <mec:serverDataTable id="tabelaPalavrasChave" list="#{menucrudController.palavras}"> 
-		          <c:set var="menu" value="#{item}"/>  
-		          <p:column headerText="Ações" styleClass="first-column auto-adjust" exportable="false"> 
-		            <mec:commandLink id="tabelaMenuPalavra_link_editar" profile="edit" title="editar" action="#{menucrudController.editarPalavra}"> 
-		              <f:setPropertyActionListener target="#{menucrudController.palavra}" value="#{menu}" for="command"/>  
-		            </mec:commandLink>  
-		            <mec:commandLink id="tabelaMenuPalavra_link_remover" profile="delete" title="excluir" action="#{menucrudController.removerPalavra}"> 
-		              <f:setPropertyActionListener for="command" target="#{menucrudController.palavraSelecionada}" value="#{menu}"/> 
-		            </mec:commandLink> 
-		          </p:column>  
-		          <p:column> 
-		            <f:facet name="header"> 
-		              <h:outputText value="Palavra Chave"/> 
-		            </f:facet> 
-		            <h:outputText value="#{menu.palavra}"/>  
-		          </p:column>  
-		        </mec:serverDataTable>
-		        </aghu:panelGeral> 
-		        <aghu:acao> 
-					<mec:commandButton value="#{messages.LABEL_NOVO}" immediate="true" action="#{menucrudController.novaPalavra}" style="float:right !important;" profile="add"/>
-				</aghu:acao>
-	          </aghu:linha>
-	       </p:outputPanel>
         </aghu:panelGeral> 
         <aghu:acao> 
           <mec:commandButton value="#{messages.CASCA_LABEL_CANCELAR}" immediate="true" action="#{menucrudController.cancelar()}" profile="cancel"/>  

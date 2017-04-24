@@ -382,5 +382,7 @@ public interface ICadastrosBasicosPacienteFacade extends Serializable {
 
 	void excluirOrigemProntuario(AghSamis aux, RapServidores servidorLogado, Short codigoSamisExclusao) throws ApplicationBusinessException;
 	
-	List<AghSamis> pesquisaOrigemProntuarioPorCodigoOuDescricao(String param);	
+	List<AghSamis> pesquisaOrigemProntuarioPorCodigoOuDescricao(String param);
+
+	void existeOrigemPadrao(Short codigo) throws ApplicationBusinessException;	
 }

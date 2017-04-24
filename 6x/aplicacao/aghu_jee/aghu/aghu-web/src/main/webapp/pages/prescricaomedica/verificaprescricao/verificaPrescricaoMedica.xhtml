@@ -321,7 +321,7 @@ xmlns:mf="http://www.mec.gov.br/taglib">
                 
                 <mec:commandButton value="#{messages.LABEL_SOLICITAR_EXAMES}"
                 				   action="#{verificarPrescricaoMedicaController.realizarChamadaSolicitarExame}"
-                				   rendered="#{verificarPrescricaoMedicaController.verificarModuloExameAtivo()}" 
+                				   rendered="#{verificarPrescricaoMedicaController.verificarModuloExameAtivo() and verificarPrescricaoMedicaController.buscaParametroAtivaDesativaSolicitacaoExames()}" 
                 				   ajax="true" disabled="#{verificarPrescricaoMedicaController.aghuBotoesExameHemoterapia}">
                   <f:setPropertyActionListener target="#{solicitacaoExameController.atendimentoSeq}" value="#{verificarPrescricaoMedicaController.atendimento.seq}" for="command"/>
                   <f:setPropertyActionListener target="#{solicitacaoExameController.paginaChamadora}" value="prescricaomedica-verificaPrescricaoMedica" for="command" />
@@ -333,6 +333,7 @@ xmlns:mf="http://www.mec.gov.br/taglib">
 					rendered="#{(!verificarPrescricaoMedicaController.enableButtonAnamneseEvolucao or not mf:hasPermission('visualizarAnamneseEvolucao', 'visualizar')) and !(mf:hasPermission(securityController, 'altaPacientes_Enfermeiro_Obstetra,pesquisar'))}">
 					<f:setPropertyActionListener target="#{listarAnamneseEvolucaoController.atdSeq}" value="#{verificarPrescricaoMedicaController.atendimento.seq}" for="command"/>
                   	<f:setPropertyActionListener target="#{listarAnamneseEvolucaoController.voltarPara}" value="prescricaomedica-verificaPrescricaoMedica" for="command"/>
+                  	<f:setPropertyActionListener target="#{listarAnamneseEvolucaoController.paginaChamadora}" value="prescricaomedica-verificaPrescricaoMedica" for="command"/>
 				</mec:commandButton>
                 
               </p:outputPanel>

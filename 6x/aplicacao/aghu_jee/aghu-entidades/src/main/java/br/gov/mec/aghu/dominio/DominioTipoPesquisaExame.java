@@ -31,9 +31,9 @@ public enum DominioTipoPesquisaExame implements Dominio {
 	public String getDescricao() {
 		switch (this) {
 		case INICIO:
-			return "Pesquisar pelo início do exame";
+			return "Pesquisar pelo início do nome do exame";
 		case QUALQUER:
-			return "Pesquisar por qualquer parte do exame";
+			return "Pesquisar por qualquer parte do nome do exame";
 		default:
 			return "";
 		}

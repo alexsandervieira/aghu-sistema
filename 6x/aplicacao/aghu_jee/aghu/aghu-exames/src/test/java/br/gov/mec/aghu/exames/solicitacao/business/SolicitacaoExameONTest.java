@@ -303,12 +303,13 @@ public class SolicitacaoExameONTest extends AGHUBaseUnitTest<SolicitacaoExameON>
 	@Test
 	public void testarValidacaoAmbulatorioEOutros001() {
 		AghAtendimentos atendimento = new AghAtendimentos();
+		atendimento.setDthrInicio(new Date());
 		atendimento.setDthrInicio(DateUtil.adicionaDias(new Date(), 1));
 		try {
 			systemUnderTest.validacaoAmbulatorioEOutros(atendimento, null, false);
-			Assert.fail();
-		} catch (BaseException e) {
 			Assert.assertTrue(true);
+		} catch (BaseException e) {
+			Assert.fail();
 		}
 	}
 	

@@ -225,7 +225,11 @@ public class PortalPlanejamentoCirurgia3ON extends BaseBusiness {
 				if (cirurgia.getSaidaSala() != null && cirurgia.getEntradaSala() != null) {
 					return portalPlanejamentoCirurgia2ON.getDiferencaEmMinutos(cirurgia.getSaidaSala(), cirurgia.getEntradaSala());
 				} else {
-					return portalPlanejamentoCirurgia2ON.getDiferencaEmMinutos(cirurgia.getFimCirurgia(), cirurgia.getInicioCirurgia());
+					if(cirurgia.getFimCirurgia() != null && cirurgia.getInicioCirurgia() != null){
+						return portalPlanejamentoCirurgia2ON.getDiferencaEmMinutos(cirurgia.getFimCirurgia(), cirurgia.getInicioCirurgia());
+					} else {
+						return 0;
+					}
 				}
 			}
 		}

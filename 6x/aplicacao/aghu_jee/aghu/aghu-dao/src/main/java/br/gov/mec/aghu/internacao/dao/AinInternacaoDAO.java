@@ -33,7 +33,9 @@ import org.hibernate.type.StringType;
 
 import br.gov.mec.aghu.constante.ConstanteAghCaractUnidFuncionais;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dao.SequenceID;
+import br.gov.mec.aghu.dominio.DominioIndConcluido;
 import br.gov.mec.aghu.dominio.DominioLocalPaciente;
 import br.gov.mec.aghu.dominio.DominioModuloCompetencia;
 import br.gov.mec.aghu.dominio.DominioOrdenacaoPesquisaPacientesAdmitidos;
@@ -42,6 +44,7 @@ import br.gov.mec.aghu.dominio.DominioOrigemPaciente;
 import br.gov.mec.aghu.dominio.DominioPacAtendimento;
 import br.gov.mec.aghu.dominio.DominioSexo;
 import br.gov.mec.aghu.dominio.DominioSimNao;
+import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.dominio.DominioSituacaoCompetencia;
 import br.gov.mec.aghu.dominio.DominioSituacaoConta;
 import br.gov.mec.aghu.dominio.DominioSituacaoUnidadeFuncional;
@@ -61,10 +64,13 @@ import br.gov.mec.aghu.model.AghProfEspecialidades;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.model.AinAcomodacoes;
 import br.gov.mec.aghu.model.AinAtendimentosUrgencia;
+import br.gov.mec.aghu.model.AinCaracteristicaLeito;
 import br.gov.mec.aghu.model.AinInternacao;
 import br.gov.mec.aghu.model.AinLeitos;
 import br.gov.mec.aghu.model.AinMovimentosInternacao;
 import br.gov.mec.aghu.model.AinQuartos;
+import br.gov.mec.aghu.model.AinTipoCaracteristicaLeito;
+import br.gov.mec.aghu.model.AinTiposAltaMedica;
 import br.gov.mec.aghu.model.AinTiposCaraterInternacao;
 import br.gov.mec.aghu.model.AinTiposMovimentoLeito;
 import br.gov.mec.aghu.model.AipPacientes;
@@ -73,6 +79,7 @@ import br.gov.mec.aghu.model.EcpHorarioControle;
 import br.gov.mec.aghu.model.FatContasInternacao;
 import br.gov.mec.aghu.model.FatConvenioSaude;
 import br.gov.mec.aghu.model.FatConvenioSaudePlano;
+import br.gov.mec.aghu.model.MpmAltaSumario;
 import br.gov.mec.aghu.model.RapConselhosProfissionais;
 import br.gov.mec.aghu.model.RapPessoasFisicas;
 import br.gov.mec.aghu.model.RapQualificacao;
@@ -695,6 +702,8 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 
 			criteria.add(Restrictions.between(AinInternacao.Fields.DATA_PREV_ALTA.toString(), auxCalInicial.getTime(),
 					auxCalFinal.getTime()));
+			criteria.add(Restrictions.isNull(AinInternacao.Fields.DT_SAIDA_PACIENTE.toString()));
+			criteria.add(Restrictions.eq(AinInternacao.Fields.IND_SAIDA_PACIENTE.toString(),Boolean.FALSE));
 		}
 
 		criteria.setProjection(Projections.projectionList().add(// 0
@@ -1711,7 +1720,7 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 		final Query query = createHibernateQuery(hql.toString());
 		query.setParameter("seqEspecialidade", seqEspecialidade);
 		query.setParameter("indPacienteInternado", Boolean.TRUE);
-		query.setParameter("indPertenceRefl", DominioSimNao.N);
+		query.setParameter("indPertenceRefl", Boolean.FALSE);
 
 		final Object[] result = (Object[]) query.uniqueResult();
 
@@ -1754,7 +1763,7 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 		final Query query = createHibernateQuery(hql.toString());
 		query.setParameter("seqEspecialidade", seqEspecialidade);
 		query.setParameter("indPacienteInternado", Boolean.TRUE);
-		query.setParameter("indPertenceRefl", DominioSimNao.N);
+		query.setParameter("indPertenceRefl", Boolean.FALSE);
 		query.setParameter("indUnidCti", DominioSimNao.N);
 
 		final Object[] result = (Object[]) query.uniqueResult();
@@ -1819,13 +1828,13 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 	@SuppressWarnings("unchecked")
 	public List<Object[]> obterCensoUnion17(final Short unfSeq, final Short unfSeqMae, final Date data, final DominioSituacaoUnidadeFuncional status) {
 
-		final StringBuffer hql = new StringBuffer(900);
+		final StringBuffer hql = new StringBuffer(950);
 		hql.append(" select ");
 		hql.append(" 	unf.seq,  unfSeq.seq,");
 		hql.append(" 	case when lto.leitoID is null then ( case when qrt.descricao is null then '' else (qrt.descricao) end ) else lto.leitoID end, ");
 		hql.append(" 	pac.prontuario, pac.codigo, pac.nome,");
 		hql.append(" 	int.dthrInternacao, esp.sigla, tpa.codigo,");
-		hql.append(" 	int.seq, ser.id.matricula, ser.id.vinCodigo, cnv.codigo, pac.dtNascimento, cnv.descricao, tpa.descricao, esp.nomeEspecialidade, atd.seq"); 
+		hql.append(" 	int.seq, ser.id.matricula, ser.id.vinCodigo, cnv.codigo, pac.dtNascimento, cnv.descricao, tpa.descricao, esp.nomeEspecialidade, atd.seq, obs.descricao, pac.nroCartaoSaude"); 
 		hql.append(" from AinInternacao int");
 		hql.append(" join int.atendimento as atd ");
 		hql.append(" join int.especialidade as esp ");
@@ -1837,6 +1846,7 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 		hql.append(" left join int.tipoAltaMedica as tpa");
 		hql.append(" left join int.quarto as qrt");
 		hql.append(" left join int.leito as lto");
+		hql.append(" left join int.observacoesCenso as obs");
 		hql.append(" where atd.indPacAtendimento = :indPacAtd ");
 
 		if (unfSeq != null) {
@@ -1959,7 +1969,7 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 
 	/* Internações em acomodação apartamentos */
 	public List<AinInternacao> internacoesAcomodacaoApartamento(final Short vinculo, final Integer matricula, final Short especialidade) {
-		final DominioSimNao indPertenceRefl = DominioSimNao.N;
+		final boolean indPertenceRefl = Boolean.FALSE;
 		final List<Integer> listaAcomodacoesSeq = Arrays.asList(1, 2, 3);
 
 		final DetachedCriteria criteria = criarCriteriaInternacaoContaCTI(vinculo, matricula, especialidade);
@@ -2012,7 +2022,7 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 	public List<AinInternacao> internacoesMesmaClinicaNaoAptoNaoCti(final Short vinculo, final Integer matricula, final Short especialidade,
 			final Short hospDiaSiaAids) {
 		final DominioSimNao indUnidCti = DominioSimNao.N;
-		final DominioSimNao indPertenceRefl = DominioSimNao.N;
+		final boolean indPertenceRefl = Boolean.FALSE;
 		final List<Integer> listaAcomodacoesSeq = Arrays.asList(1, 2, 3);
 		final String aliasEspecialidade = "especialidade";
 		final String aliasQuarto = "quarto";
@@ -2700,30 +2710,53 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 		return executeCriteria(criteria);
 	}
 	
-	public AinInternacao obterInternacaoPorProntuario(final Integer prontuario) {
+	public AinInternacao obterInternacaoPorProntuario(final Integer prontuario, Boolean blnPacienteInternado) {
 		final DetachedCriteria criteria = DetachedCriteria.forClass(AinInternacao.class);
 		criteria.createAlias(AinInternacao.Fields.PACIENTE.toString(), "PAC");
-		criteria.add(Restrictions.eq(AinInternacao.Fields.IND_PACIENTE_INTERNADO.toString(), true));
+		if (blnPacienteInternado){
+			criteria.add(Restrictions.eq(AinInternacao.Fields.IND_PACIENTE_INTERNADO.toString(), blnPacienteInternado));
+		}
 		criteria.add(Restrictions.eq("PAC." + AipPacientes.Fields.PRONTUARIO.toString(), prontuario));
-		return (AinInternacao) executeCriteriaUniqueResult(criteria);
+		criteria.addOrder(Order.desc(AinInternacao.Fields.SEQ.toString()));
+		List<AinInternacao> result = executeCriteria(criteria); 
+		return result != null && !result.isEmpty() ? result.get(0) : null;
 	}
 	
 
-	public AinInternacao obterInternacaoPorLeito(final String leitoID) {
+	public AinInternacao obterInternacaoPorLeito(final String leitoID, Boolean blnPacienteInternado) {
 		final DetachedCriteria criteria = DetachedCriteria.forClass(AinInternacao.class);
 		criteria.createAlias(AinInternacao.Fields.LEITO.toString(), "LET");
 		criteria.createAlias(AinInternacao.Fields.PACIENTE.toString(), "PAC");
-		criteria.add(Restrictions.eq(AinInternacao.Fields.IND_PACIENTE_INTERNADO.toString(), true));
+		if (blnPacienteInternado){
+			criteria.add(Restrictions.eq(AinInternacao.Fields.IND_PACIENTE_INTERNADO.toString(), blnPacienteInternado));
+		}
 		criteria.add(Restrictions.eq("LET." + AinLeitos.Fields.LTO_ID.toString(), leitoID));
-		return (AinInternacao) executeCriteriaUniqueResult(criteria);
+		criteria.addOrder(Order.desc(AinInternacao.Fields.SEQ.toString()));
+		List<AinInternacao> result = executeCriteria(criteria); 
+		return result != null && !result.isEmpty() ? result.get(0) : null;
 	}
 	
 	public Long pesquisaInternacoesPorProntuarioCount(final Integer prontuario) {
-		final DetachedCriteria cri = DetachedCriteria.forClass(AinInternacao.class);
+		final DetachedCriteria cri = DetachedCriteria.forClass(AinInternacao.class,"int");
+		
 		if (prontuario != null) {
-			cri.createAlias("paciente", "paciente");
-			cri.add(Restrictions.eq(AinInternacao.Fields.PRONTUARIO_PACIENTE.toString(), prontuario));
+			cri.createAlias("int." + AinInternacao.Fields.PACIENTE.toString(), "pac", JoinType.INNER_JOIN);
+			cri.add(Restrictions.eq("pac." + AipPacientes.Fields.PRONTUARIO.toString(), prontuario));
 		}
+		cri.createAlias("int." + AinInternacao.Fields.LEITO.toString(), "lt", JoinType.LEFT_OUTER_JOIN);
+		cri.createAlias("int." + AinInternacao.Fields.QUARTO.toString(), "qrt", JoinType.LEFT_OUTER_JOIN);
+		cri.createAlias("int." + AinInternacao.Fields.UNIDADE_FUNCIONAL.toString(), "unf", JoinType.LEFT_OUTER_JOIN);
+		cri.createAlias("unf." + AghUnidadesFuncionais.Fields.ALA.toString(), "ala", JoinType.LEFT_OUTER_JOIN);
+		cri.createAlias("int." + AinInternacao.Fields.ESPECIALIDADE.toString(), "esp", JoinType.INNER_JOIN);
+		cri.createAlias("int." + AinInternacao.Fields.CONVENIO_SAUDE_PLANO.toString(), "csp", JoinType.INNER_JOIN);
+		cri.createAlias("csp." + FatConvenioSaudePlano.Fields.CONVENIO_SAUDE.toString(), "cs", JoinType.INNER_JOIN);
+		cri.createAlias("int." + AinInternacao.Fields.SERVIDOR_PROFESSOR.toString(), "sp", JoinType.LEFT_OUTER_JOIN);
+		cri.createAlias("sp." + RapServidores.Fields.PESSOA_FISICA.toString(), "pf", JoinType.INNER_JOIN);
+		cri.createAlias(AinInternacao.Fields.ATENDIMENTO.toString(),"atend", JoinType.INNER_JOIN);
+		
+		cri.add(Restrictions.eq("atend." + AghAtendimentos.Fields.IND_PAC_ATENDIMENTO.toString(), DominioPacAtendimento.S));
+		cri.add(Restrictions.isNull("atend." + AghAtendimentos.Fields.DTHR_FIM.toString()));
+		
 		cri.setProjection(Projections.rowCount());
 		return (Long) this.executeCriteriaUniqueResult(cri);
 	}
@@ -2732,18 +2765,22 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 			final boolean asc, final Integer prontuario) {
 		final DetachedCriteria cri = DetachedCriteria.forClass(AinInternacao.class, "int");
 		if (prontuario != null) {
-			cri.createAlias("int." + AinInternacao.Fields.PACIENTE.toString(), "pac");
+			cri.createAlias("int." + AinInternacao.Fields.PACIENTE.toString(), "pac", JoinType.INNER_JOIN);
 			cri.add(Restrictions.eq("pac." + AipPacientes.Fields.PRONTUARIO.toString(), prontuario));
 		}
 		cri.createAlias("int." + AinInternacao.Fields.LEITO.toString(), "lt", JoinType.LEFT_OUTER_JOIN);
 		cri.createAlias("int." + AinInternacao.Fields.QUARTO.toString(), "qrt", JoinType.LEFT_OUTER_JOIN);
 		cri.createAlias("int." + AinInternacao.Fields.UNIDADE_FUNCIONAL.toString(), "unf", JoinType.LEFT_OUTER_JOIN);
 		cri.createAlias("unf." + AghUnidadesFuncionais.Fields.ALA.toString(), "ala", JoinType.LEFT_OUTER_JOIN);
-		cri.createAlias("int." + AinInternacao.Fields.ESPECIALIDADE.toString(), "esp");
-		cri.createAlias("int." + AinInternacao.Fields.CONVENIO_SAUDE_PLANO.toString(), "csp");
-		cri.createAlias("csp." + FatConvenioSaudePlano.Fields.CONVENIO_SAUDE.toString(), "cs");
+		cri.createAlias("int." + AinInternacao.Fields.ESPECIALIDADE.toString(), "esp", JoinType.INNER_JOIN);
+		cri.createAlias("int." + AinInternacao.Fields.CONVENIO_SAUDE_PLANO.toString(), "csp", JoinType.INNER_JOIN);
+		cri.createAlias("csp." + FatConvenioSaudePlano.Fields.CONVENIO_SAUDE.toString(), "cs", JoinType.INNER_JOIN);
 		cri.createAlias("int." + AinInternacao.Fields.SERVIDOR_PROFESSOR.toString(), "sp", JoinType.LEFT_OUTER_JOIN);
-		cri.createAlias("sp." + RapServidores.Fields.PESSOA_FISICA.toString(), "pf");
+		cri.createAlias("sp." + RapServidores.Fields.PESSOA_FISICA.toString(), "pf", JoinType.INNER_JOIN);
+		cri.createAlias(AinInternacao.Fields.ATENDIMENTO.toString(),"atend", JoinType.INNER_JOIN);
+		
+		cri.add(Restrictions.eq("atend." + AghAtendimentos.Fields.IND_PAC_ATENDIMENTO.toString(), DominioPacAtendimento.S));
+		cri.add(Restrictions.isNull("atend." + AghAtendimentos.Fields.DTHR_FIM.toString()));
 		
 		cri.addOrder(Order.desc(AinInternacao.Fields.COD_PACIENTE.toString()));
 		cri.addOrder(Order.desc(AinInternacao.Fields.DATA_HORA_ALTA_MEDICA.toString()));
@@ -2760,11 +2797,33 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 		final DetachedCriteria criteria = createPesquisaCriteriaTransferenciaPaciente(prontuario);
 		return executeCriteriaCount(criteria);
 	}
+	
+	public boolean pesquisarPacienteComAltaAdministrativa(Integer internacaoSeq) {
+		final DetachedCriteria criteria = DetachedCriteria.forClass(AinInternacao.class);
+		criteria.add(Restrictions.eq(AinInternacao.Fields.IND_PACIENTE_INTERNADO.toString(), false));
+		criteria.add(Restrictions.eq(AinInternacao.Fields.SEQ.toString(), internacaoSeq));
+		return executeCriteriaExists(criteria);
+	}
+	
+	// Retorna se permite ou não permanência de paciente com alta médica
+	public boolean pesquisarTipoAltaMedicaPermitePacienteComAlta(Integer internacaoSeq) {
+		final DetachedCriteria criteria = DetachedCriteria.forClass(AinInternacao.class);
+		criteria.createAlias(AinInternacao.Fields.TIPO_ALTA_MEDICA.toString(), "TIPO_ALTA_MED", JoinType.LEFT_OUTER_JOIN);
+		criteria.add(Restrictions.eq("TIPO_ALTA_MED." + AinTiposAltaMedica.Fields.PERMITE_PERMANENCIA_COM_ALTA.toString(), true));
+		criteria.add(Restrictions.eq(AinInternacao.Fields.SEQ.toString(), internacaoSeq));
+		return executeCriteriaExists(criteria);
+	}
 
+	
 	private DetachedCriteria createPesquisaCriteriaTransferenciaPaciente(final Integer prontuario) {
 		final DetachedCriteria criteria = DetachedCriteria.forClass(AinInternacao.class);
 		criteria.createAlias(AinInternacao.Fields.PACIENTE.toString(), "PAC");
-		criteria.add(Restrictions.eq(AinInternacao.Fields.IND_PACIENTE_INTERNADO.toString(), true));
+		criteria.createAlias(AinInternacao.Fields.TIPO_ALTA_MEDICA.toString(), "TIPO_ALTA_MED", JoinType.LEFT_OUTER_JOIN); // W
+		// Paciente internado OU Tipo de alta médica permite permanência com alta administrativa
+		criteria.add(Restrictions.or(Restrictions.eq(AinInternacao.Fields.IND_PACIENTE_INTERNADO.toString(), true)
+									,Restrictions.eq("TIPO_ALTA_MED." + AinTiposAltaMedica.Fields.PERMITE_PERMANENCIA_COM_ALTA.toString(), true)
+					));
+		// Filtra por prontuário
 		if (prontuario != null) {
 			criteria.add(Restrictions.eq("PAC." + AipPacientes.Fields.PRONTUARIO.toString(), prontuario));
 		}
@@ -3282,12 +3341,13 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 	public AinInternacao obterInternacaoPorAtendimentoPacCodigo(final Integer pacCodigo) {
 		final DetachedCriteria criteria = DetachedCriteria.forClass(AinInternacao.class);
 		criteria.createAlias(AinInternacao.Fields.ATENDIMENTO.toString(), "ATD");
+		criteria.add(Restrictions.eq(AinInternacao.Fields.IND_SAIDA_PACIENTE.toString(),  Boolean.FALSE));
 		criteria.add(Restrictions.eq("ATD."+ AghAtendimentos.Fields.PAC_CODIGO.toString(), pacCodigo));
 		criteria.add(Restrictions.eq("ATD."+ AghAtendimentos.Fields.IND_PAC_ATENDIMENTO.toString(), DominioPacAtendimento.S));
 		criteria.add(Restrictions.eq("ATD."+ AghAtendimentos.Fields.ORIGEM.toString(), DominioOrigemAtendimento.I));
 		
 		return (AinInternacao) executeCriteriaUniqueResult(criteria);
-	}
+	} 
 	
 	public AinInternacao obterInternacaoPorSequencialPaciente(final Integer seq, final Integer pacCodigo) {
 		
@@ -3445,6 +3505,64 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 		
 		return (AinInternacao) this.executeCriteriaUniqueResult(criteria);
 	}
+
+
+	public List<AinInternacao> obterCaracteristicasLeitos(Date dataInicial,	Date dataFinal, Short unidadeFuncionalSeq, 
+			AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito,AghEspecialidades especialidade) {
+		final DetachedCriteria criteria = montarCriteriaCaracteristicasLeito(dataInicial, dataFinal, unidadeFuncionalSeq, 
+				ainTipoCaracteristicaLeito, especialidade, null);
+		
+		return executeCriteria(criteria);
+	}
+
+	private DetachedCriteria montarCriteriaCaracteristicasLeito(Date dataInicial,	Date dataFinal, Short unidadeFuncionalSeq,
+			AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito,	AghEspecialidades especialidade, String orderProperty) {
+		final DetachedCriteria criteria = DetachedCriteria.forClass(AinInternacao.class,"INT");
+		
+		if(!StringUtils.containsIgnoreCase(orderProperty, "paciente.nome") && !StringUtils.containsIgnoreCase(orderProperty, "paciente.prontuario")){
+			criteria.createAlias("INT." + AinInternacao.Fields.PACIENTE.toString(), "PAC", JoinType.INNER_JOIN);
+		}
+		
+		if(!StringUtils.containsIgnoreCase(orderProperty, "especialidade.nomeEspecialidade")){
+			criteria.createAlias("INT." + AinInternacao.Fields.ESPECIALIDADE.toString(), "ESP", JoinType.INNER_JOIN);
+		}
+		
+		if(!StringUtils.containsIgnoreCase(orderProperty, "leito.leitoID")){
+			criteria.createAlias("INT." + AinInternacao.Fields.LEITO.toString(), "leito", JoinType.LEFT_OUTER_JOIN);
+		}
+
+		criteria.createAlias("leito." + AinLeitos.Fields.QUARTO.toString(), "QTO", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("QTO."+AinQuartos.Fields.UNIDADES_FUNCIONAIS.toString(), "UNIDADES_FUNCIONAIS", JoinType.LEFT_OUTER_JOIN);
+
+		criteria.createAlias("leito." + AinLeitos.Fields.CARACTERISTICAS.toString(), "CAR", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("CAR." + AinCaracteristicaLeito.Fields.TIPO_CARACTERISTICA.toString(), "TP", JoinType.INNER_JOIN);
+		
+		criteria.add(Restrictions.eq("TP." + AinTipoCaracteristicaLeito.Fields.CODIGO.toString(),ainTipoCaracteristicaLeito.getCodigo()));
+		criteria.add(Restrictions.ge("INT." + AinInternacao.Fields.DT_INTERNACAO.toString(),DateUtil.obterDataComHoraInical(dataInicial)));
+		
+		if(dataFinal != null){
+			criteria.add(Restrictions.le("INT." + AinInternacao.Fields.DT_INTERNACAO.toString(),DateUtil.obterDataComHoraFinal(dataFinal)));
+		}
+		
+		if(especialidade != null){
+			criteria.add(Restrictions.eq("ESP." + AghEspecialidades.Fields.SEQ.toString(),especialidade.getSeq()));
+		}
+		
+		if(unidadeFuncionalSeq != null){
+			criteria.add(Restrictions.eq("UNIDADES_FUNCIONAIS." + AghUnidadesFuncionais.Fields.SEQUENCIAL.toString(),unidadeFuncionalSeq));
+		}
+		return criteria;
+	}
+	
+
+	public List<AinInternacao> obterCaracteristicasLeitosList(Integer firstResult, Integer maxResult, String orderProperty,
+			boolean asc, Date dataInicial, Date dataFinal,Short unidadeFuncionalSeq,AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito,
+			AghEspecialidades especialidade) {
+		final DetachedCriteria criteria = montarCriteriaCaracteristicasLeito(dataInicial, dataFinal, unidadeFuncionalSeq, 
+				ainTipoCaracteristicaLeito, especialidade, orderProperty);
+		
+		return executeCriteria(criteria, firstResult, maxResult, orderProperty, asc);
+	}
 	
 	public List<AinInternacao> pesquisarAltasNoPeriodo(Date peridoInicial, Date periodoFinal) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(AinInternacao.class);
@@ -3460,6 +3578,103 @@ public class AinInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 		criteria.addOrder(Order.asc(AinInternacao.Fields.DATA_HORA_ALTA_MEDICA.toString()));
 		
 		return executeCriteria(criteria);
+	}
+	
+	public List<AinInternacao> buscarPacientesSumarioAltaPendente(Date dataInicio, Date dataFim, Short unidadeFuncional){
+		
+		final DetachedCriteria criteria = montarCriteriaPacienteSumarioAltaPendente(dataInicio, dataFim,unidadeFuncional);
+		return executeCriteria(criteria);
+	}
+	
+	/* História #82783 regras:
+	 * 	 2.3.1.2.1  Quando o usuário preencher o sumário de alta do paciente e não finalizar(antecipação do sumário).
+	 *	 2.3.1.2.2- Quando existir alta administrativa para o paciente que não possui alta médica.
+	 *	 2.3.1.2.2.1- Quando a Unidade funcional (Internação > Cadastros > Unidade Funcional) possui a característica "Permite sumário de alta manual" 
+	 *	 marcada e tiver alta administrativa, não deve aparecer no sumário pendente.
+	 *   !! NÃO ALTERAR QUERY ABAIXO !!	
+	*/
+	private DetachedCriteria montarCriteriaPacienteSumarioAltaPendente(	Date dataInicio, Date dataFim, Short unidadeFuncional) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(AinInternacao.class, "int");
+		
+		criteria.createAlias("int." + AinInternacao.Fields.PACIENTE.toString(), "pac");
+		criteria.createAlias("int." + AinInternacao.Fields.LEITO.toString(), "lt", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("int." + AinInternacao.Fields.QUARTO.toString(), "qrt", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("int." + AinInternacao.Fields.UNIDADE_FUNCIONAL.toString(), "unf", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("unf." + AghUnidadesFuncionais.Fields.ALA.toString(), "ala", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias(AinInternacao.Fields.ATENDIMENTO.toString(), "ATD", JoinType.INNER_JOIN);
+		criteria.createAlias("ATD." + AghAtendimentos.Fields.ALTA_SUMARIO.toString(), "SUM", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("ATD." + AghAtendimentos.Fields.SERVIDOR.toString(), "ser");		
+		criteria.createAlias("ser." + RapServidores.Fields.PESSOA_FISICA.toString(), "pes");
+		criteria.createAlias("int." + AinInternacao.Fields.ESPECIALIDADE.toString(), "esp");
+		criteria.createAlias("int." + AinInternacao.Fields.CONVENIO_SAUDE_PLANO.toString(), "csp");
+		criteria.createAlias("csp." + FatConvenioSaudePlano.Fields.CONVENIO_SAUDE.toString(), "cs");
+		
+
+		criteria.add(Restrictions.ge("int." + AinInternacao.Fields.DT_INTERNACAO.toString(),DateUtil.obterDataComHoraInical(dataInicio)));
+
+		if(unidadeFuncional != null){
+			criteria.add(Restrictions.eq("unf." + AghUnidadesFuncionais.Fields.SEQUENCIAL.toString(),unidadeFuncional));
+		}
+		if(dataFim != null){
+			criteria.add(Restrictions.le("int." + AinInternacao.Fields.DT_INTERNACAO.toString(),DateUtil.obterDataComHoraInical(dataFim)));
+		}
+		
+		final DetachedCriteria criteriaUnidade = DetachedCriteria.forClass(AghUnidadesFuncionais.class, "unf_carac");
+		criteriaUnidade.setProjection(Property.forName(AghUnidadesFuncionais.Fields.SEQUENCIAL.toString()));
+		criteriaUnidade.createAlias("unf_carac." + AghUnidadesFuncionais.Fields.CARACTERISTICAS.toString(), "UNID_CARAC");
+		criteriaUnidade.add(Restrictions.eqProperty("unf_carac." + AghUnidadesFuncionais.Fields.SEQUENCIAL.toString(), "unf." + AghUnidadesFuncionais.Fields.SEQUENCIAL.toString()));
+		criteriaUnidade.add(Restrictions.eq("UNID_CARAC." + AghCaractUnidFuncionais.Fields.DESCRICAO_CARACTERISTICA.toString(),ConstanteAghCaractUnidFuncionais.PERMITE_SUMARIO_ALTA_MANUAL));
+
+		criteria.add(Restrictions.or(Restrictions.and(Restrictions.isNotNull("int." + AinInternacao.Fields.DATA_HORA_ALTA_MEDICA.toString()),
+													  Restrictions.or(Restrictions.isEmpty("ATD." + AghAtendimentos.Fields.ALTA_SUMARIO.toString()),
+																	Restrictions.and(Restrictions.eq("SUM." + MpmAltaSumario.Fields.IND_CONCLUIDO.toString(), DominioIndConcluido.N),
+																	Restrictions.eq("SUM." + MpmAltaSumario.Fields.IND_SITUACAO.toString(), DominioSituacao.A))),
+														Subqueries.notExists(criteriaUnidade)),
+									Restrictions.and(Restrictions.eq("SUM." + MpmAltaSumario.Fields.IND_CONCLUIDO.toString(), DominioIndConcluido.N),
+									Restrictions.eq("SUM." + MpmAltaSumario.Fields.IND_SITUACAO.toString(), DominioSituacao.A))));
+		
+		
+		return criteria;
+	}
+	
+	public List<AinInternacao> buscarPacientesSumarioAltaPendenteList(Integer firstResult, Integer maxResult, String orderProperty,
+			boolean asc, Date dataInicial, Date dataFinal,Short unidadeFuncionalSeq) {
+		
+		final DetachedCriteria criteria = montarCriteriaPacienteSumarioAltaPendente(dataInicial, dataFinal, unidadeFuncionalSeq);
+		return executeCriteria(criteria, firstResult, maxResult, orderProperty, asc);
+	}
+	
+	public Long buscarPacientesSumarioAltaPendenteCount(Date dataInicio, Date dataFim, Short unidadeFuncional){
+		final DetachedCriteria criteria = montarCriteriaPacienteSumarioAltaPendente(dataInicio, dataFim, unidadeFuncional); 
+		
+		return executeCriteriaCount(criteria);
+	}
+
+	public Long obterCaracteristicasLeitosCount(Date dataInicial, Date dataFinal,Short unidadeFuncionalSeq,AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito,
+			AghEspecialidades especialidade) {
+		final DetachedCriteria criteria = montarCriteriaCaracteristicasLeito(dataInicial, dataFinal, unidadeFuncionalSeq, 
+				ainTipoCaracteristicaLeito, especialidade, null);
+		
+		return executeCriteriaCount(criteria);
+	}
+	
+	
+	/* (non-Javadoc)
+	 * @see br.gov.mec.aghu.core.persistence.dao.BaseDao#persistir(br.gov.mec.aghu.core.persistence.BaseEntity)
+	 */
+	@Override
+	public void persistir(AinInternacao entity) {
+		entity.validarInternacao();
+		super.persistir(entity);
+	}
+
+	/* (non-Javadoc)
+	 * @see br.gov.mec.aghu.core.persistence.dao.BaseDao#atualizar(br.gov.mec.aghu.core.persistence.BaseEntity)
+	 */
+	@Override
+	public AinInternacao atualizar(AinInternacao elemento) {
+		elemento.validarInternacao();
+		return super.atualizar(elemento);
 	}
 
 }

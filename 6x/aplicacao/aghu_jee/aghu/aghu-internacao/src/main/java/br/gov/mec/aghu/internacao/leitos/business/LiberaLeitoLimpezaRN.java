@@ -124,7 +124,7 @@ private ICadastrosBasicosInternacaoFacade cadastrosBasicosInternacaoFacade;
 		}
 
 		// Valida Prontuário
-		AinInternacao internacao = this.ainInternacaoDAO.obterInternacaoPorLeito(leito.getLeitoID());
+		AinInternacao internacao = this.ainInternacaoDAO.obterInternacaoPorLeito(leito.getLeitoID(), true);
 				
 		if (internacao != null
 				&& internacao.getPaciente().getProntuario() == null) {

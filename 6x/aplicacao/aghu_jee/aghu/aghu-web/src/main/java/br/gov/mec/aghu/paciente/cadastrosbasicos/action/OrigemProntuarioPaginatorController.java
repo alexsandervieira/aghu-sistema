@@ -153,15 +153,14 @@ public class OrigemProntuarioPaginatorController extends ActionController implem
 				.obterOrigemProntuario(this.selecionado.getCodigo());
 		try {
 			this.cadastrosBasicosPacienteFacade.excluirOrigemProntuario(aghSamisRemover, registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado()), this.selecionado.getCodigo());
+			// Exibr mensagem de exclusão com sucesso e fecha janela de
+			// confirmação
+			this.apresentarMsgNegocio(Severity.INFO, "MENSAGEM_SUCESSO_REMOVER_ORIGEM_PRONTUARIO");
+			pesquisar();
 		} catch (ApplicationBusinessException e) {
 			apresentarExcecaoNegocio(e);
 		}
 
-		// Exibr mensagem de exclusão com sucesso e fecha janela de
-		// confirmação
-		this.apresentarMsgNegocio(Severity.INFO, "MENSAGEM_SUCESSO_REMOVER_ORIGEM_PRONTUARIO");
-		limparPesquisa();
-		pesquisar();
 	}
  
 

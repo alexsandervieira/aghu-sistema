@@ -847,24 +847,18 @@ public class AinLeitosDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<A
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<RegistraExtratoLeitoVO> pesquisarRegistraExtratoLeitoVO(String leitoID, List<Short> codigosMovimento) {
+	public List<RegistraExtratoLeitoVO> pesquisarRegistraExtratoLeitoVO(String leitoID) {
 
 		StringBuffer hql = new StringBuffer(330);
 
 		hql.append(" select new br.gov.mec.aghu.internacao.business.vo.RegistraExtratoLeitoVO (");
-		hql.append(" 	lto2.leitoID, lto2.indBloqLeitoLimpeza ");
+		hql.append(" 	lto1.leitoID, lto1.indBloqLeitoLimpeza ");
 		hql.append(" ) ");
-		hql.append(" from ");
-		hql.append(" 	AinLeitos lto2 join lto2.tipoMovimentoLeito as tml, ");
-		hql.append(" 	AinLeitos lto1 ");
+		hql.append(" from AinLeitos lto1");
 		hql.append(" where lto1.leitoID = :leitoID1 ");
-		hql.append(" 	and lto2.quarto = lto1.quarto ");
-		hql.append(" 	and (lto2.leitoID = :leitoID2 or tml.codigo in (:codigosMovimento)) ");
 
 		Query query = createHibernateQuery(hql.toString());
 		query.setParameter("leitoID1", leitoID);
-		query.setParameter("leitoID2", leitoID);
-		query.setParameterList("codigosMovimento", codigosMovimento);
 
 		return query.list();
 	}

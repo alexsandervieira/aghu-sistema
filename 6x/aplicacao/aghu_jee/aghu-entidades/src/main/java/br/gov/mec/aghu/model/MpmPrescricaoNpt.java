@@ -89,6 +89,7 @@ public class MpmPrescricaoNpt extends ItemPrescricaoMedica<MpmPrescricaoNptId> {
 	private Short duracaoTratSolicitado;
 	private Boolean bombaInfusao;
 	private AghAtendimentos atendimento;
+	private Integer ordem;
 	private Set<FatItemContaHospitalar> itensContasHospitalares = new HashSet<FatItemContaHospitalar>(
 			0);
 	private Set<MpmComposicaoPrescricaoNpt> composicoesPrescricaoNpt = new HashSet<MpmComposicaoPrescricaoNpt>(
@@ -719,5 +720,14 @@ public class MpmPrescricaoNpt extends ItemPrescricaoMedica<MpmPrescricaoNptId> {
 
 	public void setAtendimento(AghAtendimentos atendimento) {
 		this.atendimento = atendimento;
+	}
+	
+	@Column(name = "ORDEM", nullable = false)
+	public Integer getOrdem() {
+		return this.ordem;
+	}
+	
+	public void setOrdem(Integer ordemRelatorio) {
+		this.ordem = ordemRelatorio;
 	}
 }

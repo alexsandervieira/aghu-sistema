@@ -1,5 +1,7 @@
 package br.gov.mec.aghu.exames.solicitacao.action;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,19 +13,25 @@ import javax.ejb.EJB;
 import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 
+import br.gov.mec.aghu.core.business.SelectionQualifier;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.exception.Severity;
+import br.gov.mec.aghu.core.utils.DateFormatUtil;
+import br.gov.mec.aghu.dominio.DominioSimNaoRotina;
 import br.gov.mec.aghu.dominio.DominioSolicitacaoExameLote;
 import br.gov.mec.aghu.exames.solicitacao.business.ISolicitacaoExameFacade;
 import br.gov.mec.aghu.exames.solicitacao.business.SelecionarRadioDefaultManager;
 import br.gov.mec.aghu.exames.solicitacao.business.TipoCampoDataHoraISE;
+import br.gov.mec.aghu.exames.solicitacao.vo.DataProgramadaVO;
 import br.gov.mec.aghu.exames.solicitacao.vo.ItemSolicitacaoExameVO;
 import br.gov.mec.aghu.exames.solicitacao.vo.LoteDefaultVO;
 import br.gov.mec.aghu.exames.solicitacao.vo.SolicitacaoExameVO;
 import br.gov.mec.aghu.exames.solicitacao.vo.TipoLoteVO;
 import br.gov.mec.aghu.exames.solicitacao.vo.UnfExecutaSinonimoExameVO;
+import br.gov.mec.aghu.model.AelExameHorarioColeta;
+import br.gov.mec.aghu.model.AelPermissaoUnidSolic;
 import br.gov.mec.aghu.model.AelSitItemSolicitacoes;
-import br.gov.mec.aghu.core.business.SelectionQualifier;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.Severity;
 
 
 
@@ -42,40 +50,55 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 	private List<UnfExecutaSinonimoExameVO> listaExamesLote = null;
 	private List<UnfExecutaSinonimoExameVO> listaExamesLoteSemPermissao = null;
 	private Short tipoLoteSeq;
-	//	
-	//	@In(create = true, value = "listarExamesSendoSolicitadosController")
-	//	private ListarExamesSendoSolicitadosController listarExamesSendoSolicitadosController;
-	
+
 	@Inject
 	private SolicitacaoExameController solicitacaoExameController;
 
-	private Map<String, ArrayList<UnfExecutaSinonimoExameVO>> exames = new HashMap<String, ArrayList<UnfExecutaSinonimoExameVO>>();
-	private String exameSiglaSelecionado;
+	private Map<String, UnfExecutaSinonimoExameVO> exames = new HashMap<String, UnfExecutaSinonimoExameVO>();
+	private String exameSiglaSelecionado = "";
 	private boolean habilitarListExames = false;
 
-	//filtros aba situação
-	//40284 - Por padrão deverá trazer o checkbox urgente como true.
 	private Boolean checkUrgente = Boolean.FALSE;
 	private Date dataProgr = new Date();
 	private AelSitItemSolicitacoes situacao;
 	private Boolean calendar = Boolean.TRUE;
 
-	//#2253
 	private Integer numeroAmostra;
 	private Date intervaloHoras;
 	private Integer intervaloDias;
 		
-	//#31396 LABEL_MODAL_EXAMES_SEM_PERMISSAO
 	private Boolean exibirModalExamesSemPermissao;
 	private String modalMessage;
 	private String modalListaExames;
+
+	private List<DataProgramadaVO> listaDatasHorasProgramadas;
 	
+	private ItemSolicitacaoExameVO itemSolicitacaoExameVo = new ItemSolicitacaoExameVO();
 	
+	private Boolean flagPermissaoSimNao = Boolean.FALSE;
+	
+	private Date dataHoraProgramada;
+	
+	public enum ListarExamesSendoSolicitadosLoteControllerException implements BusinessExceptionCode{
+		
+	}
+	
+	public void inicio(){
+		numeroAmostra = Integer.valueOf(0);
+		intervaloDias = Integer.valueOf(0);
+		intervaloHoras = new Date(); 
+		exibirModalExamesSemPermissao = Boolean.FALSE;
+		modalMessage = "";
+		modalListaExames = "";
+		apresentarAbas();
+		renderAbaPorLote(solicitacaoExameController.getSolicitacaoExame());
+	}
 	
 	@PostConstruct
 	protected void inicializar() {
 		this.begin(conversation);
 	}
+	
 	
 	public void renderAbaPorLote(SolicitacaoExameVO solicEx) {
 		this.habilitarListExames=false;
@@ -164,7 +187,6 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 		Short seqUnidade;
 		clearExames();
 		if (tipoLoteSeq != null && tipoLoteSeq != -1) {
-			// Vericar convenio SUS e pegar valor de Unidade Funcional
 			if(this.getSolicitacaoExameVo() != null){
 				if(this.getSolicitacaoExameVo().getUnidadeFuncional() != null){
 					seqUnidade = this.getSolicitacaoExameVo().getUnidadeFuncional().getSeq();
@@ -212,7 +234,6 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 				apresentarMsgNegocio(Severity.INFO, this.getBundle().getString("USUARIO_SEM_PROTOCOLO_EXAMES_GRUPO"));
 			}
 		}
-
 	}
 
 	private void obterMessagemListaExamesSemPermissao() {
@@ -254,10 +275,6 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 	}
 	
 	@Override
-	/**
-	 * Escolhe as abas que irá validar.
-	 * @return
-	 */
 	protected List<ISECamposObrigatoriosValidator> getAbasValidators() {
 		List<ISECamposObrigatoriosValidator> validators = new ArrayList<ISECamposObrigatoriosValidator>();
 
@@ -296,40 +313,56 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 		return validators;
 	}
 
-	/**
-	 * Metodo para adicionar item de solicitacao exame na lista.
-	 * @throws MECBaseException 
-	 */
-	//@Restrict("#{s:hasPermission('solicitarExamesLote','executar')}")
-	public void adicionarItemSolicitacaoExameLote() throws BaseException {
+	public void adicionarItemSolicitacaoExameLote() throws BaseException, ParseException {
 		ocultarModalExamesSemPermissao();
 		
 		if (Boolean.FALSE.equals(this.isExisteItemExameLoteSelecionado())) {
 			apresentarMsgNegocio(Severity.ERROR, "ERRO_AO_ADICIONAR_EXAME_LOTE");
 		}
-		//Se adicionou remove da lista todos os sinonimos daquele exame
+		
+		if(checkUrgente){
+			checkUrgenteLote();
+		}
+		
 		List<UnfExecutaSinonimoExameVO> listaAuxiliar = new ArrayList<UnfExecutaSinonimoExameVO>();
 		List<UnfExecutaSinonimoExameVO> listaAuxiliar2 = new ArrayList<UnfExecutaSinonimoExameVO>();
 		boolean adicionou = false;
+		
 		if (getUnfExecutaExame() != null && listaExamesLote != null) {
 			listaAuxiliar.addAll(listaExamesLote);
 			for (UnfExecutaSinonimoExameVO unfExeExameVO : listaExamesLote) {
 				if (unfExeExameVO.isSelecionado()) {
+					
+					verificarPermissaoExameProgramado(unfExeExameVO);
+					
 					super.setUnfExecutaExame(unfExeExameVO, false);
-					super.getItemSolicitacaoExameVo().setUrgente(unfExeExameVO.getCheckUrgente());
-					super.getItemSolicitacaoExameVo().setDataProgramada(unfExeExameVO.getDataProgr()!=null?unfExeExameVO.getDataProgr():new Date());
-					super.getItemSolicitacaoExameVo().setNumeroAmostra(unfExeExameVO.getNumeroAmostra());
-					super.getItemSolicitacaoExameVo().setIntervaloHoras(unfExeExameVO.getIntervaloHoras());
-					super.getItemSolicitacaoExameVo().setIntervaloDias(unfExeExameVO.getIntervaloDias());
-					AelSitItemSolicitacoes situacaoExame = unfExeExameVO.getSituacao();
-					if(situacaoExame==null){
-						    situacaoExame = this.solicitacaoExameFacade.obterSituacaoExameSugestao(this.getSolicitacaoExameVo().getUnidadeFuncional(),
-							this.getSolicitacaoExameVo().getAtendimento(), this.getSolicitacaoExameVo().getAtendimentoDiverso(), this.getItemSolicitacaoExameVo()
-							.getUnfExecutaExame().getUnfExecutaExame(), obterUnidadeTrabalho(), this.getItemSolicitacaoExameVo(), getSolicitacaoExameVo());
-					}
-					super.getItemSolicitacaoExameVo().setSituacaoCodigo(situacaoExame);
-					//			listaAuxiliar.remove(unfExeExameVO);
+					
+					popularItemSolicitacaoExameVo(unfExeExameVO);
 					adicionou = super.adicionarItemSolicitacaoExame();
+					
+					if(!getCalendar()){
+						for (ItemSolicitacaoExameVO vo : solicitacaoExameController.getListaItemSolicitacaoExame()) {
+							if(vo.getUnfExecutaExame().getSinonimoExameNome() != null){
+								if(vo.getUnfExecutaExame().getSinonimoExameNome().equalsIgnoreCase(unfExeExameVO.getSinonimoExameNome())){
+									vo.setDataProgramada(getDataHoraProgramada());
+								}
+							}
+						} 
+						super.getItemSolicitacaoExameVo().setDataProgramada(getDataHoraProgramada());
+						getItemSolicitacaoExameVo().setDataProgramada(getDataHoraProgramada());
+						unfExeExameVO.setDataProgr(getDataHoraProgramada());
+					}else{
+						for (ItemSolicitacaoExameVO vo : solicitacaoExameController.getListaItemSolicitacaoExame()) {
+							if(vo.getUnfExecutaExame().getSinonimoExameNome() != null){
+								if(vo.getUnfExecutaExame().getSinonimoExameNome().equalsIgnoreCase(unfExeExameVO.getSinonimoExameNome())){
+									vo.setDataProgramada(getDataProgr());
+								}	
+							}
+						}
+						super.getItemSolicitacaoExameVo().setDataProgramada(getDataProgr());
+						getItemSolicitacaoExameVo().setDataProgramada(getDataProgr());
+						unfExeExameVO.setDataProgr(getDataProgr());
+					}
 					if(adicionou){//só exclui da lista de exames se adicionou com sucesso.
 						listaAuxiliar2.add(unfExeExameVO);
 					}
@@ -337,10 +370,6 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 			}
 		}
 
-		/**
-		 *  Remove da lista principal os exames que já estão sendo solicitados.
-		 *  Existe exames que tem exames dependentes que já estão sendo solicitados por isso é removido da listagem principal.
-		 */
 		for (UnfExecutaSinonimoExameVO unfExeExameVO2 : listaAuxiliar2) {
 			for (UnfExecutaSinonimoExameVO unfExeExameVO : listaExamesLote) {
 				if(unfExeExameVO2.getUnfExecutaExame().equals(unfExeExameVO.getUnfExecutaExame())){
@@ -354,6 +383,101 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 		}
 
         desmarcaExameDaListaQueNaoCampoObrigatorioPreenchido();
+        listaDatasHorasProgramadas.clear();
+        apresentarAbas();
+        inicio();
+        setDataHoraProgramada(null);
+        setDataProgr(new Date());
+        setCalendar(Boolean.TRUE);
+        setFlagPermissaoSimNao(Boolean.FALSE);
+        getExames().clear();
+	}
+
+	private void verificarPermissaoExameProgramado(
+			UnfExecutaSinonimoExameVO unfExeExameVO) throws ParseException {
+		Integer emaManSeq = unfExeExameVO.getUnfExecutaExame().getId().getEmaManSeq();
+		String sigla = unfExeExameVO.getUnfExecutaExame().getId().getEmaExaSigla();
+		Short unfSeqSolicitante = solicitacaoExameController.getSolicitacaoExame().getUnidadeFuncional().getSeq();
+		Short unfSeq = unfExeExameVO.getUnfExecutaExame().getId().getUnfSeq().getSeq();
+		
+		AelPermissaoUnidSolic aelPermissaoUnidSolic = buscarAelPermissaoUnidSolicPorEmaExaSiglaEmaManSeqUnfSeqUnfSeqSolicitante(
+				emaManSeq, sigla, unfSeqSolicitante, unfSeq);
+		
+		if(aelPermissaoUnidSolic != null && 
+		   aelPermissaoUnidSolic.getIndPermiteProgramarExames().equals(DominioSimNaoRotina.S)){
+				boolean retorno = verificarHorarioExame(emaManSeq, sigla);
+				if(retorno){
+					return;
+				}
+		}
+	}
+
+	private void popularItemSolicitacaoExameVo(
+			UnfExecutaSinonimoExameVO unfExeExameVO) throws BaseException {
+		super.getItemSolicitacaoExameVo().setNumeroAmostra(unfExeExameVO.getNumeroAmostra());
+		super.getItemSolicitacaoExameVo().setIntervaloHoras(unfExeExameVO.getIntervaloHoras());
+		super.getItemSolicitacaoExameVo().setIntervaloDias(unfExeExameVO.getIntervaloDias());
+		AelSitItemSolicitacoes situacaoExame = unfExeExameVO.getSituacao();
+		
+		if(situacaoExame==null){
+		    situacaoExame = this.solicitacaoExameFacade.obterSituacaoExameSugestao(this.getSolicitacaoExameVo().getUnidadeFuncional(),
+			this.getSolicitacaoExameVo().getAtendimento(), this.getSolicitacaoExameVo().getAtendimentoDiverso(), this.getItemSolicitacaoExameVo()
+			.getUnfExecutaExame().getUnfExecutaExame(), obterUnidadeTrabalho(), this.getItemSolicitacaoExameVo(), getSolicitacaoExameVo());
+		}
+		
+		super.getItemSolicitacaoExameVo().setSituacaoCodigo(situacaoExame);
+		super.getItemSolicitacaoExameVo().setUrgente(getCheckUrgente());
+		getItemSolicitacaoExameVo().setUrgente(getCheckUrgente());
+		if(!getCalendar()){
+			super.getItemSolicitacaoExameVo().setDataProgramada(getDataHoraProgramada());
+			getItemSolicitacaoExameVo().setDataProgramada(getDataHoraProgramada());
+		}else{
+			super.getItemSolicitacaoExameVo().setDataProgramada(getDataProgr());
+			getItemSolicitacaoExameVo().setDataProgramada(getDataProgr());
+		}
+		
+	}
+
+	private AelPermissaoUnidSolic buscarAelPermissaoUnidSolicPorEmaExaSiglaEmaManSeqUnfSeqUnfSeqSolicitante(
+			Integer emaManSeq, String sigla, Short unfSeqSolicitante, Short unfSeq) {
+		return solicitacaoExameFacade.buscarAelPermissaoUnidSolicPorEmaExaSiglaEmaManSeqUnfSeqUnfSeqSolicitante(sigla, emaManSeq, unfSeq, unfSeqSolicitante);
+	}
+
+	private boolean verificarHorarioExame(Integer emaManSeq, String sigla)
+			throws ParseException {
+		AelExameHorarioColeta aehc = solicitacaoExameFacade.recuperarHorarioColetas(sigla, emaManSeq);
+		boolean retorno = false;
+		
+		if(aehc == null){
+			retorno = true;
+		} else {
+			String horaInicial = DateFormatUtil.formataHoraMinuto(aehc.getHorarioInicial());
+			String horaFinal = DateFormatUtil.formataHoraMinuto(aehc.getHorarioFinal());
+			String horaProgramada = DateFormatUtil.formataHoraMinuto(itemSolicitacaoExameVo.getDataProgramada());
+			
+			SimpleDateFormat formato = new SimpleDateFormat("hh:mm");
+			
+			Date dataIncial = formato.parse(horaInicial); 
+			Date dataFinal = formato.parse(horaFinal);
+			Date dataProgramada = formato.parse(horaProgramada);
+			
+			if(!(dataProgramada.after(dataIncial) && dataProgramada.before(dataFinal))){
+				apresentarMsgNegocio(Severity.ERROR, "Unidade não executa este exame neste horário.");
+				retorno = true;
+			}
+			
+		}
+		return retorno;
+	}
+
+	private void apresentarAbas() {
+		getItemSolicitacaoExameVo().setMostrarAbaTipoTransporte(Boolean.FALSE);
+		getItemSolicitacaoExameVo().setMostrarAbaIntervColeta(Boolean.FALSE);
+		getItemSolicitacaoExameVo().setMostrarAbaNoAmostras(Boolean.FALSE);
+		getItemSolicitacaoExameVo().setMostrarAbaConcentO2(Boolean.FALSE);
+		getItemSolicitacaoExameVo().setMostrarAbaRegMatAnalise(Boolean.FALSE);
+		getItemSolicitacaoExameVo().setMostrarAbaRecomendacoes(Boolean.FALSE);
+		getItemSolicitacaoExameVo().setMostrarAbaExamesOpcionais(Boolean.FALSE);
 	}
 
     private void desmarcaExameDaListaQueNaoCampoObrigatorioPreenchido() {
@@ -365,9 +489,7 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
                 }
             }
         }
-
     }
-
 	
 	private boolean isExisteItemExameLoteSelecionado() {
 		if(listaExamesLote != null){
@@ -435,21 +557,115 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 		this.setExameSiglaSelecionado(codigoSoeSelecionado);
 		setFiltrosAbaSituacao(vo);
 		
-		if(this.exames.containsKey(vo)){
-			if(this.exames.get(codigoSoeSelecionado).contains(vo)){
-
-				this.exames.get(codigoSoeSelecionado).remove(vo);
-
-				if(this.exames.get(codigoSoeSelecionado).size()==0){
-					this.exames.remove(codigoSoeSelecionado);
-				}
-			}else{
-				this.exames.get(codigoSoeSelecionado).add(vo);
-			}
+		if(this.exames.containsKey(codigoSoeSelecionado)){
+			
+			verificaSimNaoRotina();
+			this.exames.remove(codigoSoeSelecionado);
+			
 		}else{
-			this.exames.put(codigoSoeSelecionado, new ArrayList<UnfExecutaSinonimoExameVO>());
-			this.exames.get(codigoSoeSelecionado).add(vo);
+			this.exames.put(codigoSoeSelecionado, vo);
+			ItemSolicitacaoExameVO ise = new ItemSolicitacaoExameVO();
+			ise.setUnfExecutaExame(new UnfExecutaSinonimoExameVO());
+			ise.setUnfExecutaExame(vo);
+			
+			DominioSimNaoRotina simNaoRotina = null;
+			
+			Integer emaManSeq = vo.getUnfExecutaExame().getId().getEmaManSeq();
+			String sigla = vo.getUnfExecutaExame().getId().getEmaExaSigla();
+			Short unfSeqSolicitante = solicitacaoExameController.getSolicitacaoExame().getUnidadeFuncional().getSeq();
+			Short unfSeq = vo.getUnfExecutaExame().getId().getUnfSeq().getSeq();
+			
+			AelPermissaoUnidSolic aelPermissaoUnidSolic = buscarAelPermissaoUnidSolicPorEmaExaSiglaEmaManSeqUnfSeqUnfSeqSolicitante(
+					emaManSeq, sigla, unfSeqSolicitante, unfSeq);
+			
+			if(aelPermissaoUnidSolic != null){
+				simNaoRotina = aelPermissaoUnidSolic.getIndPermiteProgramarExames();
+			}
+			
+			if(simNaoRotina.getDescricao().equalsIgnoreCase("rotina")){
+				setFlagPermissaoSimNao(Boolean.TRUE);
+			}
+			
+			if(getFlagPermissaoSimNao()){
+				simNaoRotina = DominioSimNaoRotina.R;
+			}
+			
+			switch (simNaoRotina) {
+			case N:
+				setCalendar(Boolean.TRUE);
+				break;
+			case S:
+				setCalendar(Boolean.TRUE);
+				break;
+			case R:
+				recuperarHorarioExamesProgramados(ise);
+				break;
+			}
 		}
+		verificarNenhumItemSelecionado();
+		this.checkUrgente = false;
+	}
+
+	private void verificarNenhumItemSelecionado() {
+		if(!listaExamesLote.isEmpty()){
+			boolean selecionado = true;
+			
+			for (UnfExecutaSinonimoExameVO use : listaExamesLote) {
+				if(use.isSelecionado()){
+					selecionado = false;
+					break;
+				}
+			} 
+			if(selecionado){
+				setCalendar(Boolean.TRUE);
+				getItemSolicitacaoExameVo().setDataProgramada(new Date());
+				setFlagPermissaoSimNao(Boolean.FALSE);
+			}
+		}
+	}
+
+	private void recuperarHorarioExamesProgramados(ItemSolicitacaoExameVO ise) {
+		
+		List<DataProgramadaVO> listaAux = doGetListaDatasHorasProgramadas(ise);
+		List<DataProgramadaVO> listaTemp = new ArrayList<DataProgramadaVO>();
+		
+		verificarDataHoraRepetida(listaAux, listaTemp);
+		
+		if(getListaDataHoraProgramada() != null && getListaDataHoraProgramada().size() > 0){
+			setCalendar(Boolean.FALSE);
+		}
+	}
+
+	private void verificarDataHoraRepetida(List<DataProgramadaVO> listaAux,
+			List<DataProgramadaVO> listaTemp) {
+		if(getListaDatasHorasProgramadas().size() == 0){
+			getListaDatasHorasProgramadas().addAll(listaAux);
+		}else{
+			for (DataProgramadaVO dataProgramadaVO : listaAux) {
+				for (DataProgramadaVO dp : getListaDatasHorasProgramadas()) {
+					if(dataProgramadaVO.getDate().compareTo(dp.getDate()) == 0 && listaTemp.contains(dp.getDate())){
+						listaTemp.add(dp);
+					}
+				}
+			}
+			getListaDatasHorasProgramadas().removeAll(listaTemp);
+		}
+	}
+	
+	/**
+	 * Carrega a lista de dt/hr de rotina para aquele exame, unidade executora e unidade solicitante.
+	 */
+	public List<DataProgramadaVO> doGetListaDatasHorasProgramadas(ItemSolicitacaoExameVO itemVO) {
+		List<DataProgramadaVO> lista = null;
+		if (itemVO != null) {
+			try {
+				lista = solicitacaoExameFacade.getHorariosRotina(itemVO, solicitacaoExameController.getSolicitacaoExame().getUnidadeFuncional());
+			} catch (BaseException e) {
+				apresentarExcecaoNegocio(e);
+			}
+		}
+
+		return lista;
 	}
 
 	private void setFiltrosAbaSituacao(UnfExecutaSinonimoExameVO vo) {
@@ -459,11 +675,6 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 			setSituacao(vo.getSituacao());
 			setCalendar(vo.getCalendar());
 		}else{
-			//#40284 - Setar valores para todos os exames somente ao alterar um item.
-			//setCheckUrgente(super.getItemSolicitacaoExameVo().getUrgente()!=null?super.getItemSolicitacaoExameVo().getUrgente():false);
-			//setDataProgr(super.getItemSolicitacaoExameVo().getDataProgramada()!=null?super.getItemSolicitacaoExameVo().getDataProgramada():new Date()); 
-			//setSituacao(super.getItemSolicitacaoExameVo().getSituacaoCodigo()!=null?super.getItemSolicitacaoExameVo().getSituacaoCodigo():vo.getSituacao());
-			//setCalendar(super.getItemSolicitacaoExameVo().getCalendar()!=null?super.getItemSolicitacaoExameVo().getCalendar():vo.getCalendar());
 			alterar();
 		}
 	}
@@ -490,7 +701,21 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 				if(unfExeExameVO.isSelecionado()){
 					unfExeExameVO.setSituacao(situacao);
 					unfExeExameVO.setCheckUrgente(checkUrgente);
-					unfExeExameVO.setDataProgr(dataProgr);
+					unfExeExameVO.setDataProgr(itemSolicitacaoExameVo.getDataProgramada());
+					unfExeExameVO.setEditado(Boolean.TRUE);
+					unfExeExameVO.setCalendar(getCalendar());
+				}
+			}
+		}
+	}
+	
+	public void inserirHorarioRotinaItemNaLista(){
+		if (getUnfExecutaExame() != null && listaExamesLote != null) {
+			for (UnfExecutaSinonimoExameVO unfExeExameVO : listaExamesLote) {
+				if(unfExeExameVO.isSelecionado()){
+					unfExeExameVO.setSituacao(situacao);
+					unfExeExameVO.setCheckUrgente(checkUrgente);
+					unfExeExameVO.setDataProgr(getDataHoraProgramada());
 					unfExeExameVO.setEditado(Boolean.TRUE);
 					unfExeExameVO.setCalendar(getCalendar());
 				}
@@ -507,18 +732,74 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 			try {
 				getItemSolicitacaoExameVo().setUrgente(getCheckUrgente());
 				getItemSolicitacaoExameVo().setDataProgramada(new Date());
-				setDataProgr(new Date());
 				AelSitItemSolicitacoes situacao = this.solicitacaoExameFacade.obterSituacaoExameSugestao(this.getSolicitacaoExameVo().getUnidadeFuncional(),
 						this.getSolicitacaoExameVo().getAtendimento(), this.getSolicitacaoExameVo().getAtendimentoDiverso(), this.getItemSolicitacaoExameVo()
 						.getUnfExecutaExame().getUnfExecutaExame(), obterUnidadeTrabalho(), this.getItemSolicitacaoExameVo(), getSolicitacaoExameVo());
 				this.getItemSolicitacaoExameVo().setSituacaoCodigo(situacao);
 				setSituacao(situacao);
-				reLoadDataHoraProgramadaLote();
 				alterar();
+				verificaSimNaoRotinaSelecionado();
 			} catch (BaseException e) {
 				apresentarExcecaoNegocio(e);
 			}
 		}
+	}
+	
+	private void verificaSimNaoRotinaSelecionado() {
+		
+	DominioSimNaoRotina simNaoRotina = null;
+		
+		for (UnfExecutaSinonimoExameVO exameVO : this.exames.values()) {
+			Integer emaManSeq = exameVO.getUnfExecutaExame().getId().getEmaManSeq();
+			String sigla = exameVO.getUnfExecutaExame().getId().getEmaExaSigla();
+			Short unfSeqSolicitante = solicitacaoExameController.getSolicitacaoExame().getUnidadeFuncional().getSeq();
+			Short unfSeq = exameVO.getUnfExecutaExame().getId().getUnfSeq().getSeq();
+			
+			AelPermissaoUnidSolic aelPermissaoUnidSolic = buscarAelPermissaoUnidSolicPorEmaExaSiglaEmaManSeqUnfSeqUnfSeqSolicitante(
+					emaManSeq, sigla, unfSeqSolicitante, unfSeq);
+			
+			if(aelPermissaoUnidSolic != null){
+				simNaoRotina = aelPermissaoUnidSolic.getIndPermiteProgramarExames();
+			}
+		
+			if(exameVO.isSelecionado()) {
+				if(simNaoRotina.equals(DominioSimNaoRotina.R) && !checkUrgente) {
+					setCalendar(Boolean.FALSE);
+					break;
+				} else {
+					setCalendar(Boolean.TRUE);
+				}
+			}
+		}
+	}
+	
+	private void verificaSimNaoRotina() {
+		
+		DominioSimNaoRotina simNaoRotina = null;
+		
+		for (UnfExecutaSinonimoExameVO exameVO : this.exames.values()) {
+			Integer emaManSeq = exameVO.getUnfExecutaExame().getId().getEmaManSeq();
+			String sigla = exameVO.getUnfExecutaExame().getId().getEmaExaSigla();
+			Short unfSeqSolicitante = solicitacaoExameController.getSolicitacaoExame().getUnidadeFuncional().getSeq();
+			Short unfSeq = exameVO.getUnfExecutaExame().getId().getUnfSeq().getSeq();
+			
+			AelPermissaoUnidSolic aelPermissaoUnidSolic = buscarAelPermissaoUnidSolicPorEmaExaSiglaEmaManSeqUnfSeqUnfSeqSolicitante(
+					emaManSeq, sigla, unfSeqSolicitante, unfSeq);
+			
+			if(aelPermissaoUnidSolic != null){
+				simNaoRotina = aelPermissaoUnidSolic.getIndPermiteProgramarExames();
+			}
+			
+			if(exameVO.isSelecionado()){
+				if(simNaoRotina.equals(DominioSimNaoRotina.R)) {
+					setCalendar(Boolean.FALSE);
+					break;
+				}else{
+					setCalendar(Boolean.TRUE);
+				}
+			}
+		}
+		
 	}
 
 	public void reLoadDataHoraProgramadaLote() {
@@ -563,13 +844,13 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 		listaExamesLoteSemPermissao = null;
 		tipoLoteSeq = null;
 
-		exames = new HashMap<String, ArrayList<UnfExecutaSinonimoExameVO>>();
+		exames = new HashMap<String, UnfExecutaSinonimoExameVO>();
 		exameSiglaSelecionado = null;
 		habilitarListExames = false;
 
 		//filtros aba situação
-		//40284 - Por padrão deverá trazer o checkbox urgente como true.
-		checkUrgente = Boolean.TRUE;
+		//#83554 - Por padrão deverá trazer o checkbox urgente como FALSE.
+		checkUrgente = Boolean.FALSE;
 		dataProgr = new Date();
 		situacao = null;
 		calendar = Boolean.TRUE;
@@ -585,11 +866,11 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 		modalListaExames = null;
 	}
 	
-	public Map<String, ArrayList<UnfExecutaSinonimoExameVO>> getExames() {
+	public Map<String, UnfExecutaSinonimoExameVO> getExames() {
 		return exames;
 	}
 
-	public void setExames(Map<String, ArrayList<UnfExecutaSinonimoExameVO>> exames) {
+	public void setExames(Map<String, UnfExecutaSinonimoExameVO> exames) {
 		this.exames = exames;
 	}
 
@@ -691,5 +972,34 @@ public class ListarExamesSendoSolicitadosLoteController extends ListarExamesSend
 		if(!exibirModalExamesSemPermissao){
 			this.modalMessage = null;
 		}
-	}	
+	}
+	public List<DataProgramadaVO> getListaDatasHorasProgramadas() {
+		if(listaDatasHorasProgramadas == null){
+			listaDatasHorasProgramadas = new ArrayList<DataProgramadaVO>();
+		}
+		return listaDatasHorasProgramadas;
+	}
+	public void setListaDatasHorasProgramadas(
+			List<DataProgramadaVO> listaDatasHorasProgramadas) {
+		this.listaDatasHorasProgramadas = listaDatasHorasProgramadas;
+	}
+	public ItemSolicitacaoExameVO getItemSolicitacaoExameVo() {
+		return itemSolicitacaoExameVo;
+	}
+	public void setItemSolicitacaoExameVo(
+			ItemSolicitacaoExameVO itemSolicitacaoExameVo) {
+		this.itemSolicitacaoExameVo = itemSolicitacaoExameVo;
+	}
+	public Boolean getFlagPermissaoSimNao() {
+		return flagPermissaoSimNao;
+	}
+	public void setFlagPermissaoSimNao(Boolean flagPermissaoSimNao) {
+		this.flagPermissaoSimNao = flagPermissaoSimNao;
+	}
+	public Date getDataHoraProgramada() {
+		return dataHoraProgramada;
+	}
+	public void setDataHoraProgramada(Date dataHoraProgramada) {
+		this.dataHoraProgramada = dataHoraProgramada;
+	}
 }

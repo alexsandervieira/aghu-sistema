@@ -129,6 +129,7 @@ import br.gov.mec.aghu.prescricaomedica.vo.DadosDialiseVO;
 import br.gov.mec.aghu.prescricaomedica.vo.DadosPesoAlturaVO;
 import br.gov.mec.aghu.prescricaomedica.vo.DetalhesParecerMedicamentosVO;
 import br.gov.mec.aghu.prescricaomedica.vo.EstadoPacienteVO;
+import br.gov.mec.aghu.prescricaomedica.vo.EvolucaoPrescricaoVO;
 import br.gov.mec.aghu.prescricaomedica.vo.GerarPDFSinanVO;
 import br.gov.mec.aghu.prescricaomedica.vo.HistoricoParecerMedicamentosJnVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ItemDispensacaoFarmaciaVO;
@@ -147,6 +148,7 @@ import br.gov.mec.aghu.prescricaomedica.vo.MpmSolicitacaoConsultoriaVO;
 import br.gov.mec.aghu.prescricaomedica.vo.PacienteListaProfissionalVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ParametrosProcedureVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ParecerPendenteVO;
+import br.gov.mec.aghu.prescricaomedica.vo.PosolociaDosagemMedicamentoVO;
 import br.gov.mec.aghu.prescricaomedica.vo.PrescricaoMedicaVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ProcedimentoEspecialVO;
 import br.gov.mec.aghu.prescricaomedica.vo.RelSolHemoterapicaVO;
@@ -1020,6 +1022,14 @@ public class PrescricaoMedicaFacade extends BaseFacade implements IPrescricaoMed
 	public List<ItemPrescricaoMedica> listarItensPrescricaoMedicaConfirmados(
 			final MpmPrescricaoMedica prescricao) {
 		return this.getConfirmarPrescricaoMedicaON().listarItensPrescricaoMedicaConfirmados(prescricao);
+	}
+
+	@Override
+	@Secure("#{s:hasPermission('itemPrescricaoMedica','pesquisar')}")
+	@BypassInactiveModule
+	public List<ItemPrescricaoMedica> listarItensPrescricaoMedica(
+			final MpmPrescricaoMedica prescricao) {
+		return this.getConfirmarPrescricaoMedicaON().listarItensPrescricaoMedica(prescricao);
 	}
 
 	/*
@@ -2566,7 +2576,7 @@ public class PrescricaoMedicaFacade extends BaseFacade implements IPrescricaoMed
 
 	@Override
 	@BypassInactiveModule
-	public String obterDescricaoFormatadaMedicamentoSolucaoRelatorioItensConfirmados(
+	public List<PosolociaDosagemMedicamentoVO> obterDescricaoFormatadaMedicamentoSolucaoRelatorioItensConfirmados(
 			final MpmPrescricaoMdto medicamentoConfirmada, final Boolean inclusaoExclusao,
 			final Boolean impressaoTotal, final Boolean isUpperCase, final Boolean incluirCodigoMedicamentos) throws ApplicationBusinessException {
 		return this.getDescricaoFormatadaRelatorioItensConfirmadosON()
@@ -2577,7 +2587,7 @@ public class PrescricaoMedicaFacade extends BaseFacade implements IPrescricaoMed
 
 	@Override
 	@BypassInactiveModule
-	public String obterDescricaoAlteracaoMedicamentoSolucaoRelatorioItensConfirmados(
+	public List<PosolociaDosagemMedicamentoVO> obterDescricaoAlteracaoMedicamentoSolucaoRelatorioItensConfirmados(
 			final MpmPrescricaoMdto medicamentoConfirmada, final Boolean isUpperCase) throws ApplicationBusinessException {
 		return this.getDescricaoFormatadaRelatorioItensConfirmadosON()
 				.obterDescricaoAlteracaoMedicamentoSolucao(
@@ -4282,7 +4292,7 @@ public class PrescricaoMedicaFacade extends BaseFacade implements IPrescricaoMed
 	 * @throws BaseException
 	 */
 	@Override
-	public Boolean existeAmbulatorio() throws BaseException {
+	public Boolean existeAmbulatorio(){
 		return this.getConcluirSumarioAltaON().existeAmbulatorio();
 	}
 
@@ -8179,7 +8189,7 @@ public class PrescricaoMedicaFacade extends BaseFacade implements IPrescricaoMed
 	}
 
 	@Override
-	public void atualizarMpmEvolucaoEmUso(MpmEvolucoes evolucao,
+	public void atualizarMpmEvolucaoEmUso(EvolucaoPrescricaoVO evolucao,
 			RapServidores servidor) {
 
 		getEvolucaoRN().atualizarMpmEvolucaoEmUso(evolucao, servidor);
@@ -8187,7 +8197,7 @@ public class PrescricaoMedicaFacade extends BaseFacade implements IPrescricaoMed
 	}
 
 	@Override
-	public void validarEvolucaoEmUso(MpmEvolucoes evolucao)
+	public void validarEvolucaoEmUso(EvolucaoPrescricaoVO evolucao)
 			throws ApplicationBusinessException {
 
 		getEvolucaoRN().validarEvolucaoEmUso(evolucao);
@@ -8467,4 +8477,34 @@ public class PrescricaoMedicaFacade extends BaseFacade implements IPrescricaoMed
 		return getMpmEvolucoesDAO().obterEvolucoesAnamnese(anamnese, situacoes, dataInicio, dataFim);
 	}
 
+	@Override
+	public void trocarOrdemItemPrescricaoMedica(ItemPrescricaoMedicaVO item,
+			ItemPrescricaoMedicaVO itemNovaOrdem,String nomeMicrocomputador)throws BaseException {
+		this.getManterPrescricaoMedicaON().trocarOrdemItemPrescricaoMedica(item, itemNovaOrdem, nomeMicrocomputador);
+	}
+	@Override
+	public List<EvolucaoPrescricaoVO> obterEvolucoesVO(MpmAnamneses anamnese,
+			List<DominioIndPendenteAmbulatorio> situacoes, Date dataInicioEvolucao, Date dataFimEvolucao) {
+		return mpmEvolucoesRN.obterEvolucoesVO(anamnese, situacoes, dataInicioEvolucao, dataFimEvolucao);
+	}
+	
+	@Override
+	public EvolucaoPrescricaoVO criarEvolucaoPrescricao(MpmAnamneses anamnese,
+			Date dataReferencia, RapServidores servidor)
+			throws ApplicationBusinessException {
+		return getEvolucaoRN().criarEvolucoesPrescricao(anamnese, dataReferencia,
+				servidor);
+	}
+	
+	@Override
+	public EvolucaoPrescricaoVO criarEvolucaoVoComDescricao(String descricao,
+			MpmAnamneses anamnese, Date dataReferencia, RapServidores servidor) 
+			throws ApplicationBusinessException {
+		return getEvolucaoRN().criarEvolucaoVoComDescricao(descricao, anamnese, dataReferencia, servidor);
+	}	
+		
+	@Override
+	public List<String> obterAprazamentoDieta(MpmPrescricaoDieta dieta) {
+		return this.getAprazamentoRN().obterAprazamentoDieta(dieta);
+	}
 }

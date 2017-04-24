@@ -91,7 +91,7 @@ public interface IMascaraExamesFacade {
 
 	String montaNomeExameCabecalho(Object itemSolicitacaoExameObject, boolean isPrevia);
 
-	Integer obterIdadePaciente(Object itemSolicitacaoExameObject);
+	Date obterDtNascimentoPaciente(Object itemSolicitacaoExameObject);
 
 	String obterSexoPaciente(Object itemSolicitacaoExameObject);
 

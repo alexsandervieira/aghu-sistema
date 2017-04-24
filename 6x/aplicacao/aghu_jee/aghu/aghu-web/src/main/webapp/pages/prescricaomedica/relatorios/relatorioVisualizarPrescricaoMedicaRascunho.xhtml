@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:fn="http://xmlns.jcp.org/jsp/jstl/functions" xmlns:mec="http://xmlns.jcp.org/jsf/composite/components" xmlns:p="http://primefaces.org/ui" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:aghu="http://xmlns.jcp.org/jsf/component" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:c="http://xmlns.jcp.org/jsp/jstl/core" xmlns:mf="http://www.mec.gov.br/taglib">  
+  <ui:composition xmlns:fn="http://java.sun.com/jsp/jstl/functions" template="/WEB-INF/templates/form_template.xhtml">  
+    <ui:define name="head"> 
+        <title>#{messages.TITLE_RELATORIO_PRESCRICAO_MEDICA}</title> 
+		<style xml:space="preserve">
+		.mainContainer {
+			margin-bottom: 0 !important;
+		}
+		</style>
+    </ui:define>  
+    <ui:define name="body"> 
+        <h:form prependId="false" id="resultadosItensConfirmados"> 
+			<aghu:panelGeral legend="#{messages.LABEL_RELATORIO_PRESCRICAO_MEDICA}">
+				<br clear="none" />
+				<div align="center" style="text-align: center">
+		          <p:media id="media2" align="middle" width="760" height="470" player="pdf" value="#{relatorioPrescricaoMedicaController.renderPdf}" cache="false"> 
+		            <f:param name="cid" value="#{javax.enterprise.context.conversation.id}"/> 
+		          </p:media> 
+				</div>
+			</aghu:panelGeral>
+			<aghu:acao>
+	          	<mec:commandButton id="bt_confirmarcomimpressao"
+					style="margin:0 5px !important;"					
+					value="#{messages.LABEL_CONFIRMAR_COM_IMPRESSAO}"
+					action="#{manterPrescricaoMedicaController.prescreverJustificativaUsoMedicamento}"
+					profile="ok"
+					process="@this"
+					block="true"				
+					disabled="#{not mf:hasPermission(securityController, 'prescricaoMedica,confirmar')}">
+		              <f:setPropertyActionListener target="#{prescreverItemController.prescricaoMedicaVO}" value="#{manterPrescricaoMedicaController.prescricaoMedicaVO}" for="command"/>				
+					  <f:setPropertyActionListener target="#{manterPrescricaoMedicaController.tipoConfirmacaoModalPrevPlanoAlta}" value="comImpressao" for="command"/>
+					  <f:setPropertyActionListener target="#{manterPrescricaoMedicaController.confirmacaoPelaModalPrevPlanoAlta}" value="#{false}" for="command"/>
+					  <f:setPropertyActionListener target="#{manterDiagnosticosAtendimentoController.cidSeq}" value="#{null}" for="command"/>  
+		              <f:setPropertyActionListener target="#{manterDiagnosticosAtendimentoController.idConversacaoAnterior}" value="#{manterPrescricaoMedicaController.cid}" for="command"/>  
+		              <f:setPropertyActionListener target="#{manterDiagnosticosAtendimentoController.exibirMensagemCIDObrigatorioConfirmacao}" value="S" for="command"/>  
+		              <f:setPropertyActionListener target="#{manterDiagnosticosAtendimentoController.prescricaoMedicaVO}" value="#{manterPrescricaoMedicaController.prescricaoMedicaVO}" for="command"/>
+			    </mec:commandButton>
+	            <mec:commandButton id="bt_confirmarsemimpressao" 
+	            	value="#{messages.LABEL_CONFIRMAR_SEM_IMPRESSAO}" 
+	            	disabled="#{not mf:hasPermission(securityController, 'prescricaoMedica,confirmar')}"
+	            	style="margin:0 5px !important;"
+	            	action="#{manterPrescricaoMedicaController.prescreverJustificativaUsoMedicamento}"
+	            	process="@this"
+					ajax="true"
+					block="true"
+	            	profile="ok"> 
+		              <f:setPropertyActionListener target="#{prescreverItemController.prescricaoMedicaVO}" value="#{manterPrescricaoMedicaController.prescricaoMedicaVO}" for="command"/>
+		              <f:setPropertyActionListener target="#{verificarPrescricaoMedicaController.atendimentoSeq}" value="#{manterPrescricaoMedicaController.pmeSeqAtendimento}" for="command"/>  
+		              <f:setPropertyActionListener target="#{manterDiagnosticosAtendimentoController.cidSeq}" value="#{null}" for="command"/>  
+		              <f:setPropertyActionListener target="#{manterDiagnosticosAtendimentoController.idConversacaoAnterior}" value="#{manterPrescricaoMedicaController.cid}" for="command"/>  
+		              <f:setPropertyActionListener target="#{manterDiagnosticosAtendimentoController.exibirMensagemCIDObrigatorioConfirmacao}" value="S" for="command"/>  
+		              <f:setPropertyActionListener target="#{manterDiagnosticosAtendimentoController.prescricaoMedicaVO}" value="#{manterPrescricaoMedicaController.prescricaoMedicaVO}" for="command"/>
+		              <f:setPropertyActionListener target="#{manterPrescricaoMedicaController.tipoConfirmacaoModalPrevPlanoAlta}" value="semImpressao" for="command"/>
+		              <f:setPropertyActionListener target="#{manterPrescricaoMedicaController.confirmacaoPelaModalPrevPlanoAlta}" value="#{false}" for="command"/> 
+	            </mec:commandButton>  
+	            <mec:commandButton id="bt_prescricao_pendente" 
+	            	style="margin:0px 5px !important" value="#{messages.LABEL_DEIXAR_PENDENTE}" 
+	            	hint="Deixar a prescrição atual pendente" 
+	            	disabled="#{not mf:hasPermission(securityController, 'prescricaoMedica,deixarPendente')}" 
+	            	action="#{manterPrescricaoMedicaController.prescreverJustificativaUsoMedicamento}"
+	            	block="true" 
+	            	styleClass="bt_cinza"> 
+	              	<f:setPropertyActionListener target="#{prescreverItemController.prescricaoMedicaVO}" value="#{manterPrescricaoMedicaController.prescricaoMedicaVO}" for="command"/>
+	              	<f:setPropertyActionListener target="#{verificarPrescricaoMedicaController.atendimentoSeq}" value="#{manterPrescricaoMedicaController.pmeSeqAtendimento}" for="command"/>
+	              	
+	              	<f:setPropertyActionListener target="#{manterPrescricaoMedicaController.tipoConfirmacaoModalPrevPlanoAlta}" value="deixarPendente" for="command"/>
+	              	<f:setPropertyActionListener target="#{manterPrescricaoMedicaController.confirmacaoPelaModalPrevPlanoAlta}" value="#{false}" for="command"/> 
+	            </mec:commandButton>  
+            	<mec:commandButton value="#{messages.LABEL_VOLTAR}" action="#{relatorioPrescricaoMedicaController.voltar}" styleClass=" bt_voltar bt_cinza" profile="back"/> 
+        	</aghu:acao> 
+          </h:form>
+		<script xml:space="preserve">
+			var alturaPdf = window.innerHeight-126;
+			jQuery('#media').css('height', alturaPdf+'px');
+		</script> 
+    </ui:define> 
+  </ui:composition> 
+</html>

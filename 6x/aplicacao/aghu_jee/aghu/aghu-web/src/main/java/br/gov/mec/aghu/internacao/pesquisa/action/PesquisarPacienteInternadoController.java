@@ -109,9 +109,10 @@ public class PesquisarPacienteInternadoController extends ActionController {
 			unfTemp = internacao.getUnidadesFuncionais();
 		}else if(internacao.getQuarto() != null && internacao.getQuarto().getUnidadeFuncional() != null ){
 			unfTemp = internacao.getQuarto().getUnidadeFuncional();
-		}else if(internacao.getLeito() != null && internacao.getLeito().getQuarto()!= null & internacao.getLeito().getQuarto().getUnidadeFuncional() != null){
-			unfTemp = internacao.getLeito().getQuarto().getUnidadeFuncional();
+		}else if(internacao.getLeito() != null && internacao.getLeito().getQuarto()!= null & internacao.getLeito().getUnidadeFuncional() != null){
+			unfTemp = internacao.getLeito().getUnidadeFuncional();
 		}
+		//
 		
 		if(unfTemp != null){ 
 			StringBuilder sb = new StringBuilder("");

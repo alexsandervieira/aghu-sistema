@@ -71,7 +71,7 @@ public class VMpmListaPacInternadosDAO extends br.gov.mec.aghu.core.persistence.
 				}
 //				x.LOCAL
 				if (StringUtils.isNotBlank((String)row[5])) {
-					vo.setLocal(StringUtils.substring((String)row[5], 0, 8));
+					vo.setLocal((String)row[5]);
 				}
 //				x.DATA_NASCIMENTO
 				vo.setDataNascimento((Date)row[6]);

@@ -83,13 +83,12 @@
               <p:editor id="texto" 
               		widgetVar="editorWG" 
               		height="100" width="600"  
-              		controls="bold italic underline strikethrough alignleft center alignright justify font size" 
+              		controls="bold italic underline strikethrough alignleft center alignright justify size" 
               		language="pt" 
               		required="#{manterMascaraExamesController.requiredTextoFixo()}" 
               		value="#{manterMascaraExamesController.parametroSelect.textoLivre}" 
               		rendered="#{manterMascaraExamesController.parametroSelect != null and manterMascaraExamesController.versaoLaudo.situacao.isConstrucao()             
-           							and manterMascaraExamesController.parametroSelect.objetoVisual ne 'TEXTO_LONGO'            
-           							and manterMascaraExamesController.parametroSelect.campoLaudo.tipoCampo ne 'E'}" />
+           							and manterMascaraExamesController.parametroSelect.objetoVisual ne 'TEXTO_LONGO'}" />
           </aghu:linha>
           <aghu:linha>
            	<mec:field label="#{messages.LABEL_MODO_EXIBICAO}" id="modoExibicao"
@@ -139,13 +138,13 @@
             		value="#{manterMascaraExamesController.parametroSelect.larguraObjetoVisual}" 
             		label="#{messages.LABEL_LARGURA}" title="#{messages.TITLE_LARGURA}" 
             		size="3" maxlength="3" 
-            		readonly="#{not manterMascaraExamesController.versaoLaudo.situacao.isConstrucao() or manterMascaraExamesController.parametroSelect.objetoVisual eq 'TEXTO_LONGO'}"/>  
+            		readonly="#{not manterMascaraExamesController.versaoLaudo.situacao.isConstrucao()}"/>  
             <mec:inputNumero id="altura" 
             		value="#{manterMascaraExamesController.parametroSelect.alturaObjetoVisual}" 
             		label="#{messages.LABEL_ALTURA}" 
             		title="#{messages.TITLE_ALTURA}" 
             		size="3" maxlength="3" 
-            		readonly="#{not manterMascaraExamesController.versaoLaudo.situacao.isConstrucao() or manterMascaraExamesController.parametroSelect.objetoVisual eq 'TEXTO_LONGO'}"/> 
+            		readonly="#{not manterMascaraExamesController.versaoLaudo.situacao.isConstrucao()}"/> 
           </aghu:linha>  
           <aghu:linha> 
             <mec:inputNumero id="positionY" 

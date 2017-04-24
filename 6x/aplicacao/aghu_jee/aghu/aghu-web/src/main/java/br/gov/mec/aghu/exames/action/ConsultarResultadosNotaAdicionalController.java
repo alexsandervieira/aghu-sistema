@@ -221,7 +221,9 @@ public class ConsultarResultadosNotaAdicionalController extends ActionController
 			if (outputStreamLaudo != null){
 				ByteArrayOutputStream baos = this.outputStreamLaudo.getOutputStreamLaudo();
 				if (getPermiteImprimirResultadoExamesPOL() || (cascaFacade.usuarioTemPermissao(obterLoginUsuarioLogado(), PERMISSAO_IMPRESSAO_LAUDOS))) {
-					streamedLaudoPdf =  ActionReport.criarStreamedContentPdfPorByteArray(baos.toByteArray());
+					if(baos != null){
+						streamedLaudoPdf =  ActionReport.criarStreamedContentPdfPorByteArray(baos.toByteArray());
+					}
 				} else {
 					streamedLaudoPdf =  ActionReport.criarStreamedContentPdfPorByteArray(PdfUtil.protectPdf(baos.toByteArray()).toByteArray());
 				}
@@ -424,7 +426,11 @@ public class ConsultarResultadosNotaAdicionalController extends ActionController
 		if (outputStreamLaudo != null){
 			ByteArrayOutputStream baos = this.outputStreamLaudo.getOutputStreamLaudo();
 			if (getPermiteImprimirResultadoExamesPOL() || (cascaFacade.usuarioTemPermissao(obterLoginUsuarioLogado(), PERMISSAO_IMPRESSAO_LAUDOS))) {
-				return ActionReport.criarStreamedContentPdfPorByteArray(baos.toByteArray());
+				if(baos != null){
+					return ActionReport.criarStreamedContentPdfPorByteArray(baos.toByteArray());
+				}else{
+					return null;
+				}
 			} else {
 				return ActionReport.criarStreamedContentPdfPorByteArray(PdfUtil.protectPdf(baos.toByteArray()).toByteArray());			
 			}

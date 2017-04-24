@@ -25,7 +25,7 @@
     <p:outputPanel id="panelPesquisa" rendered="#{informacaoAmostraController.origemMenu}" layout="inline" styleClass="aghu-panel-geral"> 
       <aghu:panelGeral legend="#{messages.LABEL_PESQUISAR_AMOSTRAS_SOLICITACAO}"> 
         <aghu:linha> 
-          <mec:inputNumero id="solicitacao" label="#{messages.LABEL_SOLICITACAO_SEQ}" title="#{messages.TITLE_SOLICITACAO_AMOSTRAS_SOLICITACAO}" size="10" maxlength="8" value="#{informacaoAmostraController.soeSeq}"/>  
+          <mec:inputNumero id="solicitacao" label="#{messages.LABEL_SOLICITACAO_SEQ}" title="#{messages.TITLE_SOLICITACAO_AMOSTRAS_SOLICITACAO}" size="10" maxlength="8" value="#{informacaoAmostraController.soeSeq}" onkeyup="if(this.value.length &gt; 6) document.getElementById('amostra:amostra:inputId_input').focus()"/>   
           <mec:inputNumero id="amostra" label="#{messages.LABEL_AMOSTRA}" title="#{messages.TITLE_AMOSTRA_AMOSTRAS_SOLICITACAO}" size="10" maxlength="8" value="#{informacaoAmostraController.amostraSeq}"/> 
         </aghu:linha>  
         <aghu:linha> 
@@ -193,31 +193,37 @@
               <c:set var="_amostra" value="#{item}"/>  
               <p:column> 
                 <p:outputPanel layout="block" style="float:left;"> 
-                  <p:outputPanel id="panelRadioAmostra" layout="block" rendered="#{_amostra.id.seqp.equals(informacaoAmostraController.seqpSelecionado)}"> 
-                    <input type="radio" 
+                  <p:outputPanel id="panelCheckboxAmostra" layout="block" 
+                  rendered="#{not informacaoAmostraController.amostraEstaChecada(_amostra)}"> 
+                    <input type="checkbox" 
                            id="#{_amostra.id.seqp}" 
                            name="group2" 
                            class="serverDataTable" 
-                           onchange="selecionarAmostra(#{_amostra.id.seqp})" 
-                           checked="checked"/> 
+                           onchange="selecionarAmostra(#{_amostra.id.seqp})" />
                   </p:outputPanel>  
-                  <p:outputPanel id="panelRadioAmostraAux" 
+                  <p:outputPanel id="panelCheckboxAmostraAux" 
                                  layout="block" 
-                                 rendered="#{not _amostra.id.seqp.equals(informacaoAmostraController.seqpSelecionado)}"> 
-                    <input type="radio" 
+                                 rendered="#{informacaoAmostraController.amostraEstaChecada(_amostra)}"> 
+                    <input type="checkbox" 
                            id="#{_amostra.id.seqp}" 
                            class="serverDataTable" 
                            onchange="selecionarAmostra(#{_amostra.id.seqp})" 
-                           name="group2"/> 
+                           name="group2"
+                           checked="checked"/> 
                   </p:outputPanel> 
                 </p:outputPanel>  
                 <p:outputPanel layout="block" style="float:left;"> 
-                  <mec:commandLink title="#{messages.LABEL_EDITAR}" 
+                  <mec:commandLink title="#{messages.LABEL_EDITAR}"
+                  				   oncomplete="PF('modalEditarAmostraWG').show();" 
                                    rendered="#{informacaoAmostraController.possuiCaracteristica and informacaoAmostraController.verificaSituacaoAmostraGeradaOuEmColeta(_amostra.situacao) and mf:hasPermission(securityController,'informacaoColetaAmostra,executar')}" 
-                                   oncomplete="PF('modalEditarAmostraWG').show();;" 
                                    profile="edit" 
                                    ajax="true" 
-                                   process="@this"/> 
+                                   process="@this"
+                                   render="panelEditarAmostraInterno">
+                          <f:setPropertyActionListener  target="#{informacaoAmostraController.amostraSelecionada}" 
+                          								value="#{_amostra}" 
+                          								for="command"/> 
+                 </mec:commandLink> 
                 </p:outputPanel> 
               </p:column>  
               <p:column> 
@@ -282,7 +288,7 @@
       </p:outputPanel> 
     </p:outputPanel>  
     <p:outputPanel id="panelAcoesAmostra" layout="inline"> 
-      <p:outputPanel id="panelAcoesAmostraInterno" rendered="#{informacaoAmostraController.listaAmostras!=null}" layout="inline"> 
+      <p:outputPanel id="panelAcoesAmostraInterno" rendered="#{not empty informacaoAmostraController.listaAmostraSelecionada}" layout="inline"> 
         <aghu:acao> 
           <mec:commandButton value="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_COLETADO}" id="bt_coletado" action="#{informacaoAmostraController.confirmarColeta}" disabled="#{informacaoAmostraController.desabilitaBotaoColeta or not mf:hasPermission(securityController,'informacaoColetaAmostra,executar')}" ajax="true" render="panelAmostras,panelExamesAmostra,panelAcoesAmostra" process="@this" styleClass="bt_cinza"/>  
           <mec:commandButton value="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_VOLTAR_COLETA}" id="bt_cancela_coleta" action="#{informacaoAmostraController.voltarColeta}" disabled="#{informacaoAmostraController.desabilitaBotaoCancelarColeta or not mf:hasPermission(securityController,'voltarColeta,executar')}" ajax="true" render="panelAmostras,panelExamesAmostra,panelAcoesAmostra" process="@this" styleClass="bt_cinza"/>  
@@ -291,7 +297,7 @@
       </p:outputPanel> 
     </p:outputPanel>  
     <p:outputPanel id="panelExamesAmostra" layout="inline"> 
-      <p:outputPanel id="panelExamesAmostraInterno" rendered="#{informacaoAmostraController.listaExamesAmostra!=null}" layout="inline" styleClass="aghu-panel-geral"> 
+      <p:outputPanel id="panelExamesAmostraInterno" rendered="#{not empty informacaoAmostraController.listaExamesAmostra}" layout="inline" styleClass="aghu-panel-geral"> 
         <aghu:panelGeral legend="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_EXAMES_DA_AMOSTRA}"> 
           <p:outputPanel layout="block" style="width: 100%; height:150px;overflow-y:scroll;"> 
             <mec:serverDataTable list="#{informacaoAmostraController.listaExamesAmostra}" scrollable="true"> 
@@ -357,7 +363,7 @@
       </p:outputPanel> 
     </p:outputPanel>  
     <p:outputPanel id="panelAcoesExamesAmostra" layout="inline"> 
-      <p:outputPanel id="panelAcoesExamesAmostraInterno" rendered="#{informacaoAmostraController.listaExamesAmostra!=null}" layout="inline"> 
+      <p:outputPanel id="panelAcoesExamesAmostraInterno" rendered="#{not empty informacaoAmostraController.listaExamesAmostra}" layout="inline"> 
         <aghu:acao> 
           <mec:commandButton value="#{messages.LABEL_COLETAR_EXAME}" id="bt_coletar_exame" action="#{informacaoAmostraController.coletarExame}" disabled="#{informacaoAmostraController.desabilitaBotaoColetarExame or not mf:hasPermission(securityController,'informacaoColetaAmostra,executar')}" ajax="true" render="panelExamesAmostra, panelAmostras, panelAcoesAmostra" process="@this" styleClass="bt_cinza"/>  
           <mec:commandButton value="#{messages.LABEL_VOLTAR_EXAME}" id="bt_voltar_exame" action="#{informacaoAmostraController.voltarExame}" disabled="#{informacaoAmostraController.desabilitaBotaoVoltarExame or not mf:hasPermission(securityController,'informacaoColetaAmostra,executar')}" ajax="true" render="panelExamesAmostra, panelAmostras, panelAcoesAmostra" process="@this" styleClass="bt_cinza"/> 
@@ -367,21 +373,21 @@
     <p:dialog id="modalEditarAmostra" width="550" height="350" modal="true" resizable="false" widgetVar="modalEditarAmostraWG"> 
       <f:facet name="header"> 
         <h:panelGroup> 
-          <h:outputText value="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_AMOSTRA}"/> 
+          <h:outputText value="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_AMOSTRA} #{informacaoAmostraController.amostraSelecionada.id.seqp}"/> 
         </h:panelGroup> 
       </f:facet>  
       <p:outputPanel id="panelEditarAmostraInterno" layout="inline" styleClass="aghu-panel-geral"> 
         <aghu:panelGeral style="padding:10px;" legend="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_AMOSTRA}"> 
           <aghu:linha> 
-            <mec:inputNumero id="solicitacaoNumero" value="#{informacaoAmostraController.amostraSelecionada.id.seqp	}" readonly="true" label="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_NUMERO_SOLICITACAO}" maxlength="8" size="10"/>    
+            <mec:inputNumero id="solicitacaoNumero" value="#{informacaoAmostraController.amostraSelecionada.id.seqp}" readonly="true" label="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_NUMERO_SOLICITACAO}" maxlength="8" size="10"/>    
             <mec:inputNumero label="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_AMOSTRA}" id="amostraNumero" maxlength="8" value="#{informacaoAmostraController.amostraSelecionada.id.seqp}" size="10" readonly="true"/>  
             <mec:inputText label="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_SITUACAO_AMOSTRA}" id="situacaoAmostra" maxlength="25" value="#{informacaoAmostraController.amostraSelecionada.situacao.descricao}" style="text-transform:uppercase" size="25" readonly="true"/> 
           </aghu:linha>  
           <aghu:linha> 
-            <mec:inputText label="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_RECIPIENTE}" id="recipienteAmostra" maxlength="85" value="#{informacaoAmostraController.amostraSelecionada.recipienteColeta.descricao}" style="text-transform:uppercase" size="85" readonly="true"/> 
+            <mec:inputText label="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_RECIPIENTE}" id="recipienteAmostra" maxlength="85" value="#{informacaoAmostraController.amostraSelecionada.recipienteColeta.descricao}" style="text-transform:uppercase" size="70" readonly="true"/> 
           </aghu:linha>  
           <aghu:linha> 
-            <mec:inputText label="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_ANTICOAGULANTE}" id="anticoagulanteAmostra" maxlength="85" value="#{informacaoAmostraController.amostraSelecionada.anticoagulante.descricao}" style="text-transform:uppercase" size="85" readonly="true"/> 
+            <mec:inputText label="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_ANTICOAGULANTE}" id="anticoagulanteAmostra" maxlength="85" value="#{informacaoAmostraController.amostraSelecionada.anticoagulante.descricao}" style="text-transform:uppercase" size="70" readonly="true"/> 
           </aghu:linha>  
           <aghu:linha> 
             <mec:suggestionBox id="salaEX" label="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_UNIDADE_SALA}" title="#{messages.LABEL_PREENCHER_INFORMACOES_AMOSTRA_UNIDADE_SALA_HELP}" descricaoInput="numero" descricaoLabel="localizacao" size="20" suggestionAction="pesquisarSalaExecutoraExamesPorUnidadeFuncional" width="450" controller="#{informacaoAmostraController}" value="#{informacaoAmostraController.sala}" render="panelEditarAmostraAcoesInterno"> 
@@ -406,8 +412,8 @@
       </p:outputPanel>  
       <p:outputPanel id="panelEditarAmostraAcoesInterno" layout="inline"> 
         <aghu:acao> 
-          <mec:commandButton id="bt_confirmar" value="#{messages.LABEL_GRAVAR}" action="#{informacaoAmostraController.atualizarSalaExecutoraExamesDaAmostra}" disabled="#{informacaoAmostraController.sala eq null or not mf:hasPermission(securityController,'informacaoColetaAmostra,executar')}" rendered="#{mf:hasPermission(securityController,'amostraII,executar')}" oncomplete="PF('modalEditarAmostraWG').hide();" profile="ok" ajax="true" render="panelAmostras,panelExamesAmostra,panelAcoesAmostra" process="@this"/>  
-          <mec:commandButton value="#{messages.LABEL_FECHAR}" immediate="true" oncomplete="PF('modalEditarAmostraWG').hide();" styleClass="bt_fechar bt_cinza" ajax="true" process="@this"/> 
+           <mec:commandButton id="bt_confirmar" value="#{messages.LABEL_GRAVAR}" action="#{informacaoAmostraController.atualizarSalaExecutoraExamesDaAmostra}" disabled="#{informacaoAmostraController.sala eq null or not mf:hasPermission(securityController,'informacaoColetaAmostra,executar')}" rendered="#{mf:hasPermission(securityController,'amostraII,executar')}" oncomplete="PF('modalEditarAmostraWG').hide();" profile="ok" ajax="true" render="panelAmostras,panelExamesAmostra,panelAcoesAmostra" process="@this"/>  
+          <mec:commandButton value="#{messages.LABEL_FECHAR}" immediate="true" action="#{informacaoAmostraController.limparAmostraSelecionada}" oncomplete="PF('modalEditarAmostraWG').hide();" styleClass="bt_fechar bt_cinza" ajax="true" process="@this"/> 
         </aghu:acao> 
       </p:outputPanel> 
     </p:dialog> 

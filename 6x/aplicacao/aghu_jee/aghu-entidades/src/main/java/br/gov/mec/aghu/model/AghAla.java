@@ -55,8 +55,8 @@ public class AghAla extends BaseEntityCodigo<String> implements java.io.Serializ
 	}
 
 	@Id
-	@Column(name = "CODIGO", unique = true, nullable = false, length = 1)
-	@Length(max = 1)
+	@Column(name = "CODIGO", unique = true, nullable = false, length = 2)
+	@Length(max = 2)
 	public String getCodigo() {
 		return this.codigo;
 	}

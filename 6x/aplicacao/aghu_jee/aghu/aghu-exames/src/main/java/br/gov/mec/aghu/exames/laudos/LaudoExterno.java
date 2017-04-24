@@ -94,7 +94,7 @@ public class LaudoExterno extends LaudoMascara {
 
 	}
 
-	public void executar() throws IOException {
+	public void executar(Boolean consideraAlinhamentoVertical) throws IOException {
 
 		Collections.sort(this.getExamesLista().getExames(),
 				new Comparator<ExameVO>() {
@@ -127,7 +127,7 @@ public class LaudoExterno extends LaudoMascara {
 			}
 			super.criarCabecalhoExame(exame);
 			super.criarMensagemResultadoNaoLiberado(exame);
-			super.processaMascaras(exame);
+			super.processaMascaras(exame, consideraAlinhamentoVertical);
 			super.criarRecebimentoLiberacao(exame);
 			super.criarAssinaturaMedico(exame);
 			super.criarInformacoesColeta(exame);

@@ -195,11 +195,15 @@ public class MenuON extends BaseBusiness {
     }
 
     public List<Menu> recuperarMenusValidos(String loginUser, String nome, Set<String> conjuntoModulosAtivos) {
-	// TODO: Consulta não funciona com mais de 2 String derivadas da
-	// normalização
-	// return getMenuDAO().recuperarMenusValidos(loginUser,
-	// semiFonetiza(nome));
-	return getMenuDAO().recuperarMenusValidos(loginUser, nome, conjuntoModulosAtivos);
+    	List<Menu> menus = getMenuDAO().pesquisarMenusAtivosLucene(nome);
+    	List<Integer> listaMenusIds = new ArrayList<Integer>();
+    	for(Menu menu : menus) {
+    		listaMenusIds.add(menu.getId());
+    	}
+    	if(listaMenusIds != null && !listaMenusIds.isEmpty()) {
+    		return getMenuDAO().recuperarMenusValidos(loginUser, listaMenusIds, conjuntoModulosAtivos);
+    	}
+    	return new ArrayList<Menu>();
     }
 
     public List<Integer> recuperarMenusValidos(String loginUser, Set<String> conjuntoModulosAtivos) {

@@ -42,7 +42,7 @@
 				<aghu:linha>
 					<mec:suggestionBox label="#{messages.LABEL_ALMOXARIFADO_ORIGEM}"
 						title="#{gerarTransferenciaAutoAlmoxarifadoController.emEdicao ? null : messages.TITLE_ALMOXARIFADO_ORIGEM}"
-						suggestionAction="obterAlmoxarifado" descricaoInput="seq"
+						suggestionAction="obterAlmoxarifadoOrigem" descricaoInput="seq"
 						descricaoLabel="descricao"
 						requiredFake="#{gerarTransferenciaAutoAlmoxarifadoController.emEdicao ? false : true}"
 						maxlength="30" width="650"
@@ -63,7 +63,7 @@
 					</mec:suggestionBox>
 					<mec:suggestionBox label="#{messages.LABEL_ALMOXARIFADO_DESTINO}"
 						title="#{gerarTransferenciaAutoAlmoxarifadoController.emEdicao ? null : messages.TITLE_ALMOXARIFADO_DESTINO}"
-						suggestionAction="obterAlmoxarifado" descricaoInput="seq"
+						suggestionAction="obterAlmoxarifadoDestino" descricaoInput="seq"
 						descricaoLabel="descricao" maxlength="30" width="650"
 						requiredFake="#{gerarTransferenciaAutoAlmoxarifadoController.emEdicao ? false : true}"
 						readonly="#{gerarTransferenciaAutoAlmoxarifadoController.emEdicao}"

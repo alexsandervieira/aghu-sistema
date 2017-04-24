@@ -244,7 +244,7 @@ private ItemContaHospitalarON itemContaHospitalarON;
 				
 				if(operacao == TipoOperacaoEnum.INSERT) {
 					vo.setPacCodigo(regProc.getPacCodigo());
-					vo.setPedSeq((Short) CoreUtil.nvl(regProc.getPedSeq(), 0));
+					vo.setPedSeq((Short) CoreUtil.nvl(regProc.getPedSeq(), Short.valueOf("0")));
 					vo.setPrescricaoSeq(regProc.getPprSeq().intValue());
 					vo.setServidorValida(this.getRegistroColaboradorFacade().buscaServidor(
 							new RapServidoresId(regProc.getMatricula(), regProc.getVinCodigo())));

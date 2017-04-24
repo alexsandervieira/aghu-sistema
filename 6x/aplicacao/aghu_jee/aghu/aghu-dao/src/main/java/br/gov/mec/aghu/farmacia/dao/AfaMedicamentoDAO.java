@@ -239,7 +239,7 @@ public class AfaMedicamentoDAO extends BaseDao<AfaMedicamento> {
 					.toString(), DominioSituacao.A));
 		}
 		
-		if ((listaMedicamentos != null)&& (listaMedicamentosAux == false)){
+		if ((listaMedicamentos != null && listaMedicamentosAux != null && listaMedicamentosAux == false)){
 			if(listaMedicamentos == true) {
 				cri.add(Restrictions.eq(VAfaDescrMdto.Fields.IND_PADRONIZACAO
 						.toString(), true));
@@ -262,7 +262,7 @@ public class AfaMedicamentoDAO extends BaseDao<AfaMedicamento> {
 		if(somenteMdtoDeUsoAmbulatorial != null){
 			cri.add(Restrictions.eq(VAfaDescrMdto.Fields.PRESCRICAO_AMBULATORIAL.toString(), somenteMdtoDeUsoAmbulatorial));
 		}
-		if(listaMedicamentosAux == true){
+		if(listaMedicamentosAux != null && listaMedicamentosAux == true){
 			cri.add(Restrictions.eq("TUM."+AfaTipoUsoMdto.Fields.IND_QUIMIOTERAPICO.toString(), true));
 			cri.add(Restrictions.in(VAfaDescrMdto.Fields.IND_PADRONIZACAO.toString(), new Object[]{Boolean.TRUE,Boolean.FALSE}));
 		}

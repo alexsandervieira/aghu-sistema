@@ -21,6 +21,7 @@ public class PesquisarConsultasPendentesVO implements BaseEntity {
 	private Date dtHrInicioConsulta;
 	private Short caaSeq;
 	private String nome;
+	private String nomeSocial;
 	private Integer prontuario;
 	private Short serVinCodigo;
 	private Integer serMatricula;
@@ -247,6 +248,14 @@ public class PesquisarConsultasPendentesVO implements BaseEntity {
 
 	public void setReaberto(boolean reaberto) {
 		this.reaberto = reaberto;
+	}
+
+	public String getNomeSocial() {
+		return nomeSocial;
+	}
+
+	public void setNomeSocial(String nomeSocial) {
+		this.nomeSocial = nomeSocial;
 	}
 	
 }

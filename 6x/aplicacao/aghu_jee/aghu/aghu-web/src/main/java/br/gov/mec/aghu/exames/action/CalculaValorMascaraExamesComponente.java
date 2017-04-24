@@ -161,6 +161,7 @@ public class CalculaValorMascaraExamesComponente implements Serializable{
 							AelParametroCamposLaudo parametroCampoLaudo = (AelParametroCamposLaudo) input.getAttributes().get(NOME_ATRIBUTO_PARAMETRO_CAMPO_LAUDO);
 							NumberFormat format = NumberFormat.getInstance(new Locale("pt","BR"));
 							format.setMaximumFractionDigits(parametroCampoLaudo.getQuantidadeCasasDecimais());
+							format.setMinimumFractionDigits(parametroCampoLaudo.getQuantidadeCasasDecimais());
 							retorno = format.format(retorno);
 						}
 					}

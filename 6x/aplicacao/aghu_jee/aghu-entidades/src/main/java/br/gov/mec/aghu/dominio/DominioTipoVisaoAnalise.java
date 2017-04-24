@@ -18,7 +18,7 @@ public enum DominioTipoVisaoAnalise implements Dominio {
 		case OBJETO_CUSTO:
 			return "Objeto de Custo";
 		case CENTRO_CUSTO:
-			return "Centro de Custo";
+			return "Centro de Atividade";
 		default:
 			return "";
 		}

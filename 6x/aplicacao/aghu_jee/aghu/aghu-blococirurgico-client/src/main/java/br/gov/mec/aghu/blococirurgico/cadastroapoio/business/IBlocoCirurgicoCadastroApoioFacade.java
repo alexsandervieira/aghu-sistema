@@ -381,7 +381,7 @@ public interface IBlocoCirurgicoCadastroApoioFacade extends Serializable {
 
 	public List<MbcControleEscalaCirurgica> pesquisarEscalasCirurgicas(
 			Integer firstResult, Integer maxResult, String orderProperty,
-			boolean asc, AghUnidadesFuncionais unidadeFunc);
+			boolean asc, AghUnidadesFuncionais unidadeFunc, Date dtInicio, Date dtFim);
 
 	public Long pesquisarEscalasCirurgicasCount(AghUnidadesFuncionais unidadeFunc);
 

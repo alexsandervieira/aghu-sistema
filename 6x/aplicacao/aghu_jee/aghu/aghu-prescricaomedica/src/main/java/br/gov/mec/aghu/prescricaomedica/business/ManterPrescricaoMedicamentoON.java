@@ -268,17 +268,14 @@ public class ManterPrescricaoMedicamentoON extends BaseBusiness {
 			Boolean autoExcluirProcedimentoMedicamentoSol = null;
 //			prescricaoMedicamento = reatachar(prescricaoMedicamento);
 			
-			if (prescricaoMedicamento.getId() == null
-					|| prescricaoMedicamento.getId().getSeq() == null) {
+			if (prescricaoMedicamento.getId() == null || prescricaoMedicamento.getId().getSeq() == null) {
 				// Inserção
-				getPrescricaoMedicamentoRN().inserirPrescricaoMedicamento(
-						prescricaoMedicamento, nomeMicrocomputador, isCopiado);
+				getPrescricaoMedicamentoRN().inserirPrescricaoMedicamento(prescricaoMedicamento, nomeMicrocomputador, isCopiado);
 	
 				ItemPrescricaoMedicamentoRN itemPrescricaoMedicamentoRN = getItemPrescricaoMedicamentoRN();
 	
 				if (prescricaoMedicamento.getItensPrescricaoMdtos() != null) {
-					for (MpmItemPrescricaoMdto itemPrescricaoMedicamento : prescricaoMedicamento
-							.getItensPrescricaoMdtos()) {
+					for (MpmItemPrescricaoMdto itemPrescricaoMedicamento : prescricaoMedicamento.getItensPrescricaoMdtos()) {
 						itemPrescricaoMedicamento = itemPrescricaoMedicamentoRN.reatachar(itemPrescricaoMedicamento);
 						MpmItemPrescricaoMdtoId idItem = new MpmItemPrescricaoMdtoId();
 						idItem.setPmdAtdSeq(prescricaoMedicamento.getPrescricaoMedica().getId().getAtdSeq());
@@ -288,8 +285,7 @@ public class ManterPrescricaoMedicamentoON extends BaseBusiness {
 						idItem.setSeqp((short) 1);
 						
 						itemPrescricaoMedicamento.setId(idItem);
-						itemPrescricaoMedicamentoRN
-							.inserirItemPrescricaoMedicamento(itemPrescricaoMedicamento, isCopiado);
+						itemPrescricaoMedicamentoRN.inserirItemPrescricaoMedicamento(itemPrescricaoMedicamento, isCopiado);
 					}
 				}
 				getPrescricaoMedicamentoRN().flush();
@@ -396,14 +392,15 @@ public class ManterPrescricaoMedicamentoON extends BaseBusiness {
 		for (int i =0; i < prescricaoMedicamentos.size();i++){
 			MpmPrescricaoMdto medicamento = prescricaoMedicamentos.get(i);
 			MpmPrescricaoMdto medicamentoOriginal = prescricaoMedicamentosOriginal.get(i);
+			if(medicamento.getOrdem()== null){
+				medicamento.setOrdem(i);
+			}
 			this.persistirPrescricaoMedicamento(medicamento, isCopiado, nomeMicrocomputador,medicamentoOriginal);
 		}
 	}
 
-	public void persistirParecerItemPrescricaoMedicamento(
-			MpmItemPrescParecerMdto itemParecer) throws ApplicationBusinessException {
-		getPrescricaoMedicamentoRN().inserirParecerItemPrescricaoMedicamento(
-				itemParecer);
+	public void persistirParecerItemPrescricaoMedicamento(MpmItemPrescParecerMdto itemParecer) throws ApplicationBusinessException {
+		getPrescricaoMedicamentoRN().inserirParecerItemPrescricaoMedicamento(itemParecer);
 	}
 
 	protected MpmItemPrescricaoMdtoDAO getMpmItemPrescricaoMdtoDAO() {

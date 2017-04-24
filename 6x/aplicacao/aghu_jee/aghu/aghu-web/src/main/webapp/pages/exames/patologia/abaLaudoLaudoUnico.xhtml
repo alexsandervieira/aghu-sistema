@@ -65,27 +65,9 @@
 								disabled="#{!laudoUnicoController.telaVo.stInformacaoClinica}"/>
 					    </c:when>
 					  <c:otherwise>
-					  <p:editor id="informacaoClinicaEditor"  
-							height="20" 
-							theme="advanced" 
-							language="pt" 
+					  <p:editor id="informacaoClinicaEditor"  widgetVar="informacaoClinicaEditorWG"
 							value="#{laudoLaudoUnicoController.strInformacaoClinica}" 
-							readonly="#{!laudoUnicoController.telaVo.stInformacaoClinica}">
-					    <f:param name="width" value="100%" />
-                        <f:param name="theme_advanced_toolbar_location" value="top"/>  
-                        <f:param name="theme_advanced_toolbar_align" value="left"/>  
-					    <f:param name="plugins" value="-btnLowerCase,-btnUpperCase,-capitalize,fullscreen"/>  
-					    <f:param name="theme_advanced_buttons1"  value="bold,italic,underline,separator,cut,copy,paste, separator,undo,redo, separator,justifyleft,justifycenter,justifyright,justifyfull, separator,bullist,numlist, separator,outdent,indent, separator,sub,sup, separator,removeformat,formatselect, separator,btnUpperCase,btnLowerCase,capitalize,fullscreen"/>  
-                        <f:param name="theme_advanced_buttons2" value="" />  
-                        <f:param name="theme_advanced_buttons3" value="" />
-                        <f:param name="valid_elements" value="b/strong,i/em,u,ul,li,p,ol,h1[style],h2[style],h3[style],h4[style],h5[style],h6[style],pre,address,p[style=text-align|padding-left],sup,sub,br"/>
-                        <f:param name="convert_fonts_to_spans" value="false"/>
-                        <f:param name="inline_styles" value="false"/>
-					    <f:param name="force_p_newlines" value="false"/>
-					    <f:param name="force_br_newlines" value="true"/>
-					    <f:param name="forced_root_block" value="false"/>
-					    <f:param name="convert_newlines_to_brs" value="false"/>
-					    <f:param name="remove_linebreaks" value="true"/>
+							disabled="#{!laudoUnicoController.telaVo.stInformacaoClinica}">
 					  </p:editor>										
 				    </c:otherwise>
 				  </c:choose>
@@ -152,7 +134,7 @@
 					ajaxSingle="true"
 					style="width:100px"
 					profile="ok"
-					process="@this,descricaoMaterial, numeroApOrigem"
+					process="@this,descricaoMaterial,numeroApOrigem"
 					styleClass="bt_ok icon-yes"
 					render="listaMateriais, btn_controle, panelDescricaoKitMaterial"
 					action="#{laudoLaudoUnicoController.gravarKitMaterial(true)}"
@@ -301,26 +283,9 @@
 						</h:inputTextarea>
 					  </c:when>
 					  <c:otherwise>
-					    <p:editor id="descricaoMaterialLaudoEditor"  
+					    <p:editor id="descricaoMaterialLaudoEditor" widgetVar="descricaoMaterialLaudoEditorWG"
 							value="#{laudoLaudoUnicoController.strDescricaoMaterialLaudo}"
-							width="835" height="20" theme="advanced" 
-							readonly="#{laudoUnicoController.telaVo.laudoAssinado}"
-							language="pt" >
-						  <f:param name="width" value="100%" />
-                          <f:param name="theme_advanced_toolbar_location" value="top"/>  
-                          <f:param name="theme_advanced_toolbar_align" value="left"/>  
-						  <f:param name="plugins" value="-btnLowerCase,-btnUpperCase,-capitalize,fullscreen"/>  
- 						  <f:param name="theme_advanced_buttons1"  value="bold,italic,underline,separator,cut,copy,paste, separator,undo,redo, separator,justifyleft,justifycenter,justifyright,justifyfull, separator,bullist,numlist, separator,outdent,indent, separator,sub,sup, separator,removeformat,formatselect, separator,btnUpperCase,btnLowerCase,capitalize,fullscreen"/>  
-                          <f:param name="theme_advanced_buttons2" value="" />  
-                          <f:param name="theme_advanced_buttons3" value="" />
-                          <f:param name="valid_elements" value="b/strong,i/em,u,ul,li,p,ol,h1[style],h2[style],h3[style],h4[style],h5[style],h6[style],pre,address,p[style=text-align|padding-left],sup,sub,br"/>
-                          <f:param name="convert_fonts_to_spans" value="false"/>
-                          <f:param name="inline_styles" value="false"/>
-						  <f:param name="force_p_newlines" value="false"/>
-						  <f:param name="force_br_newlines" value="true"/>
-						  <f:param name="forced_root_block" value="false"/>
-						  <f:param name="convert_newlines_to_brs" value="false"/>
-						  <f:param name="remove_linebreaks" value="true"/>
+							disabled="#{laudoUnicoController.telaVo.laudoAssinado}" >
 					    </p:editor>
 					  </c:otherwise>
 				    </c:choose>
@@ -382,26 +347,9 @@
 							disabled="#{laudoUnicoController.telaVo.laudoAssinado}"/>
 					  </c:when>
 					  <c:otherwise>
-					    <p:editor id="macroscopiaEditor"  
+					    <p:editor id="macroscopiaEditor" widgetVar="macroscopiaEditorWG"  
 							value="#{laudoLaudoUnicoController.strMacroscopia}"
-							width="835" height="20" theme="advanced" 
-							readonly="#{laudoUnicoController.telaVo.laudoAssinado}"
-							language="pt" >
-					      <f:param name="width" value="100%" />
-				          <f:param name="theme_advanced_toolbar_location" value="top"/>  
-				      	  <f:param name="theme_advanced_toolbar_align" value="left"/>  
-					      <f:param name="plugins" value="-btnLowerCase,-btnUpperCase,-capitalize,fullscreen"/>  
-				 	      <f:param name="theme_advanced_buttons1"  value="bold,italic,underline,separator,cut,copy,paste, separator,undo,redo, separator,justifyleft,justifycenter,justifyright,justifyfull, separator,bullist,numlist, separator,outdent,indent, separator,sub,sup, separator,removeformat,formatselect, separator,btnUpperCase,btnLowerCase,capitalize,fullscreen"/>  
-				          <f:param name="theme_advanced_buttons2" value="" />  
-				          <f:param name="theme_advanced_buttons3" value="" />
-				          <f:param name="valid_elements" value="b/strong,i/em,u,ul,li,p,ol,h1[style],h2[style],h3[style],h4[style],h5[style],h6[style],pre,address,p[style=text-align|padding-left],sup,sub,br"/>
-				          <f:param name="convert_fonts_to_spans" value="false"/>
-				          <f:param name="inline_styles" value="false"/>
-					      <f:param name="force_p_newlines" value="false"/>
-					      <f:param name="force_br_newlines" value="true"/>
-					      <f:param name="forced_root_block" value="false"/>
-					      <f:param name="convert_newlines_to_brs" value="false"/>
-					      <f:param name="remove_linebreaks" value="true"/>
+							disabled="#{laudoUnicoController.telaVo.laudoAssinado}" >
 					    </p:editor>										
 				      </c:otherwise>
 				    </c:choose>
@@ -413,7 +361,7 @@
 				      <mec:commandButton id="bt_textoPadrao"
 							ajax="true"  
 							action="#{macroscopiaLaudoUnicoController.inicio}" 
-							process="@this @(#macroscopia) @(#panelMacroscopiaAbaLaudo)"
+							process="@this,panelMacroscopiaAbaLaudo"
 							block="true"
 							style="width:100px"
 							render="panelBotoesConcluirMacro, panelMacroscopia, panelDivMacroscopiaAbaLaudo"
@@ -427,7 +375,7 @@
 							 action="#{laudoLaudoUnicoController.gravarMacroscopia}" 
 							 profile="ok"
 							 ajax="true" 
-							 process="@this,macroscopia"
+							 process="@this,panelMacroscopiaAbaLaudo"
 							 block="true"
 							 style="width:100px"
 							 render="panelBotoesConcluirMacro, panelBotoesConcluirDiagnostico, panelEtapasLaudo, panelDivMacroscopiaAbaLaudo"
@@ -456,7 +404,7 @@
 						value="#{laudoLaudoUnicoController.neoplasiaMaligna}" 
 						readonly="#{laudoUnicoController.telaVo.laudoAssinado}"
 						render="neoplasiaMaligna"
-						requiredFake="#{laudoUnicoController.telaVo.obrigCombosDiagnostico}"/>
+						required="#{laudoUnicoController.telaVo.obrigCombosDiagnostico}"/>
 			    <mec:selectOneMenu id="biopsia"
 						enum="DominioSimNao"
 						style="width:130px"
@@ -466,7 +414,7 @@
 						title="#{messages.TITLE_BIOPSIA_LAUDO_UNICO}"
 						readonly="#{laudoUnicoController.telaVo.laudoAssinado}"
 						render="biopsia"
-						requiredFake="#{laudoUnicoController.telaVo.obrigCombosDiagnostico}"/>
+						required="#{laudoUnicoController.telaVo.obrigCombosDiagnostico}"/>
 			    <mec:selectOneMenu id="margemComprometida"
 						enum="DominioSimNaoNaoAplicavel"
 						style="width:130px"
@@ -476,7 +424,7 @@
 						value="#{laudoLaudoUnicoController.margemComprometida}"
 						readonly="#{laudoUnicoController.telaVo.laudoAssinado}"  
 						render="margemComprometida"
-						requiredFake="#{laudoUnicoController.telaVo.obrigCombosDiagnostico}"/>
+						required="#{laudoUnicoController.telaVo.obrigCombosDiagnostico}"/>
 			  </p:outputPanel>
 		    </aghu:linha>
 		    <aghu:linha>
@@ -497,26 +445,9 @@
 							disabled="#{laudoUnicoController.telaVo.laudoAssinado}"/>
 					  </c:when>
 					  <c:otherwise>
-					    <p:editor id="diagnosticoEditor"
-						    readonly="#{laudoUnicoController.telaVo.laudoAssinado}"
-							value="#{laudoLaudoUnicoController.strDiagnostico}"
-							width="835" height="20" theme="advanced"
-							language="pt" >
-					      <f:param name="width" value="100%" />
-                          <f:param name="theme_advanced_toolbar_location" value="top"/>  
-                          <f:param name="theme_advanced_toolbar_align" value="left"/>  
-					      <f:param name="plugins" value="-btnLowerCase,-btnUpperCase,-capitalize,fullscreen"/>  
-						  <f:param name="theme_advanced_buttons1"  value="bold,italic,underline,separator,cut,copy,paste, separator,undo,redo, separator,justifyleft,justifycenter,justifyright,justifyfull, separator,bullist,numlist, separator,outdent,indent, separator,sub,sup, separator,removeformat,formatselect, separator,btnUpperCase,btnLowerCase,capitalize,fullscreen"/>  
-                          <f:param name="theme_advanced_buttons2" value="" />  
-                          <f:param name="theme_advanced_buttons3" value="" />
-                          <f:param name="valid_elements" value="b/strong,i/em,u,ul,li,p,ol,h1[style],h2[style],h3[style],h4[style],h5[style],h6[style],pre,address,p[style=text-align|padding-left],sup,sub,br"/>
-                          <f:param name="convert_fonts_to_spans" value="false"/>
-                          <f:param name="inline_styles" value="false"/> 
-					      <f:param name="force_p_newlines" value="false"/>
-					      <f:param name="force_br_newlines" value="true"/>
-					      <f:param name="forced_root_block" value="false"/>
-					      <f:param name="convert_newlines_to_brs  " value="false"/>
-					      <f:param name="remove_linebreaks" value="true"/>
+					    <p:editor id="diagnosticoEditor" widgetVar="diagnosticoEditorWG"
+						    disabled="#{laudoUnicoController.telaVo.laudoAssinado}"
+							value="#{laudoLaudoUnicoController.strDiagnostico}" >
 					    </p:editor>
 					  </c:otherwise>
 				    </c:choose>
@@ -529,7 +460,7 @@
 					    <mec:commandButton id="bt_textoPadraoDiag"
 							 ajax="true"  
 							 action="#{diagnosticoLaudoUnicoController.inicio}" 
-							 process="@this,diagnostico, neoplasiaMaligna, biopsia, @(#margemComprometida) @(#panelDiagnostico)"
+							 process="@this,panelDiagnostico,neoplasiaMaligna,biopsia,margemComprometida"
 							 block="true"
 							 style="width: 100px;"
 							 disabled="#{laudoUnicoController.telaVo.laudoAssinado}" 
@@ -546,7 +477,7 @@
 							 profile="ok"
 							 ajax="true"
 							 style="width: 100px;"
-							 process="@this @(#diagnostico) @(#neoplasiaMaligna) @(#biopsia) @(#margemComprometida)"
+							 process="@this,panelDiagnostico,neoplasiaMaligna,biopsia,margemComprometida"
 							 disabled="#{laudoUnicoController.telaVo.laudoAssinado}" 
 							 render="panelBotoesConcluirDiagnostico, panelBotoesConcluirMacro, panelEtapasLaudo, panelDivDiagnostico, panelCombosDiagnostico"
 							 rendered="#{mf:hasPermission(securityController,'preencherDiagnosticoLaudoUnico,persistir')}"

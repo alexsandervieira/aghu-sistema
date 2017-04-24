@@ -1563,7 +1563,9 @@ public interface IAghuFacade extends Serializable {
 	 */
 	
 	public AghClinicas obterClinica(final Integer codigo);
-
+	
+	public AghClinicas obterClinicaIndicadoresHospitalares(final Integer codigo);
+	
 	/**
 	 * Pesquisa <b>AghClinicas</b> com codigo igual a <i>strPesquisa</i><br>
 	 * ou descricao contendo <i>strPesquisa</i>.
@@ -1785,7 +1787,10 @@ public interface IAghuFacade extends Serializable {
 	
 	public AghAtendimentos obterAtendimentoPorInternacaoVigente(final Integer cIntSeq);
 	
-	public List<AghAtendimentos> buscaAtendimentosSumarioPrescricao(
+	public List<AghAtendimentos> buscaAtendimentosSumarioPrescricaoMedica(
+			final Date dataInicio, final Date dataFim)
+			throws ApplicationBusinessException;
+	public List<AghAtendimentos> buscaAtendimentosSumarioPrescricaoEnfermacao(
 			final Date dataInicio, final Date dataFim)
 			throws ApplicationBusinessException;
 
@@ -3188,5 +3193,15 @@ public interface IAghuFacade extends Serializable {
 	List<AghUnidadesFuncionais> pesquisarUnidadeFuncionalInternacaoAtiva(
 			String strPesquisa, String ordernarPorAndar, boolean apenasAtivos,
 			Object[] caracteristicas);
+
+	List<AghEspecialidades> pesquisarEspecialidadesAtivas(String parametro,
+			List<Integer> listIdsEspe);
+
+	List<AghEquipes> getListaEquipes(String parametro,
+			List<Integer> listIdsEquipe);
+
+	AghAla obterAghAlaPorCodigoDescricao(AghAla ala,boolean isUpdate);
+
+	AghEspecialidades obterEspecialidadeNone(Short seq);
 
 }

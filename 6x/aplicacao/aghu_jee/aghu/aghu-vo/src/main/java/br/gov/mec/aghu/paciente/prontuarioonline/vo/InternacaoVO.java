@@ -20,6 +20,7 @@ public class InternacaoVO implements BaseBean {
 	private Integer atdSeq;
 	private Date dthrInicio;
 	private Date dthrFim;
+	private Date dthrAlta;
 	private Date dtPrevisao;
 	private String leito;
 	private String nomeEspecialidade;
@@ -224,6 +225,15 @@ public class InternacaoVO implements BaseBean {
 
 	public void setSeqVersaoDocumento(Integer seqVersaoDocumento) {
 		this.seqVersaoDocumento = seqVersaoDocumento;
+	}
+
+	
+	public Date getDthrAlta() {
+		return dthrAlta;
+	}
+
+	public void setDthrAlta(Date dthrAlta) {
+		this.dthrAlta = dthrAlta;
 	}
 
 	public Boolean getPossuiDocumentoPendente() {

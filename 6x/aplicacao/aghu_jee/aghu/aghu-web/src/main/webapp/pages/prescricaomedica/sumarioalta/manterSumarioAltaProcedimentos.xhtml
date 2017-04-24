@@ -37,8 +37,7 @@
                 <p:outputPanel rendered="#{manterSumarioAltaProcedimentosController.mostrarPanelOutrosItens}" layout="inline"> 
                   <aghu:linha>
                     <mec:inputTextData label="#{messages.LABEL_DATA}" 
-                    	value="#{manterSumarioAltaProcedimentosController.dataCirurgia}" 
-                    	required="true" 
+                    	value="#{manterSumarioAltaProcedimentosController.dataCirurgia}"  
                     	readonly="#{manterSumarioAltaProcedimentosController.itemEdicaoCirurgias.origemListaCombo}" 
                     	id="dtCirurgia" 
                     	tipo="data"/>  
@@ -48,8 +47,7 @@
                     	suggestionAction="obterProcedimentoCirurgicos" 
                     	descricaoInput="seq" 
                     	descricaoLabel="descricao" 
-                    	maxlength="30" 
-                    	required="true" 
+                    	maxlength="30"  
                     	readonly="#{manterSumarioAltaProcedimentosController.itemEdicaoCirurgias.emEdicao or manterSumarioAltaProcedimentosController.itemEdicaoCirurgias.origemListaCombo}"
                     	controller="#{manterSumarioAltaProcedimentosController}" 
                     	value="#{manterSumarioAltaProcedimentosController.procedimentoCirurgicos}"
@@ -177,15 +175,13 @@
 	                <p:outputPanel rendered="#{manterSumarioAltaProcedimentosController.mostrarPanelOutrosItensProcedimento}" layout="inline"> 
 	                  <aghu:linha> 
 	                    <mec:inputTextData label="#{messages.LABEL_DATA}" 
-	                    		value="#{manterSumarioAltaProcedimentosController.dataProcedimento}" 
-	                    		required="true" 
+	                    		value="#{manterSumarioAltaProcedimentosController.dataProcedimento}"  
 	                    		readonly="#{manterSumarioAltaProcedimentosController.itemEdicaoProcedimentos.origemListaCombo}" 
 	                    		id="dataProcedimento" 
 	                    		tipo="data"/>  
 	                    <mec:suggestionBox label="#{messages.LABEL_PROCEDIMENTOS}" 
 	                    		title="#{messages.TITLE_PROCEDIMENTOS_SUMARIO_ALTA}" 
 	                    		suggestionAction="listarVMpmOtrProcedSum" 
-	                    		required="true" 
 	                    		size="50" 
 	                    		maxlength="50" 
 	                    		descricaoInput="id.codigo" 
@@ -299,14 +295,13 @@
 	              <aghu:linha> 
 	                <mec:inputTextData label="#{messages.LABEL_DATA}" 
 	                		value="#{manterSumarioAltaProcedimentosController.dataOutroProcedimento}" 
-	                		requiredFake="true" id="dataOutroProcedimento" 
+	                	    id="dataOutroProcedimento" 
 	                		tipo="data"/>  
 	                <mec:inputText label="#{messages.LABEL_DESCRICAO}" 
 	                		value="#{manterSumarioAltaProcedimentosController.descricaoOutroProcedimento}" 
 	                		title="#{messages.LABEL_DESCRICAO_OUTROS_PROCEDIMENTOS_HELP}" 
 	                		size="50" 
 	                		maxlength="240" 
-	                		requiredFake="true" 
 	                		id="descricaoOutroProcedimento"/>
 	                <aghu:acao newLine="false">  
 	                  <mec:commandButton id="btGravarOutroProcedimento" 
@@ -422,7 +417,6 @@
 	                  <aghu:linha> 
 	                    <mec:inputTextData label="#{messages.LABEL_DATA}" 
 	                    		value="#{manterSumarioAltaProcedimentosController.dataConsultoria}" 
-	                    		required="true" 
 	                    		readonly="#{manterSumarioAltaProcedimentosController.itemEdicaoConsultorias.origemListaCombo}" 
 	                    		id="dataConsultoria" 
 	                    		tipo="data"/>  
@@ -432,8 +426,6 @@
 	                      		descricaoInput="sigla" 
 	                      		descricaoLabel="nomeEspecialidade" 
 	                      		maxlength="30" 
-	                      		width="300" 
-	                      		required="true" 
 	                      		readonly="#{manterSumarioAltaProcedimentosController.itemEdicaoConsultorias.emEdicao or manterSumarioAltaProcedimentosController.itemEdicaoConsultorias.origemListaCombo}" 
 	                      		id="sbConsultoriasEspecialidades" 
 	                      		controller="#{manterSumarioAltaProcedimentosController}" 

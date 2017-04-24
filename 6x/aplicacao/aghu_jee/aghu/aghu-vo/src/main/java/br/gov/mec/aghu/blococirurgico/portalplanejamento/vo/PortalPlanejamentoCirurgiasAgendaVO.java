@@ -96,6 +96,9 @@ public class PortalPlanejamentoCirurgiasAgendaVO implements Serializable {
 	public String getPaciente() {
 		return paciente;
 	}
+	public String getPacienteUpperCase(){
+		return paciente.toUpperCase();
+	}
 	public void setPaciente(String paciente) {
 		this.paciente = paciente;
 	}

@@ -83,36 +83,36 @@
             <aghu:linha>
               <p:outputPanel id="panelAmostras" name="panelAmostras" layout="inline">
                 <p:outputPanel layout="block" style="height:105px; overflow-y:scroll;">
-                  <mec:serverDataTable id="tabelaAmostras" rowKeyVar="_itemId" onRowMouseOver="this.style.backgroundColor='#F1F1F1'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" list="#{reimprimirEtiquetasController.listaAmostras}" scrollable="true">
+                  <mec:serverDataTable id="tabelaAmostras" list="#{reimprimirEtiquetasController.listaAmostras}" selection="amostraVO" controller="#{reimprimirEtiquetasController}" scrollable="true">
                     <c:set var="_itemAmostra" value="#{item}"/>
                     <p:ajax event="rowSelect"
-                            listener="#{reimprimirEtiquetasController.pesquisarExamesAmostra(_itemAmostra)}"
+                            listener="#{reimprimirEtiquetasController.pesquisarExamesAmostra()}"
                             update="@(#tabelaAmostras) @(#tabelaExamesAmostra)" />
-                    <p:column style="white-space:nowrap; #{(_itemAmostra.seqp eq reimprimirEtiquetasController.amostraSeqpSelecionada)?'background-color:#EEE8AA':''}" styleClass="first-column">
+                    <p:column style="white-space:nowrap;" styleClass="first-column">
                       <f:facet name="header"> 
                         <h:outputText value="#{messages.LABEL_ACAO}"/> 
                       </f:facet>  
                       <mec:commandLink id="bt_ImprimirEtiquetaAmostra" title="#{messages.LABEL_IMPRIMIR_ETIQUETA_AMOSTRA_REIMPRIMIR_ETIQUETA}" action="#{reimprimirEtiquetasController.calcularNumeroImpressoes(_itemAmostra.seqp)}" rendered="#{mf:hasPermission(securityController,'reimprimirEtiquetasAmostras,executar')}" oncomplete="PF('modalConfirmacaoImpressaoEtiquetasWG').show();;" ignoreDupResponses="true" styleClass=" silk-printer silk-icon " ajax="true" render="panelMensagemConfirmacaoImpressaoEtiquetas"/>
                     </p:column>
-                    <p:column style="#{(_itemAmostra.seqp eq reimprimirEtiquetasController.amostraSeqpSelecionada)?'background-color:#EEE8AA':''}">
+                    <p:column>
                       <f:facet name="header"> 
                         <h:outputText value="#{messages.LABEL_NUMERO_REIMPRIMIR_ETIQUETA}"/> 
                       </f:facet>  
                       <h:outputText value="#{_itemAmostra.seqp}"/>
                     </p:column>
-                    <p:column style="#{(_itemAmostra.seqp eq reimprimirEtiquetasController.amostraSeqpSelecionada)?'background-color:#EEE8AA':''}">
+                    <p:column>
                       <f:facet name="header"> 
                         <h:outputText value="#{messages.LABEL_MATERIAL_ANALISE_REIMPRIMIR_ETIQUETA}"/> 
                       </f:facet>  
                       <h:outputText value="#{_itemAmostra.materialAnalise}"/>  
                     </p:column>
-                    <p:column style="#{(_itemAmostra.seqp eq reimprimirEtiquetasController.amostraSeqpSelecionada)?'background-color:#EEE8AA':''}">
+                    <p:column>
                       <f:facet name="header"> 
                         <h:outputText value="#{messages.LABEL_RECIPIENTE_REIMPRIMIR_ETIQUETA}"/> 
                       </f:facet>  
                       <h:outputText value="#{_itemAmostra.recipienteColeta != null ? _itemAmostra.recipienteColeta : ''}"/>  
                     </p:column>
-                    <p:column style="#{(_itemAmostra.seqp eq reimprimirEtiquetasController.amostraSeqpSelecionada)?'background-color:#EEE8AA':''}">
+                    <p:column>
                       <f:facet name="header"> 
                         <h:outputText value="#{messages.LABEL_ANTICOAGULANTE_REIMPRIMIR_ETIQUETA}"/> 
                       </f:facet>  
@@ -125,13 +125,13 @@
           </aghu:panelGeral> 
         </p:outputPanel> 
       </h:form>  
-      <h:form prependId="false" id="formExamesAmostra" name="formExamesAmostra"> 
+      <h:form prependId="false" id="formExamesAmostra"> 
         <p:outputPanel id="panelExamesAmostra" name="panelExamesAmostra" rendered="#{not empty reimprimirEtiquetasController.listaAmostras}" layout="inline" styleClass="aghu-panel-geral"> 
           <aghu:panelGeral legend="#{messages.LABEL_EXAMES_AMOSTRA_REIMPRIMIR_ETIQUETA}"> 
             <aghu:linha> 
               <p:outputPanel id="panelExamesAmostras" name="panelExamesAmostras" layout="inline"> 
                 <p:outputPanel layout="block" style="max-height:150px; overflow-y:scroll;"> 
-                  <mec:serverDataTable id="tabelaExamesAmostra" rowKeyVar="_itemId" onRowMouseOver="this.style.backgroundColor='#F1F1F1'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" list="#{reimprimirEtiquetasController.listaExamesAmostras}" scrollable="true"> 
+                  <mec:serverDataTable id="tabelaExamesAmostra" list="#{reimprimirEtiquetasController.listaExamesAmostras}" scrollable="true"> 
                     <c:set var="_itemExameAmostra" value="#{item}"/>  
                     <p:column> 
                       <f:facet name="header"> 

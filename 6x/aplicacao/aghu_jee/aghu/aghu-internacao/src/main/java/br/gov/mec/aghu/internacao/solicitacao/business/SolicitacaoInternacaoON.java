@@ -16,6 +16,12 @@ import org.apache.commons.logging.LogFactory;
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.business.IAghuFacade;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.business.seguranca.Secure;
+import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseRuntimeException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.dominio.DominioSituacaoSolicitacaoInternacao;
 import br.gov.mec.aghu.faturamento.business.IFaturamentoFacade;
@@ -37,12 +43,6 @@ import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.model.RapServidoresId;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.business.seguranca.Secure;
-import br.gov.mec.aghu.core.commons.CoreUtil;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseRuntimeException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 @SuppressWarnings({"PMD.AghuTooManyMethods","PMD.AtributoEmSeamContextManager"})
 @Stateless
@@ -87,7 +87,7 @@ public class SolicitacaoInternacaoON extends BaseBusiness {
 
 	private enum SolicitaInternacaoONExceptionCode implements
 			BusinessExceptionCode {
-		DATA_PREV_INTERNACAO_MENOR_EXCEPTION, SITUACAO_PENDENTE_EXCEPTION, SITUACAO_LIBERADA_CANCELADA_EXCEPTION, PROFISSIONAL_NAO_INTERNA_EXCEPTION, MENSAGEM_ERRO_PERSISTIR_SOLICITACAO_INTERNACAO, AIN_ESPECIALIDADE_OBRIGATORIA, AIN_CRM_OBRIGATORIO, CRM_ESPECIALIDADE_INVALIDO, AIN_CONVENIO_PLANO_OBRIGATORIO, ERRO_INFORMAR_LEITO_QUARTO_UNIDADE;
+		DATA_PREV_INTERNACAO_MENOR_EXCEPTION, SITUACAO_PENDENTE_EXCEPTION, SITUACAO_LIBERADA_CANCELADA_EXCEPTION, PROFISSIONAL_NAO_INTERNA_EXCEPTION, MENSAGEM_ERRO_PERSISTIR_SOLICITACAO_INTERNACAO, AIN_ESPECIALIDADE_OBRIGATORIA, AIN_CRM_OBRIGATORIO, CRM_ESPECIALIDADE_INVALIDO, AIN_CONVENIO_PLANO_OBRIGATORIO, ERRO_INFORMAR_LEITO_QUARTO_UNIDADE,AIN_CID_OBRIGATORIO;
 	}
 
 	private Short parametroProcedimento;
@@ -282,7 +282,6 @@ public class SolicitacaoInternacaoON extends BaseBusiness {
 					solicitacaoInternacaoTemp, substituirProntuario);
 		}
 	}
-
 	
 	private void incluirSolicitacaoInternacao(AinSolicitacoesInternacao solicitacaoInternacao) throws ApplicationBusinessException {
 		RapServidores servidorLogado = getServidorLogadoFacade().obterServidorLogado();
@@ -354,24 +353,21 @@ public class SolicitacaoInternacaoON extends BaseBusiness {
 		}
 	}
 
-	private void validarCamposObrigatorios(
-			AinSolicitacoesInternacao solicitacaoInternacao)
+	private void validarCamposObrigatorios(	AinSolicitacoesInternacao solicitacaoInternacao)
 			throws ApplicationBusinessException {
 
-		if (solicitacaoInternacao.getConvenio().getId() == null) {
-			throw new ApplicationBusinessException(
-					SolicitaInternacaoONExceptionCode.AIN_CONVENIO_PLANO_OBRIGATORIO);
+		if (solicitacaoInternacao.getConvenio() == null) {
+			throw new ApplicationBusinessException(	SolicitaInternacaoONExceptionCode.AIN_CONVENIO_PLANO_OBRIGATORIO);
 		}
 
 		if (solicitacaoInternacao.getEspecialidade() == null) {
-			throw new ApplicationBusinessException(
-					SolicitaInternacaoONExceptionCode.AIN_ESPECIALIDADE_OBRIGATORIA);
+			throw new ApplicationBusinessException(	SolicitaInternacaoONExceptionCode.AIN_ESPECIALIDADE_OBRIGATORIA);
 		}
 
 		if (solicitacaoInternacao.getServidor() == null) {
-			throw new ApplicationBusinessException(
-					SolicitaInternacaoONExceptionCode.AIN_CRM_OBRIGATORIO);
+			throw new ApplicationBusinessException(	SolicitaInternacaoONExceptionCode.AIN_CRM_OBRIGATORIO);
 		}
+
 	}
 
 	/**
@@ -397,15 +393,22 @@ public class SolicitacaoInternacaoON extends BaseBusiness {
 	public void atenderSolicitacaoInternacao(
 			AinSolicitacoesInternacao solicitacaoInternacao, Boolean substituirProntuario)
 			throws ApplicationBusinessException {
-		solicitacaoInternacao
-				.setIndSitSolicInternacao(DominioSituacaoSolicitacaoInternacao.A);
-
-		this
-				.validarDadosAtendimentoSolicitacaoInternacao(solicitacaoInternacao);
+		solicitacaoInternacao.setIndSitSolicInternacao(DominioSituacaoSolicitacaoInternacao.A);
+		this.validarDadosAtendimentoSolicitacaoInternacao(solicitacaoInternacao);
 		AinSolicitacoesInternacao solicitacaoInternacaoOriginal = ainSolicitacoesInternacaoDAO.obterOriginal(solicitacaoInternacao);
 
-		this.persistirSolicitacaoInternacao(solicitacaoInternacao,
-				solicitacaoInternacaoOriginal, substituirProntuario);
+		this.persistirSolicitacaoInternacao(solicitacaoInternacao,solicitacaoInternacaoOriginal, substituirProntuario);
+	}
+	
+	@Secure("#{s:hasPermission('solicitacaoInternacao','atender')}")
+	public void negarSolicitacaoInternacao(AinSolicitacoesInternacao solicitacaoInternacao) throws ApplicationBusinessException {
+		
+		solicitacaoInternacao.setNegadoEm(new Date());
+		solicitacaoInternacao.setIndNegativaInternacao(Boolean.TRUE);
+		solicitacaoInternacao.setIndSitSolicInternacao(DominioSituacaoSolicitacaoInternacao.C);
+		ainSolicitacoesInternacaoDAO.merge(solicitacaoInternacao);
+		ainSolicitacoesInternacaoDAO.flush();
+		
 	}
 
 	private void validarDadosAtendimentoSolicitacaoInternacao(

@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -44,6 +45,7 @@ import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.model.AipPacientes;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagem;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagemId;
+import br.gov.mec.aghu.model.ItemPrescricaoMedica;
 import br.gov.mec.aghu.model.MamEstadoPaciente;
 import br.gov.mec.aghu.model.MamTipoEstadoPaciente;
 import br.gov.mec.aghu.model.MpmPrescricaoMedica;
@@ -60,6 +62,7 @@ import br.gov.mec.aghu.prescricaomedica.vo.FormularioDispAntimicrobianosVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ItemPrescricaoMedicaVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ParametrosProcedureVO;
 import br.gov.mec.aghu.prescricaomedica.vo.PrescricaoMedicaVO;
+import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 
 public class ManterPrescricaoMedicaController extends ActionController {
 
@@ -84,7 +87,7 @@ public class ManterPrescricaoMedicaController extends ActionController {
 	private static final String PAGINA_MANTER_PRESCRICAO_ALERGIA = "prescricaomedica-manterPrescricaoAlergia";
     private static final String CONFIRMACAO_PRESCRICAO_SUCESSO = "CONFIRMACAO_PRESCRICAO_SUCESSO";
     private static final String LABEL_ESTADO_PACIENTE_MP="Estado do Paciente : ";
-	
+	private static final String PAGINA_RELATORIO_VISUALIZAR_PRESCRICAO_MEDICA_RASCUNHO = "prescricaomedica-relatorioVisualizarPrescricaoMedicaRascunho";
     @EJB
 	private IPrescricaoMedicaFacade prescricaoMedicaFacade;
 	@EJB
@@ -139,12 +142,13 @@ public class ManterPrescricaoMedicaController extends ActionController {
     private String UrlBaseWebForms;
     private Boolean apresentaModalFormularioAntimicrobianos = Boolean.FALSE;
     private boolean aghuBotoesExameHemoterapia;
+	@EJB @SuppressWarnings("cdi-ambiguous-dependency")
+	private IServidorLogadoFacade servidorLogadoFacade;
 	
 	@PostConstruct
 	protected void inicializar() {
 		this.begin(conversation);
 	}
-
 	public String inicio() {
 		String returnValue = null;
 		this.setControleModalPlanoPrevAlta(true);
@@ -155,19 +159,14 @@ public class ManterPrescricaoMedicaController extends ActionController {
 			buscarParametroDesabilitarBotoesExameHemoterapia();
 			setListaAntimicrobianos(new ArrayList<ItemPrescricaoMedicaVO>());
 			formularioPreenchido = false;
-
 			if(this.pmeSeqAtendimento != null){
 				this.bloquearData = this.prescricaoMedicaFacade.verificarPacienteInternadoCaracteristicaControlePrevisao(pmeSeqAtendimento);
 				List<AipPacientes> pacientesPorAtendimento = prescricaoMedicaFacade.pesquisarPacientePorAtendimento(pmeSeqAtendimento);
 				pegarIdade(pacientesPorAtendimento);
 			}
 			if (this.pmeSeqAtendimento != null && this.pmeSeq != null) {
-				MpmPrescricaoMedicaId filter = new MpmPrescricaoMedicaId(this.pmeSeqAtendimento, this.pmeSeq);
-				this.prescricaoMedicaVO = this.prescricaoMedicaFacade.buscarDadosCabecalhoPrescricaoMedicaVO(filter);
 				buscaTriagem();
-				List<ItemPrescricaoMedicaVO> itens = null;
-				itens = this.prescricaoMedicaFacade.buscarItensPrescricaoMedica(filter, false);
-				this.prescricaoMedicaVO.setItens(itens);
+				buscarItensPrescricaoMedica();
 				List<EpePrescricaoEnfermagem> listaPrescEnf = this.prescricaoEnfermagemFacade.pesquisarPrescricaoEnfermagemPorAtendimentoEDataFimAteDataAtual(this.pmeSeqAtendimento,prescricaoMedicaVO.getDthrFim());
 				EpePrescricaoEnfermagem prescEnfermagem = null;
 				if (!listaPrescEnf.isEmpty()) {
@@ -211,7 +210,13 @@ public class ManterPrescricaoMedicaController extends ActionController {
 		}
 		return returnValue;
 	}
-	
+	private void buscarItensPrescricaoMedica()	throws ApplicationBusinessException {
+		MpmPrescricaoMedicaId filter = new MpmPrescricaoMedicaId(this.pmeSeqAtendimento, this.pmeSeq);
+		this.prescricaoMedicaVO = this.prescricaoMedicaFacade.buscarDadosCabecalhoPrescricaoMedicaVO(filter);
+		List<ItemPrescricaoMedicaVO> itens = null;
+		itens = this.prescricaoMedicaFacade.buscarItensPrescricaoMedica(filter, false);
+		this.prescricaoMedicaVO.setItens(itens);
+	}
 	private void buscarParametroDesabilitarBotoesExameHemoterapia() throws ApplicationBusinessException {
 		AghParametros aghParametroDesabilitarBotoes = this.parametroFacade.buscarAghParametro(AghuParametrosEnum.P_DESABILITAR_BOTOES_EXAME_HEMOTERAPIA);
 		if(aghParametroDesabilitarBotoes != null && aghParametroDesabilitarBotoes.getVlrTexto() != null){
@@ -222,14 +227,12 @@ public class ManterPrescricaoMedicaController extends ActionController {
 			}
 		}
 	}
-	
 	public void pegarIdade(List<AipPacientes> pacientesPorAtendimento) {
 		if(pacientesPorAtendimento != null && pacientesPorAtendimento.size() == 1){
 			AipPacientes paciente = pacientesPorAtendimento.get(0);
 			idadePaciente = getIdade(paciente.getDtNascimento());
 		}
 	}
-	
 	public void buscaTriagem() {
 		if(this.prescricaoMedicaVO != null){
 			triagemSeq = this.prescricaoMedicaFacade.obterTriagemPorPaciente(pmeSeqAtendimento);
@@ -252,12 +255,10 @@ public class ManterPrescricaoMedicaController extends ActionController {
 					this.valorEstadoPaciente = prescricaoMedicaFacade.obterTipoEstadoPacientePorDescricao(estadoPaciente);
 				}
 			}
-			
 			this.exibirModalEstado = Boolean.TRUE;
 		} else {
 			this.exibirModalEstado = Boolean.FALSE;
 		}
-		// #18810
 		if(prescricaoMedicaVO != null){
 			for (ItemPrescricaoMedicaVO vo : prescricaoMedicaVO.getItens()) {
 				if (Boolean.TRUE.equals(vo.getReprescrito())) {
@@ -267,7 +268,6 @@ public class ManterPrescricaoMedicaController extends ActionController {
 			}
 		}
 	}
-
 	/**
 	 * Retorna cabeçalho (descrição) formatado para identificar tabela de itens
 	 * de Prescrição Enfermagem.
@@ -283,7 +283,6 @@ public class ManterPrescricaoMedicaController extends ActionController {
 		}
 		return sb.toString();
 	}
-	
 	/**
 	 * bsoliveira
 	 * 07/10/2010
@@ -295,10 +294,9 @@ public class ManterPrescricaoMedicaController extends ActionController {
 	public void excluirSelecionados() {
 		try {
 			List<ItemPrescricaoMedicaVO> itens = prescricaoMedicaVO.getItens();
-
 			String nomeMicrocomputador = obtemNomeDoMicroComputador();
-
 			prescricaoMedicaFacade.excluirSelecionados(prescricaoMedicaVO.getPrescricaoMedica(), itens, nomeMicrocomputador);
+			buscarItensPrescricaoMedica();
 		} catch (BaseException e) {
 			apresentarExcecaoNegocio(e);
 		}
@@ -407,11 +405,8 @@ public class ManterPrescricaoMedicaController extends ActionController {
 				}
 			}
 			atualizaPrevisaoAltaInternacaoSeTemInternacao();
-			
 			String nomeMicrocomputador = obtemNomeDoMicroComputador();
-			
 			prescricaoMedicaTemPeloMenosUmaDieta();
-			
 			List<AfaMedicamento> listaMed = pacienteFacade.obterListaMedicamentosTubercolostaticos();
 			Boolean isMedTubercolostatico = Boolean.FALSE;
 			for(ItemPrescricaoMedicaVO obj : prescricaoMedicaVO.getItens()){
@@ -463,7 +458,30 @@ public class ManterPrescricaoMedicaController extends ActionController {
 		}
 		return null;
 	}
-
+	public String visualizarPrescricaoMedica() {
+		try {
+			Date dataTrabalho = null;
+			if (prescricaoMedicaVO.getPrescricaoMedica().getDthrInicioMvtoPendente() != null) {
+				dataTrabalho = prescricaoMedicaVO.getPrescricaoMedica().getDthrInicioMvtoPendente();
+			} else {
+				dataTrabalho = prescricaoMedicaVO.getPrescricaoMedica().getDthrMovimento();
+			}
+			ConfirmacaoPrescricaoVO confirmacaoPrescricaoVO  = new ConfirmacaoPrescricaoVO();
+			confirmacaoPrescricaoVO.setDataMovimento(dataTrabalho);
+			List<ItemPrescricaoMedica> itensConfirmados = prescricaoMedicaFacade
+					.listarItensPrescricaoMedica(prescricaoMedicaVO.getPrescricaoMedica());
+			confirmacaoPrescricaoVO.setItensConfirmados(itensConfirmados);
+			confirmacaoPrescricaoVO.setServidorValido(servidorLogadoFacade.obterServidorLogado());
+			this.relatoriosPrescricaoController.setConfirmacaoPrescricaoVO(confirmacaoPrescricaoVO);
+			this.relatoriosPrescricaoController.setPrescricaoMedicaVO(prescricaoMedicaVO);
+			this.relatoriosPrescricaoController.setTipoImpressao(EnumTipoImpressao.VISUALIZAR_RELATORIO);
+			this.relatoriosPrescricaoController.visualizarRelatorioPrescricaoMedica();
+			return PAGINA_RELATORIO_VISUALIZAR_PRESCRICAO_MEDICA_RASCUNHO;
+		} catch (Exception e) {
+			this.apresentarMsgNegocio(Severity.ERROR,"ERRO_GERAR_RELATORIO");
+		}
+		return null;
+	}
 	/**
 	 * @return
 	 */
@@ -476,7 +494,6 @@ public class ManterPrescricaoMedicaController extends ActionController {
 		}
 		return nomeMicrocomputador;
 	}
-
 	/**
 	 * @throws BaseException
 	 */
@@ -490,7 +507,6 @@ public class ManterPrescricaoMedicaController extends ActionController {
 	private void prescricaoMedicaTemPeloMenosUmaDieta() throws ApplicationBusinessException {
 		prescricaoMedicaFacade.prescricaoMedicaTemPeloMenosUmaDieta(prescricaoMedicaVO);
 	}
-	
 	/**
 	 * Ação do botão "Confirmar COM Impressão"
 	 */
@@ -506,7 +522,6 @@ public class ManterPrescricaoMedicaController extends ActionController {
 			tipoImpressao = EnumTipoImpressao.IMPRESSAO; 
 			if (isExibirModalFormularioAntimicrobianos()){
 				HttpSession session = ((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest()).getSession();
-				
 				if (!formularioPreenchido){
 					formularioPreenchido = true;
 					return null;
@@ -523,7 +538,6 @@ public class ManterPrescricaoMedicaController extends ActionController {
 		}
 		return null;
 	}
-	
 	public String confirmarPrescricaoMedicaModalPrevPlanoAlta(Boolean considerarValorParam) throws ApplicationBusinessException {
 		try {
 			prescricaoMedicaFacade.verificarPrescricaoCancelada(this.prescricaoMedicaVO.getPrescricaoMedica());
@@ -561,37 +575,34 @@ public class ManterPrescricaoMedicaController extends ActionController {
 			apresentarExcecaoNegocio(e);
 			return null;
 		}
-
-			try {	
-				prescricaoMedicaTemPeloMenosUmaDieta();
-			} catch (ApplicationBusinessException e) {
-				if (e.getCode().toString().equals("MSG_ERRO_PRESCRICAO_MEDICA_DEVE_CONTER_AO_MENOS_UM_ITEM_DIETA")
-						|| e.getCode().toString().equals("QUANTIDADE_DIETAS")) {
-					apresentarMsgNegocio(e.getCode().toString());
-					return null;
-				}
+		try {	
+			prescricaoMedicaTemPeloMenosUmaDieta();
+		} catch (ApplicationBusinessException e) {
+			if (e.getCode().toString().equals("MSG_ERRO_PRESCRICAO_MEDICA_DEVE_CONTER_AO_MENOS_UM_ITEM_DIETA")
+					|| e.getCode().toString().equals("QUANTIDADE_DIETAS")) {
+				apresentarMsgNegocio(e.getCode().toString());
+				return null;
 			}
-			
-			String confirmacao = executaConfirmarPrescricaoMedicaComReimpressao();// gerar pendencia de
-			if (confirmacao != null) {
-				prescricaoMedicaVO.setPrescricaoMedica(prescricaoMedicaVO.getPrescricaoMedica());
-				tipoImpressao = EnumTipoImpressao.REIMPRESSAO;
-				relatorioPrescricaoMedicaController.setTipoImpressao(EnumTipoImpressao.REIMPRESSAO);
-				relatorioPrescricaoMedicaController.setDataMovimento(new Date());
-				relatorioPrescricaoMedicaController.setServidorValido(prescricaoMedicaVO.getPrescricaoMedica().getServidorValida());
-				relatorioPrescricaoMedicaController.setPrescricaoMedicaVO(prescricaoMedicaVO);
-			if (cupsFacade.isCupsAtivo()) {// na v5, raiseCupsEvent só e disparado caso cups esteja ativo
-					relatorioPrescricaoMedicaController.observarEventoReimpressaoPrescricao();
-				}
-				relatorioPrescricaoMedicaController.setTipoImpressao(null);
-				relatorioPrescricaoMedicaController.setDataMovimento(null);
-				relatorioPrescricaoMedicaController.setServidorValido(null);
-				relatorioPrescricaoMedicaController.setPrescricaoMedicaVO(null);
-				buscarEstado = Boolean.TRUE;
-				return PAGINA_VERIFICA_PRESCRICAO_MEDICA;
+		}
+		String confirmacao = executaConfirmarPrescricaoMedicaComReimpressao();// gerar pendencia de
+		if (confirmacao != null) {
+			prescricaoMedicaVO.setPrescricaoMedica(prescricaoMedicaVO.getPrescricaoMedica());
+			tipoImpressao = EnumTipoImpressao.REIMPRESSAO;
+			relatorioPrescricaoMedicaController.setTipoImpressao(EnumTipoImpressao.REIMPRESSAO);
+			relatorioPrescricaoMedicaController.setDataMovimento(new Date());
+			relatorioPrescricaoMedicaController.setServidorValido(prescricaoMedicaVO.getPrescricaoMedica().getServidorValida());
+			relatorioPrescricaoMedicaController.setPrescricaoMedicaVO(prescricaoMedicaVO);
+		if (cupsFacade.isCupsAtivo()) {// na v5, raiseCupsEvent só e disparado caso cups esteja ativo
+				relatorioPrescricaoMedicaController.observarEventoReimpressaoPrescricao();
 			}
-			return null;
-	
+			relatorioPrescricaoMedicaController.setTipoImpressao(null);
+			relatorioPrescricaoMedicaController.setDataMovimento(null);
+			relatorioPrescricaoMedicaController.setServidorValido(null);
+			relatorioPrescricaoMedicaController.setPrescricaoMedicaVO(null);
+			buscarEstado = Boolean.TRUE;
+			return PAGINA_VERIFICA_PRESCRICAO_MEDICA;
+		}
+		return null;
 	}
 	public String prescreverJustificativaUsoMedicamento() {
         return PAGINA_PRESCREVER_ITEM;
@@ -614,7 +625,6 @@ public class ManterPrescricaoMedicaController extends ActionController {
 		}
 		return null;			
 	}
-	
 	public String executaConfirmarPrescricaoMedicaComReimpressao() throws ApplicationBusinessException {
 		try {
 			prescricaoMedicaFacade.verificarPrescricaoCancelada(this.prescricaoMedicaVO.getPrescricaoMedica());
@@ -630,12 +640,9 @@ public class ManterPrescricaoMedicaController extends ActionController {
 		}
 		return null;			
 	}
-	
-
 	public Boolean getHabilitaReimpressao() {
 		if (this.pmeSeqAtendimento != null && this.pmeSeq != null) {
 			MpmPrescricaoMedica prescricaoMedica = prescricaoMedicaFacade.obterPrescricaoPorId(this.pmeSeqAtendimento, this.pmeSeq);
-			
 			if (prescricaoMedica != null && prescricaoMedica.getServidorValida() != null && prescricaoMedica.getServidorValida().getId() != null
 					&& prescricaoMedica.getServidorValida().getId().getMatricula() != null && prescricaoMedica.getServidorValida().getId().getVinCodigo() != null) {
 				habilitaReimpressao = true;
@@ -769,6 +776,26 @@ public class ManterPrescricaoMedicaController extends ActionController {
  			apresentarExcecaoNegocio(e);
  		}
 		return PAGINA_MANTER_PRESCRICAO_ALERGIA;
+	}
+	
+	public void upItemPrescricaoMedica(ItemPrescricaoMedicaVO item, Integer rowIndex) throws BaseException {
+		
+			Collections.swap(prescricaoMedicaVO.getItens(), rowIndex, rowIndex -1);
+			Integer aux = item.getOrdem();
+			item.setOrdem(aux-1);
+			ItemPrescricaoMedicaVO itemNovaOrdem = prescricaoMedicaVO.getItens().get(rowIndex);
+			prescricaoMedicaVO.getItens().get(rowIndex).setOrdem(aux);
+			prescricaoMedicaFacade.trocarOrdemItemPrescricaoMedica(item, itemNovaOrdem, obtemNomeDoMicroComputador());
+	}
+
+	public void downItemPrescricaoMedica(ItemPrescricaoMedicaVO item,  Integer rowIndex) throws BaseException  {
+			
+			Collections.swap(prescricaoMedicaVO.getItens(), rowIndex, rowIndex +1);
+			Integer aux = item.getOrdem();
+			item.setOrdem(aux+1);
+			ItemPrescricaoMedicaVO itemNovaOrdem = prescricaoMedicaVO.getItens().get(rowIndex);
+			prescricaoMedicaVO.getItens().get(rowIndex).setOrdem(aux);
+			prescricaoMedicaFacade.trocarOrdemItemPrescricaoMedica(item, itemNovaOrdem, obtemNomeDoMicroComputador());
 	}
 	
 	public FormularioDispAntimicrobianosVO getFormulario() {

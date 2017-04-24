@@ -306,21 +306,17 @@ private static final Log LOG = LogFactory.getLog(RelatorioTicketExamesPacienteON
 	}
 	
 	public void verificarSetarMaiorTempoJejum(List<TicketExamesPacienteVO> tickets) {
-		StringBuilder result = new StringBuilder(20);
-		Short maiorJejum = 0;
+		StringBuilder result;
 		for(TicketExamesPacienteVO vo : tickets){
-			if(vo.getTempoJejum()!=null && maiorJejum < vo.getTempoJejum()) {
-				maiorJejum = vo.getTempoJejum();
+
+			result = new StringBuilder(20);
+			
+			if (vo.getTempoJejum()!=null && vo.getTempoJejum() > 0) {
+				result.append("Jejum: " + vo.getTempoJejum() + " " + (vo.getTempoJejum() > 1 ? "horas" : "hora"));
+			} else {
+				result.append("Não necessita Jejum");
 			}
-		}
-		
-		if (maiorJejum > 0) {
-			result.append("Jejum: " + maiorJejum + " " + (maiorJejum > 1 ? "horas" : "hora"));
-		} else {
-			result.append("Não necessita Jejum");
-		}
-		
-		for(TicketExamesPacienteVO vo : tickets){
+			
 			vo.setMaiorTempoJejum(result.toString());
 		}	
 	}

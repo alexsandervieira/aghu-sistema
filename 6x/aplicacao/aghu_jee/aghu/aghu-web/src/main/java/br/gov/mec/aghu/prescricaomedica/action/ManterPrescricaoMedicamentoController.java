@@ -278,6 +278,23 @@ public class ManterPrescricaoMedicamentoController extends ActionController {
 			} 
 		}
 	}
+	
+	public boolean tipoAprazamentoQuandoNecessario() throws ApplicationBusinessException {
+		
+		AghParametros tipoAprazamentoQuandoNecessario = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_TIPO_APRAZAMENTO_CAMPO_OBSERVACAO_OBRIGATORIO);
+		
+		if(validarParametros(tipoAprazamentoQuandoNecessario)) {
+			return true;
+		}
+		
+		return false;
+	}
+
+	private boolean validarParametros(AghParametros tipoAprazamentoQuandoNecessario) {
+		return tipoAprazamentoQuandoNecessario.getVlrTexto() != null 
+				&& tipoAprazamento != null && tipoAprazamento.getDescricao() != null 
+				&& tipoAprazamento.getDescricao().equalsIgnoreCase(tipoAprazamentoQuandoNecessario.getVlrTexto());
+	}
 
 	@SuppressWarnings("PMD.NPathComplexity")
 	public void calculoDose() {	
@@ -459,7 +476,7 @@ public class ManterPrescricaoMedicamentoController extends ActionController {
 	public void realizarVerificacoesMedicamento(){
 		if (this.medicamentoVO != null) {
 			this.medicamentoVO.setMedicamento(farmaciaFacade.obterMedicamento(this.getMedicamentoVO().getMatCodigo()));
-			//this.exigeObservacao = this.medicamentoVO.getIndExigeObservacao();
+			this.exigeObservacao = this.medicamentoVO.getIndExigeObservacao();
 			
 			StringBuilder returnValue = new StringBuilder("");
 			if (medicamentoVO.getDescricaoMat()!= null) {
@@ -863,6 +880,7 @@ public class ManterPrescricaoMedicamentoController extends ActionController {
 	}
 
 	public String gravarEVoltar() {
+		recuperarDiluente();
 		try {
 			this.executarGravar();
 			return this.cancelar();
@@ -944,6 +962,7 @@ public class ManterPrescricaoMedicamentoController extends ActionController {
 					novaPrescricaoMedicamento.setIndSeNecessario(this.indSeNecessario);
 					novaPrescricaoMedicamento.setTipoFreqAprazamento(this.tipoAprazamento);
 					novaPrescricaoMedicamento.setDthrInicioTratamento(this.getDataInicioTratamento());
+					novaPrescricaoMedicamento.setOrdem(prescricaoMedicamento.getOrdem());
 					
 					MpmItemPrescricaoMdto itemPrescricaoMedicamento = new MpmItemPrescricaoMdto();
 					itemPrescricaoMedicamento.setPrescricaoMedicamento(novaPrescricaoMedicamento);
@@ -1423,8 +1442,8 @@ public class ManterPrescricaoMedicamentoController extends ActionController {
 			throw new ApplicationBusinessException(ManterPrescricaoMedicamentoExceptionCode.OBRIGATORIO_PREENCHER_VIA);			
 		}
 		
-		if (this.medicamento.getIndExigeObservacao() && StringUtils.isBlank(this.complemento)) {
-			throw new ApplicationBusinessException(ManterPrescricaoMedicamentoExceptionCode.OBRIGATORIO_PREENCHER_COMPLEMENTO);
+		if (this.medicamento.getIndExigeObservacao() && StringUtils.isBlank(this.observacao)) {
+			throw new ApplicationBusinessException(ManterPrescricaoMedicamentoExceptionCode.OBRIGATORIO_PREENCHER_OBSERVACAO);
 		}
 		
 		if (this.dose != null && this.unidadeDosagem == null) {
@@ -1882,7 +1901,7 @@ public class ManterPrescricaoMedicamentoController extends ActionController {
 		this.dataInicioTratamento = dataInicioTratamento;
 	}
 
-	public List<VMpmDosagem> buscarDosagens(){
+	public List<VMpmDosagem> buscarDosagens(String strPesquisa){
 		if(this.medicamento != null) {
 			return this.prescricaoMedicaFacade.buscarDosagensMedicamento(this.medicamento.getMatCodigo());
 		}

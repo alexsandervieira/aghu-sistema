@@ -157,11 +157,12 @@ public class AtualizarConsultaController extends ActionController {
 				projetoPesquisa = consulta.getProjetoPesquisa();
 				servidorConsultado = consulta.getServidorConsultado();
 				
-				if(servidorAtendimento != null) {
+				if(consulta.getGradeAgendamenConsulta().getProfEspecialidade().getRapServidor().getPessoaFisica() != null) {
 					espCrmVO = new EspCrmVO();
-					espCrmVO.setNomeMedico(servidorAtendimento.getPessoaFisica().getNome());
-					espCrmVO.setMatricula(servidorAtendimento.getId().getMatricula());
-					espCrmVO.setVinCodigo(servidorAtendimento.getId().getVinCodigo());
+					espCrmVO.setNomeMedico(consulta.getGradeAgendamenConsulta().getProfEspecialidade().getRapServidor().getPessoaFisica().getNome());
+					espCrmVO.setMatricula( consulta.getGradeAgendamenConsulta().getPreSerMatricula());
+					espCrmVO.setVinCodigo( consulta.getGradeAgendamenConsulta().getPreSerVinCodigo());
+					
 					//				servidorAtendimento = registroColaboradorFacade.obterRapServidor(consulta.getServidorAtendido().getId());
 				}
 				servidorAtendimento = consulta.getServidorAtendido();

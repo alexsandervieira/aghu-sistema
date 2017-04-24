@@ -29,6 +29,8 @@ import br.gov.mec.aghu.blococirurgico.vo.RelatorioCirurgiaProcedProfissionalVO;
 import br.gov.mec.aghu.blococirurgico.vo.RelatorioEscalaCirurgiaAghuResponsavelVO;
 import br.gov.mec.aghu.blococirurgico.vo.RelatorioProdutividadePorAnestesistaConsultaVO;
 import br.gov.mec.aghu.blococirurgico.vo.SuggestionListaCirurgiaVO;
+import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dominio.DominioFuncaoProfissional;
 import br.gov.mec.aghu.dominio.DominioIndRespProc;
 import br.gov.mec.aghu.dominio.DominioNaturezaFichaAnestesia;
@@ -54,8 +56,6 @@ import br.gov.mec.aghu.model.MbcSalaCirurgica;
 import br.gov.mec.aghu.model.PdtDescricao;
 import br.gov.mec.aghu.model.RapPessoasFisicas;
 import br.gov.mec.aghu.model.RapServidores;
-import br.gov.mec.aghu.core.commons.CoreUtil;
-import br.gov.mec.aghu.core.utils.DateUtil;
 
 @SuppressWarnings({"PMD.ExcessiveClassLength"})
 public class MbcProfCirurgiasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<MbcProfCirurgias> {
@@ -319,7 +319,7 @@ public class MbcProfCirurgiasDAO extends br.gov.mec.aghu.core.persistence.dao.Ba
 		sqlProjection.append("     LPAD(TO_CHAR(VIN_CODIGO, 'FM999'),3,'0') ||                ");
 		sqlProjection.append("     LPAD(TO_CHAR(MATRICULA, 'FM9999999'),7,'0') || '-' ||      ");
 		sqlProjection.append("     CASE WHEN NOME_USUAL IS NULL THEN                          ");
-		sqlProjection.append("     SUBSTR(NOME,1,15) ELSE NOME_USUAL END                      ");
+		sqlProjection.append("     NOME END             							          ");
 	}
 	
 	/**

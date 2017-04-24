@@ -22,9 +22,10 @@
 								required="#{manterTipoFrequenciaAprazamentoController.entity.indDigitaFrequencia}"
 								title="#{messages.TITLE_TIPO_FREQUENCIA_APRAZAMENTO_SINTAXE_EDIT}"
 								value="#{manterTipoFrequenciaAprazamentoController.entity.sintaxe}"
-								id="sintaxe" />
+								id="sintaxe"
+								removerCaratersEspeciais="false" />
 						</p:outputPanel>  
-              <mec:inputText label="#{messages.LABEL_TIPO_FREQUENCIA_APRAZAMENTO_FATOR_HORAS}" size="15" maxlength="15" required="true" ajaxValidation="false" styleClass="mask_dose_medicamento" readonly="#{manterTipoFrequenciaAprazamentoController.entity.seq != null}" title="#{messages.TITLE_TIPO_FREQUENCIA_APRAZAMENTO_FATOR_HORAS_EDIT}" value="#{manterTipoFrequenciaAprazamentoController.entity.fatorConversaoHoras}" converter="#{bigDecimalDoseConverter}" id="tipoFrequenciaFatorHoras"/> 
+              <mec:inputNumero label="#{messages.LABEL_TIPO_FREQUENCIA_APRAZAMENTO_FATOR_HORAS}" size="15" maxlength="15" required="true" ajaxValidation="false" styleClass="mask_dose_medicamento" readonly="#{manterTipoFrequenciaAprazamentoController.entity.seq != null}" title="#{messages.TITLE_TIPO_FREQUENCIA_APRAZAMENTO_FATOR_HORAS_EDIT}" value="#{manterTipoFrequenciaAprazamentoController.entity.fatorConversaoHoras}" converter="#{bigDecimalDoseConverter}" id="tipoFrequenciaFatorHoras"/> 
             </p:outputPanel> 
           </aghu:linha>  
           <aghu:linha> 

@@ -43,7 +43,6 @@ import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.core.utils.DateValidator;
 import br.gov.mec.aghu.dominio.DominioGrupoConvenio;
 import br.gov.mec.aghu.dominio.DominioOrigemAtendimento;
-import br.gov.mec.aghu.dominio.DominioPacAtendimento;
 import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.dominio.DominioSimNaoRestritoAreaExecutora;
 import br.gov.mec.aghu.dominio.DominioSismamaMamoCadCodigo;
@@ -864,9 +863,9 @@ public class SolicitacaoExameON extends BaseBusiness {
 		if (DominioOrigemAtendimento.I == atendimento.getOrigem()
 				|| DominioOrigemAtendimento.N == atendimento.getOrigem()) {
 			if (atendimento.getInternacao() != null) {
-				Date dthrAlaMedica = getTransferirPacienteFacade().getDthrAltaMedica(atendimento.getInternacao().getSeq());
-				DominioPacAtendimento indPacAtendimento = atendimento.getIndPacAtendimento();
-				if (DominioPacAtendimento.N.equals(indPacAtendimento)) {
+//				Date dthrAlaMedica = getTransferirPacienteFacade().getDthrAltaMedica(atendimento.getInternacao().getSeq());
+//				DominioPacAtendimento indPacAtendimento = atendimento.getIndPacAtendimento();
+//				if (DominioPacAtendimento.N.equals(indPacAtendimento)) {
 					Date dthrFim = atendimento.getDthrFim();
 					if (dthrFim != null) {
 						AghParametros paramSys = this.getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_DIAS_SOL_EX_ALTA);
@@ -879,10 +878,10 @@ public class SolicitacaoExameON extends BaseBusiness {
 							}
 						}	
 					}	
-				} else if (dthrAlaMedica != null) {
+//				} else if (dthrAlaMedica != null) {
 					// Não é permitido solicitar exames para paciente com alta médica
-					throw new ApplicationBusinessException(SolicitacaoExameONExceptionCode.AEL_01598);
-				}
+//					throw new ApplicationBusinessException(SolicitacaoExameONExceptionCode.AEL_01598);
+//				}
 			}
 		}
 		// Origem do Atendimento: Paciente, Internação, Pós-Alta, Urgência ou Nascimento.
@@ -1040,20 +1039,28 @@ public class SolicitacaoExameON extends BaseBusiness {
 	 */
 	protected void validacaoAmbulatorioEOutros(AghAtendimentos atendimento, AghuParametrosEnum paramSysRangePosterior, boolean origemSumarioAlta) throws BaseException {
 		Date dtConsulta = atendimento.getDthrInicio();
-		//dtConsulta = atendimento.getConsulta().getDtConsulta();
-
 		if (this.temTargetExecutor()) {
 			this.validacaoAmbulatorioParaExecutorInterno(dtConsulta, paramSysRangePosterior);
 
 		} else if (!temTargetSolicitarExamesViaSumarioAlta() || !origemSumarioAlta) {
-			// Se consulta foi feita no dia  OU no dia anterior 
-			// E se a unidade tem controle de atendimento ambulatorial durante o inicio e o fim do atendimento.
-			Date diaAnterior = DateUtil.adicionaDias(new Date(), -1);
-
-			if ( !(DateValidator.validarMesmoDia(dtConsulta, new Date()) || DateValidator.validarMesmoDia(dtConsulta, diaAnterior))
-					|| !this.temControleAtendimentoAmbulatorial(atendimento)) {
-				// AEL_APENAS_DIA_CONS_OU_DIA_ANTERIOR: Só é permitido solicitar exames para esta consulta no dia da consulta OU no dia anterior da consulta.
-				throw new ApplicationBusinessException(SolicitacaoExameONExceptionCode.AEL_APENAS_DIA_CONS_OU_DIA_ANTERIOR);						
+			Date dataParamDiasAnterior = new Date();
+			Date dataParamDiasPosterior = new Date();
+			
+			AghParametros paramSysAnt = this.getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_DIAS_SOL_EX_ANTERIOR);
+			AghParametros paramSysPost = this.getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_DIAS_SOL_EX_POSTERIOR);
+			
+			if(paramSysAnt != null && paramSysAnt.getVlrNumerico() != null){
+				dataParamDiasAnterior = DateUtil.adicionaDias(dataParamDiasAnterior, -paramSysAnt.getVlrNumerico().intValue());
+			}
+			
+			if(paramSysPost != null && paramSysPost.getVlrNumerico() != null){
+				dataParamDiasPosterior = DateUtil.adicionaDias(dataParamDiasPosterior, paramSysPost.getVlrNumerico().intValue());
+			}
+			
+			if(!DateUtil.entre(DateUtil.truncaData(dtConsulta), DateUtil.truncaData(dataParamDiasAnterior), DateUtil.truncaData(dataParamDiasPosterior))){
+				if(paramSysAnt != null && paramSysPost != null){
+					throw new ApplicationBusinessException(SolicitacaoExameONExceptionCode.AEL_DIA_CONSULTA_FORA_RANGE, paramSysAnt.getVlrNumerico(), paramSysPost.getVlrNumerico());
+				}
 			}
 		}
 	}

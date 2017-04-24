@@ -20,4 +20,16 @@ public class MamTipoAtestadoDAO extends br.gov.mec.aghu.core.persistence.dao.Bas
 		return executeCriteria(criteria);
 	}
 	
+	public List<MamTipoAtestado> listarTodos(Short seqTipoAtest, boolean igual) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(MamTipoAtestado.class);
+		if(seqTipoAtest != null){
+			if(igual){
+				criteria.add(Restrictions.eq(MamTipoAtestado.Fields.SEQ.toString(), seqTipoAtest));
+			}else{				
+				criteria.add(Restrictions.ne(MamTipoAtestado.Fields.SEQ.toString(), seqTipoAtest));
+			}
+		}
+		return executeCriteria(criteria);
+	}
+	
 }

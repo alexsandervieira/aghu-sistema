@@ -38,6 +38,20 @@
 	
 	<navigation-rule>
 		<navigation-case>
+			<from-outcome>internacao-visualizarRelatorioTipoCaracteristicaLeito</from-outcome>
+			<to-view-id>/pages/internacao/relatorios/relatorioTipoCaracterisiticaLeitoPdf.xhtml</to-view-id>
+		<redirect/></navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>internacao-visualizarRelatorioNegativaInternacaoPDF</from-outcome>
+			<to-view-id>/pages/internacao/relatorios/relatorioNegativasInternacaoDiaPdf.xhtml</to-view-id>
+		<redirect/></navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<navigation-case>
 			<from-outcome>internacao-transferirPacienteCRUD</from-outcome>
 			<to-view-id>/pages/internacao/transferir/transferirPacienteCRUD.xhtml</to-view-id>
 		<redirect/></navigation-case>
@@ -185,6 +199,20 @@
 	
 	<navigation-rule>
 		<navigation-case>
+			<from-outcome>internacao-negativaSolicitacaoInternacao</from-outcome>
+			<to-view-id>/pages/internacao/relatorios/relatorioNegativasInternacaoDia.xhtml</to-view-id>
+		<redirect/></navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>internacao-negativaAtendendimentoSolicitacaoInternacao</from-outcome>
+			<to-view-id>/pages/internacao/negativaAtendendimentoSolicitacaoInternacao.xhtml</to-view-id>
+		<redirect/></navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<navigation-case>
 			<from-outcome>internacao-quartoCRUD</from-outcome>
 			<to-view-id>/pages/internacao/cadastrosbasicos/quartoCRUD.xhtml</to-view-id>
 		<redirect/></navigation-case>
@@ -320,6 +348,40 @@
 		</navigation-case>
 	</navigation-rule>
 	
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>internacao-visualizarRelatorioAltasObitoPDF</from-outcome>
+			<to-view-id>/pages/internacao/relatorios/relatorioAltasObitoPdf.xhtml</to-view-id>
+		<redirect/></navigation-case>
+	</navigation-rule>
+
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>internacao-relatorioAltasObito</from-outcome>
+			<to-view-id>/pages/internacao/relatorios/relatorioAltasObito.xhtml</to-view-id>
+		<redirect/></navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>internacao-relatorioSumarioAltaPendente</from-outcome>
+			<to-view-id>/pages/internacao/relatorios/relatorioSumarioAltaPendente.xhtml</to-view-id>
+		<redirect/></navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>internacao-visualizarRelatorioSumarioAltaPendente</from-outcome>
+			<to-view-id>/pages/internacao/relatorios/relatorioSumarioAltaPendentePdf.xhtml</to-view-id>
+		<redirect/></navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>internacao-relatorioTipoCaracteristicaLeito</from-outcome>
+			<to-view-id>/pages/internacao/relatorios/relatorioTipoCaracteristicaLeito.xhtml</to-view-id>
+		<redirect/></navigation-case>
+	</navigation-rule>
 	
 	<!-- =================================================================================================================== -->
 	<!-- ATENÇÃO: Coloque os valores para as variáveis de redirect com o nome do módulo junto: Ex: casca-pesquisarPermissoes -->

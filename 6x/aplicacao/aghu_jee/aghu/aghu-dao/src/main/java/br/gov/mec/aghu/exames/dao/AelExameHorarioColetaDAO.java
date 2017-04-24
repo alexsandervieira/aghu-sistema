@@ -49,5 +49,14 @@ public class AelExameHorarioColetaDAO extends br.gov.mec.aghu.core.persistence.d
 		return this.executeCriteria(criteria);
 	}
 	
+	public AelExameHorarioColeta pesquisarExameHorarioColetaPorDia(String sigla, Integer matExame, Integer seq) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(AelExameHorarioColeta.class, "ehc");
+		criteria.add(Restrictions.eq(AelExameHorarioColeta.Fields.SIGLA.toString(), sigla));
+		criteria.add(Restrictions.eq(AelExameHorarioColeta.Fields.MATERIAL.toString(), matExame));
+		criteria.add(Restrictions.eq(AelExameHorarioColeta.Fields.SITUACAO.toString(), DominioSituacao.A));
+		criteria.add(Restrictions.eq(AelExameHorarioColeta.Fields.SEQP.toString(), seq));
+		return (AelExameHorarioColeta) executeCriteriaUniqueResult(criteria);
+	}
+	
 
 }

@@ -613,7 +613,7 @@ private static final Log LOG = LogFactory.getLog(AelParametroCamposLaudoON.class
 				if (!dependeCamposMascara && possuiOperadores) {
 					// se não depende de nenhum outro campo da máscara, avalia
 					// logo a expressão e deixa o valor fixo no campo.
-					StringBuilder formulasb = new StringBuilder("import static br.gov.mec.seam.exemplos.FuncoesOracle.*; ");
+					StringBuilder formulasb = new StringBuilder("import static br.gov.mec.aghu.core.persistence.dialect.FuncoesOracle.*; ");
 					formulasb.append(formulaTemp);
 					Eval.me(formulasb.toString());
 				}

@@ -64,6 +64,11 @@ public class OrigemProntuarioController extends ActionController{
 	
 	public String confirmar() {
 		try {
+			// Verifica se marcou origem padrão
+			if (this.samisOrigemProntuario.getOrigemPadrao()){
+				// Retorna exception caso tenha outro registro com flag origemPadrao = true
+				this.cadastrosBasicosPacienteFacade.existeOrigemPadrao(this.samisOrigemProntuario.getCodigo());
+			}
 			origemProntuarioPaginatorController.getDataModel().reiniciarPaginator();
 
 			RapServidores servidorLogado = registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado(), new Date());

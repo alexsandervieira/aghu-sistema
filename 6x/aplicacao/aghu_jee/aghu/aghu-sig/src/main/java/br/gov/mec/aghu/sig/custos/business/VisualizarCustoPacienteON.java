@@ -396,7 +396,7 @@ public class VisualizarCustoPacienteON  extends BaseBusiness {
 		}
 		
 		if(!parametros[2].isEmpty()) {
-			message.append("Centro de Custo " + parametros[2] + virgula);
+			message.append("Centro de Atividade " + parametros[2] + virgula);
 		}
 		
 		if(!parametros[3].isEmpty()) {

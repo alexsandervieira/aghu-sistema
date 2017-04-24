@@ -6,16 +6,22 @@ import java.util.List;
 
 import org.hibernate.SQLQuery;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.ShortType;
 
+import br.gov.mec.aghu.dominio.DominioIndPendentePrescricoesCuidados;
+import br.gov.mec.aghu.model.EpeCuidados;
 import br.gov.mec.aghu.model.EpeDiagnostico;
 import br.gov.mec.aghu.model.EpeFatRelacionado;
 import br.gov.mec.aghu.model.EpePrescCuidDiagnostico;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagem;
+import br.gov.mec.aghu.model.EpePrescricaoEnfermagemId;
 import br.gov.mec.aghu.model.EpePrescricoesCuidados;
+import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.prescricaoenfermagem.vo.DiagnosticoEtiologiaVO;
 
 public class EpePrescCuidDiagnosticoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<EpePrescCuidDiagnostico> {
@@ -190,6 +196,70 @@ public class EpePrescCuidDiagnosticoDAO extends br.gov.mec.aghu.core.persistence
 		// Retorna Lista
 		return query.list();
 
+	}
+
+	/**
+	 * Lista os cuidados prescritos através chave da prescrição
+	 * de enfermagem(pen_seq + atd_seq) onde a data de fim do cuidado seja igual a data
+	 * da prescrição
+	 * 
+	 * @param penId
+	 * @param dthrFim
+	 * @param excluirHierarquicos
+	 * @return
+	 */
+	public List<EpePrescCuidDiagnostico> pesquisarCuidadosPrescricao(
+			EpePrescricaoEnfermagemId penId, Date dthrFim, Boolean listarTodas) {
+
+		if (penId == null || dthrFim == null) {
+			throw new IllegalArgumentException("Parametro invalido!!!");
+		}
+		String separador = ".";
+		String aliasCuidado = "cui";
+		DetachedCriteria criteria = DetachedCriteria.forClass(EpePrescCuidDiagnostico.class);
+		
+		criteria.createAlias(EpePrescCuidDiagnostico.Fields.PRESCRICAO_CUIDADO.toString(), "PRESC_CUID", JoinType.INNER_JOIN);
+		criteria.createAlias("PRESC_CUID." + EpePrescricoesCuidados.Fields.CUIDADO.toString(), aliasCuidado, JoinType.INNER_JOIN);
+		criteria.createAlias("PRESC_CUID." + EpePrescricoesCuidados.Fields.SERVIDOR_VALIDACAO.toString(), "SERV_VAL", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("SERV_VAL."+RapServidores.Fields.PESSOA_FISICA.toString(), "SERV_VAL_PES", JoinType.LEFT_OUTER_JOIN);
+
+		criteria.add(Restrictions.eq("PRESC_CUID." + EpePrescricoesCuidados.Fields.PEN_ID.toString(), penId));
+		
+//		//Utilizado para exibição dos itens no momento da edição/inclusão
+//		if (excluirHierarquicos){
+//			criteria.add(Restrictions.isNull("PRESC_CUID." + EpePrescricoesCuidados.Fields.SERVIDOR_MOVIMENTO_VALIDACAO.toString()));
+//			criteria.add(Restrictions.isNull("PRESC_CUID." + EpePrescricoesCuidados.Fields.DTHR_VALIDA_MVTO.toString()));
+//		}
+		
+		if(!listarTodas) {
+			criteria.add(Restrictions.or(Restrictions.isNull("PRESC_CUID." + EpePrescricoesCuidados.Fields.DTHR_FIM.toString()),
+										Restrictions.eq("PRESC_CUID." + EpePrescricoesCuidados.Fields.DTHR_FIM.toString(), dthrFim)));
+		}
+		
+		criteria.addOrder(Order.asc(EpePrescCuidDiagnostico.Fields.CDG_FDG_DGN_SNB_GNB_SEQ.toString()));
+		criteria.addOrder(Order.asc(EpePrescCuidDiagnostico.Fields.CDG_FDG_DGN_SNB_SEQUENCIA.toString()));
+		criteria.addOrder(Order.asc(EpePrescCuidDiagnostico.Fields.CDG_FDG_DGN_SEQUENCIA.toString()));
+		criteria.addOrder(Order.asc(aliasCuidado + separador + EpeCuidados.Fields.DESCRICAO.toString()));
+		
+		return executeCriteria(criteria);
+	}	
+
+	public Boolean verificarExisteCuidadoDiagnosticosRelacionadoPrescricao(EpePrescricaoEnfermagemId prescEnfermagemId, Short freSeq, Short dgnSequencia, Short dgnSnbSequencia, Short dgnSnbGnbSeq) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(EpePrescCuidDiagnostico.class);
+
+		criteria.createAlias(EpePrescCuidDiagnostico.Fields.PRESCRICAO_CUIDADO.toString(), "PC");
+		criteria.createAlias("PC." + EpePrescricoesCuidados.Fields.PRESCRICAO_ENFERMAGEM, "PE");
+
+		criteria.add(Restrictions.eq(EpePrescCuidDiagnostico.Fields.PRC_ATD_SEQ.toString(), prescEnfermagemId.getAtdSeq()));
+		criteria.add(Restrictions.eq(EpePrescCuidDiagnostico.Fields.CDG_FDG_FRE_SEQ.toString(), freSeq));
+		criteria.add(Restrictions.eq(EpePrescCuidDiagnostico.Fields.CDG_FDG_DGN_SEQUENCIA.toString(), dgnSequencia));
+		criteria.add(Restrictions.eq(EpePrescCuidDiagnostico.Fields.CDG_FDG_DGN_SNB_SEQUENCIA.toString(), dgnSnbSequencia));
+		criteria.add(Restrictions.eq(EpePrescCuidDiagnostico.Fields.CDG_FDG_DGN_SNB_GNB_SEQ.toString(), dgnSnbGnbSeq));
+		criteria.add(Restrictions.eq("PE." + EpePrescricaoEnfermagem.Fields.ATD_SEQ.toString(), prescEnfermagemId.getAtdSeq()));
+		criteria.add(Restrictions.eq("PE." + EpePrescricaoEnfermagem.Fields.SEQ.toString(), prescEnfermagemId.getSeq()));
+		criteria.add(Restrictions.ne("PC." + EpePrescricoesCuidados.Fields.IND_PENDENTE.toString(), DominioIndPendentePrescricoesCuidados.E));
+
+		return executeCriteriaExists(criteria);
 	}
 
 }

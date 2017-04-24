@@ -11,7 +11,7 @@
         <dependent-module archiveName="commons-collections.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/commons-collections/commons-collections/3.0/commons-collections-3.0.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="aghu-core-commons.jar" deploy-path="/lib" handle="module:/resource/aghu-core-commons/aghu-core-commons">
+        <dependent-module archiveName="aghu-core-commons.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/br/gov/mec/aghu-core/aghu-core-commons/3.5/aghu-core-commons-3.5.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="bcprov-jdk15on.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/org/bouncycastle/bcprov-jdk15on/1.49/bcprov-jdk15on-1.49.jar">
@@ -59,7 +59,7 @@
         <dependent-module archiveName="aghu-business.jar" deploy-path="/lib" handle="module:/resource/aghu-business/aghu-business">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="aghu-core-business.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/br/gov/mec/aghu-core/aghu-core-business/3.7/aghu-core-business-3.7.jar">
+        <dependent-module archiveName="aghu-core-business.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/br/gov/mec/aghu-core/aghu-core-business/3.9/aghu-core-business-3.9.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="lucene-queryparser.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/org/apache/lucene/lucene-queryparser/4.10.4/lucene-queryparser-4.10.4.jar">
@@ -95,7 +95,7 @@
         <dependent-module archiveName="aghu-registrocolaborador-service.jar" deploy-path="/" handle="module:/resource/aghu-registrocolaborador-service/aghu-registrocolaborador-service">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="aghu-core-service.jar" deploy-path="/lib" handle="module:/resource/aghu-core-service/aghu-core-service">
+        <dependent-module archiveName="aghu-core-service.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/br/gov/mec/aghu-core/aghu-core-service/3.1/aghu-core-service-3.1.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="swagger-core.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/io/swagger/swagger-core/1.5.3/swagger-core-1.5.3.jar">
@@ -501,6 +501,9 @@
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="lucene-core.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/org/apache/lucene/lucene-core/4.10.4/lucene-core-4.10.4.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="aghu-jasperreports-fonts.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/br/gov/mec/aghu-jasperreports-fonts/1.0/aghu-jasperreports-fonts-1.0.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="fabesul-client.jar" deploy-path="/lib" handle="module:/classpath/var/M2_REPO/br/gov/mec/fabesul-client/1.0.1/fabesul-client-1.0.1.jar">

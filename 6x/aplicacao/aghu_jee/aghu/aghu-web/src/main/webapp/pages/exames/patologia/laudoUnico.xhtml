@@ -124,13 +124,13 @@
         <p:outputPanel id="panelAbas" layout="inline">
           <p:outputPanel rendered="#{laudoUnicoController.telaVo.aelAnatomoPatologico != null}" layout="inline">
           <h:form prependId="false" id="formGeralAbas"> 
-            <p:outputPanel layout="block" id="tabs11" style="overflow:hidden; height:487px">
+            <p:outputPanel layout="block" id="tabs11">
               <aghu:linha>               
                 <p:tabView id="resultTab" widgetVar="resultTab" dynamic="true" activeIndex="#{laudoUnicoController.selectedTab}" prependId="false">
                   <p:ajax event="tabChange" ajax="true" listener="#{laudoUnicoController.onTabChange}" process="@this" update="@(#btnsLaudoUnico) @(#formConclusaoLaudoUnico)"/>
                   <p:tab id="aba0" title="#{messages.ABA_LAUDO_LAUDO_UNICO}"> 
                     <p:outputPanel id="tabs-0" rendered="#{laudoUnicoController.renderLaudo}" layout="inline">                     
-                      <p:outputPanel layout="block" style="overflow:auto; height:415px"> 
+                      <p:outputPanel layout="block" > 
                         <ui:include src="/pages/exames/patologia/abaLaudoLaudoUnico.xhtml"/> 
                       </p:outputPanel>                       
                     </p:outputPanel>
@@ -138,7 +138,7 @@
 
                   <p:tab  id="aba1" title="#{messages.ABA_CADASTRO_LAUDO_UNICO}" > 
                     <p:outputPanel id="tabs-1" rendered="#{laudoUnicoController.renderCadastro}" layout="inline"> 
-                      <p:outputPanel layout="block" style="overflow:auto; height:415px"> 
+                      <p:outputPanel layout="block" > 
                         <ui:include src="/pages/exames/patologia/abaCadastroLaudoUnico.xhtml"/> 
                       </p:outputPanel> 
                     </p:outputPanel> 
@@ -148,7 +148,7 @@
                   		 disabled="#{!laudoUnicoController.telaVo.renderLamina or !laudoUnicoController.telaVo.exibeIndiceBlocos}"
                   		 title="#{messages.ABA_INDICE_BLOCO_LAUDO_UNICO}" > 
                     <p:outputPanel id="tabs-3" rendered="#{laudoUnicoController.renderLamina}" layout="inline"> 
-                      <p:outputPanel layout="block" style="overflow:auto; height:415px"> 
+                      <p:outputPanel layout="block" > 
                         <ui:include src="/pages/exames/patologia/abaLaminaLaudoUnico.xhtml"/> 
                       </p:outputPanel> 
                     </p:outputPanel> 
@@ -160,7 +160,7 @@
 
                   <p:tab  id="aba5" title="#{messages.ABA_NOTA_ADICIONAL_LAUDO_UNICO}"  disabled="#{not laudoUnicoController.telaVo.laudoAssinado}"> 
                     <p:outputPanel id="tabs-5" rendered="#{laudoUnicoController.renderNotaAdicional}" layout="inline"> 
-                      <p:outputPanel layout="block" style="overflow:auto; height:415px"> 
+                      <p:outputPanel layout="block" > 
                         <ui:include src="/pages/exames/patologia/abaNotaAdicionalLaudoUnico.xhtml"/> 
                       </p:outputPanel> 
                     </p:outputPanel> 
@@ -168,7 +168,7 @@
                   
                   <p:tab  id="aba6" title="#{messages.ABA_LIBERAR_LAUDO}"> 
                     <p:outputPanel id="tabs-6" rendered="#{laudoUnicoController.renderConclusao}" layout="inline"> 
-                      <p:outputPanel layout="block" style="overflow:auto; height:415px"> 
+                      <p:outputPanel layout="block" > 
                         <ui:include src="/pages/exames/consultarResultadoNotaAdicionalInclude.xhtml"/> 
                       </p:outputPanel> 
                     </p:outputPanel> 
@@ -187,7 +187,7 @@
                           <mec:commandButton value="#{messages.LABEL_LIBERAR_LAUDO}" 
                           		action="#{laudoUnicoController.liberarLaudo}" 
                           		rendered="#{mf:hasPermission(securityController,'assinarLaudoUnico,executar')}" 
-                          		styleClass=" alinha-esquerda bt_cinza"
+                          		styleClass="alinha-esquerda bt_cinza"
                           		process="@this" 
                           		ajax="true" 
                           		render="panelLaudoUnico" /> 

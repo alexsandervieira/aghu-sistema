@@ -1925,6 +1925,8 @@ public ScoFornecedorVO bindValoresLista(List<ScoFornecedorVO> listVO);
 
 	FsoNaturezaDespesa obtemNaturezaDespesaPorMaterial(Integer materialId);
 
-	void inserirScoFaseSolicitacaoSemRn(ScoFaseSolicitacao faseSolicitacao,
-			Boolean flush) throws BaseException;
+	void inserirScoFaseSolicitacaoSemRn(ScoFaseSolicitacao faseSolicitacao,	Boolean flush) throws BaseException;
+	
+	List<ScoGrupoMaterial> pesquisarGruposMateriaisPorFiltroAlmoxarifado(Short almoxSeq, Object _input);
+	
 }

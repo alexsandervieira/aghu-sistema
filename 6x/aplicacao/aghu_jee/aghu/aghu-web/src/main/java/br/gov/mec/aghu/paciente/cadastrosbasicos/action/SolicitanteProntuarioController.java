@@ -97,7 +97,7 @@ public class SolicitanteProntuarioController extends ActionController {
 	 */
 	public String confirmar() {
 		this.solicitanteProntuarioPaginatorController.reiniciarPaginator();
-
+		boolean isObrigatorio = true;
 		try {
 			// Tarefa 659 - deixar todos textos das entidades em caixa alta via
 			// toUpperCase()
@@ -105,22 +105,17 @@ public class SolicitanteProntuarioController extends ActionController {
 
 			boolean create = this.aipSolicitanteProntuario.getSeq() == null;
 
-			this.aipSolicitanteProntuario
-					.setFinalidadesMovimentacao(this.finalidadesMovimentacao);
-			this.aipSolicitanteProntuario
-					.setUnidadesFuncionais(this.unidadesFuncionais);
+			this.aipSolicitanteProntuario.setFinalidadesMovimentacao(this.finalidadesMovimentacao);
+			this.aipSolicitanteProntuario.setUnidadesFuncionais(this.unidadesFuncionais);
 			this.aipSolicitanteProntuario.setOrigemEventos(this.origemEventos);
-
-			this.cadastrosBasicosPacienteFacade
-					.persistirSolicitanteProntuario(this.aipSolicitanteProntuario);
-
-			if (create) {
-				this.apresentarMsgNegocio(Severity.INFO,
-						"MENSAGEM_SUCESSO_CRIACAO_SOLICITANTE_PRONTUARIO");
-			} else {
-				this.apresentarMsgNegocio(Severity.INFO,
-						"MENSAGEM_SUCESSO_EDICAO_SOLICITANTE_PRONTUARIO");
+			
+			isObrigatorio = validarCampos(isObrigatorio);
+			
+			boolean retorno = salvarAtualizarCadastroBasicoPaciente(isObrigatorio, create);
+			if(retorno){
+				return null;
 			}
+
 		} catch (ApplicationBusinessException e) {
 			e.getMessage();
 			apresentarExcecaoNegocio(e);
@@ -129,6 +124,43 @@ public class SolicitanteProntuarioController extends ActionController {
 		}
 
 		return REDIRECT_PESQUISAR_SOLICITANTE_PRONTUARIO;
+	}
+
+	private boolean salvarAtualizarCadastroBasicoPaciente(boolean isObrigatorio, boolean create) throws ApplicationBusinessException {
+		boolean retorno = true;
+		if(isObrigatorio){
+			this.cadastrosBasicosPacienteFacade.persistirSolicitanteProntuario(this.aipSolicitanteProntuario);
+			if (create) {
+				this.apresentarMsgNegocio(Severity.INFO,"MENSAGEM_SUCESSO_CRIACAO_SOLICITANTE_PRONTUARIO");
+				retorno = true;
+			} else {
+				this.apresentarMsgNegocio(Severity.INFO,"MENSAGEM_SUCESSO_EDICAO_SOLICITANTE_PRONTUARIO");
+				retorno = true;
+			}
+		}
+		return retorno;
+	}
+
+	private boolean validarCampos(boolean isObrigatorio) {
+		if(aipSolicitanteProntuario.getFinalidadesMovimentacao() == null){
+			this.apresentarMsgNegocio(Severity.ERROR, "O campo Finalidade da Movimenta\u00E7\u00E3o é obrigat\u00F3rio");
+			isObrigatorio = false;
+		}
+		switch (abaSelecionada) {
+		case 0:
+			if(aipSolicitanteProntuario.getUnidadesFuncionais() == null){
+				this.apresentarMsgNegocio(Severity.ERROR, "O campo Unidade Funcional é obrigat\u00F3rio");
+				isObrigatorio = false;
+			}
+			break;
+		case 1:
+			if(aipSolicitanteProntuario.getOrigemEventos() == null){
+				this.apresentarMsgNegocio(Severity.ERROR, "O campo Origem Evento é obrigat\u00F3rio.");
+				isObrigatorio = false;
+			}
+			break;
+		}
+		return isObrigatorio;
 	}
 
 	private void transformarTextosCaixaAlta() {

@@ -31,10 +31,10 @@ public class ExamesSuggestionMB implements Serializable {
 	@Inject
 	private ISolicitacaoExameFacade solicitacaoExameFacade;
 
-	public List<ExameSuggestionVO> obterExamesSuggetion(String nomeExame, Integer seqAtendimento, Boolean isProtocoloEnf, Boolean isOrigemInternacao, DominioTipoPesquisaExame tipoPesquisa) {
+	public List<ExameSuggestionVO> obterExamesSuggetion(String nomeExame, Short seqUnidadeFuncionalSol, Integer seqAtendimento, Boolean isProtocoloEnf, Boolean isOrigemInternacao, DominioTipoPesquisaExame tipoPesquisa, Boolean filtroPorUnidade) {
 		
 		setAtdSeq(seqAtendimento);
-		listaExames = this.solicitacaoExameFacade.pesquisaUnidadeExecutaSinonimoExame(nomeExame, null, null, isOrigemInternacao, seqAtendimento, isProtocoloEnf, true, tipoPesquisa);
+		listaExames = this.solicitacaoExameFacade.pesquisaUnidadeExecutaSinonimoExame(nomeExame, seqUnidadeFuncionalSol, false, isOrigemInternacao, seqAtendimento, isProtocoloEnf, true, tipoPesquisa, filtroPorUnidade);
 		ordenarLista();
 		return listaExames;
 	}

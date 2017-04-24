@@ -19,9 +19,6 @@ import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.transaction.SystemException;
 
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.governors.MaxPagesGovernorException;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -31,8 +28,12 @@ import org.jboss.weld.context.ConversationContext;
 import org.jboss.weld.context.http.Http;
 import org.primefaces.model.StreamedContent;
 
+import com.itextpdf.text.DocumentException;
+
 import br.gov.mec.aghu.action.impressao.SistemaImpressao;
 import br.gov.mec.aghu.action.report.ActionReport;
+import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
+import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.business.IAghuFacade;
 import br.gov.mec.aghu.controlepaciente.business.IControlePacienteFacade;
 import br.gov.mec.aghu.controlepaciente.cadastrosbasicos.business.ICadastrosBasicosControlePacienteFacade;
@@ -47,12 +48,13 @@ import br.gov.mec.aghu.dominio.DominioTipoGrupoControle;
 import br.gov.mec.aghu.impressao.SistemaImpressaoException;
 import br.gov.mec.aghu.internacao.business.IInternacaoFacade;
 import br.gov.mec.aghu.model.AghAtendimentos;
+import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.model.AinInternacao;
 import br.gov.mec.aghu.model.AipPacientes;
 import br.gov.mec.aghu.model.EcpItemControle;
 import br.gov.mec.aghu.paciente.prontuarioonline.vo.InternacaoVO;
-
-import com.itextpdf.text.DocumentException;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.governors.MaxPagesGovernorException;
 
 @SuppressWarnings({ "PMD.AghuTooManyMethods" })
 public class RelatorioRegistrosControlesPacienteController extends ActionReport {
@@ -93,6 +95,9 @@ public class RelatorioRegistrosControlesPacienteController extends ActionReport 
 
 	@EJB
 	private ICadastrosBasicosControlePacienteFacade cadastrosBasicosControlePacienteFacade;
+	
+	@EJB
+	private IParametroFacade parametroFacade;
 
 	private boolean fromTransferenciaPaciente = false;
 	private boolean fromVisualizarControles = false;
@@ -228,8 +233,18 @@ public class RelatorioRegistrosControlesPacienteController extends ActionReport 
 
 	@Override
 	public String recuperarArquivoRelatorio() {
-		return "br/gov/mec/aghu/controlepaciente/report/relatorioRegistroControlePaciente.jasper";
-		// alterar a chamada para o metodo da controller.(recuperarColecao())
+		try {
+			AghParametros aghParamRelatorioControlePaciente = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_RELATORIO_CONTROLE_PACIENTE_PAISAGEM);
+			String RelatorioControlePacientePaisagem = aghParamRelatorioControlePaciente.getVlrTexto();
+			if ("S".equalsIgnoreCase(RelatorioControlePacientePaisagem)) {
+				return "br/gov/mec/aghu/controlepaciente/report/relatorioRegistroControlePacientePaisagem.jasper";
+			} else {
+				return "br/gov/mec/aghu/controlepaciente/report/relatorioRegistroControlePaciente.jasper";
+			}
+		} catch (ApplicationBusinessException e) {
+			apresentarExcecaoNegocio(e);
+		}
+		return "retorno";
 	}
 
 	@Override

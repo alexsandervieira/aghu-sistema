@@ -76,11 +76,11 @@ public class MbcSolicHemoCirgAgendadaDAO extends br.gov.mec.aghu.core.persistenc
 		DetachedCriteria criteria = DetachedCriteria.forClass(MbcSolicHemoCirgAgendada.class, "SHA");
 		criteria.createAlias("SHA.".concat(MbcSolicHemoCirgAgendada.Fields.ABS_COMPONENTE_SANGUINEO.toString()), "CSA");
 		
-		StringBuilder sqlProjection = new StringBuilder(250);
+		StringBuilder sqlProjection = new StringBuilder(300);
 		sqlProjection.append("   RPAD(SUBSTR(csa1_.DESCRICAO,1,25),25,'.') || ':' ||   ")
-		.append("   LPAD(TO_CHAR({alias}.QUANTIDADE, 'FM999'),3,' ') ||   ")
-		.append("   CASE WHEN {alias}.QTDE_ML IS NULL THEN ' UN' ELSE ' ML' END  "
-			).append( SubRelatorioNotasDeConsumoDaSalaSangueUtilizadoVO.Fields.SANGUE_UTILIZADO.toString());
+		.append("   CASE WHEN {alias}.QUANTIDADE IS NOT NULL THEN LPAD(TO_CHAR({alias}.QUANTIDADE, 'FM999'),3,' ') || ' UN'   ")
+		.append("   WHEN {alias}.QTDE_ML IS NOT NULL THEN LPAD(TO_CHAR({alias}.QTDE_ML, 'FM999'),3,' ') || ' ML' END  ")
+		.append( SubRelatorioNotasDeConsumoDaSalaSangueUtilizadoVO.Fields.SANGUE_UTILIZADO.toString());
 		
 		criteria.setProjection(Projections.projectionList()
 				.add(Projections.sqlProjection(sqlProjection.toString(),

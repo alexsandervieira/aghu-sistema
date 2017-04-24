@@ -408,7 +408,7 @@ public class ManterReceitaController extends ActionController{
 			if (StringUtils.isNotBlank(medicamentos.getId().getDescricao())) {
 				descricao.append(medicamentos.getId().getDescricao());
 			}
-			if (StringUtils.isNotBlank(medicamentos.getConcentracao().toString())) {
+			if (medicamentos.getConcentracao() != null) {
 				descricao.append(' ').append(medicamentos.getConcentracao().toString());
 			}
 			if (medicamentos.getDescricaoUmm() != null && StringUtils.isNotBlank(medicamentos.getDescricaoUmm())) {

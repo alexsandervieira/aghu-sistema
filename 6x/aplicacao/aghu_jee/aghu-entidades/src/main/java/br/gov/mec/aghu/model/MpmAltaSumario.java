@@ -787,8 +787,10 @@ public class MpmAltaSumario extends BaseEntityId<MpmAltaSumarioId> implements ja
 		,ESTORNO("estorno")
 		,REGISTRO("registro")
 		,REGISTRO_SEQ("registro.seq")
-		,DTHR_ESTORNO("dthrEstorno")
-		;
+		,DTHR_ESTORNO("dthrEstorno"),
+		LEITO("leito"),
+		QUARTO("quarto"),
+		ESPECIALIDADE("especialidade");
 
 		private String fields;
 

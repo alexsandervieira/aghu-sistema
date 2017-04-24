@@ -19,10 +19,10 @@
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.default_schema" value="AGH" />
 			<property name="hibernate.connection.driver_class" value="org.postgresql.Driver" />
-			<property name="hibernate.dialect" value="br.gov.mec.aghu.core.persistence.dialect.PostgreSQLExtendedDialect" />
+			<property name="hibernate.dialect" value="br.gov.mec.ebserh.core.persistence.dialect.PostgreSQLExtendedDialect" />
 			<property name="hibernate.connection.username" value="ugen_aghu" />
 			<property name="hibernate.connection.password" value="ugen_aghu" />
-			<property name="hibernate.connection.url" value="jdbc:postgresql://172.17.62.53:5432/dbaghu_huufpi_6x" />
+			<property name="hibernate.connection.url" value="jdbc:postgresql://172.17.62.146:6544/dbaghu-hujf-63" />
 			<property name="javax.persistence.validation.mode" value="callback, ddl" />
 		</properties> 
 		
@@ -36,7 +36,7 @@
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.default_schema" value="AGH" />
 			<property name="hibernate.connection.driver_class" value="oracle.jdbc.OracleDriver" />
-			<property name="hibernate.dialect" value="br.gov.mec.aghu.core.persistence.dialect.Oracle10gExtendedDialect" />
+			<property name="hibernate.dialect" value="br.gov.mec.ebserh.core.persistence.dialect.Oracle10gExtendedDialect" />
 			<property name="hibernate.connection.username" value="ugen_aghu" />
 			<property name="hibernate.connection.password" value="xLKZG2Na" />
 			<property name="javax.persistence.validation.mode" value="callback, ddl" />

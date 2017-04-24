@@ -491,7 +491,7 @@ public class PrescreverProcedimentosEspeciaisON extends BaseBusiness {
 		novo.setProcedimentoEspecialDiverso(prescricaoProcedimento.getProcedimentoEspecialDiverso());
 		novo.setMatCodigo(prescricaoProcedimento.getMatCodigo());
 		novo.setProcedimentoCirurgico(prescricaoProcedimento.getProcedimentoCirurgico());
-		
+		novo.setOrdem(prescricaoProcedimento.getOrdem());
 		// Prepara os Modo Uso para Insercao no Novo Procedimento.
 		List<MpmModoUsoPrescProcedId> modoUsoIdExcluidos = new LinkedList<MpmModoUsoPrescProcedId>();
 		for (ModoUsoProcedimentoEspecialVO modoUsoProcEspVO : listaModoUsoParaExclusao) {

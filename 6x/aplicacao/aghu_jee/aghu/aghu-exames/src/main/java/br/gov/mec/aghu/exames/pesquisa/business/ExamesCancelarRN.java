@@ -387,6 +387,12 @@ return LOG;
 		itensSolicitacoes = getAelItemSolicitacaoExameDAO().pesquisarItemSolicitacaoExamePorAtendimento(atendimento.getSeq(), unfSeqAnatomia, codigos);
 		
 		for (AelItemSolicitacaoExames aelItemSolicitacaoExames : itensSolicitacoes) {
+			
+			// Tarefa #85481. Exames que podem ser solicitados após alta do paciente não devem ser cancelados
+			if(DominioSimNao.S.equals(aelItemSolicitacaoExames.getAelExameMaterialAnalise().getIndPermiteSolicAlta())) {
+				continue;
+			}
+			
 			AelItemSolicitacaoExames original = new AelItemSolicitacaoExames();
 			try {
 				BeanUtils.copyProperties(original, aelItemSolicitacaoExames);

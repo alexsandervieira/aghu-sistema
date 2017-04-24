@@ -12,11 +12,11 @@ import javax.ejb.EJB;
 import javax.inject.Inject;
 import javax.transaction.SystemException;
 
-import net.sf.jasperreports.engine.JRException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.itextpdf.text.DocumentException;
 
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
@@ -60,8 +60,7 @@ import br.gov.mec.aghu.paciente.business.IPacienteFacade;
 import br.gov.mec.aghu.prescricaomedica.vo.AghAtendimentosVO;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
-
-import com.itextpdf.text.DocumentException;
+import net.sf.jasperreports.engine.JRException;
 
 @SuppressWarnings("PMD.ExcessiveClassLength")
 public class GeracaoRequisicaoMaterialController extends ActionController {
@@ -189,6 +188,7 @@ public class GeracaoRequisicaoMaterialController extends ActionController {
 	private boolean materialCarregou;
 	
 	private boolean imprimir;
+	private boolean mostrarModalConfirmacaoImpressaoWG;
 	
 	@PostConstruct
 	protected void inicializar() {
@@ -201,8 +201,10 @@ public class GeracaoRequisicaoMaterialController extends ActionController {
 	 */
 	public void inicio() {
 		try {
+			this.validarImpressaoParamtroRM();
+			
 			this.limparPaciente();
-
+			
 			if (seqReq != null) {
 				reqMaterial = this.estoqueFacade.obterRequisicaoMaterial(this.seqReq);
 				cancelarEdicao();
@@ -253,6 +255,15 @@ public class GeracaoRequisicaoMaterialController extends ActionController {
 		} catch (ApplicationBusinessException e) {
 			apresentarExcecaoNegocio(e);
 			LOG.error(e.getMessage(), e);
+		}
+	}
+
+	public void validarImpressaoParamtroRM() throws ApplicationBusinessException {
+		String parametro = this.parametroFacade.buscarAghParametro(AghuParametrosEnum.P_IMPRIMI_RM_LOCAL_E_REMOTA).getVlrTexto();
+		if(parametro.equalsIgnoreCase("S")){
+			this.setMostrarModalConfirmacaoImpressaoWG(Boolean.TRUE);
+		}else{
+			this.setMostrarModalConfirmacaoImpressaoWG(Boolean.FALSE);
 		}
 	}
 
@@ -827,10 +838,11 @@ public class GeracaoRequisicaoMaterialController extends ActionController {
 				} catch (UnknownHostException e) {
 					LOG.error(EXCECAO_CAPTURADA, e);
 				}
+
 				this.estoqueBeanFacade.gravarRequisicaoMaterial(this.reqMaterial, nomeMicrocomputador);
 
 				if (this.reqMaterial.getPacoteMaterial() != null) {
-					this.adicionarItensPacote();
+					this.adicionarItensPacote(nomeMicrocomputador);
 					this.atualizaListaItens();
 				}
 
@@ -885,13 +897,15 @@ public class GeracaoRequisicaoMaterialController extends ActionController {
 				LOG.error(EXCECAO_CAPTURADA, e);
 			}
 			try {
-				this.estoqueBeanFacade.gravarRequisicaoMaterial(
-						this.reqMaterial, nomeMicrocomputador);
 
 				if (this.reqMaterial.getPacoteMaterial() != null) {
-					this.adicionarItensPacote();
+					this.adicionarItensPacote(nomeMicrocomputador);
 					this.atualizaListaItens();
 				}
+				
+				this.estoqueBeanFacade.gravarRequisicaoMaterial(
+						this.reqMaterial, nomeMicrocomputador);
+								
 			} catch (BaseException e) {
 				this.apresentarExcecaoNegocio(e);
 			}
@@ -1069,6 +1083,14 @@ public class GeracaoRequisicaoMaterialController extends ActionController {
 			imprimirNoAlmoxarifadoDaRequisicao();
 		}
 	}
+	
+	public void confirmarImpressaoParametro() throws JRException, SystemException, IOException, BaseException{
+		if(this.isMostrarModalConfirmacaoImpressaoWG()){
+			return;
+		}else{
+			confirmar();
+		}
+	}
 
 	public void cancelarEdicao() {
 		this.mostrarPanelAvisoAlmox = false;
@@ -1118,7 +1140,7 @@ public class GeracaoRequisicaoMaterialController extends ActionController {
 	 * 
 	 * @throws BaseException
 	 */
-	private void adicionarItensPacote() throws BaseException {
+	private void adicionarItensPacote(String nomeMicrocomputador) throws BaseException {
 
 		if (reqMaterial.getSeq() != null) {
 
@@ -1128,36 +1150,8 @@ public class GeracaoRequisicaoMaterialController extends ActionController {
 				codigoGrupoMaterial = this.reqMaterial.getGrupoMaterial().getCodigo();
 			}
 
-			List<SceEstoqueAlmoxarifado> lstItemToAdd = this.estoqueFacade.pesquisarEstoqueAlmoxarifadoPorPacote(codigoGrupoMaterial,
-					this.reqMaterial.getPacoteMaterial().getId());
+			this.estoqueFacade.validarInsercaoPacoteRequisicaoMaterial(this.reqMaterial, codigoGrupoMaterial, this.isAlmoxarife, nomeMicrocomputador);
 
-			this.estoqueFacade.validarInsercaoPacoteRequisicaoMaterial(this.reqMaterial, lstItemToAdd, this.isAlmoxarife);
-
-			String nomeMicrocomputador = null;
-			try {
-				nomeMicrocomputador = super.getEnderecoRedeHostRemoto();
-			} catch (UnknownHostException e) {
-				LOG.error(EXCECAO_CAPTURADA, e);
-			}
-
-			for (SceEstoqueAlmoxarifado estoqueAlmoxarifado : lstItemToAdd) {
-				/* ID do item de requisicao */
-				SceItemRmsId idItem = new SceItemRmsId();
-				// idItem.setRmsSeq(reqMaterial.getSeq());
-				idItem.setEalSeq(estoqueAlmoxarifado.getSeq());
-				idItem.setRmsSeq(reqMaterial.getSeq());
-
-				SceItemRms item = new SceItemRms();
-				item.setId(idItem);
-				item.setQtdeRequisitada(estoqueAlmoxarifado.getQuantidade());
-				item.setEstoqueAlmoxarifado(estoqueAlmoxarifado);
-				item.setScoUnidadeMedida(estoqueAlmoxarifado.getUnidadeMedida());
-				item.setIndTemEstoque(true);
-				item.setSceReqMateriais(reqMaterial);
-
-				this.estoqueFacade.preencheConsumoMedioItemRequisicao(item, reqMaterial.getCentroCustoAplica().getCodigo());
-				this.estoqueBeanFacade.gravarItensRequisicaoMaterial(item, nomeMicrocomputador);
-			}
 		}
 	}
 
@@ -1253,7 +1247,8 @@ public class GeracaoRequisicaoMaterialController extends ActionController {
 	// Metodo para pesquisa na suggestion box de Grupo de Materiais
 	public List<ScoGrupoMaterial> obterScoGrupoMaterial(String objPesquisa) {
 		Short almoSeq = (reqMaterial.getAlmoxarifado() != null) ? reqMaterial.getAlmoxarifado().getSeq() : null;
-		return this.comprasFacade.pesquisarGrupoMaterialPorFiltroAlmoxarifado(almoSeq, objPesquisa);
+		this.limparPacote();
+		return this.comprasFacade.pesquisarGruposMateriaisPorFiltroAlmoxarifado(almoSeq, objPesquisa);
 	}
 
 	// Metodo para pesquisa na suggestion box de Pacote
@@ -1276,20 +1271,65 @@ public class GeracaoRequisicaoMaterialController extends ActionController {
 				codigoCentroCustoAplicacao, codigoGrupoMaterial, objPesquisa);
 
 	}
-
+	public void limparDadosPosdeleteAlmox(){
+		this.limparItemEstoqueAlmoxarifado();
+		this.limparCamposAlmoxarifado();
+	}
+	
+	public void limparDadosPosdeleteGrupoMaterial(){
+		this.limparGrupoMaterial();
+		this.limparPacote();
+	}
+	
 	/**
-	 * Limpa centro dados do Grupo Material e Pacote
+	 * Limpa os campos dependentes da RM, após apagar o almoxarifado
 	 */
-	public void limparPacote() {
-		this.reqMaterial.setGrupoMaterial(null);
+	private void limparCamposAlmoxarifado(){
+		this.limparMaeterial();
+		this.limparGrupoMaterial();
+		this.limparPacote();
+	}
+	
+	/**
+	 * Limpa os campos dependentes da RM, após apagar o Centro de custo Aplicação
+	 */
+	public void limparCamposCCAplicacao(){
+		this.limparPacote();
+	}
+	
+	/**
+	 * Limpa os campos dependentes da RM, após apagar o centro de custo requisição
+	 */
+    public void limparCamposCCRequisicao(){
+    	this.limparPacote();
+	}
+    
+    /**
+	 * Limpa o campo pacote
+	 */	
+	private void limparPacote(){
 		this.reqMaterial.setPacoteMaterial(null);
+	}
+	
+	 /**
+		 * Limpa o campo Grupo de material
+     */	
+	private void limparGrupoMaterial(){
+		this.reqMaterial.setGrupoMaterial(null);
+	}
+   
+	/**
+		 * Limpa o campo material
+	*/	
+	private void limparMaeterial(){
+		this.material = null;
 	}
 
 	/**
 	 * Limpa Item de Estoque Almoxarifado utilizado que sera acrescentado na
 	 * lista de itens
 	 */
-	public void limparItemEstoqueAlmoxarifado() {
+	private void limparItemEstoqueAlmoxarifado() {
 		this.estoqueAlmo = null;
 		this.quantidade = 0;
 	}
@@ -1652,6 +1692,14 @@ public class GeracaoRequisicaoMaterialController extends ActionController {
 
 	public void setRenderizaModalImpressao(boolean renderizaModalImpressao) {
 		this.imprimir = renderizaModalImpressao;
+	}
+	
+	public boolean isMostrarModalConfirmacaoImpressaoWG() {
+		return mostrarModalConfirmacaoImpressaoWG;
+	}
+
+	public void setMostrarModalConfirmacaoImpressaoWG(boolean mostrarModalConfirmacaoImpressaoWG) {
+		this.mostrarModalConfirmacaoImpressaoWG = mostrarModalConfirmacaoImpressaoWG;
 	}
 	
 }

@@ -163,7 +163,7 @@ public enum AelItemHorarioAgendadoRNExceptionCode implements BusinessExceptionCo
 	 * @param {AelItemHorarioAgendado} itemHorarioAgendado
 	 * @throws BaseException 
 	 */
-	protected void atualizarItemAgendamento(AelItemSolicitacaoExames itemSolicitacaoExames, AelItemSolicitacaoExames itemSolicitacaoExameOriginal, String nomeMicrocomputador) throws BaseException {
+	public void atualizarItemAgendamento(AelItemSolicitacaoExames itemSolicitacaoExames, AelItemSolicitacaoExames itemSolicitacaoExameOriginal, String nomeMicrocomputador) throws BaseException {
 		
 			String sitCodigo = itemSolicitacaoExames.getSituacaoItemSolicitacao().getCodigo();
 			

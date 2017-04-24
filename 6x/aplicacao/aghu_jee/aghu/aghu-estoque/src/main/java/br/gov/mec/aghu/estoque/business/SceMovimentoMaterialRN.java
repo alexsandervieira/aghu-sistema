@@ -2016,7 +2016,7 @@ public class SceMovimentoMaterialRN extends BaseBusiness{
 		
 		verificaCustoMedioPonderadorIgualZero(sceMovimentoMaterial);
 		
-		if ((sceMovimentoMaterial.getValor().doubleValue() < valorMinimo) && (sceMovimentoMaterial.getCustoMedioPonderadoGer() != null)) {
+		if ((sceMovimentoMaterial.getValor().doubleValue() < valorMinimo) && (sceMovimentoMaterial.getCustoMedioPonderadoGer() != null && sceMovimentoMaterial.getQuantidade() != 0)) {
 			
 			Double quantidadeMinima = valorMinimo / sceMovimentoMaterial.getCustoMedioPonderadoGer().doubleValue();
 

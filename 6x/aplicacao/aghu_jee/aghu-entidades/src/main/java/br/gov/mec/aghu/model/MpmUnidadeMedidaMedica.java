@@ -134,8 +134,8 @@ public class MpmUnidadeMedidaMedica extends BaseEntitySeq<Integer> implements ja
 		this.servidor = servidor;
 	}
 
-	@Column(name = "DESCRICAO", nullable = false, length = 35)
-	@Length(max = 35)
+	@Column(name = "DESCRICAO", nullable = false, length = 30)
+	@Length(max = 30)
 	public String getDescricao() {
 		return this.descricao;
 	}

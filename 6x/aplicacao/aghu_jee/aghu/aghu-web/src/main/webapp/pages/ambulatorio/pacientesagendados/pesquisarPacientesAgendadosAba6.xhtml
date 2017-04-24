@@ -45,10 +45,20 @@
             <f:facet name="header"> 
               <h:outputText value="#{messages.LABEL_PESQUISAR_PACIENTES_AUSENTES_PACIENTE}"/> 
             </f:facet>  
-            <h:outputText id="colunaPaciente" value="#{item.pacienteNome}" />            
+            
+            <h:outputText 
+            	id="colunaPaciente" 
+            	value="#{not empty item.nomeSocial ? item.nomeSocial : item.pacienteNome}"/>
+            	
+			<h:graphicImage 
+				title="#{messages.LABEL_NOME_CIVIL}: #{item.pacienteNome}"  
+				value="/resources/img/icons/nome-civil-paciente.png" 
+				style="border:0px; float:right;" 
+				rendered="#{not empty item.nomeSocial}" />
+            
             <p:tooltip for="colunaPaciente">#{messages.LABEL_PESQUISAR_PACIENTES_AUSENTES_AGENDA}:#{item.nomeEspecialidade}  
-            								 <br clear="none"/>#{messages.LABEL_PESQUISAR_PACIENTES_AUSENTES_EQUIPE}: #{item.gradeEquipeNome}
-            								 <br clear="none"/>#{messages.LABEL_PESQUISAR_PACIENTES_AUSENTES_PROFISSIONAL}: #{item.nomeProfissional}
+            	<br clear="none"/>#{messages.LABEL_PESQUISAR_PACIENTES_AUSENTES_EQUIPE}: #{item.gradeEquipeNome}
+            	<br clear="none"/>#{messages.LABEL_PESQUISAR_PACIENTES_AUSENTES_PROFISSIONAL}: #{item.nomeProfissional}
             </p:tooltip>            
           </p:column>
           

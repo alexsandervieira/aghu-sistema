@@ -44,6 +44,9 @@ public class MedicamentoPaginatorController extends ActionController implements 
 	@Inject
 	private MedicamentoController medicamentoController;
 	
+	@Inject
+	private CadastroDiluentesPaginatorController cadastroDiluentesPaginatorController;
+	
 	@PostConstruct
 	public void init(){
 		dataModel.setUserEditPermission(permissionService.usuarioTemPermissao(this.obterLoginUsuarioLogado(), "medicamento", "alterar"));
@@ -64,7 +67,8 @@ public class MedicamentoPaginatorController extends ActionController implements 
 		SUBSTITUTO_MEDICAMENTO("medicamentoEquivalenteList"),
 		HISTORICO_MDTO("historicoCadastroMedicamentoList"),
 		MEDICAMENTO_CRUD("medicamentoCRUD"),
-		CADASTRAR_DILUENTES("farmacia-cadastrarDiluentes");
+		CADASTRAR_DILUENTES("farmacia-cadastrarDiluentes"),
+		CANCELAR("farmacia-cancelar");
 		
 		private final String str;
 		
@@ -141,6 +145,15 @@ public class MedicamentoPaginatorController extends ActionController implements 
 		String retorno = RetornoAcaoStrEnum.ERRO.toString();
 		if (this.medicamentoSelecionado != null) {
 			retorno = RetornoAcaoStrEnum.CADASTRAR_DILUENTES.toString();
+			this.cadastroDiluentesPaginatorController.setVoltar(RetornoAcaoStrEnum.CANCELAR.toString());
+		}
+		return retorno;
+	}
+	public String realizarChamadaDiluentesCRUD(){
+		String retorno = RetornoAcaoStrEnum.ERRO.toString();
+		if (this.medicamentoSelecionado != null) {
+			retorno = RetornoAcaoStrEnum.CADASTRAR_DILUENTES.toString();
+			this.cadastroDiluentesPaginatorController.setVoltar(RetornoAcaoStrEnum.MEDICAMENTO_CRUD.toString());
 		}
 		return retorno;
 	}
@@ -226,5 +239,7 @@ public class MedicamentoPaginatorController extends ActionController implements 
 	public void setIndRevisaoCadastro(DominioSimNao indRevisaoCadastro) {
 		this.indRevisaoCadastro = indRevisaoCadastro;
 	}
+	
+	
 
 }

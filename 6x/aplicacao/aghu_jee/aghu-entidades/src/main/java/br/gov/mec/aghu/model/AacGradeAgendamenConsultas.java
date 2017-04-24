@@ -447,6 +447,7 @@ public class AacGradeAgendamenConsultas extends BaseEntitySeq<Integer> implement
 				USLSALA("uslSala"),
 				PROF_ESPECIALIDADE("profEspecialidade"), 
 				PROF_ESPECIALIDADE_SERVIDOR("profEspecialidade.rapServidor"),
+				PROF_ESPECIALIDADE_SERVIDOR_ID("profEspecialidade.rapServidor.id"),
 				PROF_ESPECIALIDADE_SERVIDOR_PESSOA_FISICA("profEspecialidade.rapServidor.pessoaFisica"),
 				GRADE_PROCEDIMENTOS_HOSPITALAR("gradeProcedimentosHospitalar"),
 				

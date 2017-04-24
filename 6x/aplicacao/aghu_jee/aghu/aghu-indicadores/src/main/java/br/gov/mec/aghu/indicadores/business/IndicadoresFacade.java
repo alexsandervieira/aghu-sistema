@@ -106,6 +106,7 @@ public class IndicadoresFacade extends BaseFacade implements IIndicadoresFacade 
 	 * @throws ApplicationBusinessException
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	public void gerarIndicadoresHospitalares(Date date, String cron) throws ApplicationBusinessException {
 		this.getIndicadoresON().gerarIndicadoresHospitalares(date, cron);
 	}

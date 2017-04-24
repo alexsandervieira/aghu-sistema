@@ -18,6 +18,7 @@ import br.gov.mec.aghu.casca.autenticacao.AghuQuartzPrincipal;
 import br.gov.mec.aghu.core.business.jobs.AppJob;
 import br.gov.mec.aghu.core.business.scheduler.AppSchedulingConstants;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.locator.ServiceLocator;
 import br.gov.mec.aghu.core.messages.MessagesUtils;
 import br.gov.mec.aghu.core.utils.DateFormatUtil;
@@ -54,7 +55,7 @@ public abstract class AghuJob  extends AppJob {
 	@Override
 	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 		String nomeProcessoQuartz = getNomeProcessoQuartz(jobExecutionContext);
-		//RapServidores servidorLogado = this.getServidorAgendador(jobExecutionContext);
+		RapServidores servidorAgendador = this.getServidorAgendador(jobExecutionContext);
 		
 		if (nomeProcessoQuartz == null || "".equals(nomeProcessoQuartz.trim())) {
 			throw new IllegalArgumentException("Nome do job não pode ser nulo.");
@@ -62,6 +63,16 @@ public abstract class AghuJob  extends AppJob {
 		LOG.info("Quartz Job " + " [" + nomeProcessoQuartz + "] " + DateFormatUtil.formataTimeStamp(new Date()) + ".");
 		
 		AghJobDetail job = getSchedulerFacade().obterAghJobDetailPorNome(nomeProcessoQuartz);
+		if (job == null) {
+			try {
+				job = schedulerFacade.persistirAghJobDetail(new AghJobDetail(nomeProcessoQuartz, servidorAgendador, null));
+				LOG.info("AghJobDetail inserido.");
+			} catch (BaseException e) {
+				LOG.error(e.getMessage(), e);
+				//throw new JobExecutionException(e);
+				return;
+			}
+		}
 		boolean iniciouExecucao = getSchedulerFacade().iniciarExecucao(job);
 		if (!iniciouExecucao) {
 			return;

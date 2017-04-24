@@ -29,7 +29,7 @@ public interface ILaudoReport {
 	
 	ExamesListaVO getExamesLista();
 	
-	void executar() throws FileNotFoundException, IOException;
+	void executar(Boolean consideraAlinhamentoVertical) throws FileNotFoundException, IOException;
 	
 	void setCaminhoLogo(String caminho);
 	

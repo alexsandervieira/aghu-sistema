@@ -137,15 +137,14 @@
 										<h:outputText
 											value="#{messages.LABEL_PRESCRICAO_ENFERMAGEM_FREQUENCIA}" />
 									</f:facet>
-									<p:inputText id="frequencia" styleClass="numerico"
+									<p:inputMask id="frequencia" mask="9?99"
 										value="#{_cuidadoVO.prescricaoCuidado.frequencia}" size="3"	maxlength="3" 
-										converter="#{javax.faces.Short}"
-										autocomplete="off">
+										>
 										<p:ajax event="change" 
 											oncomplete="atualizarFrequencia('tipoFrequenciaAprazamento', '#{_cuidadoVO.prescricaoCuidado.frequencia}')"
 											update="@(#tipoFrequenciaAprazamento),@(#panelTabelaCuidados)" process="@this" 
 											listener="#{manutencaoPrescricaoCuidadoController.rePopularComboTipoFreqAprazamento(_cuidadoVO)}" />
-									</p:inputText>
+									</p:inputMask>
 								</p:column>
 								<p:column width="25%"
 									style="#{manutencaoPrescricaoCuidadoController.obterEstiloColuna(_cuidadoVO)}">
@@ -167,16 +166,6 @@
 											immediate="true" />
 									</p:selectOneMenu>
 								</p:column>
-								<p:column width="10%" style="#{manutencaoPrescricaoCuidadoController.obterEstiloColuna(_cuidadoVO)}">
-								<p:outputPanel id="actionPannelButtons">
-									<mec:commandLink 
-										styleClass="silk-yes-link silk-icon"
-										style="padding-left:5px !important"
-						            	title="#{messages.LABEL_GRAVAR}"
-										action="#{manutencaoPrescricaoCuidadoController.gravar(_cuidadoVO)}"
-										render="panelTabelaCuidados"/>
-						           </p:outputPanel>	
-								</p:column>					
 							</mec:serverDataTable>
 						</p:outputPanel>
 					</p:outputPanel>

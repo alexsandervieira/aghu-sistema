@@ -63,6 +63,7 @@ import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.core.exception.Severity;
+import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dominio.DominioExibicaoParametroCamposLaudo;
 import br.gov.mec.aghu.dominio.DominioFormaRespiracao;
 import br.gov.mec.aghu.dominio.DominioObjetoVisual;
@@ -70,6 +71,7 @@ import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.dominio.DominioSituacaoItemSolicitacaoExame;
 import br.gov.mec.aghu.dominio.DominioSubTipoImpressaoLaudo;
 import br.gov.mec.aghu.dominio.DominioTipoCampoCampoLaudo;
+import br.gov.mec.aghu.dominio.DominioUnidadeMedidaIdade;
 import br.gov.mec.aghu.exames.business.IExamesFacade;
 import br.gov.mec.aghu.exames.business.IMascaraExamesFacade;
 import br.gov.mec.aghu.exames.cadastrosapoio.business.ICadastrosApoioExamesFacade;
@@ -129,7 +131,7 @@ public class MascaraExamesComponentes extends ActionController implements Serial
 	@EJB
 	private IAghuFacade aghuFacade;
 
-	@Inject
+	@EJB
 	private ICadastrosApoioExamesFacade cadastrosApoioExamesFacade;
 	
 	@Inject
@@ -1254,8 +1256,8 @@ public class MascaraExamesComponentes extends ActionController implements Serial
 			inputTextArea.setId(campo.getId().toString());
 			inputTextAreaGrande.setId(campo.getId().toString() + "Grande");
 			
-			inputTextArea.setControls("bold italic underline strikethrough alignleft center alignright justify font size color");
-			inputTextAreaGrande.setControls("bold italic underline strikethrough alignleft center alignright justify font size color");
+			inputTextArea.setControls("bold italic underline strikethrough size color");
+			inputTextAreaGrande.setControls("bold italic underline strikethrough size color");
 			
 			if (campo.getLarguraObjetoVisual() != null) {
 				inputTextArea.setWidth(campo.getLarguraObjetoVisual().intValue());
@@ -1848,8 +1850,8 @@ public class MascaraExamesComponentes extends ActionController implements Serial
 				if (operandos != null) {
 					for (String operando : operandos) {
 						if (operando.equals("IDADE")) {
-							String idade = mascaraExamesFacade.obterIdadePaciente(itemSolicitacaoExameObject) != null ? mascaraExamesFacade
-									.obterIdadePaciente(itemSolicitacaoExameObject).toString() : "";
+							String idade = mascaraExamesFacade.obterDtNascimentoPaciente(itemSolicitacaoExameObject) != null ? DateUtil.getIdade(mascaraExamesFacade
+									.obterDtNascimentoPaciente(itemSolicitacaoExameObject)).toString() : "";
 							String valor = isPrevia ? MascaraExamesComponentes.IDADE_PREVIA.toString() : idade;
 							formula = StringUtils.replace(formula, "[" + operando + "]", valor);
 						} else if (operando.equals("SEXO")) {
@@ -2123,7 +2125,7 @@ public class MascaraExamesComponentes extends ActionController implements Serial
 	}
 
 	private boolean possuiOperadores(final String formula) {
-		if (formula != null) {
+		if (formula != null  && !formula.contains("#")) {
 			String[] operadores = { "POWER", "SQRT", "DECODE", "GREATEST", "SIGN", "+", "-", "*", "/" };
 			for (String operador : operadores) {
 				if (formula.toUpperCase().contains(operador)) {
@@ -2226,19 +2228,38 @@ public class MascaraExamesComponentes extends ActionController implements Serial
 		}
 
 		// Se a idade for específicada, a idade do paciente deve estar no range.
-		int idadePaciente = mascaraExamesFacade.obterIdadePaciente(itemSolicitacaoExame);
-		boolean idadeMinima = valorNormalidade.getIdadeMinima() != null && valorNormalidade.getIdadeMinima() >= idadePaciente;
-		boolean idadeMaxima = valorNormalidade.getIdadeMaxima() != null && valorNormalidade.getIdadeMaxima() <= idadePaciente;
 
-		if (idadeMinima || idadeMaxima) {
-			retorno = false;
-
+		if(DominioUnidadeMedidaIdade.A.equals(valorNormalidade.getUnidMedidaIdade())) {
+			int idadePaciente = DateUtil.getIdade(mascaraExamesFacade.obterDtNascimentoPaciente(itemSolicitacaoExame));
+			retorno = isIdadeDentroNormalidade(valorNormalidade, retorno,
+					idadePaciente);
+		} else if(DominioUnidadeMedidaIdade.M.equals(valorNormalidade.getUnidMedidaIdade())) {
+			int idadePaciente = DateUtil.getIdadeMeses(mascaraExamesFacade.obterDtNascimentoPaciente(itemSolicitacaoExame));
+			retorno = isIdadeDentroNormalidade(valorNormalidade, retorno,
+					idadePaciente);
+		} else if(DominioUnidadeMedidaIdade.D.equals(valorNormalidade.getUnidMedidaIdade())) {
+			int idadePaciente = DateUtil.getIdadeDias(mascaraExamesFacade.obterDtNascimentoPaciente(itemSolicitacaoExame));
+			retorno = isIdadeDentroNormalidade(valorNormalidade, retorno,
+					idadePaciente);
 		}
 		if (valorNormalidade.getSexo() != null
 				&& !valorNormalidade.getSexo().toString().equals(mascaraExamesFacade.obterSexoPaciente(itemSolicitacaoExame))) {
 			retorno = false;
 		}
 
+		return retorno;
+	}
+
+	private boolean isIdadeDentroNormalidade(
+			AelValorNormalidCampo valorNormalidade, boolean retorno,
+			int idadePaciente) {
+		boolean idadeMinima = valorNormalidade.getIdadeMinima() != null && valorNormalidade.getIdadeMinima() >= idadePaciente;
+		boolean idadeMaxima = valorNormalidade.getIdadeMaxima() != null && valorNormalidade.getIdadeMaxima() <= idadePaciente;
+		
+		if (idadeMinima || idadeMaxima) {
+			retorno = false;
+			
+		}
 		return retorno;
 	}
 

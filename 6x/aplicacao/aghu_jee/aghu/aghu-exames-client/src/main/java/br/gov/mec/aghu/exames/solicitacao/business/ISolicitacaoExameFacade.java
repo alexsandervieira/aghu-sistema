@@ -41,10 +41,12 @@ import br.gov.mec.aghu.exames.vo.VAelSolicAtendsVO;
 import br.gov.mec.aghu.model.AelAmostraItemExames;
 import br.gov.mec.aghu.model.AelAmostras;
 import br.gov.mec.aghu.model.AelAtendimentoDiversos;
+import br.gov.mec.aghu.model.AelExameHorarioColeta;
 import br.gov.mec.aghu.model.AelExameInternetStatus;
 import br.gov.mec.aghu.model.AelItemSolicitacaoExames;
 import br.gov.mec.aghu.model.AelLoteExameUsual;
 import br.gov.mec.aghu.model.AelMotivoCancelaExames;
+import br.gov.mec.aghu.model.AelPermissaoUnidSolic;
 import br.gov.mec.aghu.model.AelRecomendacaoExame;
 import br.gov.mec.aghu.model.AelRegiaoAnatomica;
 import br.gov.mec.aghu.model.AelSitItemSolicitacoes;
@@ -849,7 +851,7 @@ public interface ISolicitacaoExameFacade extends Serializable {
     public Boolean validaUnidadeSolicitanteSus(Short unfSeq);
 
 	public List<ExameSuggestionVO> pesquisaUnidadeExecutaSinonimoExame(
-			final String nomeExame, Short seqUnidade, Boolean isSus, Boolean isOrigemInternacao, Integer seqAtendimento, boolean filtrarExamesProcEnfermagem, boolean buscaCompleta, DominioTipoPesquisaExame tipoPesquisa);
+			final String nomeExame, Short seqUnidade, Boolean isSus, Boolean isOrigemInternacao, Integer seqAtendimento, boolean filtrarExamesProcEnfermagem, boolean buscaCompleta, DominioTipoPesquisaExame tipoPesquisa, Boolean filtroPorUnidade);
 
 	public AelItemSolicitacaoExames obterItemSolicitacaoExamePorId(final Integer soeSeq, final Short seqp);
 	public void processarExameInternet(AghJobDetail job);
@@ -889,4 +891,9 @@ public interface ISolicitacaoExameFacade extends Serializable {
 			String nomeMicrocomputador) throws BaseException;
 
 	List<AelItemSolicitacaoExames> buscarItensPorAmostra(Integer soeSeq, Integer amoSeqp);
+	
+	public AelPermissaoUnidSolic 
+	buscarAelPermissaoUnidSolicPorEmaExaSiglaEmaManSeqUnfSeqUnfSeqSolicitante(String exame, Integer emaManSeq, Short unfSeq, Short unfSeqSolicitante);
+	
+	public AelExameHorarioColeta recuperarHorarioColetas(String exame, Integer matExame);
 }

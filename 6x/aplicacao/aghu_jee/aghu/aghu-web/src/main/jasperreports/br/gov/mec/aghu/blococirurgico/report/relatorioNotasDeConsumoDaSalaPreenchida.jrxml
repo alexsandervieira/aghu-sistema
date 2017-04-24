@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="relatorioProntuariosExcluidos" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="69899cf4-ea4d-4bff-b6bd-b6afaae51739">
-	<property name="ireport.zoom" value="2.0"/>
-	<property name="ireport.x" value="115"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.zoom" value="1.366026910730148"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="25"/>
 	<subDataset name="dataset1" uuid="24e4ef59-5576-427d-b1dd-256e236dc59f"/>
 	<parameter name="caminhoLogo" class="java.lang.String"/>
 	<parameter name="unfDescricao" class="java.lang.String"/>
@@ -319,7 +319,7 @@
 		</groupHeader>
 	</group>
 	<detail>
-		<band height="295" splitType="Prevent">
+		<band height="107" splitType="Stretch">
 			<frame>
 				<reportElement uuid="d9a44ecf-918c-4547-b0d3-be3833ec9934" positionType="Float" x="3" y="2" width="539" height="22" isPrintWhenDetailOverflows="true"/>
 				<box>
@@ -375,462 +375,14 @@
 				</textElement>
 				<text><![CDATA[CIRURGIA]]></text>
 			</staticText>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="84" width="382" height="22"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<text><![CDATA[APLICADA LISTA DE VERIFICAÇÃO CIRURG. SEGURA?    SIM      NÃO]]></text>
-			</staticText>
 			<ellipse>
-				<reportElement uuid="264b6893-5fdf-4866-877b-7a8d06dcaca9" x="230" y="91" width="6" height="6"/>
+				<reportElement uuid="264b6893-5fdf-4866-877b-7a8d06dcaca9" x="264" y="90" width="10" height="8"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</ellipse>
-			<ellipse>
-				<reportElement uuid="934461f7-4022-4725-b5fc-4da3b62bd88c" x="271" y="91" width="6" height="6"/>
-				<graphicElement>
-					<pen lineWidth="0.5"/>
-				</graphicElement>
-			</ellipse>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="60" width="27" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[ENT:]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="30" y="60" width="45" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{dtHrEntradaSala}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="72" width="27" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[SAI:]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="30" y="72" width="45" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{dtHrSaidaSala}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="428" y="46" width="17" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[O2:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="428" y="58" width="100" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[ÓXIDO NITROSO: ____]]></text>
-			</staticText>
 			<line>
 				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" x="0" y="106" width="555" height="1"/>
-				<graphicElement>
-					<pen lineWidth="1.0"/>
-				</graphicElement>
-			</line>
-			<line>
-				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" x="0" y="123" width="555" height="1"/>
-				<graphicElement>
-					<pen lineWidth="1.0"/>
-				</graphicElement>
-			</line>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="110" width="98" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[MOTIVO CANCELAMENTO:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="214" y="110" width="84" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[DESTINO PACIENTE:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="126" width="46" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[EQUIPE:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="138" width="81" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[CIRURGIÃO  : 1.]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="84" y="138" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{cirurgiaoMpf}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="219" y="138" width="12" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[2.]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="231" y="138" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{cirurgiaoMco}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="366" y="138" width="12" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[3.]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="378" y="138" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{cirurgiaoMax}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="150" width="81" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[ANESTESISTA: 1.]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="366" y="150" width="12" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[3.]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="378" y="150" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{anestesistaAnr}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="231" y="150" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{anestesistaAnc}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="219" y="150" width="12" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[2.]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="84" y="150" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{anestesistaAnp}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="162" width="81" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[ENFERMEIRA : 1.]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="84" y="162" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{enfermeiraEpf}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="366" y="162" width="12" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[3.]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="378" y="162" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{enfermeiraEax}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="231" y="162" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{enfermeiraEco}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="219" y="162" width="12" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[2.]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="174" width="81" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[CIRCULANTE : 1.]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="84" y="174" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{circulanteCpf}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="219" y="174" width="12" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[2.]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="378" y="174" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{circulanteCax}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="231" y="174" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{circulanteCco}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="366" y="174" width="12" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[3.]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="186" width="81" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[INSTRUMENT.: 1.]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="378" y="186" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{instrumentInx}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="366" y="186" width="12" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[3.]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="231" y="186" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{instrumentIno}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="84" y="186" width="135" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{instrumentInp}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="219" y="186" width="12" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[2.]]></text>
-			</staticText>
-			<line>
-				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" x="0" y="199" width="555" height="1"/>
-				<graphicElement>
-					<pen lineWidth="1.0"/>
-				</graphicElement>
-			</line>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="202" width="75" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[EXAMES [S/N]]]></text>
-			</staticText>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="143" y="202" width="93" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[SANGUE UTILIZADO]]></text>
-			</staticText>
-			<subreport>
-				<reportElement uuid="7be9bd5c-a10f-46de-a12a-2f5f4966c1b6" x="3" y="214" width="120" height="12"/>
-				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{subRelatorioExames})]]></dataSourceExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "relatorioNotasDeConsumoDaSala_subExames.jasper"]]></subreportExpression>
-			</subreport>
-			<subreport>
-				<reportElement uuid="7be9bd5c-a10f-46de-a12a-2f5f4966c1b6" x="143" y="214" width="190" height="12"/>
-				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{subRelatorioSangueUtilizado})]]></dataSourceExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "relatorioNotasDeConsumoDaSala_subSangueUtilizado.jasper"]]></subreportExpression>
-			</subreport>
-			<line>
-				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" positionType="Float" x="0" y="228" width="555" height="1"/>
-				<graphicElement>
-					<pen lineWidth="1.0"/>
-				</graphicElement>
-			</line>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" positionType="Float" x="3" y="230" width="130" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[UTILIZAÇÃO EQUIPAMENTOS]]></text>
-			</staticText>
-			<frame>
-				<reportElement uuid="d9a44ecf-918c-4547-b0d3-be3833ec9934" positionType="Float" x="3" y="243" width="528" height="15" isPrintWhenDetailOverflows="true"/>
-				<box>
-					<pen lineWidth="0.0"/>
-					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
-				</box>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="0" y="0" width="132" height="12"/>
-					<textElement verticalAlignment="Middle">
-						<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-						<paragraph lineSpacing="1_1_2"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{descricaoEquipamentoColuna1}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="132" y="1" width="132" height="12"/>
-					<textElement verticalAlignment="Middle">
-						<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-						<paragraph lineSpacing="1_1_2"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{descricaoEquipamentoColuna2}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="264" y="0" width="132" height="12"/>
-					<textElement verticalAlignment="Middle">
-						<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-						<paragraph lineSpacing="1_1_2"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{descricaoEquipamentoColuna3}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="396" y="0" width="132" height="12"/>
-					<textElement verticalAlignment="Middle">
-						<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-						<paragraph lineSpacing="1_1_2"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{descricaoEquipamentoColuna4}]]></textFieldExpression>
-				</textField>
-			</frame>
-			<line>
-				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" positionType="Float" x="0" y="260" width="555" height="1"/>
-				<graphicElement>
-					<pen lineWidth="1.0"/>
-				</graphicElement>
-			</line>
-			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" positionType="Float" x="3" y="262" width="330" height="12"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
-				</textElement>
-				<text><![CDATA[ÓRTESE/PRÓTESE  ESPECIFICAR: Nome e Quantidade]]></text>
-			</staticText>
-			<frame>
-				<reportElement uuid="d9a44ecf-918c-4547-b0d3-be3833ec9934" positionType="Float" x="3" y="275" width="550" height="15" isPrintWhenDetailOverflows="true"/>
-				<box>
-					<pen lineWidth="0.0"/>
-					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
-				</box>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="0" y="0" width="183" height="12"/>
-					<textElement verticalAlignment="Middle">
-						<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-						<paragraph lineSpacing="1_1_2"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{descricaoOrteseProteseColuna1}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="183" y="0" width="183" height="12"/>
-					<textElement verticalAlignment="Middle">
-						<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-						<paragraph lineSpacing="1_1_2"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{descricaoOrteseProteseColuna2}]]></textFieldExpression>
-				</textField>
-				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="366" y="1" width="183" height="12"/>
-					<textElement verticalAlignment="Middle">
-						<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-						<paragraph lineSpacing="1_1_2"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{descricaoOrteseProteseColuna3}]]></textFieldExpression>
-				</textField>
-			</frame>
-			<line>
-				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" positionType="Float" x="0" y="292" width="555" height="1"/>
 				<graphicElement>
 					<pen lineWidth="1.0"/>
 				</graphicElement>
@@ -904,7 +456,7 @@
 				<text><![CDATA[FIM:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="75d608eb-ee76-431c-8549-006edd7ddc42" x="231" y="90" width="5" height="8">
+				<reportElement uuid="75d608eb-ee76-431c-8549-006edd7ddc42" x="267" y="90" width="5" height="8">
 					<printWhenExpression><![CDATA[$F{aplicaListaCirurgiaSegura}.equals(Boolean.TRUE)]]></printWhenExpression>
 				</reportElement>
 				<textElement>
@@ -913,7 +465,7 @@
 				<text><![CDATA[X]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="b4b89902-92e4-41b7-8b91-f54f981b2115" x="272" y="90" width="5" height="8">
+				<reportElement uuid="b4b89902-92e4-41b7-8b91-f54f981b2115" x="347" y="90" width="5" height="8">
 					<printWhenExpression><![CDATA[$F{aplicaListaCirurgiaSegura}.equals(Boolean.FALSE)]]></printWhenExpression>
 				</reportElement>
 				<textElement>
@@ -921,22 +473,6 @@
 				</textElement>
 				<text><![CDATA[X]]></text>
 			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="101" y="110" width="111" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{motivoCancelamento}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="298" y="110" width="252" height="12"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
-					<paragraph lineSpacing="1_1_2"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{destinoPaciente}]]></textFieldExpression>
-			</textField>
 			<staticText>
 				<reportElement uuid="8c9b01c3-4c84-40bb-a58e-6d471684c384" x="428" y="71" width="120" height="20"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -944,6 +480,13 @@
 				</textElement>
 				<text><![CDATA[PARADA CARDIORRESPIRATÓRIA:]]></text>
 			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="01bd42c9-9a05-44e2-966c-4a2acc40c09f" x="150" y="36" width="100" height="15"/>
+				<textElement>
+					<font fontName="Courier New" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dtHrAtbProf}]]></textFieldExpression>
+			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="91b09154-3ade-44e7-a21c-a7071b3fae1c" x="530" y="80" width="24" height="12"/>
 				<textElement verticalAlignment="Middle">
@@ -953,11 +496,69 @@
 				<textFieldExpression><![CDATA[$F{indPrc}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="301b0fa3-c197-461a-b8cb-de2d09ff5d0a" x="3" y="36" width="72" height="15" isPrintWhenDetailOverflows="true"/>
-				<textElement verticalAlignment="Middle">
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="88" width="381" height="13"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[APLICADA LISTA DE VERIFICAÇÃO CIRURG. SEGURA?		SIM		NÃO]]></text>
+			</staticText>
+			<ellipse>
+				<reportElement uuid="934461f7-4022-4725-b5fc-4da3b62bd88c" mode="Transparent" x="344" y="90" width="9" height="8"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</ellipse>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="60" width="27" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
 				</textElement>
-				<text><![CDATA[ATB profil.:]]></text>
+				<text><![CDATA[ENT:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="30" y="60" width="45" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dtHrEntradaSala}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="72" width="27" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[SAI:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="30" y="72" width="45" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dtHrSaidaSala}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="8c72c5fb-bdfe-42b1-8f54-1225c476308f" x="63" y="36" width="43" height="15"/>
+				<textElement>
+					<font fontName="Courier New" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{atbProf}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="428" y="46" width="17" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[O2:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="428" y="58" width="100" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[ÓXIDO NITROSO: ____]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="3aa33b61-388f-4d14-880d-8b0824d487c8" x="125" y="36" width="25" height="15" isPrintWhenDetailOverflows="true"/>
@@ -966,64 +567,521 @@
 				</textElement>
 				<text><![CDATA[Hora:]]></text>
 			</staticText>
-			<textField>
-				<reportElement uuid="8c72c5fb-bdfe-42b1-8f54-1225c476308f" x="63" y="36" width="43" height="15"/>
-				<textElement>
-					<font fontName="Courier New" size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{atbProf}]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement uuid="01bd42c9-9a05-44e2-966c-4a2acc40c09f" x="150" y="36" width="100" height="15"/>
-				<textElement>
-					<font fontName="Courier New" size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{dtHrAtbProf}]]></textFieldExpression>
-			</textField>
-		</band>
-		<band height="25">
 			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="1" width="100" height="12" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="301b0fa3-c197-461a-b8cb-de2d09ff5d0a" x="3" y="36" width="72" height="15" isPrintWhenDetailOverflows="true"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[ATB profil.:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="75d608eb-ee76-431c-8549-006edd7ddc42" x="376" y="106" width="35" height="0">
+					<printWhenExpression><![CDATA[$F{aplicaListaCirurgiaSegura}.equals(Boolean.TRUE)]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Courier New" size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="88" width="381" height="13"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<text><![CDATA[APLICADA LISTA DE VERIFICAÇÃO CIRURG. SEGURA?		SIM		NÃO]]></text>
+			</staticText>
+		</band>
+		<band height="12" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="101" y="0" width="111" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{motivoCancelamento}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="3" y="0" width="98" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[MOTIVO CANCELAMENTO:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="298" y="0" width="252" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{destinoPaciente}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="214" y="0" width="84" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="false" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[DESTINO PACIENTE:]]></text>
+			</staticText>
+		</band>
+		<band height="37" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="10" y="25" width="176" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cirurgiaoMpf}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" x="0" y="0" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="372" y="25" width="12" height="12"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
 				</textElement>
-				<text><![CDATA[MEDICAÇÃO/MATERIAL]]></text>
+				<text><![CDATA[3.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="156" y="1" width="25" height="12" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="13" width="555" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[CIRURGIÃO]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="195" y="25" width="175" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cirurgiaoMco}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="380" y="25" width="176" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cirurgiaoMax}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="187" y="25" width="10" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[2.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="25" width="14" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[1.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="1" width="555" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[EQUIPE]]></text>
+			</staticText>
+		</band>
+		<band height="24" splitType="Stretch">
+			<line>
+				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" x="1" y="0" width="553" height="1" forecolor="#B1B1B1"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="380" y="12" width="176" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{anestesistaAnr}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="372" y="12" width="12" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[3.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="187" y="12" width="12" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[2.]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="10" y="12" width="176" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{anestesistaAnp}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="12" width="14" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[1.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="0" width="555" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[ANESTESISTA]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="195" y="12" width="175" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{anestesistaAnc}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="25" splitType="Stretch">
+			<line>
+				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" x="2" y="0" width="553" height="1" forecolor="#B1B1B1"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="187" y="13" width="12" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[2.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="13" width="14" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[1.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="1" width="555" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[ENFERMEIRA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="372" y="13" width="12" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[3.]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="380" y="13" width="176" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{enfermeiraEax}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="195" y="13" width="175" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{enfermeiraEco}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="10" y="13" width="176" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{enfermeiraEpf}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="24" splitType="Stretch">
+			<line>
+				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" x="3" y="0" width="553" height="1" forecolor="#B1B1B1"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="187" y="12" width="12" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[2.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="12" width="14" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[1.]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="380" y="12" width="176" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{circulanteCax}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="195" y="12" width="175" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{circulanteCco}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="372" y="12" width="12" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[3.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="0" width="555" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[CIRCULANTE]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="10" y="12" width="176" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{circulanteCpf}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="25" splitType="Stretch">
+			<line>
+				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" x="1" y="0" width="553" height="1" forecolor="#B1B1B1"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="187" y="13" width="12" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[2.]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="195" y="13" width="175" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{instrumentIno}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="1" width="555" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[INSTRUMENTADOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="372" y="13" width="12" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[3.]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="380" y="13" width="176" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{instrumentInx}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" stretchType="RelativeToBandHeight" x="10" y="13" width="176" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{instrumentInp}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="13" width="14" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[1.]]></text>
+			</staticText>
+		</band>
+		<band height="25" splitType="Stretch">
+			<line>
+				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" x="0" y="0" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<subreport>
+				<reportElement uuid="7be9bd5c-a10f-46de-a12a-2f5f4966c1b6" x="2" y="13" width="120" height="12"/>
+				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{subRelatorioExames})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "relatorioNotasDeConsumoDaSala_subExames.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="143" y="1" width="93" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[SANGUE UTILIZADO]]></text>
+			</staticText>
+			<subreport>
+				<reportElement uuid="7be9bd5c-a10f-46de-a12a-2f5f4966c1b6" x="143" y="13" width="190" height="12"/>
+				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{subRelatorioSangueUtilizado})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "relatorioNotasDeConsumoDaSala_subSangueUtilizado.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="1" y="1" width="75" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[EXAMES [S/N]]]></text>
+			</staticText>
+		</band>
+		<band height="25" splitType="Stretch">
+			<line>
+				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" positionType="Float" x="2" y="0" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" positionType="Float" x="0" y="0" width="555" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[UTILIZAÇÃO EQUIPAMENTOS]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="277" y="13" width="134" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricaoEquipamentoColuna3}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="139" y="13" width="134" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricaoEquipamentoColuna2}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="1" y="13" width="134" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricaoEquipamentoColuna1}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="416" y="13" width="138" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricaoEquipamentoColuna4}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="50" splitType="Stretch">
+			<line>
+				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" positionType="Float" x="0" y="0" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" positionType="Float" x="0" y="32" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="240085b8-8a8e-4463-8f2b-5ba7261db809" x="0" y="15" width="555" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" pdfFontName="Courier"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricaoOrteseProteseColuna1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" positionType="Float" x="0" y="2" width="555" height="12"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[ÓRTESE/PRÓTESE  ESPECIFICAR: Nome e Quantidade]]></text>
+			</staticText>
+		</band>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="153" y="0" width="25" height="12" isPrintWhenDetailOverflows="true"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
 				</textElement>
 				<text><![CDATA[UNID]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="181" y="1" width="28" height="12" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="272" y="0" width="100" height="12" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<text><![CDATA[MEDICAÇÃO/MATERIAL]]></text>
+			</staticText>
+			<subreport>
+				<reportElement uuid="7be9bd5c-a10f-46de-a12a-2f5f4966c1b6" x="0" y="12" width="555" height="12"/>
+				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{subRelatorioMateriais})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "relatorioNotasDeConsumoDaSala_subMateriais.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="178" y="0" width="28" height="12" isPrintWhenDetailOverflows="true"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
 				</textElement>
 				<text><![CDATA[QTDE]]></text>
 			</staticText>
-			<subreport>
-				<reportElement uuid="7be9bd5c-a10f-46de-a12a-2f5f4966c1b6" x="3" y="13" width="544" height="12"/>
-				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{subRelatorioMateriais})]]></dataSourceExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "relatorioNotasDeConsumoDaSala_subMateriais.jasper"]]></subreportExpression>
-			</subreport>
 			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="275" y="1" width="100" height="12" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="0" width="100" height="12" isPrintWhenDetailOverflows="true"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
 				</textElement>
 				<text><![CDATA[MEDICAÇÃO/MATERIAL]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="428" y="1" width="25" height="12" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="425" y="0" width="25" height="12" isPrintWhenDetailOverflows="true"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
 				</textElement>
 				<text><![CDATA[UNID]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="453" y="1" width="28" height="12" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="450" y="0" width="28" height="12" isPrintWhenDetailOverflows="true"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Courier New" size="8" isBold="true" pdfFontName="Courier-Bold"/>
 				</textElement>
@@ -1037,7 +1095,7 @@
 	<pageFooter>
 		<band height="26" splitType="Stretch">
 			<line>
-				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" x="0" y="11" width="555" height="1"/>
+				<reportElement uuid="2a9741b0-dc00-4419-a630-39cadb761ba3" x="-1" y="0" width="555" height="1"/>
 				<graphicElement>
 					<pen lineWidth="1.0"/>
 				</graphicElement>
@@ -1057,7 +1115,7 @@
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="1" y="14" width="141" height="12"/>
+				<reportElement uuid="19074bff-a6db-4f0d-b6b5-d0724f9a3491" x="0" y="14" width="141" height="12"/>
 				<textElement textAlignment="Left">
 					<font fontName="Courier New" size="10" isBold="false" pdfFontName="Courier"/>
 				</textElement>

@@ -1,5 +1,7 @@
 package br.gov.mec.aghu.internacao.business;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -48,6 +50,7 @@ import br.gov.mec.aghu.internacao.vo.PesquisaSituacoesLeitosVO;
 import br.gov.mec.aghu.internacao.vo.ProcedenciaPacientesInternadosVO;
 import br.gov.mec.aghu.internacao.vo.ProfessorCrmInternacaoVO;
 import br.gov.mec.aghu.internacao.vo.RelatorioAltasDiaVO;
+import br.gov.mec.aghu.internacao.vo.RelatorioAltasObitoVO;
 import br.gov.mec.aghu.internacao.vo.RelatorioBoletimInternacaoVO;
 import br.gov.mec.aghu.internacao.vo.RelatorioSolicitacaoInternacaoVO;
 import br.gov.mec.aghu.internacao.vo.ResponsaveisPacienteVO;
@@ -56,6 +59,7 @@ import br.gov.mec.aghu.internacao.vo.SituacaoLeitosVO;
 import br.gov.mec.aghu.internacao.vo.ValidaContaTrocaConvenioVO;
 import br.gov.mec.aghu.internacao.vo.VerificaPermissaoVO;
 import br.gov.mec.aghu.model.AelProjetoPesquisas;
+import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.AghCid;
 import br.gov.mec.aghu.model.AghClinicas;
 import br.gov.mec.aghu.model.AghEquipes;
@@ -84,6 +88,7 @@ import br.gov.mec.aghu.model.AinQuartos;
 import br.gov.mec.aghu.model.AinQuartos.Fields;
 import br.gov.mec.aghu.model.AinResponsaveisPaciente;
 import br.gov.mec.aghu.model.AinSolicitacoesInternacao;
+import br.gov.mec.aghu.model.AinTipoCaracteristicaLeito;
 import br.gov.mec.aghu.model.AinTiposAltaMedica;
 import br.gov.mec.aghu.model.AinTiposCaraterInternacao;
 import br.gov.mec.aghu.model.AipEtnia;
@@ -625,7 +630,8 @@ public interface IInternacaoFacade extends Serializable {
 			List<AinResponsaveisPaciente> listaResponsaveisExcluidos,
 			String nomeMicrocomputador,
 			final Date dataFimVinculoServidor,
-			final Boolean substituirProntuario) throws BaseException;
+			final Boolean substituirProntuario,
+			final FatItensProcedHospitalar itemProcedHospitalar) throws BaseException;
 
 	/**
 	 * Método que valida quando o CNRAC deve ser informado para paciente com
@@ -1611,4 +1617,39 @@ public interface IInternacaoFacade extends Serializable {
 	 public AinResponsaveisPaciente obterResponsaveisPacientePorNome(String nome);
 	
 	public List<PacienteIdadeCIDVO> pesquisarPacientesPorIdadeECID(Integer idadeInicial, Integer idadeFinal, AghCid cid) throws ApplicationBusinessException;
+
+	List<AinSolicitacoesInternacao> pesquisaNegativasDia(Date dataAlta, AghEspecialidades especialidade) throws ApplicationBusinessException;
+
+	public List<RelatorioAltasObitoVO> pesquisaRelatorioAltasObito(
+			Date dataInicial, Date dataFinal)throws ApplicationBusinessException;
+
+	public File geraArquivoAltasObito(Date dataInicial, Date dataFinal) throws IOException, ApplicationBusinessException;
+
+	public List<AinInternacao> pesquisarTipoCaracteristicasLeitos(Date dataInicial, Date dataFinal, Short unidadeFuncionalSeq, AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito, AghEspecialidades especialidade);
+
+	public File geraArquivoCaracteristicasLeito(Date dataInicial,Date dataFinal, AghEspecialidades especialidade,
+			Short unfSeq, AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito) throws IOException, ApplicationBusinessException ;
+
+	public List<AinInternacao> pesquisaCaracteristicaList(Integer firstResult,	Integer maxResult, String orderProperty,
+			boolean asc,Date dataInicial, Date dataFinal, Short short1,	AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito,
+			AghEspecialidades especialidade);
+
+	public Long pesquisaCaracteristicaListCount(Date dataInicial,Date dataFinal, Short unidadeFuncionalSeq, 
+			AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito,AghEspecialidades especialidade);
+
+	public List<RelatorioAltasObitoVO> pesquisaRelatorioAltasObitoPaginado(
+			Integer firstResult, Integer maxResult, String orderProperty, boolean asc, Date dataInicial, Date dataFinal);
+
+	public Long pesquisaRelatorioAltasObitoCount(Date dataInicial,
+			Date dataFinal);
+
+	public List<AinInternacao> pesquisarPacientesComSumarioAltaPendente(Date dataInicial, Date dataFinal, Short unidadeFuncionalSeq );
+
+	List<AinInternacao> pesquisarPacientesComSumarioAltaPendenteList(Integer firstResult, Integer maxResult, String orderProperty,
+			boolean asc, Date dataInicial, Date dataFinal,Short unidadeFuncionalSeq);
+
+	public Long pesquisarPacientesComSumarioAltaPendenteCount(Date dataInicial,	Date dataFinal, Short short1);
+
+	AghAtendimentos obterAtendimentoPorChavePrimaria(Integer seq,
+			Enum[] innerJoin, Enum[] leftJoin);
 }

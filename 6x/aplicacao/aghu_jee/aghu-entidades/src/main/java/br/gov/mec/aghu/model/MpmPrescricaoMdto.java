@@ -84,6 +84,8 @@ public class MpmPrescricaoMdto extends ItemPrescricaoMedica<MpmPrescricaoMdtoId>
 	private AfaMedicamento diluente;
 	private BigDecimal volumeDiluenteMl;
 	private Boolean indBombaInfusao;
+	private Integer ordem;
+
 	private Set<MpmPrescricaoMdto> prescricoesMdtosReprescritosOrigem = new HashSet<MpmPrescricaoMdto>(
 			0);
 
@@ -483,6 +485,14 @@ public class MpmPrescricaoMdto extends ItemPrescricaoMedica<MpmPrescricaoMdtoId>
 	public void setPmdSeqPrcrAnt(Long pmdSeqPrcrAnt) {
 		this.pmdSeqPrcrAnt = pmdSeqPrcrAnt;
 	}
+	
+	@Column(name = "ORDEM", nullable = false)
+	public Integer getOrdem() {
+		return this.ordem;
+	}
+	public void setOrdem(Integer ordem) {
+		this.ordem = ordem;
+	}
 
 	@PrePersist
 	@PreUpdate
@@ -571,7 +581,8 @@ public class MpmPrescricaoMdto extends ItemPrescricaoMedica<MpmPrescricaoMdtoId>
 				ATENDIMENTO("atendimento"),
 				TIPO_FREQ_APZ("tipoFreqAprazamento"),
 				TIPO_VELC_ADM("tipoVelocAdministracao"),
-				PRESCRICAO_MEDICA_ORIGEM("prescricaoMdtoOrigem.prescricaoMedica");
+				PRESCRICAO_MEDICA_ORIGEM("prescricaoMdtoOrigem.prescricaoMedica"),
+				ORDEM("ordem");
 
 		private String fields;
 

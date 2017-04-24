@@ -95,7 +95,14 @@ public class SolicitacaoInternacaoFacade extends BaseFacade implements ISolicita
 			throws ApplicationBusinessException {
 		getSolicitacaoInternacaoON().atenderSolicitacaoInternacao(solicitacaoInternacao, substituirProntuario);
 	}
-
+	
+	@Override
+	@Secure("#{s:hasPermission('solicitacaoInternacao','atender')}")
+	public void negarSolicitacaoInternacao(	AinSolicitacoesInternacao solicitacaoInternacao)
+			throws ApplicationBusinessException {
+		getSolicitacaoInternacaoON().negarSolicitacaoInternacao(solicitacaoInternacao);
+	}
+	
 	@Override
 	@Secure("#{s:hasPermission('solicitacaoInternacao','alterar')}")
 	public void persistirSolicitacaoInternacao(

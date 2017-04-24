@@ -197,6 +197,7 @@ public class MpmEvolucoes extends BaseEntitySeq<Long> implements
 		ITEM_TIPO_EVOLUCAO("tipoItemEvolucao"), DTHR_VALIDA("dthrValida"),
 		ANAMNESE("anamnese"), ANA_SEQ("anamnese.seq"), SERVIDOR("servidor"),
 		DTHR_FIM("dthrFim"), DTHR_ALTERACAO("dthrAlteracao"),
+		SITUACAO("situacao"),
 		DTHR_PENDENTE("dthrPendente");
 
 		private String fields;

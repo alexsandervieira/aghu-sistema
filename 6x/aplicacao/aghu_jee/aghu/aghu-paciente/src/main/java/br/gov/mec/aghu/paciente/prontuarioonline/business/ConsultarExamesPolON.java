@@ -503,7 +503,7 @@ public class ConsultarExamesPolON extends BaseBusiness {
 		
 		boolean temPermissao = false;
 		if(this.getICascaFacade().usuarioTemPermissao(servidorLogado.getUsuario(), "imprimirResultadoExame", "imprimir") &&
-		   this.getICascaFacade().usuarioTemPermissao(servidorLogado.getUsuario(), "permiteImprimirResultadosExamesPOL","imprimir")	
+		   this.getICascaFacade().usuarioTemPermissao(servidorLogado.getUsuario(), "permiteImprimirResultadoExamesPOL","imprimir")	
 		){
 			temPermissao = true;
 		}

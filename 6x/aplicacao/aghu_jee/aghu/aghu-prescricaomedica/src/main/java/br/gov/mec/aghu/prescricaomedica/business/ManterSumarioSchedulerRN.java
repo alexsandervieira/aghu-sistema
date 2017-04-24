@@ -73,6 +73,86 @@ public class ManterSumarioSchedulerRN extends BaseBusiness {
 	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	public void gerarDadosSumarioPrescricaoMedica(String cron, Date dataInicio, Date dataFim, RapServidores servidorLogado, String nomeProcessoQuartz) throws ApplicationBusinessException {
 		AghJobDetail job = null;
+		job = obterProcessoQuartz(nomeProcessoQuartz, job);
+		
+		dataInicio = validarDataInicio(dataInicio);
+		dataFim = validarDataFim(dataFim);
+		
+		apresentaLogDtInicioDtFim(dataInicio, dataFim, nomeProcessoQuartz, job);
+		
+		List<AghAtendimentos> atendimentos = this.getAghuFacade().buscaAtendimentosSumarioPrescricaoMedica(dataInicio, dataFim);
+		List<AghAtendimentos> atendimentosAbortados = new ArrayList<>();
+		
+		apresentaLogAtendimentosAProcessar(nomeProcessoQuartz, job, atendimentos);
+
+		processaAtendimentos(servidorLogado, job, atendimentos, atendimentosAbortados);
+		
+		ManterSumarioSchedulerRN sumarioSchedulerRN = ctx.getBusinessObject(ManterSumarioSchedulerRN.class);
+		sumarioSchedulerRN.enviarEmailRotinaGeracaoDadosSucesso();
+		
+		apresentaMsgSucesso(nomeProcessoQuartz, job);
+		listarAtendimentosAbortados(nomeProcessoQuartz,job, atendimentosAbortados);		
+	}
+	private void processaAtendimentos(RapServidores servidorLogado, AghJobDetail job,
+			List<AghAtendimentos> atendimentos, List<AghAtendimentos> atendimentosAbortados) {
+		for (AghAtendimentos atendimento : atendimentos) {
+			try {
+				IPrescricaoMedicaBeanFacade ejbPrescricaoMedica = ServiceLocator.getBean(IPrescricaoMedicaBeanFacade.class, "aghu-prescricaomedica");
+				// controle transacional por EJB e requires_new				
+				ejbPrescricaoMedica.geraDadosSumarioPrescricao(atendimento.getSeq(), DominioTipoEmissaoSumario.I, servidorLogado);
+				
+			} catch (Exception ex) {
+				LOG.error(ex.getMessage(), ex);
+				atendimentosAbortados.add(atendimento);			
+				apresentaLogError(job, ex);
+			}
+		}
+	}
+	private void apresentaLogError(AghJobDetail job, Exception ex) {
+		if (job != null) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			PrintStream ps = new PrintStream(baos);
+			ex.printStackTrace(ps);
+			getSchedulerFacade().adicionarLog(job
+					, ex.getMessage() + "\n" + baos.toString()
+			);
+		}
+	}
+	private void apresentaMsgSucesso(String nomeProcessoQuartz, AghJobDetail job) {
+		if (job != null) {
+			String mensagem = "Quartz Task de "+nomeProcessoQuartz+" - finalizou com: SUCESSO";
+			getSchedulerFacade().finalizarExecucao(job, DominioSituacaoJobDetail.C, mensagem);
+			
+		}
+	}
+	private void apresentaLogAtendimentosAProcessar(String nomeProcessoQuartz, AghJobDetail job,
+			List<AghAtendimentos> atendimentos) {
+		if (job != null) {
+			getSchedulerFacade().adicionarLog(job, "Tarefa: "+nomeProcessoQuartz+" - total de atendimentos: " + atendimentos.size());
+			getSchedulerFacade().adicionarLog(job, "Tarefa: "+nomeProcessoQuartz+" - atendimentos: " + atendimentos);
+		}
+	}
+	private void apresentaLogDtInicioDtFim(Date dataInicio, Date dataFim, String nomeProcessoQuartz, AghJobDetail job) {
+		if (job != null) {
+			getSchedulerFacade().adicionarLog(job, "Tarefa: "+nomeProcessoQuartz
+					+" - Dt ini: " + DateFormatUtil.formataTimeStamp(dataInicio) 
+					+ " Dt Fim: " + DateFormatUtil.formataTimeStamp(dataFim)
+			);
+		}
+	}
+	private Date validarDataFim(Date dataFim) throws ApplicationBusinessException {
+		if (dataFim == null) {
+			dataFim = getDataFim(getDiasAtras());
+		}
+		return dataFim;
+	}
+	private Date validarDataInicio(Date dataInicio) throws ApplicationBusinessException {
+		if (dataInicio == null) {
+			dataInicio = getDataInicio(getDiasAtras()+(getDiferencaDiasAtras() <= 0 ? 0 :getDiferencaDiasAtras()));
+		}
+		return dataInicio;
+	}
+	private AghJobDetail obterProcessoQuartz(String nomeProcessoQuartz, AghJobDetail job) {
 		if (nomeProcessoQuartz != null) {
 			job = getSchedulerFacade().obterAghJobDetailPorNome(nomeProcessoQuartz);
 			if (job != null) {
@@ -82,59 +162,20 @@ public class ManterSumarioSchedulerRN extends BaseBusiness {
 				}
 			}
 		}
-		
-		if (dataInicio == null) {
-			dataInicio = getDataInicio(getDiasAtras());
-		}
-		if (dataFim == null) {
-			dataFim = getDataFim(getDiasAtras());
-		}
-		
+		return job;
+	}
+	private void listarAtendimentosAbortados(String nomeProcessoQuartz, AghJobDetail job, List<AghAtendimentos> atendimentosAbortados) {
 		if (job != null) {
-			getSchedulerFacade().adicionarLog(job, "Tarefa: "+nomeProcessoQuartz
-					+" - Dt ini: " + DateFormatUtil.formataTimeStamp(dataInicio) 
-					+ " Dt Fim: " + DateFormatUtil.formataTimeStamp(dataFim)
-			);
-		}
-		
-		List<AghAtendimentos> atendimentos = this.getAghuFacade().buscaAtendimentosSumarioPrescricao(dataInicio, dataFim);
-
-		if (job != null) {
-			getSchedulerFacade().adicionarLog(job, "Tarefa: "+nomeProcessoQuartz+" - total de atendimentos: " + atendimentos.size());
-			getSchedulerFacade().adicionarLog(job, "Tarefa: "+nomeProcessoQuartz+" - atendimentos: " + atendimentos);
-		}
-
-		for (AghAtendimentos atendimento : atendimentos) {
-			try {
-				IPrescricaoMedicaBeanFacade ejbPrescricaoMedica = ServiceLocator.getBean(IPrescricaoMedicaBeanFacade.class, "aghu-prescricaomedica");
-				// controle transacional por EJB e requires_new				
-				ejbPrescricaoMedica.geraDadosSumarioPrescricao(atendimento.getSeq(), DominioTipoEmissaoSumario.I, servidorLogado);
-				
-			} catch (Exception ex) {
-				LOG.error(ex.getMessage(), ex);
-							
-				if (job != null) {
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					PrintStream ps = new PrintStream(baos);
-					ex.printStackTrace(ps);
-					getSchedulerFacade().adicionarLog(job
-							, ex.getMessage() + "\n" + baos.toString()
-					);
+			if(atendimentosAbortados != null && atendimentosAbortados.size() > 0){				
+				StringBuilder mensagemAbortados = new StringBuilder(30);
+				mensagemAbortados.append("Quartz Task de ").append(nomeProcessoQuartz).append(" - Atendimentos abortados: ");
+				for(AghAtendimentos atend : atendimentosAbortados){
+					mensagemAbortados.append("Atendimentos: seq =").append(atend.getSeq());
 				}
+				getSchedulerFacade().adicionarLog(job,mensagemAbortados.toString());
 			}
 		}
-		
-		ManterSumarioSchedulerRN sumarioSchedulerRN = ctx.getBusinessObject(ManterSumarioSchedulerRN.class);
-		sumarioSchedulerRN.enviarEmailRotinaGeracaoDadosSucesso();
-		
-		if (job != null) {
-			String mensagem = "Quartz Task de "+nomeProcessoQuartz+" - finalizou com: SUCESSO";
-			getSchedulerFacade().finalizarExecucao(job, DominioSituacaoJobDetail.C, mensagem);
-			
-		}
-
 	}
-	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void enviarEmailRotinaGeracaoDadosSucesso() throws ApplicationBusinessException {
 		SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
@@ -189,7 +230,9 @@ public class ManterSumarioSchedulerRN extends BaseBusiness {
 	private Integer getDiasAtras() throws ApplicationBusinessException {
 		return getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_AGHU_DIAS_ATRAS_GERA_DADOS_SUMARIO_ALTA).getVlrNumerico().intValue();
 	}
-	
+	private Integer getDiferencaDiasAtras() throws ApplicationBusinessException {
+		return getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_AGHU_DIFERENCA_DIAS_ATRAS_GERA_DADOS_SUMARIO_ALTA).getVlrNumerico().intValue();
+	}
 	protected IPrescricaoMedicaFacade getPrescricaoMedicaFacade(){
 		return prescricaoMedicaFacade;
 	}

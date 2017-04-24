@@ -3,6 +3,8 @@ package br.gov.mec.aghu.faturamento.action;
 import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -14,16 +16,20 @@ import org.apache.commons.logging.LogFactory;
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.business.IAghuFacade;
-import br.gov.mec.aghu.dominio.DominioModuloCompetencia;
-import br.gov.mec.aghu.dominio.DominioOpcaoEncerramentoAmbulatorio;
-import br.gov.mec.aghu.faturamento.business.IFaturamentoFacade;
-import br.gov.mec.aghu.model.FatCompetencia;
+import br.gov.mec.aghu.business.ISchedulerFacade;
+import br.gov.mec.aghu.business.scheduler.JobEnum;
 import br.gov.mec.aghu.core.action.ActionController;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.core.utils.DateUtil;
+import br.gov.mec.aghu.dominio.DominioModuloCompetencia;
+import br.gov.mec.aghu.dominio.DominioOpcaoEncerramentoAmbulatorio;
+import br.gov.mec.aghu.faturamento.business.IFaturamentoFacade;
+import br.gov.mec.aghu.model.FatCompetencia;
+import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 
 
 public class ProgramarEncerramentoAmbulatorioController extends ActionController {
@@ -49,16 +55,12 @@ public class ProgramarEncerramentoAmbulatorioController extends ActionController
 	@EJB
 	private IParametroFacade parametroFacade;
 
-//	@EJB
-//	private ISchedulerFacade schedulerFacade;
+	@EJB
+	private ISchedulerFacade schedulerFacade;
 
-//	@EJB
-//	private IRegistroColaboradorFacade registroColaboradorFacade;
+	@EJB
+	private IRegistroColaboradorFacade registroColaboradorFacade;
 	
-//	@Inject
-//	private ProgramarEncerramentoScheduler programarEncerramentoScheduler;	// TODO pendencia de migracao, corvalao ficou de migrar isso
-	
-
 	
 
 	private enum ProgramarEncerramentoAmbulatorioControllerExceptionCode implements BusinessExceptionCode {
@@ -152,27 +154,20 @@ public class ProgramarEncerramentoAmbulatorioController extends ActionController
 	}
 
 	public void validaCampos() {
-		exibirModal = true;
 		if (dtExecucao == null || dtFimCompetencia == null) {
-			exibirModal = false;
+			return;
 		}
 		try {
 			faturamentoFacade.validarCamposProgramarEncerramento(criarNomeJob(getDtExecucao()), opcao, dtExecucao, dtFimCompetencia,
 					dtFimProximaCompetencia, previa);
+			openDialog("modalConfirmacaoWG");
 		} catch (BaseException e) {
-			exibirModal = false;
 			apresentarExcecaoNegocio(e);
 		}
 	}
 
 	public void agendar() {
 		exibirModal = false;
-		
-		
-		LOG.info("AghJobDetail inserido.");	// TODO pendencia de migracao, corvalao ficou de migrar isso
-		
-		/*
-		final String triggerName = criarNomeJob(getDtExecucao());
 		
 		String nomeMicrocomputador = null;
 		try {
@@ -183,9 +178,6 @@ public class ProgramarEncerramentoAmbulatorioController extends ActionController
 
 		// Agendamento no Quartz
 		try {
-			final AghJobDetail jobDetail = schedulerFacade.persistirAghJobDetail(new AghJobDetail(triggerName, pessoa.getRapServidores(), null));
-			LOG.info("AghJobDetail inserido.");
-			
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(dtExecucao);
 			final String cron = "0 " + calendar.get(Calendar.MINUTE) 
@@ -198,19 +190,24 @@ public class ProgramarEncerramentoAmbulatorioController extends ActionController
 			Boolean isPrevia = getPrevia();
 			Date dtFimCompetencia = getDtFimCompetencia();
 			final Date dataFimVinculoServidor = new Date();
-			RapServidores servidorLogado = registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado(), dataFimVinculoServidor);
-			QuartzTriggerHandle trigger = programarEncerramentoScheduler.agendar(dtExecucao, cron, pessoa, triggerName, opcao, isPrevia, dtFimCompetencia, nomeMicrocomputador, servidorLogado);
-			jobDetail.setTrigger(trigger.getTrigger());
 			
-			LOG.info("Quartz Trigger: " + jobDetail.getTrigger());
-			schedulerFacade.atualizarAghJobDetail(jobDetail);
+			RapServidores servidorLogado = registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado(), dataFimVinculoServidor);
+			
+			
+			Map<String,Object> parametros = new HashMap<>();
+			
+			parametros.put("MODULO", opcao.toString());
+			parametros.put("PREVIA", isPrevia);
+			parametros.put("CPE_DT_FIM", dtFimCompetencia);
+			parametros.put("NOME_MICROCOMPUTADOR", nomeMicrocomputador);
+			
+			this.schedulerFacade.agendarTarefa(JobEnum.PROGRAMAR_ENCERRAMENTO, cron, null, servidorLogado, parametros);
+			
 			this.apresentarMsgNegocio(Severity.INFO,
 					ProgramarEncerramentoAmbulatorioControllerExceptionCode.PROCEDIMENTO_AMBULATORIAL_AGENDADO_SUCESSO.toString());
 		} catch (BaseException e) {
 			super.apresentarExcecaoNegocio(e);
-		} catch (SchedulerException e) {
-			this.apresentarMsgNegocio(Severity.ERROR, e.getLocalizedMessage());
-		}*/
+		}
 	}
 
 	public void acionaRnFatpExecFatNew() {

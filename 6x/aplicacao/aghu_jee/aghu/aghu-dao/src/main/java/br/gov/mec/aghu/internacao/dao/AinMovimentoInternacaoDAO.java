@@ -20,6 +20,7 @@ import org.hibernate.criterion.Subqueries;
 import org.hibernate.sql.JoinType;
 
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dominio.DominioGrupoConvenio;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.dominio.DominioSituacaoUnidadeFuncional;
@@ -34,6 +35,7 @@ import br.gov.mec.aghu.model.AinAtendimentosUrgencia;
 import br.gov.mec.aghu.model.AinInternacao;
 import br.gov.mec.aghu.model.AinLeitos;
 import br.gov.mec.aghu.model.AinMovimentosInternacao;
+import br.gov.mec.aghu.model.AinObservacoesCenso;
 import br.gov.mec.aghu.model.AinQuartos;
 import br.gov.mec.aghu.model.AinTiposAltaMedica;
 import br.gov.mec.aghu.model.AinTiposCaraterInternacao;
@@ -424,7 +426,9 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 				.add(Projections.property("PAC" + "." + AipPacientes.Fields.DATA_NASCIMENTO.toString()))
 				.add(Projections.property("CNV" + "." + FatConvenioSaude.Fields.DESCRICAO.toString()))
 				.add(Projections.property("TAM" + "." + AinTiposAltaMedica.Fields.DESCRICAO.toString()))
-				.add(Projections.property("ESP" + "." + AghEspecialidades.Fields.NOME.toString())));
+				.add(Projections.property("ESP" + "." + AghEspecialidades.Fields.NOME.toString()))
+				.add(Projections.property("OBS" + "." + AinObservacoesCenso.Fields.DESCRICAO.toString()))
+				.add(Projections.property("PAC" + "." + AipPacientes.Fields.NRO_CARTAO_SAUDE.toString())));
 
 		cri.createAlias(AinMovimentosInternacao.Fields.INTERNACAO.toString(), "INT");
 		cri.createAlias(AinMovimentosInternacao.Fields.ESPECIALIDADE.toString(), "ESP");
@@ -433,6 +437,7 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 		cri.createAlias(AinMovimentosInternacao.Fields.UNIDADE_FUNCIONAL.toString(), "UNF");
 		cri.createAlias("INT." + AinInternacao.Fields.CONVENIO.toString(), "CNV", Criteria.LEFT_JOIN);
 		cri.createAlias("INT." + AinInternacao.Fields.TIPO_ALTA_MEDICA.toString(), "TAM", Criteria.LEFT_JOIN);
+		cri.createAlias("INT." + AinInternacao.Fields.OBSERVACOES_CENSO.toString(), "OBS", JoinType.LEFT_OUTER_JOIN);
 
 		cri.add(Restrictions.ne(AinMovimentosInternacao.Fields.TIPO_MVTO_INTERNACAO.toString(), codigoLeitoBloqueioLimpeza));
 
@@ -487,7 +492,8 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 				.add(Projections.property("PAC" + "." + AipPacientes.Fields.DATA_NASCIMENTO.toString()))
 				.add(Projections.property("CNV" + "." + FatConvenioSaude.Fields.DESCRICAO.toString()))
 				.add(Projections.property("TAM" + "." + AinTiposAltaMedica.Fields.DESCRICAO.toString()))
-				.add(Projections.property("ESP" + "." + AghEspecialidades.Fields.NOME.toString())));
+				.add(Projections.property("ESP" + "." + AghEspecialidades.Fields.NOME.toString()))
+				.add(Projections.property("OBS" + "." + AinObservacoesCenso.Fields.DESCRICAO.toString())));
 
 		cri.createAlias(AinMovimentosInternacao.Fields.INTERNACAO.toString(), "INT");
 		cri.createAlias(AinMovimentosInternacao.Fields.ESPECIALIDADE.toString(), "ESP");
@@ -496,6 +502,7 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 		cri.createAlias(AinMovimentosInternacao.Fields.UNIDADE_FUNCIONAL.toString(), "UNF");
 		cri.createAlias("INT." + AinInternacao.Fields.CONVENIO.toString(), "CNV", Criteria.LEFT_JOIN);
 		cri.createAlias("INT." + AinInternacao.Fields.TIPO_ALTA_MEDICA.toString(), "TAM", Criteria.LEFT_JOIN);
+		cri.createAlias("INT." + AinInternacao.Fields.OBSERVACOES_CENSO.toString(), "OBS", JoinType.LEFT_OUTER_JOIN);
 		// TODO remover hardcode do codigo do TipoMovtoInternacao.
 		cri.add(Restrictions.eq(AinMovimentosInternacao.Fields.TIPO_MVTO_INTERNACAO.toString(), Integer.valueOf("1")));
 
@@ -537,7 +544,8 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 				.add(Projections.property("PAC" + "." + AipPacientes.Fields.DATA_NASCIMENTO.toString()))
 				.add(Projections.property("CNV" + "." + FatConvenioSaude.Fields.DESCRICAO.toString()))
 				.add(Projections.property("TAM" + "." + AinTiposAltaMedica.Fields.DESCRICAO.toString()))
-				.add(Projections.property("ESP" + "." + AghEspecialidades.Fields.NOME.toString())));
+				.add(Projections.property("ESP" + "." + AghEspecialidades.Fields.NOME.toString()))
+				.add(Projections.property("OBS" + "." + AinObservacoesCenso.Fields.DESCRICAO.toString())));
 
 		cri.createAlias(AinMovimentosInternacao.Fields.INTERNACAO.toString(), "INT");
 		cri.createAlias(AinMovimentosInternacao.Fields.ESPECIALIDADE.toString(), "ESP");
@@ -546,6 +554,7 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 		cri.createAlias(AinMovimentosInternacao.Fields.UNIDADE_FUNCIONAL.toString(), "UNF");
 		cri.createAlias("INT." + AinInternacao.Fields.CONVENIO.toString(), "CNV", Criteria.LEFT_JOIN);
 		cri.createAlias("INT." + AinInternacao.Fields.TIPO_ALTA_MEDICA.toString(), "TAM", Criteria.LEFT_JOIN);
+		cri.createAlias("INT." + AinInternacao.Fields.OBSERVACOES_CENSO.toString(), "OBS", JoinType.LEFT_OUTER_JOIN);
 
 		cri.add(Restrictions.eq(AinMovimentosInternacao.Fields.TIPO_MVTO_INTERNACAO.toString(), codigoLeitoBloqueioLimpeza));
 
@@ -588,7 +597,8 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 				.add(Projections.property("PAC" + "." + AipPacientes.Fields.DATA_NASCIMENTO.toString()))
 				.add(Projections.property("CNV" + "." + FatConvenioSaude.Fields.DESCRICAO.toString()))
 				.add(Projections.property("TAM" + "." + AinTiposAltaMedica.Fields.DESCRICAO.toString()))
-				.add(Projections.property("ESP" + "." + AghEspecialidades.Fields.NOME.toString())));
+				.add(Projections.property("ESP" + "." + AghEspecialidades.Fields.NOME.toString()))
+				.add(Projections.property("OBS" + "." + AinObservacoesCenso.Fields.DESCRICAO.toString())));
 
 		cri.createAlias(AinMovimentosInternacao.Fields.INTERNACAO.toString(), "INT");
 		cri.createAlias(AinMovimentosInternacao.Fields.ESPECIALIDADE.toString(), "ESP");
@@ -597,26 +607,9 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 		cri.createAlias(AinMovimentosInternacao.Fields.UNIDADE_FUNCIONAL.toString(), "UNF");
 		cri.createAlias("INT." + AinInternacao.Fields.CONVENIO.toString(), "CNV", Criteria.LEFT_JOIN);
 		cri.createAlias("INT." + AinInternacao.Fields.TIPO_ALTA_MEDICA.toString(), "TAM", Criteria.LEFT_JOIN);
+		cri.createAlias("INT." + AinInternacao.Fields.OBSERVACOES_CENSO.toString(), "OBS", JoinType.LEFT_OUTER_JOIN);
 
 		cri.add(Restrictions.ne(AinMovimentosInternacao.Fields.TIPO_MVTO_INTERNACAO.toString(), codigoLeitoBloqueioLimpeza));
-
-		final DetachedCriteria criteria = DetachedCriteria.forClass(AinMovimentosInternacao.class, "MVT_WHERE");
-		criteria.setProjection(Projections.projectionList().add(
-				Projections.property("MVT_WHERE" + "." + AinMovimentosInternacao.Fields.UNIDADE_FUNCIONAL_SEQ.toString())));
-		criteria.createAlias(AinMovimentosInternacao.Fields.UNIDADE_FUNCIONAL.toString(), "UNF_WHERE");
-
-		final DetachedCriteria subquery = DetachedCriteria.forClass(AinMovimentosInternacao.class, "MVT_WHERE_SUB");
-		subquery.setProjection(Projections.max("MVT_WHERE_SUB" + "." + AinMovimentosInternacao.Fields.DATA_HORA_LANCAMENTO.toString()));
-		subquery.add(Restrictions.eqProperty("MVT_WHERE_SUB" + "." + AinMovimentosInternacao.Fields.INTERNACAO_SEQ.toString(), "MVT"
-				+ "." + AinMovimentosInternacao.Fields.INTERNACAO_SEQ.toString()));
-		subquery.add(Restrictions.ltProperty("MVT_WHERE_SUB" + "." + AinMovimentosInternacao.Fields.DATA_HORA_LANCAMENTO.toString(),
-				"MVT" + "." + AinMovimentosInternacao.Fields.DATA_HORA_LANCAMENTO.toString()));
-
-		criteria.add(Restrictions.eqProperty("MVT_WHERE" + "." + AinMovimentosInternacao.Fields.INTERNACAO_SEQ.toString(), "MVT" + "."
-				+ AinMovimentosInternacao.Fields.INTERNACAO_SEQ.toString()));
-		criteria.add(Subqueries.propertyEq(AinMovimentosInternacao.Fields.DATA_HORA_LANCAMENTO.toString(), subquery));
-
-		cri.add(Subqueries.propertyIn(AinMovimentosInternacao.Fields.UNIDADE_FUNCIONAL_SEQ.toString(), criteria));
 
 		cri.add(Restrictions.gt(AinMovimentosInternacao.Fields.DATA_HORA_LANCAMENTO.toString(), obterData(data, -numeroDiasCenso)));
 		cri.add(Restrictions.lt(AinMovimentosInternacao.Fields.DATA_HORA_LANCAMENTO.toString(), obterData(data, +UM_DIA)));
@@ -637,7 +630,7 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 	public List<Object[]> obterCensoUnion5(final Short unfSeq, final Short unfSeqMae, final Date data, final DominioSituacaoUnidadeFuncional status,
 			final Integer numeroDiasCenso) throws ApplicationBusinessException {
 
-		final StringBuffer hql = new StringBuffer(2100);
+		final StringBuffer hql = new StringBuffer(2123);
 		hql.append(" select ");
 		hql.append(" 	unf.seq,  un.seq,");
 		hql.append(" 	case when lto.leitoID is null then ( case when qrt.descricao is null then (unf.andar ||' '|| ala.codigo) else (qrt.descricao ||'') end ) else lto.leitoID end, ");
@@ -645,7 +638,7 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 		hql.append(" 	atu.dtAtendimento, esp.sigla, tpa.codigo, mv.dthrLancamento,");
 		hql.append(" 	atu.seq, ser.id.matricula, ser.id.vinCodigo, cnv.codigo,");
 		hql.append("	case when ltoAtu.leitoID is null then ( case when qrtAtu.descricao is null then '' else (qrtAtu.descricao) end ) else ltoAtu.leitoID end,");
-		hql.append(" 	add_days(mv.dthrLancamento,1), mv.dthrLancamento, pac.dtNascimento, cnv.descricao, tpa.descricao, esp.nomeEspecialidade");
+		hql.append(" 	add_days(mv.dthrLancamento,1), mv.dthrLancamento, pac.dtNascimento, cnv.descricao, tpa.descricao, esp.nomeEspecialidade, obs.descricao");
 		hql.append(" from AghUnidadesFuncionais un, AinMovimentosInternacao mv ");
 		hql.append(" join mv.especialidade as esp ");
 		hql.append(" left join mv.servidor as ser ");
@@ -662,6 +655,7 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 		hql.append(" left join int.atendimentoUrgencia as atu ");
 		hql.append(" left join atu.quarto as qrtAtu");
 		hql.append(" left join atu.leito as ltoAtu");
+		hql.append(" left join int.observacoesCenso as obs");
 		hql.append(" where tmv.codigo = :tipoMovInt ");
 		hql.append(" and mv.dthrLancamento > :dthrLancamentoMaior ");
 		hql.append(" and mv.dthrLancamento < :dthrLancamentoMenor ");
@@ -719,13 +713,13 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 	public List<Object[]> obterCensoUnion6(final Short unfSeq, final Short unfSeqMae, final Date data, final DominioSituacaoUnidadeFuncional status,
 			final Integer numeroDiasCenso) throws ApplicationBusinessException {
 
-		final StringBuffer hql = new StringBuffer(1430);
+		final StringBuffer hql = new StringBuffer(1482);
 		hql.append(" select ");
 		hql.append(" 	unf.seq,  unfSeq.seq,");
 		hql.append(" 	case when lto.leitoID is null then ( case when qrt.descricao is null then '' else (qrt.descricao) end ) else lto.leitoID end, ");
 		hql.append(" 	pac.prontuario, pac.codigo, pac.nome,");
 		hql.append(" 	int.dthrInternacao, esp.sigla, tpa.codigo, mv.dthrLancamento,");
-		hql.append(" 	int.seq, ser.id.matricula, ser.id.vinCodigo, cnv.codigo, atu.seq, add_days(mv.dthrLancamento,1), pac.dtNascimento, cnv.descricao, tpa.descricao, esp.nomeEspecialidade");
+		hql.append(" 	int.seq, ser.id.matricula, ser.id.vinCodigo, cnv.codigo, atu.seq, add_days(mv.dthrLancamento,1), pac.dtNascimento, cnv.descricao, tpa.descricao, esp.nomeEspecialidade, obs.descricao ");
 		hql.append(" from AinMovimentosInternacao mv");
 		hql.append(" join mv.internacao as int ");
 		hql.append(" join mv.especialidade as esp ");
@@ -739,6 +733,7 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 		hql.append(" left join int.tipoAltaMedica as tpa");
 		hql.append(" left join mv.quarto as qrt");
 		hql.append(" left join mv.leito as lto");
+		hql.append(" left join int.observacoesCenso as obs");
 
 		hql.append(" where tmv.codigo = :tipoMovInt ");
 		hql.append(" and mv.dthrLancamento > :dthrLancamentoMaior ");
@@ -790,7 +785,7 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 		hql.append(" 	case when lto.leitoID is null then ( case when qrt.descricao is null then '' else (qrt.descricao) end ) else lto.leitoID end, ");
 		hql.append(" 	pac.prontuario, pac.codigo, pac.nome,");
 		hql.append(" 	int.dthrInternacao,  esp.sigla, tpa.codigo, mv.dthrLancamento,");
-		hql.append(" 	int.seq, ser.id.matricula, ser.id.vinCodigo, cnv.codigo, pac.dtNascimento, cnv.descricao, tpa.descricao, esp.nomeEspecialidade");
+		hql.append(" 	int.seq, ser.id.matricula, ser.id.vinCodigo, cnv.codigo, pac.dtNascimento, cnv.descricao, tpa.descricao, esp.nomeEspecialidade, obs.descricao ");
 		hql.append(" from AinMovimentosInternacao mv2, AinMovimentosInternacao mv");
 		hql.append(" join mv.internacao as int ");
 		hql.append(" join int.paciente as pac ");
@@ -804,6 +799,7 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 		hql.append(" left join int.tipoAltaMedica as tpa");
 		hql.append(" left join mv.quarto as qrt");
 		hql.append(" left join mv.leito as lto");
+		hql.append(" left join int.observacoesCenso as obs");
 
 		
 		hql.append(" where mv2.internacao.seq = int.seq ");
@@ -878,8 +874,8 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 		hql.append(" left join INT1.quarto QTO ");
 
 		hql.append(" where ");
-		hql.append(" MVI.criadoEm >= :dataAlta ");
-		hql.append(" AND MVI.criadoEm < :dataAltaMaisUM ");
+		hql.append(" INT1.dthrAltaMedica >= :dataAlta ");
+		hql.append(" AND INT1.dthrAltaMedica < :dataAltaMaisUM ");
 		hql.append(" AND MVI.tipoMovimentoInternacao.codigo + 0 = 21 ");
 
 		hql.append(" order by ");
@@ -963,6 +959,7 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 		criteria2.add(Restrictions.lt(AinMovimentosInternacao.Fields.DATA_HORA_LANCAMENTO.toString(), data));
 		
 		criteria.add(Subqueries.propertyEq(AinMovimentosInternacao.Fields.DATA_HORA_LANCAMENTO.toString(), criteria2));
+		criteria.add(Restrictions.eq(AinMovimentosInternacao.Fields.CRIADO_EM.toString(), data));
 		criteria.setProjection(Projections.projectionList()
 				.add(Projections.property(AinMovimentosInternacao.Fields.UNIDADE_FUNCIONAL.toString())) // 0-AghUnidadesFuncionais
 				.add(Projections.property(AinMovimentosInternacao.Fields.DATA_HORA_LANCAMENTO.toString())) // 1-Date
@@ -1293,5 +1290,160 @@ public class AinMovimentoInternacaoDAO extends br.gov.mec.aghu.core.persistence.
 		cri.createAlias("INT." + AinInternacao.Fields.MOVIMENTOS_INTERNACAO.toString(), "MOV");
 		
 		return executeCriteria(cri);
+	}
+
+	public List<Object[]> pesquisaAltasObito(Date dataInicial, Date dataFinal) {
+		final StringBuilder hql = new StringBuilder(1292);
+
+		createHQLAltasObito(dataFinal, hql, false);
+		hql.append(" order by ");
+		hql.append(" CSP.id.cnvCodigo, CNV.descricao || '                ' || INT1.dthrAltaMedica, PAC.nome, INT1.tipoAltaMedica.codigo ");
+
+		final javax.persistence.Query query = this.createQuery(hql.toString());
+
+		query.setParameter("dataInicial", DateUtil.obterDataComHoraInical(dataInicial));
+
+		if(dataFinal != null){
+			query.setParameter("dataFinal", DateUtil.obterDataComHoraFinal(dataFinal));
+			
+		}
+		
+		return query.getResultList();
+	}
+
+	public Long pesquisaAltasObitoCount(Date dataInicial, Date dataFinal) {
+		final StringBuilder hql = new StringBuilder(1292);
+
+		createHQLAltasObito(dataFinal, hql, true);
+
+		final javax.persistence.Query query = this.createQuery(hql.toString());
+
+		query.setParameter("dataInicial", DateUtil.obterDataComHoraInical(dataInicial));
+
+		if(dataFinal != null){
+			query.setParameter("dataFinal", DateUtil.obterDataComHoraFinal(dataFinal));
+			
+		}
+		return (Long)query.getSingleResult();
+		
+	}
+
+	public List<Object[]> pesquisaAltasObitoPaginator(Integer firstResult,
+			Integer maxResult,
+			String orderProperty, boolean asc, Date dataInicial, Date dataFinal) {
+
+		final StringBuilder hql = new StringBuilder(1292);
+
+		createHQLAltasObito(dataFinal, hql, false);
+		hql.append(" order by ");
+		if(orderProperty == null){
+			hql.append(" PAC.prontuario ");
+		} else {
+			adicionarOrdenacao(hql, orderProperty);
+			if (asc){
+				hql.append(" ASC ");
+			} else {
+				hql.append(" DESC ");
+			}
+		}
+
+		final javax.persistence.Query query = this.createQuery(hql.toString());
+
+		query.setParameter("dataInicial", DateUtil.obterDataComHoraInical(dataInicial));
+
+		if(dataFinal != null){
+			query.setParameter("dataFinal", DateUtil.obterDataComHoraFinal(dataFinal));
+			
+		}
+		query.setFirstResult(firstResult);
+		query.setMaxResults(maxResult);
+		return query.getResultList();
+
+	}
+
+	private void adicionarOrdenacao(final StringBuilder hql, String orderProperty) {
+		switch (orderProperty) {
+		case "prontuario":
+			hql.append(" PAC.prontuario ");
+			break;
+		case "obito":
+			hql.append(" INT1.tipoAltaMedica.codigo ");
+			break;
+		case "nomePaciente":
+			hql.append(" PAC.nome ");
+			break;
+		case "dataNascimento":
+			hql.append(" PAC.dtNascimento ");
+			break;
+		case "siglaEspecialidade":
+			hql.append(" ESP.sigla ");
+			break;
+		case "dataAlta":
+			hql.append(" INT1.dthrAltaMedica ");
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	private void createHQLAltasObito(Date dataFinal, final StringBuilder hql, boolean count) {
+		hql.append(" select ");
+		if(count){
+			hql.append(" count(INT1.seq) ");
+		}else {
+			hql.append(" CSP.id.cnvCodigo, "); // 0
+			hql.append(" CNV.descricao, "); // 1
+			hql.append(" INT1.dthrAltaMedica, "); // 2
+			hql.append(" PAC.prontuario, PAC.nome, PAC.dtNascimento, "); // 3, 4 e 5
+			hql.append(" INT1.tipoAltaMedica.codigo, "); // 6
+			hql.append(" INT1.servidorProfessor.id.vinCodigo, INT1.servidorProfessor.id.matricula, "); // 7
+																										// e
+																										// //8
+			hql.append(" INT1.seq, "); // 9
+			hql.append(" INT1.dthrInternacao, "); // 10
+			hql.append(" ESP.sigla, "); // 11
+			hql.append(" LTO.leitoID, QTO.descricao, UF.andar,  "); // 12, 13 e 14
+	
+			hql.append(" PAC.nomeMae, "); //15
+			hql.append(" PAC.nroCartaoSaude, "); //16
+			hql.append(" PAC.sexo, "); //17
+			hql.append(" PAC.cor, "); //18
+			hql.append(" PAC.grauInstrucao, "); //19
+			hql.append(" PAC.estadoCivil, "); //20
+			hql.append(" INT1.paciente, "); //21
+			hql.append(" PAC.foneResidencial, "); //22
+			hql.append(" PAC.dddFoneResidencial, "); //23
+			hql.append(" PAC.foneRecado, "); //24
+			hql.append(" PAC.dddFoneRecado, "); //25
+			hql.append(" MVI.internacao, "); //26
+			hql.append(" UF.descricao, "); //27
+			hql.append(" ESP.nomeEspecialidade, "); //28
+			hql.append(" TP_ALTA.descricao, "); //29
+			hql.append(" UNF_MVI.descricao, "); //30
+			hql.append(" INT1.docObito "); //31
+		}
+		
+		hql.append(" from ");
+		hql.append(" FatConvenioSaudePlano CSP ");
+		hql.append(" join CSP.convenioSaude CNV ");
+		hql.append(" join CSP.internacoes INT1 ");
+		hql.append(" join INT1.paciente PAC ");
+		hql.append(" join INT1.atendimento ATD ");
+		hql.append(" join ATD.unidadeFuncional UF ");
+		hql.append(" join INT1.especialidade ESP ");
+		hql.append(" join INT1.movimentosInternacao MVI ");
+		hql.append(" join MVI.unidadeFuncional UNF_MVI ");
+		hql.append(" left join INT1.leito LTO ");
+		hql.append(" left join INT1.quarto QTO ");
+		hql.append(" join INT1.tipoAltaMedica TP_ALTA ");
+
+		hql.append(" where ");
+		hql.append(" MVI.criadoEm >= :dataInicial ");
+		if(dataFinal!= null){
+			hql.append(" AND MVI.criadoEm <= :dataFinal ");
+		}
+		hql.append(" AND MVI.tipoMovimentoInternacao.codigo + 0 = 21 ");
+		hql.append(" AND INT1.tipoAltaMedica.codigo in ('C','D') ");
 	}
 }

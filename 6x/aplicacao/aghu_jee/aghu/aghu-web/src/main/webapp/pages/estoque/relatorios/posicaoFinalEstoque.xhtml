@@ -63,7 +63,8 @@
             <aghu:linha> 
               <mec:selectOneMenu id="orderBy" required="true" enum="OrdenacaoPosicaoFinalEstoque" enumPath="br.gov.mec.aghu.estoque.vo" label="#{messages.LABEL_ORDENACAO}" title="#{messages.TITLE_ORDENACAO}" value="#{imprimirPosicaoFinalEstoqueController.orderBy}"/>  
               <mec:selectOneMenu id="estocavel" required="true" enum="EstocavelPosicaoFinalEstoque" enumPath="br.gov.mec.aghu.estoque.vo" label="#{messages.LABEL_MANTER_MATERIAL_ESTOCAVEL}" title="#{messages.TITLE_ESTOCAVEL}" value="#{imprimirPosicaoFinalEstoqueController.estocavel}"/> 
-            </aghu:linha> 
+              <mec:selectBooleanCheckbox id="mostraSoAtivo" label="#{messages.LABEL_SO_ATIVO}" title="#{messages.TITLE_SO_ATIVO}" value="#{imprimirPosicaoFinalEstoqueController.mostraSoAtivos}"/> 
+			</aghu:linha> 
           </aghu:panelGeral> 
         </p:outputPanel>  
         <aghu:acao> 

@@ -276,7 +276,7 @@ private ICentroCustoFacade centroCustoFacade;
 				if (criteria.getAcao() == null
 						|| DominioAcaoParametrosOrcamento.S.equals(criteria
 								.getAcao())) {
-					logInfo("Não foram encontrados centros de custo parametrizados.");
+					logInfo("Não foram encontrados centros de atividade parametrizados.");
 					
 					result = getCentroCustoFacade()
 							.pesquisarCentroCustosAtivosOrdemDescricao(criteria.getFiltro());
@@ -298,13 +298,13 @@ private ICentroCustoFacade centroCustoFacade;
 							for (FsoParametrosOrcamento cct : getFsoParametrosOrcamentoDAO()
 									.pesquisarParametrosOrcamento(criteria)) {
 								logInfo(String
-										.format("Encontrado centro de custo a partir do parâmetro %d.",
+										.format("Encontrado centro de atividade a partir do parâmetro %d.",
 												cct.getSeq()));
 								
 								result.add(cct.getCentroCustoReferencia());
 							}
 						} else {
-							logInfo("Obtendo centros de custo não restringidos.");
+							logInfo("Obtendo centros de atividade não restringidos.");
 							
 							result = getFsoParametrosOrcamentoDAO()
 									.pesquisarCentroCustos(criteria);

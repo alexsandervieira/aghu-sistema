@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:fn="http://xmlns.jcp.org/jsp/jstl/functions" xmlns:mec="http://xmlns.jcp.org/jsf/composite/components" xmlns:p="http://primefaces.org/ui" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:aghu="http://xmlns.jcp.org/jsf/component" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:c="http://xmlns.jcp.org/jsp/jstl/core" xmlns:mf="http://www.mec.gov.br/taglib">  
+  <ui:composition template="/WEB-INF/templates/form_template.xhtml"> 
+    <ui:define name="head"> 
+      <title>Pesquisar Permissão de Agendamento/Marcação de Consultas :: AGHU - MEC</title> 
+    </ui:define>  
+    <ui:define name="body"> 
+      <mec:pageConfig controller="#{manterPermissoesAgendamentoConsultaPaginatorController}"/>  
+      <h:form prependId="false" id="formPesquisa"> 
+        <aghu:panelGeral legend="#{messages.LABEL_PESQUISAR_PERMISSAO_PROFISSIONAL}"> 
+          <aghu:linha> 
+            <mec:inputNumero label="#{messages.LABEL_VINCULO}" size="6" maxlength="6" title="#{messages.TITLE_VINCULO}" value="#{manterPermissoesAgendamentoConsultaPaginatorController.vinculoServidor}" id="vinculoServidor"/>  
+            <mec:inputText label="#{messages.LABEL_MATRICULA}" size="10" maxlength="10" title="#{messages.TITLE_MATRICULA}" value="#{manterPermissoesAgendamentoConsultaPaginatorController.matriculaServidor}" style="text-transform:uppercase" id="matriculaServidor"/>  
+            <mec:inputText label="#{messages.LABEL_NOME}" size="40" maxlength="40" title="#{messages.TITLE_NOME}" value="#{manterPermissoesAgendamentoConsultaPaginatorController.nomeServidor}" style="text-transform:uppercase" id="nomeServidor"/>  
+          </aghu:linha>  
+        </aghu:panelGeral>  
+        <aghu:acao> 
+          <mec:commandButton value="#{messages.LABEL_PESQUISAR}" id="bt_pesquisar" action="#{manterPermissoesAgendamentoConsultaPaginatorController.pesquisar}" profile="search"/>  
+          <mec:commandButton value="#{messages.LABEL_LIMPAR}" id="bt_limpar" action="#{manterPermissoesAgendamentoConsultaPaginatorController.limparPesquisa}" styleClass="bt_cinza" profile="clear"/>  
+          <p:outputPanel rendered="#{manterPermissoesAgendamentoConsultaPaginatorController.pesquisaAtiva}" layout="inline"> 
+            <mec:commandButton id="bt_iniciarInclusao" value="#{messages.LABEL_NOVO}" action="#{manterPermissoesAgendamentoConsultaPaginatorController.inserirEditar}" profile="add"/> 
+          </p:outputPanel> 
+        </aghu:acao> 
+      </h:form>  
+      <h:form prependId="false" id="resultados"> 
+        <mec:serverDataTable list="#{manterPermissoesAgendamentoConsultaPaginatorController.listaPermissoes}" title="#{messages.TITLE_PESQUISA_PERMISSOES_AGENDAMENTO_CONSULTA}" id="tabelaPesmissoesAgendamentoConsulta" controller="#{manterPermissoesAgendamentoConsultaPaginatorController}"> 
+          <c:set var="_permissoes" value="#{item}"/>  
+          <p:column headerText="Ações" styleClass="first-column auto-adjust" exportable="false" width="40"> 
+            <mec:commandLink id="tabelaPermissoes_link_editar" profile="edit" title="editar" action="#{manterPermissoesAgendamentoConsultaPaginatorController.inserirEditar}"> 
+              <f:setPropertyActionListener for="command" target="#{manterPermissoesAgendamentoConsultaController.permissaoAgendamentoConsultas}" value="#{_permissoes}"/> 
+            </mec:commandLink>  
+          </p:column>  
+          <p:column width="40"> 
+            <f:facet name="header"> 
+              <h:outputText value="#{messages.LABEL_VINCULO}"/> 
+            </f:facet> 
+            <h:outputText value="#{_permissoes.servidor.id.vinCodigo}"/>  
+          </p:column>  
+          <p:column width="80"> 
+            <h:outputText value="#{_permissoes.servidor.id.matricula}"/>  
+            <f:facet name="header"> 
+              <h:outputText value="#{messages.LABEL_MATRICULA}"/> 
+            </f:facet> 
+          </p:column>  
+          <p:column> 
+            <h:outputText value="#{_permissoes.servidor.pessoaFisica.nome}"/>  
+            <f:facet name="header"> 
+              <h:outputText value="#{messages.LABEL_NOME}"/> 
+            </f:facet> 
+          </p:column>  
+          <p:column width="140"> 
+            <h:outputText value="#{_permissoes.qtdPermissoes}"/>  
+            <f:facet name="header"> 
+              <h:outputText value="#{messages.LABEL_QTD_PERMISSOES_AGENDAMENTO}"/> 
+            </f:facet> 
+          </p:column>  
+        </mec:serverDataTable> 
+      </h:form> 
+    </ui:define> 
+  </ui:composition> 
+</html>

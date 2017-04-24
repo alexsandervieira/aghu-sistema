@@ -81,6 +81,7 @@ import br.gov.mec.aghu.model.MamPcIntItemParada;
 import br.gov.mec.aghu.model.MamPcIntParada;
 import br.gov.mec.aghu.model.MbcCirurgias;
 import br.gov.mec.aghu.model.MpmAltaSumario;
+import br.gov.mec.aghu.model.MpmAnamneses;
 import br.gov.mec.aghu.model.MpmFichaApache;
 import br.gov.mec.aghu.model.MpmLaudo;
 import br.gov.mec.aghu.model.MpmMotivoIngressoCti;
@@ -586,6 +587,7 @@ public class EstornarInternacaoRN extends BaseBusiness {
 			journalDelete(internacao);
 			
 			getInternacaoFacade().enforceDelete(internacao, nomeMicrocomputador, dataFimVinculoServidor);
+			ainInternacaoDAO.flush();
 			getInternacaoFacade().posDelete(internacao, nomeMicrocomputador, dataFimVinculoServidor);
 		}
 		catch (Exception e) {		
@@ -973,10 +975,15 @@ public class EstornarInternacaoRN extends BaseBusiness {
 				else{
 					//Remove as altas sumários
 					removerAltaSumarios(atendimento);
+					this.prescricaoMedicaFacade.removerListaServidorSumarioAltaPorAtendimento(atendimento.getSeq());
 					//Remove os atendimentos do paciente
+					
 					removerAtendimentosPaciente(atendimento);
 					//Remove o atendimento
-					
+					MpmAnamneses anamneses = prescricaoMedicaFacade.obterAnamneseAtendimento(atendimento.getSeq());
+					if(anamneses != null){
+						throw new ApplicationBusinessException(EstornarInternacaoRNExceptionCode.ERRO_REMOVER_ATENDIMENTOS_INTERNACAO_REGISTROS_DEPENDENTES);
+					}
 					//this.aghuFacade.excluirAtendimento(atendimento);
 					this.getAghuFacade().removerAghAtendimentos(atendimento, true);
 				}
@@ -1044,7 +1051,6 @@ public class EstornarInternacaoRN extends BaseBusiness {
 			this.flush();			
 		}
 	}
-	
 	/**
 	 * Atualiza um atendimento de urgência
 	 * @param atendimento

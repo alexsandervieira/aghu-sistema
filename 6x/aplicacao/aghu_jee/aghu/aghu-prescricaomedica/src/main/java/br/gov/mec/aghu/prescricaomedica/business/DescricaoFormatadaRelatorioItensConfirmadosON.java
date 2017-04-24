@@ -51,6 +51,7 @@ import br.gov.mec.aghu.prescricaomedica.dao.MpmPrescricaoMdtoDAO;
 import br.gov.mec.aghu.prescricaomedica.dao.MpmPrescricaoProcedimentoDAO;
 import br.gov.mec.aghu.prescricaomedica.dao.MpmSolicitacaoConsultoriaDAO;
 import br.gov.mec.aghu.prescricaomedica.vo.ItemDispensacaoFarmaciaVO;
+import br.gov.mec.aghu.prescricaomedica.vo.PosolociaDosagemMedicamentoVO;
 
 /**
  * 
@@ -65,9 +66,13 @@ import br.gov.mec.aghu.prescricaomedica.vo.ItemDispensacaoFarmaciaVO;
 @Stateless
 public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness {
 
+	private static final String PARA = "PARA";
+
 	private static final String _PARA_ = " PARA ";
 
 	private static final String _DE_MAIUSCULO = " DE ";
+
+	private static final String DE_MAIUSCULO_ = "DE ";
 
 	private static final String _DE_ = " de ";
 
@@ -142,7 +147,7 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 	private static final String MSG_AVAL_NUTRICIONISTA = "Avaliação Nutricionista;";
 	private static final String MSG_BI = "BI;";
 	private static final String MSG_NUMERO_DE_VEZES_COM_VIRGULA = ", número de vezes:";
-	private static final String QUEBRA_LINHA = "<br/>";
+	private static final String QUEBRA_LINHA = " \n ";
 	
 	private final static String LABEL_DILUIR = "Diluir";
 	private final static String LABEL_ADMINISTRAR = "Administrar";
@@ -415,8 +420,8 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 
 		}
 
-		if (descricaoItens.length() >= 5){
-			return descricaoItens.substring(0, descricaoItens.length() - 5); // remove o último '<br/>'			
+		if (descricaoItens.length() >= 4 && descricaoItens.toString().endsWith(QUEBRA_LINHA)){
+			return descricaoItens.substring(0, descricaoItens.length() - 4); // remove a ultima quebra de linha			
 		}
 		
 		return descricaoItens.toString();
@@ -488,8 +493,8 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 		String descricaoFrequenciaDe = "";
 		String descricaoFrequenciaPara = "";
 		
-		MpmPrescricaoCuidado cuidadoAnterior = cuidado.getMpmPrescricaoCuidados();
-		
+		MpmPrescricaoCuidado cuidadoAnterior = mpmPrescricaoCuidadoDAO.obterPorChavePrimaria(cuidado.getMpmPrescricaoCuidados().getId());
+
 		//Obtém a frequência anterior
 		if (cuidadoAnterior.getMpmTipoFreqAprazamentos().getSintaxe() != null){
 			descricaoFrequenciaDe = obterFrequenciaFormatada(cuidadoAnterior
@@ -673,7 +678,7 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 	 *  
 	 */
 	@SuppressWarnings({"PMD.ExcessiveMethodLength", "PMD.NPathComplexity"})
-	public String obterDescricaoFormatadaMedicamentoSolucao(
+	public List<PosolociaDosagemMedicamentoVO> obterDescricaoFormatadaMedicamentoSolucao(
 			MpmPrescricaoMdto medicamentoSolucao, Boolean inclusaoExclusao,
 			Boolean impressaoTotal, Boolean isUpperCase, Boolean incluirCodigoMedicamentos) throws ApplicationBusinessException {
 		
@@ -681,16 +686,10 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 		
 		StringBuilder strBuilder = new StringBuilder(70);
 		
-		strBuilder.append(
-				obterDescricaoDosagemItensMedicamentoSolucao(
-						medicamentoSolucao, impressaoTotal, inclusaoExclusao, isUpperCase));
-//				.append("; ");
-		
 		//É uma Solução
 		if(medicamentoSolucao.getIndSolucao() != null && medicamentoSolucao.getIndSolucao()){
 			if(medicamentoSolucao.getViaAdministracao()!=null){
-				strBuilder.append(CoreUtil.acrescentarEspacos(13)).append(
-					medicamentoSolucao.getViaAdministracao().getSigla())
+				strBuilder.append(medicamentoSolucao.getViaAdministracao().getSigla())
 					.append(", ");
 			}
 		}
@@ -795,18 +794,27 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 		}
 
 		if (StringUtils.isNotBlank(medicamentoSolucao.getObservacao())) {
-			strBuilder.append(QUEBRA_LINHA).append("             "
-					+ OBS
-					+ medicamentoSolucao.getObservacao().replace("\n",
-							QUEBRA_LINHA + "                      "));
+			strBuilder.append(OBS
+					+ medicamentoSolucao.getObservacao().replace("\n",""));
 
 		}
 
 		if (medicamentoSolucao.getIndAntiMicrobiano()){
-			strBuilder.append(obterDiaDeAdministracao(medicamentoSolucao)).append("; ");				
+			strBuilder.append(", ").append(obterDiaDeAdministracao(medicamentoSolucao)).append("; ");				
+		}
+
+		List<PosolociaDosagemMedicamentoVO> listPosologiaDosagem = obterMapDescricaoDosagemItensMedicamentoSolucao(
+				medicamentoSolucao, impressaoTotal, inclusaoExclusao, isUpperCase, strBuilder.toString());
+		
+		if (medicamentoSolucao.getIndSolucao() != null && medicamentoSolucao.getIndSolucao()) {
+			PosolociaDosagemMedicamentoVO posologiaDosagemComplemento = new PosolociaDosagemMedicamentoVO();
+			posologiaDosagemComplemento.setDosagem(strBuilder.toString());
+			listPosologiaDosagem.add(posologiaDosagemComplemento);
+		} else {
+			listPosologiaDosagem.get(0).setDosagem(listPosologiaDosagem.get(0).getDosagem().concat(strBuilder.toString()));
 		}
 		
-		return strBuilder.toString().trim();
+		return listPosologiaDosagem;
 	}
 	
 	/**
@@ -1155,7 +1163,7 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 
 			// Frequencia
 			if (!freqEditDe.equals(freqEditPara)) {
-				descricaoAtualizacao.append("DE ").append(freqEditDe)
+				descricaoAtualizacao.append(DE_MAIUSCULO_).append(freqEditDe)
 						.append(_PARA_).append(freqEditPara+"("+aprazamento+")");
 			} else {
 				descricaoAtualizacao.append(freqEditPara+"("+aprazamento+")");
@@ -1211,11 +1219,12 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 	 * @return
 	 * @throws ApplicationBusinessException
 	 */
-	@SuppressWarnings("PMD.ExcessiveMethodLength")
-	public String obterDescricaoAlteracaoMedicamentoSolucao(
+	@SuppressWarnings({"PMD.ExcessiveMethodLength", "PMD.NPathComplexity"})
+	public List<PosolociaDosagemMedicamentoVO> obterDescricaoAlteracaoMedicamentoSolucao(
 			MpmPrescricaoMdto medicamentoSolucao, Boolean isUppercase) throws ApplicationBusinessException {
 
-		StringBuffer descricaoAtualizacao = new StringBuffer(35);
+		StringBuffer descricaoDosagem = new StringBuffer(35);
+		
 		//MpmPrescricaoMdto medicamentoSolucaoAnterior = medicamentoSolucao.getPrescricaoMdtoOrigem();
 		Enum [] fetchArgsLeftJoin = {MpmPrescricaoMdto.Fields.PRESCRICAOMEDICA,
 				MpmPrescricaoMdto.Fields.VIA_ADMINISTRACAO, MpmPrescricaoMdto.Fields.DILUENTE, 
@@ -1225,12 +1234,14 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 				new MpmPrescricaoMdtoId(medicamentoSolucao.getPrescricaoMdtoOrigem().getId().getAtdSeq(), medicamentoSolucao.getPrescricaoMdtoOrigem().getId().getSeq()),
 				null, fetchArgsLeftJoin);
 
+		List<PosolociaDosagemMedicamentoVO> listMedicamentos = new ArrayList<PosolociaDosagemMedicamentoVO>();
+
 		/*----- Obtém valores equivalentes aos campos da view -----*/
 		//Descrição Formatada
-		final String medDescricaoEditDe = obterDescricaoDosagemItensMedicamentoSolucao(medicamentoSolucaoAnterior, false, false, isUppercase);
-		final String medDescricaoEditPara = obterDescricaoDosagemItensMedicamentoSolucao(medicamentoSolucao, false, false, isUppercase);
+		List<PosolociaDosagemMedicamentoVO> medDescricaoEditDe = obterMapDescricaoDosagemItensMedicamentoSolucao(medicamentoSolucaoAnterior, false, false, isUppercase, null);
+		List<PosolociaDosagemMedicamentoVO> medDescricaoEditPara = obterMapDescricaoDosagemItensMedicamentoSolucao(medicamentoSolucao, false, false, isUppercase, null);
 		
-		final String medDescricaoAlteradaEditPara = obterDescricaoAlteradaDosagemItensMedicamentoSolucao(medicamentoSolucao, false, false, isUppercase);
+		List<PosolociaDosagemMedicamentoVO> medDescricaoAlteradaEditPara = obterDescricaoAlteradaDosagemItensMedicamentoSolucao(medicamentoSolucao, false, false, isUppercase, null);
 		
 		// Descrição Sem Dosagem
 		final String medDescricaoSemDosagemEdit = obterDescricaoSemDosagemItensMedicamentoSolucao(medicamentoSolucao, false, false, isUppercase);
@@ -1270,40 +1281,47 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 
 		// Solução
 		if (medicamentoSolucao.getIndSolucao() != null && medicamentoSolucao.getIndSolucao()) {
-			descricaoAtualizacao.append("DE").append(CoreUtil.acrescentarEspacos(8))
-					.append(StringUtils.capitalize(medDescricaoEditDe)).append(" PARA").append(CoreUtil.acrescentarEspacos(3))
-					.append(StringUtils.capitalize(medDescricaoEditPara));
+			PosolociaDosagemMedicamentoVO posologiaDe = new PosolociaDosagemMedicamentoVO();
+			posologiaDe.setPosologia("DE");
+			posologiaDe.setDosagem("");
+			PosolociaDosagemMedicamentoVO posologiaPara = new PosolociaDosagemMedicamentoVO();
+			posologiaPara.setPosologia(PARA);
+			posologiaPara.setDosagem("");
+
+			listMedicamentos.add(posologiaDe);
+			listMedicamentos.addAll(medDescricaoEditDe);
+			listMedicamentos.add(posologiaPara);
+			listMedicamentos.addAll(medDescricaoEditPara);
 		// Medicamento
 		} else if (!medAdministracaoDosagemEditDe.equals(medAdministracaoDosagemEditPara)) { 
-			descricaoAtualizacao.append(medDescricaoSemDosagemEdit);
-			descricaoAtualizacao.append(" - DE ")
-					.append(StringUtils.capitalize(medAdministracaoDosagemEditDe))
-					.append(" - PARA ")
-					.append(StringUtils.capitalize(medAdministracaoDosagemEditPara)).append(',');
+			PosolociaDosagemMedicamentoVO posologiaEdit = new PosolociaDosagemMedicamentoVO();
+			posologiaEdit.setPosologia(medDescricaoSemDosagemEdit);
+			posologiaEdit.setDosagem(DE_MAIUSCULO_.concat(StringUtils.capitalize(medAdministracaoDosagemEditDe)).concat(" - PARA ").concat(StringUtils.capitalize(medAdministracaoDosagemEditPara)));
+			listMedicamentos.add(posologiaEdit);
 		// Inclusão e Exclusão de MEDICAMENTO.
 		} else { 
-			descricaoAtualizacao.append(medDescricaoAlteradaEditPara);
+			listMedicamentos.addAll(medDescricaoAlteradaEditPara);
 		}
 
 		// Via Administração
 		if (!medicamentoSolucao.getViaAdministracao().equals(
 				medicamentoSolucaoAnterior.getViaAdministracao())) {
-			descricaoAtualizacao.append(_DE_MAIUSCULO)
+			descricaoDosagem.append(DE_MAIUSCULO_)
 					.append(medicamentoSolucaoAnterior.getViaAdministracao()
 							.getSigla()).append(_PARA_)
 					.append(medicamentoSolucao.getViaAdministracao().getSigla())
 					.append(", ");
 		} else {
-			descricaoAtualizacao.append(' ').append(medicamentoSolucao.getViaAdministracao()
+			descricaoDosagem.append(medicamentoSolucao.getViaAdministracao()
 					.getSigla())
 					.append(", ");
 		}
 		
 		//Frequencia
 		if (!freqEditDe.equals(freqEditPara)){
-			descricaoAtualizacao.append("DE ").append(freqEditDe).append(_PARA_).append(freqEditPara);
+			descricaoDosagem.append(DE_MAIUSCULO_).append(freqEditDe).append(_PARA_).append(freqEditPara);
 		} else{
-			descricaoAtualizacao.append(freqEditPara);
+			descricaoDosagem.append(freqEditPara);
 		}
 		
 		//Hora Início de Administração
@@ -1321,18 +1339,18 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 									medicamentoSolucaoAnterior.getHoraInicioAdministracao()) != 0)) {
 			
 				if (medicamentoSolucaoAnterior.getHoraInicioAdministracao() != null){
-					descricaoAtualizacao.append(", DE I= ").append(sdf.format(medicamentoSolucaoAnterior.getHoraInicioAdministracao())).append(_H_);
+					descricaoDosagem.append(", DE I= ").append(sdf.format(medicamentoSolucaoAnterior.getHoraInicioAdministracao())).append(_H_);
 				} else{
-					descricaoAtualizacao.append(", DE I= []");
+					descricaoDosagem.append(", DE I= []");
 				}
 				
 				if (medicamentoSolucao.getHoraInicioAdministracao() != null){
-					descricaoAtualizacao.append(" PARA I= ").append(sdf.format(medicamentoSolucao.getHoraInicioAdministracao())).append(_H_);
+					descricaoDosagem.append(" PARA I= ").append(sdf.format(medicamentoSolucao.getHoraInicioAdministracao())).append(_H_);
 				} else{
-					descricaoAtualizacao.append(PARA_VAZIO);
+					descricaoDosagem.append(PARA_VAZIO);
 				}
 			} else{
-				descricaoAtualizacao.append(", I= ").append(sdf.format(medicamentoSolucao.getHoraInicioAdministracao()));
+				descricaoDosagem.append(", I= ").append(sdf.format(medicamentoSolucao.getHoraInicioAdministracao()));
 			}
 		}
 		
@@ -1377,10 +1395,10 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 			}
 			
 			if (!vDiluenteDe.equalsIgnoreCase(vDiluentePara)){
-				descricaoAtualizacao.append(", DE ").append(vDiluenteDe).append(_PARA_).append(vDiluentePara);
+				descricaoDosagem.append(", DE ").append(vDiluenteDe).append(_PARA_).append(vDiluentePara);
 			}
 			else{
-				descricaoAtualizacao.append(", ").append(vDiluentePara);
+				descricaoDosagem.append(", ").append(vDiluentePara);
 			}
 		}
 		
@@ -1396,22 +1414,22 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 							.equals(unidHorasCorrerPara)))) {
 				
 				if (qtdeCorrerDe != null){
-					descricaoAtualizacao.append(", DE correr em ").append(qtdeCorrerDe).append(unidHorasCorrerDe);
+					descricaoDosagem.append(", DE correr em ").append(qtdeCorrerDe).append(unidHorasCorrerDe);
 				}
 				else{
-					descricaoAtualizacao.append(" , DE []");
+					descricaoDosagem.append(" , DE []");
 				}
 				
 				if (qtdeCorrerPara != null){
-					descricaoAtualizacao.append(" PARA correr em ").append(qtdeCorrerPara).append(unidHorasCorrerPara);
+					descricaoDosagem.append(" PARA correr em ").append(qtdeCorrerPara).append(unidHorasCorrerPara);
 				}
 				else{
-					descricaoAtualizacao.append(PARA_VAZIO);
+					descricaoDosagem.append(PARA_VAZIO);
 				}
 			}
 			else{
 				if (qtdeCorrerPara != null){
-					descricaoAtualizacao.append(", correr em ").append(qtdeCorrerPara).append(unidHorasCorrerPara);
+					descricaoDosagem.append(", correr em ").append(qtdeCorrerPara).append(unidHorasCorrerPara);
 				}
 			}
 		}
@@ -1423,18 +1441,18 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 					|| (gotejoPara != null && !gotejoPara.equals(gotejoDe))) {
 
 				if (gotejoDe != null && gotejoPara != null) {
-					descricaoAtualizacao.append(", DE velocidade de infusão ").append(gotejoDe).append(' ')
+					descricaoDosagem.append(", DE velocidade de infusão ").append(gotejoDe).append(' ')
 							.append(descricaoTvaDe).append(" PARA velocidade de infusão ").append(gotejoPara)
 							.append(' ').append(descricaoTvaPara);
 				} else {
 					if (gotejoPara != null) {
-						descricaoAtualizacao.append(VELOCIDADE_DE_INFUSAO).append(gotejoPara).append(' ')
+						descricaoDosagem.append(VELOCIDADE_DE_INFUSAO).append(gotejoPara).append(' ')
 								.append(descricaoTvaPara);
 					}
 				}
 			} else {
 				if (gotejoPara != null) {
-					descricaoAtualizacao.append(VELOCIDADE_DE_INFUSAO).append(gotejoPara).append(' ')
+					descricaoDosagem.append(VELOCIDADE_DE_INFUSAO).append(gotejoPara).append(' ')
 							.append(descricaoTvaPara);
 				}
 			}
@@ -1443,36 +1461,36 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 		//Bomba de Infusão
 		if (!medicamentoSolucaoAnterior.getIndBombaInfusao().equals(medicamentoSolucao.getIndBombaInfusao())) {
 			if (medicamentoSolucaoAnterior.getIndBombaInfusao()){
-				descricaoAtualizacao.append(", DE com BI");
+				descricaoDosagem.append(", DE com BI");
 			} else{
-				descricaoAtualizacao.append(", DE sem BI");
+				descricaoDosagem.append(", DE sem BI");
 			}
 			if (medicamentoSolucao.getIndBombaInfusao()){
-				descricaoAtualizacao.append(" PARA com BI");
+				descricaoDosagem.append(" PARA com BI");
 			} else{
-				descricaoAtualizacao.append(" PARA sem BI");
+				descricaoDosagem.append(" PARA sem BI");
 			}
 		} else{
 			if (medicamentoSolucao.getIndBombaInfusao()){
-				descricaoAtualizacao.append(", BI");
+				descricaoDosagem.append(", BI");
 			}
 		}
 		
 		//Ind seNecessário
 		if (!medicamentoSolucaoAnterior.getIndSeNecessario().equals(medicamentoSolucao.getIndSeNecessario())){
 			if (medicamentoSolucaoAnterior.getIndSeNecessario()){
-				descricaoAtualizacao.append(", DE se necessário");
+				descricaoDosagem.append(", DE se necessário");
 			} else{
-				descricaoAtualizacao.append(", DE sem se necessário");
+				descricaoDosagem.append(", DE sem se necessário");
 			}
 			if (medicamentoSolucao.getIndSeNecessario()){
-				descricaoAtualizacao.append(" PARA se necessário");
+				descricaoDosagem.append(" PARA se necessário");
 			} else{
-				descricaoAtualizacao.append(" PARA sem se necessário");
+				descricaoDosagem.append(" PARA sem se necessário");
 			}
 		} else{
 			if (medicamentoSolucao.getIndSeNecessario()){
-				descricaoAtualizacao.append(", se necessário");
+				descricaoDosagem.append(", se necessário");
 			}
 		}
 		
@@ -1495,30 +1513,36 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 			
 			if (medicamentoSolucao.getObservacao() != null && medicamentoSolucaoAnterior.getObservacao() != null){
 				
-				descricaoAtualizacao.append(',').append(QUEBRA_LINHA).append(CoreUtil.acrescentarEspacos(13)).append("obs.: DE ").append(medicamentoSolucaoAnterior.getObservacao().replace("\n", QUEBRA_LINHA + CoreUtil.acrescentarEspacos(28)));
+				descricaoDosagem.append(", ").append("obs.: DE ").append(medicamentoSolucaoAnterior.getObservacao().replace("\n", ""));
 
-				descricaoAtualizacao.append(',').append(QUEBRA_LINHA)
-						.append(CoreUtil.acrescentarEspacos(13))
-						.append(CoreUtil.acrescentarEspacos(9)).append(PARA_)
-						.append(medicamentoSolucao.getObservacao().replace("\n", QUEBRA_LINHA + CoreUtil.acrescentarEspacos(33)));
+				descricaoDosagem.append(',').append(_PARA_)
+						.append(medicamentoSolucao.getObservacao().replace("\n", ""));
 			}
 			else{
 				if (medicamentoSolucao.getObservacao() != null){
-					descricaoAtualizacao.append(',').append(QUEBRA_LINHA).append(CoreUtil.acrescentarEspacos(13)).append(OBS).append(medicamentoSolucao.getObservacao().replace("\n", QUEBRA_LINHA + CoreUtil.acrescentarEspacos(22)));
+					descricaoDosagem.append(", ").append(OBS).append(medicamentoSolucao.getObservacao().replace("\n", ""));
 				}
 			}
 		}
 		else{
 			if (medicamentoSolucao.getObservacao() != null){
-				descricaoAtualizacao.append(',').append(QUEBRA_LINHA).append(CoreUtil.acrescentarEspacos(13)).append(OBS).append(medicamentoSolucao.getObservacao().replace("\n", QUEBRA_LINHA + CoreUtil.acrescentarEspacos(22)));
+				descricaoDosagem.append(", ").append(QUEBRA_LINHA).append(OBS).append(medicamentoSolucao.getObservacao().replace("\n", ""));
 			}
 		}
 		
 		if (medicamentoSolucao.getIndAntiMicrobiano()){
-			descricaoAtualizacao.append(", ").append(obterDiaDeAdministracao(medicamentoSolucao)).append("; ");				
+			descricaoDosagem.append(", ").append(obterDiaDeAdministracao(medicamentoSolucao)).append("; ");				
 		}
-		
-		return descricaoAtualizacao.toString();
+
+		if (medicamentoSolucao.getIndSolucao() != null && medicamentoSolucao.getIndSolucao()) {
+			PosolociaDosagemMedicamentoVO posologia = new PosolociaDosagemMedicamentoVO();
+			posologia.setDosagem(descricaoDosagem.toString());
+			listMedicamentos.add(posologia);
+		} else {
+			listMedicamentos.get(0).setDosagem(listMedicamentos.get(0).getDosagem().concat(", ").concat(descricaoDosagem.toString()));
+		}
+
+		return listMedicamentos;
 	}
 	
 	
@@ -1836,23 +1860,15 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 		}
 	}
 	
-	/**
-	 *
-	 * @param medicamentoSolucao
-	 * @param impressaoTotal
-	 * @param inclusaoExclusao
-	 * @return
-	 */
 	@SuppressWarnings("PMD.NPathComplexity")
-	private String obterDescricaoDosagemItensMedicamentoSolucao(
+	private List<PosolociaDosagemMedicamentoVO> obterMapDescricaoDosagemItensMedicamentoSolucao(
 			MpmPrescricaoMdto medicamentoSolucao, Boolean impressaoTotal,
-			Boolean inclusaoExclusao, Boolean isUpperCase) {
+			Boolean inclusaoExclusao, Boolean isUpperCase, String complementoDosagem) {
 		
-		StringBuffer descricaoConcentracao = new StringBuffer();
+		List<PosolociaDosagemMedicamentoVO> listMedicamentos = new ArrayList<PosolociaDosagemMedicamentoVO>();
 		
 		medicamentoSolucao = this.getPrescricaoMdtoDAO().merge(medicamentoSolucao);
 		
-		int contador = 1;
 		boolean diluenteEncontrado = false;
 		for (MpmItemPrescricaoMdto itemPrescricaoMedicamento : medicamentoSolucao
 				.getItensPrescricaoMdtos()) {
@@ -1868,21 +1884,13 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 				
 			}
 			
-			StringBuilder strBuilderFilho = new StringBuilder();
+			StringBuilder strBuilderPosologia = new StringBuilder();
+			StringBuilder strBuilderDosagem = new StringBuilder();
 			
-			if (!impressaoTotal) {
-				// Apenas medicamento.
-				if (contador > 1 && !inclusaoExclusao){// && (medicamentoSolucao.getIndSolucao() == null || !medicamentoSolucao.getIndSolucao()) ){
-					strBuilderFilho.append(CoreUtil.acrescentarEspacos(15));
-				} else {
-					strBuilderFilho.append(CoreUtil.acrescentarEspacos(2));							
-				}
-			}
-			
-			strBuilderFilho.append(this.obterDescricaoMedicamento(itemPrescricaoMedicamento, isUpperCase));
+			strBuilderPosologia.append(this.obterDescricaoMedicamento(itemPrescricaoMedicamento, isUpperCase));
 			
 			if (itemPrescricaoMedicamento.getMedicamento().getConcentracao() != null) {
-				strBuilderFilho.append(' ').append(
+				strBuilderPosologia.append(' ').append(
 						itemPrescricaoMedicamento.getMedicamento()
 								.getConcentracaoFormatada());
 			}
@@ -1892,13 +1900,13 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 							.isNotBlank(itemPrescricaoMedicamento
 									.getMedicamento()
 									.getDescricaoUnidadeMedidaMedica())) {
-				strBuilderFilho.append(' ').append(
+				strBuilderPosologia.append(' ').append(
 						itemPrescricaoMedicamento.getMedicamento()
 								.getDescricaoUnidadeMedidaMedica());
 			}
 			if (StringUtils.isNotBlank(itemPrescricaoMedicamento
 					.getObservacao())) {
-				strBuilderFilho.append(_DOIS_PONTOS_).append(
+				strBuilderPosologia.append(_DOIS_PONTOS_).append(
 						itemPrescricaoMedicamento.getObservacao());
 			}
 
@@ -1908,17 +1916,17 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 				numFormated = AghuNumberFormat.formatarValor(itemPrescricaoMedicamento.getDose(), itemPrescricaoMedicamento.getClass(), DOSE);
 			}
 			
-			strBuilderFilho.append("- ").append(getLabelSolucao(itemPrescricaoMedicamento)).append(' ').append(numFormated).append(' ');
+			strBuilderDosagem.append(getLabelSolucao(itemPrescricaoMedicamento)).append(' ').append(numFormated).append(' ');
 
 			if (itemPrescricaoMedicamento.getFormaDosagem() != null
 					&& StringUtils.isNotBlank(itemPrescricaoMedicamento
 							.getFormaDosagem()
 							.getDescricaoUnidadeMedidaMedica())) {
-				strBuilderFilho.append(
+				strBuilderDosagem.append(
 						itemPrescricaoMedicamento.getFormaDosagem()
 								.getDescricaoUnidadeMedidaMedica());
 			} else if(itemPrescricaoMedicamento.getMedicamento().getTipoApresentacaoMedicamento() != null) {
-				strBuilderFilho.append(
+				strBuilderDosagem.append(
 						itemPrescricaoMedicamento.getMedicamento()
 								.getTipoApresentacaoMedicamento().getSigla());
 			}
@@ -1926,36 +1934,29 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 			// É um Medicamento
 			if(medicamentoSolucao.getIndSolucao() == null || !medicamentoSolucao.getIndSolucao()){
 				if(medicamentoSolucao.getViaAdministracao()!=null){
-					strBuilderFilho.append(", ").append(
+					strBuilderDosagem.append(", ").append(
 						medicamentoSolucao.getViaAdministracao().getSigla())
 						.append(", ");
 				}
 			}
-			
-//			if (itemPrescricaoMedicamento.getIndAntiMicrobiano()){
-//				strBuilderFilho.append(obterDiaDeAdministracao(medicamentoSolucao)).append(", ");				
-//			}
-			
-			if (medicamentoSolucao.getIndSolucao()) {
-				strBuilderFilho.append(QUEBRA_LINHA);
-			}
-			
-			descricaoConcentracao.append(strBuilderFilho);
-			
-			contador ++;
+			PosolociaDosagemMedicamentoVO posologiaDosagem = new PosolociaDosagemMedicamentoVO();
+			posologiaDosagem.setPosologia(strBuilderPosologia.toString());
+			posologiaDosagem.setDosagem(strBuilderDosagem.toString());
+			posologiaDosagem.setComplementoDosagem(complementoDosagem);
+			listMedicamentos.add(posologiaDosagem);
 		}
 		
-		return descricaoConcentracao.toString();
+		return listMedicamentos;
 	}
 
 	@SuppressWarnings("PMD.NPathComplexity")
-	private String obterDescricaoAlteradaDosagemItensMedicamentoSolucao(
+	private List<PosolociaDosagemMedicamentoVO> obterDescricaoAlteradaDosagemItensMedicamentoSolucao(
 			MpmPrescricaoMdto medicamentoSolucao, Boolean impressaoTotal,
-			Boolean inclusaoExclusao, Boolean isUpperCase) {
+			Boolean inclusaoExclusao, Boolean isUpperCase, String complementoDosagem) {
 
-		StringBuffer descricaoConcentracao = new StringBuffer();
+		List<PosolociaDosagemMedicamentoVO> listMedicamentos = new ArrayList<PosolociaDosagemMedicamentoVO>();
 
-		int contador = 1;
+		//int contador = 1;
 		boolean diluenteEncontrado = false;
 		for (MpmItemPrescricaoMdto itemPrescricaoMedicamento : medicamentoSolucao
 				.getItensPrescricaoMdtos()) {
@@ -1971,20 +1972,21 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 				
 			}
 
-			StringBuilder strBuilderFilho = new StringBuilder();
+			StringBuilder strBuilderPosologia = new StringBuilder();
+			StringBuilder strBuilderDosagem = new StringBuilder();
 
-			if (!impressaoTotal) {
+			/*if (!impressaoTotal) {
 				if (contador == 1) {
-					strBuilderFilho.append(CoreUtil.acrescentarEspacos(2));
+					strBuilderDosagem.append(CoreUtil.acrescentarEspacos(2));
 				} else {
-					strBuilderFilho.append(CoreUtil.acrescentarEspacos(13));
+					strBuilderDosagem.append(CoreUtil.acrescentarEspacos(13));
 				}
-			}
+			}*/
 
-			strBuilderFilho.append(this.obterDescricaoMedicamento(itemPrescricaoMedicamento, isUpperCase));			
+			strBuilderPosologia.append(this.obterDescricaoMedicamento(itemPrescricaoMedicamento, isUpperCase));			
 
 			if (itemPrescricaoMedicamento.getMedicamento().getConcentracao() != null) {
-				strBuilderFilho.append(' ').append(
+				strBuilderPosologia.append(' ').append(
 						itemPrescricaoMedicamento.getMedicamento()
 								.getConcentracaoFormatada());
 			}
@@ -1994,13 +1996,13 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 							.isNotBlank(itemPrescricaoMedicamento
 									.getMedicamento()
 									.getDescricaoUnidadeMedidaMedica())) {
-				strBuilderFilho.append(' ').append(
+				strBuilderPosologia.append(' ').append(
 						itemPrescricaoMedicamento.getMedicamento()
 								.getDescricaoUnidadeMedidaMedica());
 			}
 			if (StringUtils.isNotBlank(itemPrescricaoMedicamento
 					.getObservacao())) {
-				strBuilderFilho.append(_DOIS_PONTOS_).append(
+				strBuilderPosologia.append(_DOIS_PONTOS_).append(
 						itemPrescricaoMedicamento.getObservacao());
 			}
 
@@ -2011,41 +2013,37 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 						itemPrescricaoMedicamento.getClass(), DOSE);
 			}
 
-			strBuilderFilho.append(" - "+getLabelSolucao(itemPrescricaoMedicamento)+" ").append(numFormated)
+			strBuilderDosagem.append(getLabelSolucao(itemPrescricaoMedicamento)).append(' ').append(numFormated)
 					.append(' ');
 
 			if (itemPrescricaoMedicamento.getFormaDosagem() != null
 					&& StringUtils.isNotBlank(itemPrescricaoMedicamento
 							.getFormaDosagem()
 							.getDescricaoUnidadeMedidaMedica())) {
-				strBuilderFilho.append(
+				strBuilderDosagem.append(
 						itemPrescricaoMedicamento.getFormaDosagem()
 								.getDescricaoUnidadeMedidaMedica()).append(',');
 			} else if (itemPrescricaoMedicamento.getMedicamento()
 					.getTipoApresentacaoMedicamento() != null) {
-				strBuilderFilho.append(
+				strBuilderDosagem.append(
 						itemPrescricaoMedicamento.getMedicamento()
 								.getTipoApresentacaoMedicamento().getSigla());
 			}
-			/*if (medicamentoSolucao.getViaAdministracao() != null) {
-				strBuilderFilho.append(' ').append(
-						medicamentoSolucao.getViaAdministracao().getSigla())
-						.append(", ");
-			}
 
-			if (itemPrescricaoMedicamento.getIndAntiMicrobiano()) {
-				strBuilderFilho
-						.append(obterDiaDeAdministracao(medicamentoSolucao));
-			}
-			*/
 			if (medicamentoSolucao.getIndSolucao()) {
-				strBuilderFilho.append(QUEBRA_LINHA);
+				strBuilderDosagem.append(QUEBRA_LINHA);
 			}
-			descricaoConcentracao.append(strBuilderFilho);
-			contador++;
+			
+			PosolociaDosagemMedicamentoVO posologiaDosagem = new PosolociaDosagemMedicamentoVO();
+			posologiaDosagem.setPosologia(strBuilderPosologia.toString());
+			posologiaDosagem.setDosagem(strBuilderDosagem.toString());
+			posologiaDosagem.setComplementoDosagem(complementoDosagem);
+			listMedicamentos.add(posologiaDosagem);
+
+			//contador++;
 		}
 
-		return descricaoConcentracao.toString();
+		return listMedicamentos;
 	}
 	
 	
@@ -2071,7 +2069,7 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 
 		StringBuffer descricaoConcentracao = new StringBuffer();
 
-		int contador = 1;
+		//int contador = 1;
 		boolean diluenteEncontrado = false;
 		for (MpmItemPrescricaoMdto itemPrescricaoMedicamento : medicamentoSolucao
 				.getItensPrescricaoMdtos()) {
@@ -2089,13 +2087,13 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 
 			StringBuilder strBuilderFilho = new StringBuilder();
 
-			if (!impressaoTotal) {
+			/*if (!impressaoTotal) {
 				if (contador == 1) {
 					strBuilderFilho.append(CoreUtil.acrescentarEspacos(2));
 				} else {
 					strBuilderFilho.append(CoreUtil.acrescentarEspacos(13));
 				}
-			}
+			}*/
 
 			strBuilderFilho.append(this.obterDescricaoMedicamento(itemPrescricaoMedicamento, isUpperCase));
 			
@@ -2120,7 +2118,7 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 						itemPrescricaoMedicamento.getObservacao());
 			}
 			descricaoConcentracao.append(strBuilderFilho);
-			contador++;
+			//contador++;
 		}
 	//	descricaoConcentracao = " -" + descricaoConcentracao;
 		return descricaoConcentracao.toString();
@@ -2332,7 +2330,7 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 		//Verifica se alterou a especialidade
 		if (!consultoriaAnterior.getEspecialidade().equals(consultoria.getEspecialidade())){
 			descricaoAtualizacao.append(", ");
-			descricaoAtualizacao.append("DE ")
+			descricaoAtualizacao.append(DE_MAIUSCULO_)
 					.append(consultoriaAnterior.getEspecialidade()
 							.getNomeEspecialidade()).append(_PARA_)
 					.append(consultoria.getEspecialidade().getNomeEspecialidade());
@@ -2498,7 +2496,7 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 		.append(obterDescricaoItensSolicitacaoHemoterapica(solicitacaoHemoterapicaAntiga, impressaoTotal, false))
 		.append(QUEBRA_LINHA)
 		//SINTAXE ISH PARA
-		.append("PARA").append(CoreUtil.acrescentarEspacos(3))
+		.append(PARA).append(CoreUtil.acrescentarEspacos(3))
 		.append(obterDescricaoItensSolicitacaoHemoterapica(solicitacaoHemoterapica, impressaoTotal, false));
 		//descricaoAtualizacao += QUEBRA_LINHA;
 		
@@ -2752,7 +2750,7 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 			descricaoAtualizacao.append(descricaoFilhosAnterior);
 			
 			if (StringUtils.isBlank(descricaoFilhos)){
-				descricaoAtualizacao.append(QUEBRA_LINHA).append("PARA").append(CoreUtil.acrescentarEspacos(3));
+				descricaoAtualizacao.append(QUEBRA_LINHA).append(PARA).append(CoreUtil.acrescentarEspacos(3));
 				descricaoAtualizacao.append("[]");
 			}
 		}
@@ -2763,7 +2761,7 @@ public class DescricaoFormatadaRelatorioItensConfirmadosON extends BaseBusiness 
 				descricaoAtualizacao.append("[]");
 			}
 			//MUP PARA
-			descricaoAtualizacao.append(QUEBRA_LINHA).append("PARA").append(CoreUtil.acrescentarEspacos(3));
+			descricaoAtualizacao.append(QUEBRA_LINHA).append(PARA).append(CoreUtil.acrescentarEspacos(3));
 			descricaoAtualizacao.append(descricaoFilhos);						
 		}
 		

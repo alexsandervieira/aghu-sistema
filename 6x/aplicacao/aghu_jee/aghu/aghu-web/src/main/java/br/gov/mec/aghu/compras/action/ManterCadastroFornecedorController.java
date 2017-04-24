@@ -140,11 +140,11 @@ public class ManterCadastroFornecedorController extends ActionController{
 				frnAtivo= obterDominioSimNaoAtivo(fornecedor.getSituacao());
 				nacional = obterTipoNacionalidadeFornecedor(fornecedor.getTipoFornecedor());
 				
-				if(fornecedor.getClassificacaoEconomica() != null && !fornecedor.getClassificacaoEconomica().isEmpty()){
+				if(fornecedor.getClassificacaoEconomica() != null && !(fornecedor.getClassificacaoEconomica() == null)){
 					classEcon = DominioClassEcon.valueOf(fornecedor.getClassificacaoEconomica());
 				}
 				
-				if(fornecedor.getClassificacao() != null && !fornecedor.getClassificacaoEconomica().isEmpty()){					
+				if(fornecedor.getClassificacao() != null && !(fornecedor.getClassificacaoEconomica() == null)){					
 					tipoFornecedor = DominioTipoFornc.valueOf(fornecedor.getClassificacao());					
 				}
 				

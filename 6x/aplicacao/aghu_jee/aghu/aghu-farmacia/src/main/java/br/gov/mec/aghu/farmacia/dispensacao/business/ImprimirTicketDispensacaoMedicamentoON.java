@@ -66,13 +66,13 @@ public class ImprimirTicketDispensacaoMedicamentoON extends BaseBusiness impleme
 				prescricao_inicio, prescricao_fim);*/
 		
 		if(prescricaoEletronica){
-			matricial.append(completaComCaracter(11, '-'))
+			matricial.append(completaComCaracter(8, '-'))
 			.append(" PRESCRICAO ELETRONICA ")
 			.append(completaComCaracter(11, '-'));
 		}else{
-			matricial.append(completaComCaracter(9, '-'))
+			matricial.append(completaComCaracter(6, '-'))
 			.append(" PRESCRICAO NAO ELETRONICA ")
-			.append(completaComCaracter(9, '-'));
+			.append(completaComCaracter(6, '-'));
 		}
 		matricial.append('\n')
 		.append(getCabecalhoComumTicketMdtoDispensados(prontuario, local, paciente, prescricao_inicio, prescricao_fim));
@@ -109,23 +109,23 @@ public class ImprimirTicketDispensacaoMedicamentoON extends BaseBusiness impleme
 		
 		StringBuffer matricial = new StringBuffer(70);
 		
-		matricial.append(completaComCaracter(7, '-'))
-		.append(completaComCaracter(30, '='))
-		.append(completaComCaracter(8, '-'))
+		matricial.append(completaComCaracter(4, '-'))
+		.append(completaComCaracter(33, '='))
+		.append(completaComCaracter(5, '-'))
 		.append('\n');
 		
 		if(indMdtoControlado){
-			matricial.append(completaComCaracter(12, ' '))
+			matricial.append(completaComCaracter(7, ' '))
 			.append("MEDICAMENTOS CONTROLADOS ");
 		}else{
-			matricial.append(completaComCaracter(8, ' '))
+			matricial.append(completaComCaracter(6, ' '))
 			.append("MEDICAMENTOS NAO CONTROLADOS ");
 		}
 		matricial.append('\n')
 		
-		.append(completaComCaracter(7,  '-'))
-		.append(completaComCaracter(30, '='))
-		.append(completaComCaracter(8,  '-'))
+		.append(completaComCaracter(4,  '-'))
+		.append(completaComCaracter(33, '='))
+		.append(completaComCaracter(5,  '-'))
 		.append('\n')
 		
 		/*Linha em branco*/ 
@@ -133,12 +133,12 @@ public class ImprimirTicketDispensacaoMedicamentoON extends BaseBusiness impleme
 		
 		.append("MEDICAMENTO ")
 		/*Linha em branco*/ 
-		.append(completaComCaracter(23, ' '))
-		.append("QUANTIDADE")
+		.append(completaComCaracter(24, ' '))
+		.append("QTD")
 		.append('\n');
 		
-		Integer qtdMaxCarac = 45;
-		Integer qtdeMaxQtd = 7;
+		Integer qtdMaxCarac = 42;
+		Integer qtdeMaxQtd = 5;
 		Integer qtdCaracQtdMdto = qtdeMaxQtd+5;//1 em branco + 7 qtd (99,9999) + 1 em branco + 3 apresentacao
 		Integer qtdCaracDescMdto = qtdMaxCarac - qtdCaracQtdMdto;
 
@@ -212,29 +212,25 @@ public class ImprimirTicketDispensacaoMedicamentoON extends BaseBusiness impleme
 		/*Linha em branco*/ matricial.append(completaComCaracter(45, ' ')).append('\n');
 		
 		if(relPossuiMdto){
-			matricial.append(completaComCaracter(15, '-'))
+			matricial.append(completaComCaracter(12, '-'))
 			.append(" CONFERIDO POR ")
 			.append(completaComCaracter(15, '-'))
 			
 			/*Linha em branco*/ 
-			.append(completaComCaracter(45, ' ')).append('\n')
+			.append(completaComCaracter(42, ' ')).append('\n')
 			/*Linha em branco*/ 
-			.append(completaComCaracter(45, ' ')).append('\n')
-			/*Linha em branco*/ 
-			.append(completaComCaracter(45, ' ')).append('\n')
-			
-			.append(completaComCaracter(15, '-'))
+			.append(completaComCaracter(42, ' ')).append('\n')
+				
+			.append(completaComCaracter(12, '-'))
 			.append(" RECEBIDO  POR ")
 			.append(completaComCaracter(15, '-'))
 			/*Linha em branco*/ 
-			.append(completaComCaracter(45, ' ')).append('\n')
+			.append(completaComCaracter(42, ' ')).append('\n')
 			/*Linha em branco*/ 
-			.append(completaComCaracter(45, ' ')).append('\n')
-			/*Linha em branco*/ 
-			.append(completaComCaracter(45, ' ')).append('\n');
+			.append(completaComCaracter(42, ' ')).append('\n');
 		}
 		
-		matricial.append(completaComCaracter(45, '-')).append('\n')
+		matricial.append(completaComCaracter(42, '-')).append('\n')
 		.append("EMISSAO: ")
 		.append(DateUtil.dataToString(new Date(), "dd/MM/yyyy"))
 		.append(" as ")
@@ -255,7 +251,7 @@ public class ImprimirTicketDispensacaoMedicamentoON extends BaseBusiness impleme
 			String local, String paciente, String prescricao_inicio,
 			String prescricao_fim) throws ApplicationBusinessException {
 		
-		Integer qtdCharsLinha = 45;
+		Integer qtdCharsLinha = 42;
 		
 		StringBuffer matricial = new StringBuffer(765);
 		
@@ -264,9 +260,9 @@ public class ImprimirTicketDispensacaoMedicamentoON extends BaseBusiness impleme
 		AghParametros parametroRazaoSocial = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_RAZAO_SOCIAL);
 		String nomeHosp = StringUtil.subtituiAcentos(parametroRazaoSocial.getVlrTexto());
 		
-		if(nomeHosp.length() > 45){
-			matricial.append(nomeHosp.subSequence(0, 45)).append('\n')
-			.append(nomeHosp.subSequence(45, nomeHosp.length())).append('\n');
+		if(nomeHosp.length() > 42){
+			matricial.append(nomeHosp.subSequence(0, 42)).append('\n')
+			.append(nomeHosp.subSequence(42, nomeHosp.length())).append('\n');
 		}else{
 			/*Nome do Hospital*/ 
 		    matricial.append(nomeHosp).append('\n');
@@ -283,19 +279,17 @@ public class ImprimirTicketDispensacaoMedicamentoON extends BaseBusiness impleme
 		.append("Localizacao: ").append(local).append('\n')
 		//Paciente
 		.append("Paciente: ");
-		if(paciente.length() > 45){
-			matricial.append(paciente.subSequence(0, 45)).append('\n');
-			matricial.append(paciente.subSequence(45, paciente.length())).append('\n');
+		if(paciente.length() > 42){
+			matricial.append(paciente.subSequence(0, 42)).append('\n');
+			matricial.append(paciente.subSequence(42, paciente.length())).append('\n');
 		}else{
 			matricial.append(paciente).append('\n');
 		}
 		
 		//Prescricao
-		matricial.append("Prescricao: ").append(prescricao_inicio).append(" a ").append(prescricao_fim).append('\n')
-		
-		/*Linha em branco*/ 
-		.append(completaComCaracter(qtdCharsLinha, ' ')).append('\n');
-		
+		matricial.append("Prescricao: ").append(prescricao_inicio).append('\n')
+				.append(completaComCaracter(9, ' ')).append(" a ").append(prescricao_fim).append('\n');
+			
 		/*Integer qtdLinhasEmBranco = 12;
 		for(int i = 0; i< qtdLinhasEmBranco ; i++){
 			matricial.append(completaComCaracter(45, ' '));

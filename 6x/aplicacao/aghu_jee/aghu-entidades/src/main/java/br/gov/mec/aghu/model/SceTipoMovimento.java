@@ -574,6 +574,7 @@ public class SceTipoMovimento extends BaseEntityId<SceTipoMovimentoId> implement
 		IND_SITUACAO("indSituacao"),
 		IND_OPERACAO_BASICA("indOperacaoBasica"),
 		IND_MOVIMENTO_CONSUMO("movimentoConsumo"),
+		IND_MOVIMENTO_CONSUMO_NATIVO("IND_MOVIMENTO_CONSUMO"),
 		SIGLA("sigla"),
 		SITUACAO("indSituacao"),
 		IND_EXIGE_MOTIVO("indExigeMotivo"),

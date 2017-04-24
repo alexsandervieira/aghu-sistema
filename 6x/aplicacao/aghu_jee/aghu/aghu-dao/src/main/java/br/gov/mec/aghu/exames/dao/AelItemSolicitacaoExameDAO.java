@@ -1714,7 +1714,8 @@ public class AelItemSolicitacaoExameDAO extends br.gov.mec.aghu.core.persistence
 		
 		final DetachedCriteria criteria = DetachedCriteria.forClass(AelItemSolicitacaoExames.class);
 		criteria.createAlias(AelItemSolicitacaoExames.Fields.SOLICITACAO_EXAME.toString(), "soe");
-		criteria.createAlias("soe." + AelSolicitacaoExames.Fields.ATENDIMENTO, "atd");
+		criteria.createAlias("soe." + AelSolicitacaoExames.Fields.ATENDIMENTO.toString(), "atd");
+		criteria.createAlias(AelItemSolicitacaoExames.Fields.AEL_EXAMES_MATERIAL_ANALISE.toString(), "ema", JoinType.LEFT_OUTER_JOIN);
 		
 		criteria.add(Restrictions.eq("atd." + AghAtendimentos.Fields.SEQ, atdSeq));
 		criteria.add(Restrictions.ne(AelItemSolicitacaoExames.Fields.UFE_UNF_SEQ.toString(), unfSeq));

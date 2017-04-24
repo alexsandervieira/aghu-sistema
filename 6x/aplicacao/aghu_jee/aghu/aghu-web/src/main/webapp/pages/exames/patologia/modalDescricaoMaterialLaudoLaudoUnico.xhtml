@@ -14,7 +14,7 @@
 
   <ui:composition> 
     <p:outputPanel id="panelModalDescMats" layout="inline"> 
-      <p:dialog id="modalDescMats" width="950" height="580" autosized="true" modal="true" resizable="false" widgetVar="modalDescMatsWG" closable="true"> 
+      <p:dialog id="modalDescMats" width="850" height="420" autosized="true" modal="true" resizable="false" widgetVar="modalDescMatsWG" closable="true"> 
         <f:facet name="header"> 
           <h:panelGroup> 
             <h:outputText value="#{messages.LABEL_DESCRICAO_MATERIAL}"/> 
@@ -36,7 +36,7 @@
               <p:outputPanel id="panelDescMats" layout="inline"> 
 		        <mec:inputTextArea id="descMatsModal" 
 					    value="#{descricaoMaterialLaudoLaudoUnicoController.textoDescricaoMaterialLaudo}"
-					    cols="140" rows="7"
+					    cols="100" rows="7"
 						maxlength="2000"/>
               </p:outputPanel> 
             </aghu:linha>  
@@ -92,7 +92,7 @@
               <aghu:linha> 
                 <p:outputPanel id="panelDescricaoAelTxtDescMats" layout="inline"> 
                   <mec:inputTextArea id="dsAelTxtDescMats" 
-						cols="130" rows="7" 
+						cols="100" rows="7" 
 						maxlength="2000" 
 						value="#{descricaoMaterialLaudoLaudoUnicoController.dsAelTxtDescMats}" 
 						removerCaratersEspeciais="true">

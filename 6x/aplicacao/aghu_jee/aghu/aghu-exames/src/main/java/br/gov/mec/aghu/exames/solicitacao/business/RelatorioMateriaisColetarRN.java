@@ -6,13 +6,17 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.ejb3.annotation.TransactionTimeout;
 
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.business.IAghuFacade;
@@ -99,6 +103,8 @@ private IServidorLogadoFacade servidorLogadoFacade;
 		return getAghuFacade().buscarAghUnidadesFuncionaisPorParametro(valor);
 	}
 
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@TransactionTimeout(value=3, unit=TimeUnit.HOURS)
 	public List<SolicitacaoColetarVO> buscaMateriaisColetarInternacao(RelatorioMateriaisColetarInternacaoFiltroVO filtro, String nomeMicrocomputador)throws BaseException{
 		beforeReport(filtro);
 

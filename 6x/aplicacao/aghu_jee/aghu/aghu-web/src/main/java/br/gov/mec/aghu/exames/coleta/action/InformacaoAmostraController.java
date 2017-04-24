@@ -106,13 +106,15 @@ public class InformacaoAmostraController extends ActionController {
 	private List<AelAmostras> listaAmostras;
 	
 	// Lista de Exames da Amostra
-	private List<AelExamesAmostraVO> listaExamesAmostra;
+	private List<AelExamesAmostraVO> listaExamesAmostra = new ArrayList<>();
 	
 	// Solicitação Selecionada
 	private Integer soeSeqSelecionado;
 
 	// Amostra Selecionada
 	private AelAmostras amostraSelecionada;
+	private List<AelAmostras> listaAmostraSelecionada = new ArrayList<>();
+	
 	private Short seqpSelecionado;
 	
 	// Sala
@@ -224,10 +226,10 @@ public class InformacaoAmostraController extends ActionController {
 			this.listaAmostras = new ArrayList<AelAmostras>();
 			this.listaAmostras.add(amostra);
 		} else {
+			this.listaAmostraSelecionada.clear();
 			this.listaAmostras = this.coletaExamesFacade.buscarAmostrasPorSolicitacaoExame(soeSeqSelecionado);	
 		}
 		if(this.listaAmostras != null && !this.listaAmostras.isEmpty()){
-			this.seqpSelecionado =this.listaAmostras.get(0).getId().getSeqp();
 			this.obterExamesDaAmostra();
 		} else {
 			this.listaAmostras = null;
@@ -242,19 +244,77 @@ public class InformacaoAmostraController extends ActionController {
 	 */
 	public void obterExamesDaAmostra(){
 		this.sala = null;
-		this.listaExamesAmostra = this.coletaExamesFacade.obterAmostraItemExamesPorAmostra(this.soeSeqSelecionado, this.seqpSelecionado);
-		amostraSelecionada = this.examesFacade.buscarAmostrasComRecepientePorId(this.soeSeqSelecionado, this.seqpSelecionado);
-		if(!(possuiCaracteristica &&  this.coletaExamesFacade.verificaSituacaoAmostraGeradaOuEmColeta(amostraSelecionada.getSituacao()))) {
+		if(this.listaExamesAmostra == null) {
+			this.listaExamesAmostra = new ArrayList<AelExamesAmostraVO>();
+		}
+		if (this.listaAmostraSelecionada == null) {
+			this.listaAmostraSelecionada = new ArrayList<AelAmostras>();
+		}
+		
+//		this.listaExamesAmostra = this.coletaExamesFacade.obterAmostraItemExamesPorAmostra(this.soeSeqSelecionado, this.seqpSelecionado);
+		if (this.seqpSelecionado != null) {
+			AelAmostras amostraSelecionada = this.examesFacade.buscarAmostrasComRecepientePorId(this.soeSeqSelecionado, this.seqpSelecionado);
+			this.adicionarRemoverAmostraSelecionada(amostraSelecionada);
+		}
+		this.listaExamesAmostra = new ArrayList<>();
+		for (AelAmostras amostra : listaAmostraSelecionada) {
+			List<AelExamesAmostraVO> listaExamesAmostraSelecionada = this.coletaExamesFacade.obterAmostraItemExamesPorAmostra(this.soeSeqSelecionado, amostra.getId().getSeqp());
+			this.adicionarRemoverExamesAmostra(listaExamesAmostraSelecionada);			
+		}
+		
+		if(!(possuiCaracteristica &&  verficarSituacaoAmostraGeradaOuEmColeta())) {
 			setDesabilitaBotaoColeta(Boolean.TRUE);
 		}
 		else {
 			setDesabilitaBotaoColeta(Boolean.FALSE);
-		}
-		if(!(possuiCaracteristica && this.coletaExamesFacade.verificaSituacaoAmostraCURMA(amostraSelecionada.getSituacao()))) {
+		} 
+		if(!(possuiCaracteristica && verificaSituacaoAmostraCURMA())) {
 			setDesabilitaBotaoCancelarColeta(Boolean.TRUE);
 		}
 		else {
 			setDesabilitaBotaoCancelarColeta(Boolean.FALSE);
+		}
+		this.seqpSelecionado = null;
+		this.manterBotoesExames();
+	}
+
+	private Boolean verificaSituacaoAmostraCURMA() {
+		Boolean situacaoAmostraCURMA = true;
+		for (AelAmostras amostras : listaAmostraSelecionada) {
+			situacaoAmostraCURMA = this.coletaExamesFacade.verificaSituacaoAmostraCURMA(amostras.getSituacao());
+			if (situacaoAmostraCURMA == false) {
+				return situacaoAmostraCURMA;
+			}
+		}
+		return situacaoAmostraCURMA;
+	}
+
+	private Boolean verficarSituacaoAmostraGeradaOuEmColeta() {
+		Boolean situacaoGeradaOuEmColeta = true;
+		for (AelAmostras amostras : listaAmostraSelecionada) {
+			situacaoGeradaOuEmColeta = this.coletaExamesFacade.verificaSituacaoAmostraGeradaOuEmColeta(amostras.getSituacao());
+			if (situacaoGeradaOuEmColeta == false) {
+				return situacaoGeradaOuEmColeta;
+			}
+		}
+		return situacaoGeradaOuEmColeta;
+	}
+	
+	private void adicionarRemoverAmostraSelecionada(AelAmostras amostraSelecionada) {
+		if (this.listaAmostraSelecionada.contains(amostraSelecionada)) {
+			this.listaAmostraSelecionada.remove(amostraSelecionada);
+		} else {
+			this.listaAmostraSelecionada.add(amostraSelecionada);
+		}
+	}
+
+	private void adicionarRemoverExamesAmostra(List<AelExamesAmostraVO> listaExamesAmostra) {
+		for (AelExamesAmostraVO exameAmostra : listaExamesAmostra) {
+			if (this.listaExamesAmostra.contains(exameAmostra)) {
+				this.listaExamesAmostra.remove(exameAmostra);
+			} else {
+				this.listaExamesAmostra.add(exameAmostra);
+			}
 		}
 	}
 	
@@ -316,6 +376,7 @@ public class InformacaoAmostraController extends ActionController {
 		this.desabilitaBotaoVoltarExame = true;
 		this.sala = null;
 		this.primeiraPesquisa = false;
+		this.listaAmostraSelecionada = new ArrayList<>();
 	}
 
 	public void limparPesquisa() {
@@ -383,7 +444,7 @@ public class InformacaoAmostraController extends ActionController {
 	}
 	
 	/**
-	 * Método que atualiza a Unidade/ Sala da Amostra.
+	 * Método que atualiza a Unidade/ Sala da Amostra. - metodo acionado o selecionar o lapis.
 	 */
 	public void atualizarSalaExecutoraExamesDaAmostra() {
 		amostraSelecionada.setSalasExecutorasExames(sala);
@@ -393,7 +454,8 @@ public class InformacaoAmostraController extends ActionController {
 			this.apresentarMsgNegocio(Severity.INFO,"AMOSTRA_ATUALIZADA_COM_SUCESSO");
 		} catch (BaseException e) {
 			this.apresentarExcecaoNegocio(e);
-		}	
+		}
+		sala = new AelSalasExecutorasExames();
 	}
 	
 	/**
@@ -408,15 +470,20 @@ public class InformacaoAmostraController extends ActionController {
 			LOG.error(EXCECAO_CAPTURADA, e);
 		}
 		try {
+			this.listaExamesAmostra = new ArrayList<>();
 			
-			this.examesBeanFacade.atualizarSituacaoExamesAmostra(amostraSelecionada, nomeMicrocomputador);
-			// Atualização das Informações dos Exames das Amostras
-			this.listaAmostras = this.coletaExamesFacade.buscarAmostrasPorSolicitacaoExame(soeSeqSelecionado);
-			this.listaExamesAmostra = this.coletaExamesFacade.obterAmostraItemExamesPorAmostra(this.soeSeqSelecionado, this.seqpSelecionado);
-			setDesabilitaBotaoColeta(Boolean.TRUE);
-			setDesabilitaBotaoCancelarColeta(Boolean.FALSE);
-			this.apresentarMsgNegocio(Severity.INFO,"AMOSTRA_COLETADA_COM_SUCESSO");
-		} catch (BaseException e) {
+			for (AelAmostras amostraSelecionada : listaAmostraSelecionada) {
+				this.examesBeanFacade.atualizarSituacaoExamesAmostra(amostraSelecionada, nomeMicrocomputador);				
+			
+				// Atualização das Informações dos Exames das Amostras
+				this.listaExamesAmostra.addAll(this.coletaExamesFacade.obterAmostraItemExamesPorAmostra(this.soeSeqSelecionado, amostraSelecionada.getId().getSeqp()));
+			}
+				setDesabilitaBotaoColeta(Boolean.TRUE);
+				setDesabilitaBotaoCancelarColeta(Boolean.FALSE);
+				this.apresentarMsgNegocio(Severity.INFO,"AMOSTRA_COLETADA_COM_SUCESSO");
+				this.amostraSelecionada = new AelAmostras();
+				this.listaAmostras = this.coletaExamesFacade.buscarAmostrasPorSolicitacaoExame(soeSeqSelecionado);
+			} catch (BaseException e) {
 			this.apresentarExcecaoNegocio(e);
 		}	
 	}
@@ -442,14 +509,15 @@ public class InformacaoAmostraController extends ActionController {
 		
 		try {
 			
-			this.coletaExamesFacade.validarColetaExames(this.getSeqpSelecionado().intValue(), listaSelecionados);
 			for(AelExamesAmostraVO exameAmostraVO:listaSelecionados){
+				this.coletaExamesFacade.validarColetaExames(exameAmostraVO);
 				AelAmostraItemExamesId id = new AelAmostraItemExamesId();
-				id.setAmoSeqp(this.getSeqpSelecionado().intValue());
+				id.setAmoSeqp(exameAmostraVO.getSeqAmostra().intValue());
 				id.setAmoSoeSeq(exameAmostraVO.getSoeSeq());
 				id.setIseSoeSeq(exameAmostraVO.getSoeSeq());
 				id.setIseSeqp(exameAmostraVO.getSeqp());
 				this.coletaExamesFacade.coletarExame(id, nomeMicrocomputador);	
+				this.apresentarMsgNegocio(Severity.INFO, "MENSAGEM_EXAME_AMOSTRA_COLETA_SUCESSO");
 			}
 			
 			this.obterAmostrasDaSolicitacao();
@@ -458,6 +526,7 @@ public class InformacaoAmostraController extends ActionController {
 			this.apresentarExcecaoNegocio(e);
 			LOG.error(e.getMessage(),e);
 		}
+		
 	}
 	
 	public void voltarExame() {
@@ -481,14 +550,15 @@ public class InformacaoAmostraController extends ActionController {
 				return;
 			}
 		
-			this.coletaExamesFacade.validarVoltaExames(this.getSeqpSelecionado().intValue(), listaSelecionados);
 			for(AelExamesAmostraVO exameAmostraVO: listaSelecionados){
+				this.coletaExamesFacade.validarVoltaExames(exameAmostraVO);
 				AelAmostraItemExamesId id = new AelAmostraItemExamesId();
-				id.setAmoSeqp(this.getSeqpSelecionado().intValue());
+				id.setAmoSeqp(exameAmostraVO.getSeqAmostra().intValue());
 				id.setAmoSoeSeq(exameAmostraVO.getSoeSeq());
 				id.setIseSoeSeq(exameAmostraVO.getSoeSeq());
 				id.setIseSeqp(exameAmostraVO.getSeqp());
 				this.coletaExamesFacade.voltarExame(id, nomeMicrocomputador);	
+				this.apresentarMsgNegocio(Severity.INFO, "EXAME_AMOSTRA_VOLTADA_COM_SUCESSO");
 			}
 			this.obterAmostrasDaSolicitacao();
 			this.obterExamesDaAmostra();
@@ -564,8 +634,10 @@ public class InformacaoAmostraController extends ActionController {
 		this.isAcaoLimpar = false;
 		try {
 			String nomeMicrocomputador = getEnderecoRedeHostRemoto();
-			this.examesFacade.imprimirEtiquetaAmostra(this.amostraSelecionada, this.unidadeExecutora, nomeMicrocomputador);
-			this.apresentarMsgNegocio(Severity.INFO, "MENSAGEM_IMPRESSAO_ETIQUETA", amostraSelecionada.getId().getSeqp());
+			for (AelAmostras amostra : listaAmostraSelecionada) {
+				this.examesFacade.imprimirEtiquetaAmostra(amostra, this.unidadeExecutora, nomeMicrocomputador);				
+				this.apresentarMsgNegocio(Severity.INFO, "MENSAGEM_IMPRESSAO_ETIQUETA", amostra.getId().getSeqp());
+			}
 		} catch (final BaseException e) {
 			apresentarExcecaoNegocio(e);
 		} catch (UnknownHostException e) {
@@ -616,14 +688,21 @@ public class InformacaoAmostraController extends ActionController {
 			LOG.error(EXCECAO_CAPTURADA, e);
 		}
 		
-		try {			
-			this.examesBeanFacade.atualizarSituacaoExamesAmostraColetada(amostraSelecionada, nomeMicrocomputador);
-			// Atualização das Informações dos Exames das Amostras
-			this.listaAmostras = this.coletaExamesFacade.buscarAmostrasPorSolicitacaoExame(soeSeqSelecionado);
-			this.listaExamesAmostra = this.coletaExamesFacade.obterAmostraItemExamesPorAmostra(this.soeSeqSelecionado, this.seqpSelecionado);
+		try {
+			this.listaExamesAmostra = new ArrayList<>();
+			
+			
+			for (AelAmostras amostraSelecionada : listaAmostraSelecionada) {
+				this.examesBeanFacade.atualizarSituacaoExamesAmostraColetada(amostraSelecionada, nomeMicrocomputador);
+				Short seqpSelecionado = amostraSelecionada.getId().getSeqp();
+				
+				// Atualização das Informações dos Exames das Amostras
+				this.listaExamesAmostra.addAll(this.coletaExamesFacade.obterAmostraItemExamesPorAmostra(this.soeSeqSelecionado, seqpSelecionado));
+			}				
 			setDesabilitaBotaoColeta(Boolean.FALSE);
 			setDesabilitaBotaoCancelarColeta(Boolean.TRUE);
 			this.apresentarMsgNegocio(Severity.INFO,"AMOSTRA_VOLTADA_COM_SUCESSO");
+			this.listaAmostras = this.coletaExamesFacade.buscarAmostrasPorSolicitacaoExame(soeSeqSelecionado);
 		} catch (BaseException e) {
 			this.apresentarExcecaoNegocio(e);
 		}
@@ -651,6 +730,21 @@ public class InformacaoAmostraController extends ActionController {
 			parametro = "";
 		}
 		return this.aghuFacade.listarUnidadeFuncionalComSala(parametro);
+	}
+	
+	public boolean amostraEstaChecada(AelAmostras amostra){
+		if (amostra == null) {
+			return false;
+		}
+		return listaAmostraSelecionada.contains(amostra);
+	}
+	
+	public void selecionarAmostra(int linha) {
+		this.amostraSelecionada = listaAmostras.get(linha);
+	}
+	
+	public void limparAmostraSelecionada() {
+		this.amostraSelecionada = null;
 	}
 	
 	// Redireciona para a Pesquisa Fonética
@@ -934,4 +1028,14 @@ public class InformacaoAmostraController extends ActionController {
 	public void setDesabilitaBotaoVoltarExame(Boolean desabilitaBotaoVoltarExame) {
 		this.desabilitaBotaoVoltarExame = desabilitaBotaoVoltarExame;
 	}
+
+	public List<AelAmostras> getListaAmostraSelecionada() {
+		return listaAmostraSelecionada;
+	}
+
+	public void setListaAmostraSelecionada(List<AelAmostras> listaAmostraSelecionada) {
+		this.listaAmostraSelecionada = listaAmostraSelecionada;
+	}
+	
+	
 }

@@ -91,7 +91,14 @@
 	<aghu:linha>
 		<p:outputPanel id="panelContentInternalTabsLote">
 			<p:tabView id="tapPanelLote" dynamic="false" prependId="false"
-				rendered="#{listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaTipoTransporte or listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaIntervColeta or listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaNoAmostras or listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaConcentO2 or listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaRegMatAnalise or listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaRecomendacoes or listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaExamesOpcionais or listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.unfExecutaExame != null}">
+				rendered="#{listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaTipoTransporte or 
+							listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaIntervColeta or 
+							listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaNoAmostras or 
+							listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaConcentO2 or 
+							listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaRegMatAnalise or 
+							listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaRecomendacoes or 
+							listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.mostrarAbaExamesOpcionais or 
+							listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.unfExecutaExame != null}">
 				<p:tab title="#{messages.LABEL_SITUACAO}"
 					rendered="#{listarExamesSendoSolicitadosLoteController.itemSolicitacaoExameVo.unfExecutaExame != null}">
 					<p:outputPanel id="panelCamposItemLote" layout="block" style="min-height: 52px;">
@@ -110,6 +117,7 @@
 								requiredFake="true" id="dataProgramadaLote"
 								value="#{listarExamesSendoSolicitadosLoteController.dataProgr}"
 								rendered="#{listarExamesSendoSolicitadosLoteController.calendar}"
+								readonly="#{listarExamesSendoSolicitadosLoteController.checkUrgente}"
 								tipo="datahora">
 								<p:ajax event="blur" process="@this"
 									listener="#{listarExamesSendoSolicitadosLoteController.alterar}" />
@@ -120,7 +128,7 @@
 								title="#{messages.LABEL_TITLE_DATA_HORA_EXAME_COMBO}"
 								id="comboDataProgramadaLote" requiredFake="true"
 								style="width: 180px" itemLabel="formattedDate" itemValue="date"
-								value="#{listarExamesSendoSolicitadosLoteController.dataProgr}"
+								value="#{listarExamesSendoSolicitadosLoteController.dataHoraProgramada}"
 								items="#{listarExamesSendoSolicitadosLoteController.listaDatasHorasProgramadas}"
 								rendered="#{not listarExamesSendoSolicitadosLoteController.calendar and mf:hasPermission(securityController,'informarHorarioColeta,executar')}">
 								<f:convertDateTime type="both" pattern="dd/MM/yyyy HH:mm"
@@ -128,7 +136,7 @@
 								<p:ajax event="change"
 									update="@(#panelCamposItemLote) @(#tblistaExamesLote)"
 									process="@this"
-									listener="#{listarExamesSendoSolicitadosLoteController.alterar}" />
+									listener="#{listarExamesSendoSolicitadosLoteController.inserirHorarioRotinaItemNaLista}" />
 							</mec:selectOneMenu>
 						</p:outputPanel>
 						<mec:selectOneMenu id="comboSituacaoItemLote"

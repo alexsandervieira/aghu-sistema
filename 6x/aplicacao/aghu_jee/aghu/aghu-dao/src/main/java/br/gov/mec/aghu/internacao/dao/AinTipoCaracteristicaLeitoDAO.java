@@ -8,6 +8,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import br.gov.mec.aghu.core.commons.CoreUtil;
 import br.gov.mec.aghu.model.AinTipoCaracteristicaLeito;
 
 /**
@@ -115,34 +116,29 @@ public class AinTipoCaracteristicaLeitoDAO extends br.gov.mec.aghu.core.persiste
 	 * @param parametro
 	 * @return
 	 */
-	private DetachedCriteria obterCriteriaPesquisaPorCodigoOuDescricao(
-			Object parametro) {
+	private DetachedCriteria obterCriteriaPesquisaPorCodigoOuDescricao(Object parametro) {
 
 		String descricao = null;
 		Integer codigo = null;
-
-		if (parametro instanceof String) {
+		
+		if(CoreUtil.isNumeroInteger(parametro)){
+			codigo = Integer.parseInt((String) parametro);		
+		}else {
 			descricao = (String) parametro;
 		}
-
-		if (parametro instanceof Integer) {
-			codigo = (Integer) parametro;
-		}
+		
 		DetachedCriteria criteria = obterCriteriaTiposCaracteristicas();
 
 		if (descricao != null) {
 			criteria.add(Restrictions.ilike(
-					AinTipoCaracteristicaLeito.Fields.DESCRICAO.toString(),
-					descricao, MatchMode.ANYWHERE));
+					AinTipoCaracteristicaLeito.Fields.DESCRICAO.toString(),	descricao, MatchMode.ANYWHERE));
 		}
 
 		if (codigo != null) {
-			criteria.add(Restrictions.eq(
-					AinTipoCaracteristicaLeito.Fields.CODIGO.toString(), codigo));
+			criteria.add(Restrictions.eq(AinTipoCaracteristicaLeito.Fields.CODIGO.toString(), codigo));
 		}
 
 		return criteria;
-
 	}
 
 	/**

@@ -4,6 +4,8 @@
 package br.gov.mec.aghu.prescricaomedica.vo;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -23,6 +25,9 @@ public class RelatorioConfirmacaoItensPrescricaoVO implements Serializable,
 		this.setDescricao(descricaoItemPrescricaoMedica);
 
 	}
+	
+	public RelatorioConfirmacaoItensPrescricaoVO() {
+	}
 
 	private Integer numero;
 
@@ -38,6 +43,10 @@ public class RelatorioConfirmacaoItensPrescricaoVO implements Serializable,
 
 	Boolean indAntiMicrobiano;
 
+	private String dosagem;
+
+	List<PosolociaDosagemMedicamentoVO> listDescMedicamentos = new ArrayList<PosolociaDosagemMedicamentoVO>();
+	
 	public String getDescricao() {
 		return descricao;
 	}
@@ -92,6 +101,23 @@ public class RelatorioConfirmacaoItensPrescricaoVO implements Serializable,
 
 	public void setOrdem(Integer ordem) {
 		this.ordem = ordem;
+	}
+
+	public String getDosagem() {
+		return dosagem;
+	}
+
+	public void setDosagem(String dosagem) {
+		this.dosagem = dosagem;
+	}
+
+	public List<PosolociaDosagemMedicamentoVO> getListDescMedicamentos() {
+		return listDescMedicamentos;
+	}
+
+	public void setListDescMedicamentos(
+			List<PosolociaDosagemMedicamentoVO> listDescMedicamentos) {
+		this.listDescMedicamentos = listDescMedicamentos;
 	}
 
 	@Override

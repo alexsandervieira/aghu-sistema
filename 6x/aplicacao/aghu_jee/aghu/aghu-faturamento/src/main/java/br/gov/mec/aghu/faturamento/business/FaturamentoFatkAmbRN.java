@@ -13,14 +13,16 @@ import javax.persistence.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.criterion.Order;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDateTime;
 
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.ambulatorio.business.IAmbulatorioFacade;
 import br.gov.mec.aghu.business.IAghuFacade;
 import br.gov.mec.aghu.business.bancosangue.IBancoDeSangueFacade;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dao.ObjetosBancoOracleEnum;
 import br.gov.mec.aghu.dao.ObjetosOracleDAO;
 import br.gov.mec.aghu.dominio.DominioLocalCobrancaProcedimentoAmbulatorialRealizado;
@@ -65,10 +67,6 @@ import br.gov.mec.aghu.model.RapServidoresId;
 import br.gov.mec.aghu.paciente.business.IPacienteFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
-import br.gov.mec.aghu.core.utils.DateUtil;
 
 
 /**
@@ -78,7 +76,7 @@ import br.gov.mec.aghu.core.utils.DateUtil;
 @Stateless
 public class FaturamentoFatkAmbRN extends AbstractFatDebugLogEnableRN {
 
-	private static final String FATK_PMR_RN_V_PMR_JOURNAL = "FATK_PMR_RN_V_PMR_JOURNAL";
+//	private static final String FATK_PMR_RN_V_PMR_JOURNAL = "FATK_PMR_RN_V_PMR_JOURNAL";
 
 	private static final String AND = " AND ";
 
@@ -1419,16 +1417,16 @@ public class FaturamentoFatkAmbRN extends AbstractFatDebugLogEnableRN {
 		
 		//-- Alterado para gerar journal quando rotina de apac somente nas prévias
 		//-- de final de semana e no encerramento. Milena agosto/2003
-		atribuirContextoSessao(FATK_PMR_RN_V_PMR_JOURNAL, Boolean.TRUE);
+//		atribuirContextoSessao(FATK_PMR_RN_V_PMR_JOURNAL, Boolean.TRUE);
 		
-		LocalDateTime dt = new LocalDateTime(new Date());
+//		LocalDateTime dt = new LocalDateTime(new Date());
 		
-		if (pPrevia && 
-			dt.dayOfWeek().get() != DateTimeConstants.SUNDAY   &&
-			dt.dayOfWeek().get() != DateTimeConstants.SATURDAY &&
-			dt.dayOfWeek().get() != DateTimeConstants.MONDAY) {
-			atribuirContextoSessao(FATK_PMR_RN_V_PMR_JOURNAL, Boolean.FALSE);
-		}
+//		if (pPrevia && 
+//			dt.dayOfWeek().get() != DateTimeConstants.SUNDAY   &&
+//			dt.dayOfWeek().get() != DateTimeConstants.SATURDAY &&
+//			dt.dayOfWeek().get() != DateTimeConstants.MONDAY) {
+//			atribuirContextoSessao(FATK_PMR_RN_V_PMR_JOURNAL, Boolean.FALSE);
+//		}
 		
 		/** 
 		 *  TODO APAC está fora do escopo de desenvolvimento em 27/12/2011, ao se desenvolver tal escopo, descomentar tal código
@@ -1653,7 +1651,7 @@ public class FaturamentoFatkAmbRN extends AbstractFatDebugLogEnableRN {
 	 * @throws BaseException 
 	 */
 	@SuppressWarnings({"PMD.ExcessiveMethodLength", "PMD.NPathComplexity"})
-	void rnFatpExecFatNew(final DominioOpcaoEncerramentoAmbulatorio pModulos, final Boolean pPrevia, final Date pCpeDtFim, final AghJobDetail job, String nomeMicrocomputador, final Date dataFimVinculoServidor) throws BaseException {
+	public void rnFatpExecFatNew(final DominioOpcaoEncerramentoAmbulatorio pModulos, final Boolean pPrevia, final Date pCpeDtFim, final AghJobDetail job, String nomeMicrocomputador, final Date dataFimVinculoServidor) throws BaseException {
 		/* Executa processos de fatura ambulatorial ordenadamente */ 		
 		// Retirado pois não faz parte do escopo. Quando implementado APAC deve ser reativado e testado. 
 		//getFaturamentoFatkPmrRN().fatpApacDiaria(); //-- cfv(01/11/2001)
@@ -1667,16 +1665,16 @@ public class FaturamentoFatkAmbRN extends AbstractFatDebugLogEnableRN {
 		getSchedulerFacade().adicionarLog(job, inicio);
 		getFaturamentoFacade().enviaEmailResultadoEncerramentoAmbulatorio(inicio + "  <br /> Executando: " + (pPrevia ? " Prévia " : " Encerramento "));
 		//userTransaction = commitUserTransaction(userTransaction); //commita a parte do log
-		atribuirContextoSessao(FATK_PMR_RN_V_PMR_JOURNAL,Boolean.TRUE);
+//		atribuirContextoSessao(FATK_PMR_RN_V_PMR_JOURNAL,Boolean.TRUE);
 		
-		LocalDateTime dt = new LocalDateTime(new Date());
+//		LocalDateTime dt = new LocalDateTime(new Date());
 		
-		if (pPrevia && 
-			dt.dayOfWeek().get() != DateTimeConstants.SUNDAY   &&
-			dt.dayOfWeek().get() != DateTimeConstants.SATURDAY &&
-			dt.dayOfWeek().get() != DateTimeConstants.MONDAY) {
-			atribuirContextoSessao(FATK_PMR_RN_V_PMR_JOURNAL, Boolean.FALSE);
-		}
+//		if (pPrevia && 
+//			dt.dayOfWeek().get() != DateTimeConstants.SUNDAY   &&
+//			dt.dayOfWeek().get() != DateTimeConstants.SATURDAY &&
+//			dt.dayOfWeek().get() != DateTimeConstants.MONDAY) {
+//			atribuirContextoSessao(FATK_PMR_RN_V_PMR_JOURNAL, Boolean.FALSE);
+//		}
 		
 		if (!pPrevia) {
 			pAtualizaParametro(pModulos);
@@ -1684,7 +1682,7 @@ public class FaturamentoFatkAmbRN extends AbstractFatDebugLogEnableRN {
 		
 		//ALTERAÇÃO REALIZADA PARA MELHORAR A PERFORMANCE DO AGENDAMENTO DO ENCERRAMENTO DO FATURAMENTO DE AMBULATÓRIO
 		//SEGUNDO A MILENA A GRAVAÇÃO DA JOURNAL NÃO PRECISA ACONTECER DURANTE O PROCESSAMENTO DO BPA/BPI, 
-		atribuirContextoSessao(FATK_PMR_RN_V_PMR_JOURNAL,Boolean.FALSE);
+//		atribuirContextoSessao(FATK_PMR_RN_V_PMR_JOURNAL,Boolean.FALSE);
 		
 		final ObjetosOracleDAO ooDAO = getObjetosOracleDAO();
 		if(DominioOpcaoEncerramentoAmbulatorio.TODOS.equals(pModulos)){

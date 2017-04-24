@@ -5,13 +5,15 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.ProjectionList;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
 
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.model.MpmMotivoAltaMedica;
 import br.gov.mec.aghu.model.RapServidores;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 
 public class MpmMotivoAltaMedicaDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<MpmMotivoAltaMedica> {
 
@@ -56,6 +58,16 @@ public class MpmMotivoAltaMedicaDAO extends br.gov.mec.aghu.core.persistence.dao
 				MpmMotivoAltaMedica.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
 		criteria.add(Restrictions.eq(
 				MpmMotivoAltaMedica.Fields.IND_OBITO.toString(), false));
+		
+		return this.executeCriteria(criteria);
+	}
+	public List<Short> listSeqMotivoAltaMedicaObito(){
+		DetachedCriteria criteria = DetachedCriteria.forClass(MpmMotivoAltaMedica.class,"mot");
+		ProjectionList projectionList = Projections.projectionList();
+    	projectionList.add(Projections.property("mot." +
+    			                                MpmMotivoAltaMedica.Fields.SEQ.toString()), "seqMot");
+    	criteria.setProjection(projectionList);
+		criteria.add(Restrictions.eq(MpmMotivoAltaMedica.Fields.IND_OBITO.toString(), true));
 		
 		return this.executeCriteria(criteria);
 	}

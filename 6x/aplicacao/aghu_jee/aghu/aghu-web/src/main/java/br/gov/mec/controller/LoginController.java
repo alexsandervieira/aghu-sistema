@@ -22,6 +22,7 @@ import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.locator.ServiceLocator;
 import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.sistema.bussiness.UserSessions;
+import br.gov.mec.aghu.sistema.bussiness.UserSessions.UserSession;
 
 @RequestScoped
 @Named
@@ -50,7 +51,7 @@ public class LoginController implements Serializable {
 		try {
 			//  #45983 evita erro caso ja exista login ativo
 			if (request.getUserPrincipal() != null){
-				this.logout();
+				this.logout("NÃO IDENTIFICADO");
 			}
 			
 			request.login(username, password);
@@ -90,11 +91,13 @@ public class LoginController implements Serializable {
 	}
 	
 	
-	public void logout() {
+	public void logout(String mensagem) {
         FacesContext context = FacesContext.getCurrentInstance();  
         try {
         	HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
             request.logout();
+            UserSession user = sessions.getUserSessions().get(request.getSession().getId());
+            beanManager.fireEvent(new PreLoggedOutEvent(user.getUserName(), mensagem));
             context.getExternalContext().invalidateSession();
             sessions.removeSession(request.getSession().getId());
         } catch (ServletException e) {  
@@ -102,10 +105,10 @@ public class LoginController implements Serializable {
         }         
 	}
 	
-	public String logoutAndRedirect() {
-		logout();
+	public String logoutAndRedirect(String mensagem) {
+		logout(mensagem);
 		return CASCA_INICIO;        
-	}		
+	}
 	
 	public String esqueceuSenha(){
 		return "esqueceuSenha";

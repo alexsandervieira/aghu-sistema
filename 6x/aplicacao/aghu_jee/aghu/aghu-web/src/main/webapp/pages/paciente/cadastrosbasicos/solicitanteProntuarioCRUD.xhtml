@@ -34,7 +34,7 @@
 	                  </mec:suggestionBox>
                   </h:panelGrid> 
                 </p:tab>  
-                <p:tab  title="#{messages.LABEL_ORIGEM_EVENTO}">
+                <p:tab title="#{messages.LABEL_ORIGEM_EVENTO}">
                    <h:panelGrid>
 	                  <mec:suggestionBox id="origemEvento" label="#{messages.LABEL_ORIGEM_EVENTO}" title="Selecione uma origem para o evento." descricaoInput="seq" descricaoLabel="descricao" suggestionAction="pesquisarOrigemEventoPorDescricao" controller="#{solicitanteProntuarioController}" value="#{solicitanteProntuarioController.origemEventos}"> 
 	                    <c:set var="_origemEvento" value="#{item}"/>  
@@ -43,48 +43,49 @@
 	                  </mec:suggestionBox> 
                   </h:panelGrid>
                 </p:tab>  
-                <p:tab  style="font-size:90%;" title="#{messages.LABEL_DESCRICAO}"> 
-                   <h:panelGrid>
-                      <mec:inputText label="#{messages.LABEL_DESCRICAO}" id="descricao" maxlength="60" value="#{solicitanteProntuarioController.aipSolicitanteProntuario.descricao}" title="#{messages.TITLE_DESCRICAO_SOLICITANTE_PRONTUARIO}" size="60" styleclass="suggestion_input" style="text-transform:uppercase" emptyStringToNull="true"/>
-                   </h:panelGrid> 
-                </p:tab> 
               </p:tabView> 
             </p:outputPanel> 
           </aghu:panelGeral>
-      
           <aghu:panelGeral legend="#{messages.TITLE_INDICADORES}" layout="inline"> 
             <aghu:linha> 
-              <mec:selectBooleanCheckbox label="#{messages.LABEL_MENSAGEM_SAMIS}" title="#{messages.TITLE_PESQUISA_MENSAGEM_SAMIS}" value="#{solicitanteProntuarioController.aipSolicitanteProntuario.mensagemSamisCheckBox}" id="mensagemSamisCheckBox"/>  
-              <mec:selectBooleanCheckbox label="#{messages.LABEL_RETORNO}" title="#{messages.TITLE_PESQUISA_RETORNO}" value="#{solicitanteProntuarioController.aipSolicitanteProntuario.retornoCheckBox}" id="retornoCheckBox"/>  
-              <mec:selectBooleanCheckbox label="#{messages.LABEL_EXIGE_RESPONSAVEL}" title="#{messages.TITLE_PESQUISA_EXIGE_RESPONSAVEL}" value="#{solicitanteProntuarioController.aipSolicitanteProntuario.exigeResponsavel}" id="exigeResponsavel"/>  
-              <mec:selectBooleanCheckbox label="#{messages.LABEL_SEPARACAO_PREVIA}" title="#{messages.TITLE_PESQUISA_SEPARACAO_PREVIA}" value="#{solicitanteProntuarioController.aipSolicitanteProntuario.separacaoPreviaCheckBox}" id="separacaoPreviaCheckBox"/>  
+              <mec:selectBooleanCheckbox label="#{messages.LABEL_MENSAGEM_ARQUIVO_CLINICO}" title="#{messages.TITLE_PESQUISA_MENSAGEM_ARQUIVO_CLINICO}" value="#{solicitanteProntuarioController.aipSolicitanteProntuario.mensagemSamisCheckBox}" id="mensagemSamisCheckBox"/>  
               <mec:selectOneMenu enum="DominioTodosUltimo" label="#{messages.LABEL_VOLUMES_MANUSEADOS}" title="#{messages.TITLE_PESQUISA_VOLUMES}" value="#{solicitanteProntuarioController.aipSolicitanteProntuario.volumesManuseados}" noSelectionOption="false" id="volumesManuseados"/> 
             </aghu:linha> 
           </aghu:panelGeral> 
-        </aghu:panelGeral>  
+        </aghu:panelGeral>
         <aghu:acao> 
           <mec:commandButton id="bt_confirmar" value="#{messages.LABEL_GRAVAR}" action="#{solicitanteProntuarioController.confirmar}" profile="ok"/>  
           <mec:commandButton value="#{messages.LABEL_CANCELAR}" immediate="true" action="#{solicitanteProntuarioController.cancelar}" profile="cancel" ajax="true"/> 
         </aghu:acao> 
-      </h:form>  
-      <p:dialog id="modalConfirmacaoMudancaAba" width="300" height="160" autosized="true" resizeable="false" modal="true" resizable="false" widgetVar="modalConfirmacaoMudancaAbaWG"> 
-        <f:facet name="header"> 
-          <h:panelGroup> 
-            <h:outputText value="#{messages.MENSAGEM_CONFIRMACAO}"/> 
-          </h:panelGroup> 
-        </f:facet> #{messages.MENSAGEM_CONFIRMACAO_MUDANCA_ABA_CADASTRO_SOLICITANTE_PRONTUARIO} 
-        <br clear="none"/>  
-        <br clear="none"/>  
-        <br clear="none"/>  
-        <h:panelGroup> 
-          <h:form prependId="false" id="formModalConfirmacaoMudancaAba"> 
-            <aghu:linha> 
-              <mec:commandButton id="bt_confirmar_mudanca_aba" value="#{messages.LABEL_SIM}" action="#{solicitanteProntuarioController.limparAbas}" oncomplete="PF('modalConfirmacaoMudancaAbaWG').hide();" profile="ok" ajax="true" render="panelAbas"/>  
-              <mec:commandButton id="bt_cancelar_mudanca_aba" value="#{messages.LABEL_NAO}" action="#{solicitanteProntuarioController.selecionarAbaPreenchida}" oncomplete="PF('modalConfirmacaoMudancaAbaWG').hide();" profile="cancel" ajax="true" render="panelAbas"/> 
-            </aghu:linha> 
-          </h:form> 
-        </h:panelGroup> 
-      </p:dialog> 
-    </ui:define> 
+      </h:form>
+		<p:dialog id="modalConfirmacaoMudancaAba" width="300" height="160"
+			autosized="true" resizeable="false" modal="true" resizable="false"
+			widgetVar="modalConfirmacaoMudancaAbaWG">
+			<f:facet name="header">
+				<h:panelGroup>
+					<h:outputText value="#{messages.MENSAGEM_CONFIRMACAO}" />
+				</h:panelGroup>
+			</f:facet> #{messages.MENSAGEM_CONFIRMACAO_MUDANCA_ABA_CADASTRO_SOLICITANTE_PRONTUARIO} 
+        <br clear="none" />
+			<br clear="none" />
+			<br clear="none" />
+			<h:panelGroup>
+				<h:form prependId="false" id="formModalConfirmacaoMudancaAba">
+					<aghu:linha>
+						<mec:commandButton id="bt_confirmar_mudanca_aba"
+							value="#{messages.LABEL_SIM}"
+							action="#{solicitanteProntuarioController.limparAbas}"
+							oncomplete="PF('modalConfirmacaoMudancaAbaWG').hide();"
+							profile="ok" ajax="true" render="panelAbas" />
+						<mec:commandButton id="bt_cancelar_mudanca_aba"
+							value="#{messages.LABEL_NAO}"
+							action="#{solicitanteProntuarioController.selecionarAbaPreenchida}"
+							oncomplete="PF('modalConfirmacaoMudancaAbaWG').hide();"
+							profile="cancel" ajax="true" render="panelAbas" />
+					</aghu:linha>
+				</h:form>
+			</h:panelGroup>
+		</p:dialog>
+	</ui:define> 
   </ui:composition> 
 </html>

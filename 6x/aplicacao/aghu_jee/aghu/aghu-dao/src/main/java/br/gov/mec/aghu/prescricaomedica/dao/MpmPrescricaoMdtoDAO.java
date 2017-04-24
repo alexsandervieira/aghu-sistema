@@ -90,19 +90,15 @@ public class MpmPrescricaoMdtoDAO extends br.gov.mec.aghu.core.persistence.dao.B
 				prescricao));
 
 		if(!listarTodas) {
-			criteria.add(Restrictions.or(Restrictions
-					.isNull(MpmPrescricaoMdto.Fields.DTHR_FIM.toString()),
-					Restrictions.eq(MpmPrescricaoMdto.Fields.DTHR_FIM.toString(),
-							dtHrFimPrescricaoMedica)));
+			criteria.add(Restrictions.or(Restrictions.isNull(MpmPrescricaoMdto.Fields.DTHR_FIM.toString()),
+					Restrictions.eq(MpmPrescricaoMdto.Fields.DTHR_FIM.toString(),dtHrFimPrescricaoMedica)));
 		}
 		
 		if (isSolucao != null) {
-			criteria.add(Restrictions.eq(MpmPrescricaoMdto.Fields.INDSOLUCAO
-					.toString(), isSolucao));
+			criteria.add(Restrictions.eq(MpmPrescricaoMdto.Fields.INDSOLUCAO.toString(), isSolucao));
 		}
-
-		criteria.addOrder(Order.asc(MpmPrescricaoMdto.Fields.INDSOLUCAO
-				.toString()));
+		criteria.addOrder(Order.asc(MpmPrescricaoMdto.Fields.INDSOLUCAO.toString()));
+		criteria.addOrder(Order.asc(MpmPrescricaoMdto.Fields.ORDEM.toString()));
 		list = super.executeCriteria(criteria);
 
 		return list;
@@ -145,6 +141,37 @@ public class MpmPrescricaoMdtoDAO extends br.gov.mec.aghu.core.persistence.dao.B
 		list = super.executeCriteria(criteria);
 
 		return list;
+	}
+	
+	public Integer obterOrdemListaMedicamentosPrescritosConfirmadosPelaChavePrescricao(MpmPrescricaoMedicaId prescricao, Boolean isSolucao) {
+			
+			List<MpmPrescricaoMdto> list;
+	
+			DetachedCriteria criteria = DetachedCriteria.forClass(MpmPrescricaoMdto.class);
+			
+			criteria.add(Restrictions.eq(MpmPrescricaoMdto.Fields.PRESCRICAOMEDICA_ID.toString(), prescricao));
+			criteria.add(Restrictions.eq(MpmPrescricaoMdto.Fields.INDSOLUCAO.toString(), isSolucao));
+			criteria.addOrder(Order.desc(MpmPrescricaoMdto.Fields.ORDEM.toString()));
+			criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+			
+			list = super.executeCriteria(criteria);
+
+			Integer ordem = retornarOrdem(list);
+			
+			
+			return ordem;
+	}
+	
+	private Integer retornarOrdem(List<MpmPrescricaoMdto> list) {
+		Integer ordem;
+		if (list == null || list.isEmpty()) {
+			ordem = 1;
+		}else if (list.get(0).getOrdem() != null && list.get(0).getOrdem() > 0) {
+			ordem = list.get(0).getOrdem()+1;
+		}else{
+			ordem = list.size() +1;
+		}
+		return ordem;
 	}
 	
 	public List<MpmPrescricaoMdto> obterListaMedicamentosPrescritos(

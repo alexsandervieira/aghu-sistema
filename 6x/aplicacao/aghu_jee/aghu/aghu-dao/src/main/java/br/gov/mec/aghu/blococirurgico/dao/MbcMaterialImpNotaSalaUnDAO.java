@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.Subqueries;
@@ -15,8 +16,10 @@ import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
 
 import br.gov.mec.aghu.blococirurgico.vo.SubRelatorioNotasDeConsumoDaSalaMateriaisVO;
+import br.gov.mec.aghu.blococirurgico.vo.SubRelatorioNotasDeConsumoDaSalaOPMEVO;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.model.MbcMaterialImpNotaSalaUn;
+import br.gov.mec.aghu.model.MbcMaterialPorCirurgia;
 import br.gov.mec.aghu.model.MbcUnidadeNotaSala;
 import br.gov.mec.aghu.model.ScoMaterial;
 
@@ -60,6 +63,29 @@ public class MbcMaterialImpNotaSalaUnDAO extends br.gov.mec.aghu.core.persistenc
 		return retorno;
 	}
 	
+	
+	public List<SubRelatorioNotasDeConsumoDaSalaOPMEVO> obterListaOrteseProteseInformadaPorUnfSeqCrgSeq(Short unfSeq, Integer crgSeq, Integer pciSeq,
+			Short espSeq, Integer grupoMatOrtProt) {
+		List<SubRelatorioNotasDeConsumoDaSalaOPMEVO> retornoVO = new ArrayList<>() ;
+		
+		DetachedCriteria criteria = DetachedCriteria.forClass(MbcMaterialPorCirurgia.class, "MPC");
+		criteria.createAlias("MPC." + MbcMaterialPorCirurgia.Fields.SCO_MATERIAL.toString(),"MAT");
+		criteria.add(Restrictions.eq("MPC." + MbcMaterialPorCirurgia.Fields.CRG_SEQ.toString(), crgSeq));
+		criteria.add(Restrictions.eq("MAT." + ScoMaterial.Fields.GMT_CODIGO.toString(), grupoMatOrtProt));
+
+		ProjectionList projList = Projections.projectionList();
+		projList.add(Projections.property("MAT." + ScoMaterial.Fields.NOME.toString()), SubRelatorioNotasDeConsumoDaSalaOPMEVO.Fields.NOME.toString());
+		projList.add(Projections.property("MPC." + MbcMaterialPorCirurgia.Fields.QUANTIDADE.toString()), SubRelatorioNotasDeConsumoDaSalaOPMEVO.Fields.QUANTIDADE.toString());
+		criteria.setProjection(projList);
+		
+		criteria.setResultTransformer(Transformers.aliasToBean(SubRelatorioNotasDeConsumoDaSalaOPMEVO.class));
+		
+		retornoVO = executeCriteria(criteria);
+		
+		return retornoVO;
+	}
+	
+	
 	private List<String> obterListaOrteseProtesePorUnfSeqCrgSeqUnion1(Short unfSeq, Integer crgSeq, Integer pciSeq,
 			Short espSeq, Integer grupoMatOrtProt) {
 		
@@ -73,6 +99,10 @@ public class MbcMaterialImpNotaSalaUnDAO extends br.gov.mec.aghu.core.persistenc
 		criteria.add(Restrictions.eq("MNS." + MbcMaterialImpNotaSalaUn.Fields.MBC_UNIDADE_NOTA_SALAS_UNFSEQ.toString(), unfSeq));
 		
 		List<Short> subCriteriaResultado = obterResultadoSubCriteriaOrteseProtesePorUnfSeqCrgSeq(unfSeq, pciSeq, espSeq);
+		
+		if(subCriteriaResultado == null || subCriteriaResultado.isEmpty()) {
+			return new ArrayList<String>();
+		}
 		
 		criteria.add(Restrictions.in("MNS." + MbcMaterialImpNotaSalaUn.Fields.MBC_UNIDADE_NOTA_SALAS_SEQP.toString(), subCriteriaResultado));
 		
@@ -103,9 +133,9 @@ public class MbcMaterialImpNotaSalaUnDAO extends br.gov.mec.aghu.core.persistenc
 								Subqueries.notExists(subCriteria1)), Restrictions.and(
 										Restrictions.isNull("NOA." + MbcUnidadeNotaSala.Fields.AGH_ESPECIALIDADES_SEQ.toString()),
 										Restrictions.and(
-												Restrictions.isNull("NOA." + MbcUnidadeNotaSala.Fields.MBC_PROCEDIMENTO_CIRURGICOS_SEQ.toString()),
-												Restrictions.and(
-														Subqueries.notExists(subCriteria2), Subqueries.notExists(subCriteria3)))))));
+												Restrictions.or(Restrictions.isNull("NOA." + MbcUnidadeNotaSala.Fields.MBC_PROCEDIMENTO_CIRURGICOS_SEQ.toString()), 
+																Restrictions.and(Subqueries.notExists(subCriteria2), Subqueries.notExists(subCriteria3)))
+												)))));
 		
 		return executeCriteria(criteriaPrincipal);
 	}

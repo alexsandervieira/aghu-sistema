@@ -14,7 +14,7 @@
 	  
   <ui:composition> 
     <p:outputPanel id="panelModal" layout="inline"> 
-      <p:dialog id="modalMacroscopia" width="950" height="580" autosized="true" modal="true" resizable="false" widgetVar="modalMacroscopiaWG" closable="true"> 
+      <p:dialog id="modalMacroscopia" width="850" height="420" autosized="true" modal="true" resizable="false" widgetVar="modalMacroscopiaWG" closable="true"> 
         <f:facet name="header"> 
           <h:panelGroup> 
             <h:outputText value="#{messages.LABEL_MACROSCOPIA}"/> 
@@ -28,7 +28,7 @@
             <aghu:linha> 
               <p:outputPanel id="panelMacroscopia" layout="inline"> 
                 <mec:inputTextArea id="macroscopiaModal"
-               		cols="140" rows="7"
+               		cols="100" rows="7"
 					maxlength="4000" 
 			  		value="#{macroscopiaLaudoUnicoController.textoMacroscopia}" 
 			  		removerCaratersEspeciais="true" />
@@ -89,7 +89,7 @@
               <aghu:linha> 
                 <p:outputPanel id="panelDescricaoAelTextoPadraoMacro" layout="inline"> 
                   <mec:inputTextArea id="dsAelTextoPadraoMacro" 
-                  		cols="130" rows="7" 
+                  		cols="100" rows="7" 
                   		maxlength="4000" 
                   		removerCaratersEspeciais="true"
                   		value="#{macroscopiaLaudoUnicoController.dsAelTextoPadraoMacro}">

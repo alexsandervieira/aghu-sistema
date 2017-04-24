@@ -690,6 +690,11 @@ public class AfaDispensacaoMdtosRN extends BaseBusiness
 		aplicaTipoOperacaoBancoEOrdena(prescricaoMedicamentos);
 		
 		for(MpmPrescricaoMdto prescricaoMdto:prescricaoMedicamentos){
+			if(TipoOperacaoEnum.INSERT.equals(prescricaoMdto.getTipoOperacaoBanco())){
+				farmaciaFacade.processaDispensacaoDiluente(
+						prescricaoMdto, percSeNec, pmeDthrInicio, pmeDthrFim,
+						nomeMicrocomputador, Boolean.TRUE);
+			}
 			for(MpmItemPrescricaoMdto itemPrescricaoMdto:prescricaoMdto.getItensPrescricaoMdtos()){
 				
 				Short qtdeCalcSist24h = itemPrescricaoMdto.getQtdeCalcSist24h();
@@ -697,14 +702,7 @@ public class AfaDispensacaoMdtosRN extends BaseBusiness
 				AfaFormaDosagem formaDosagem = itemPrescricaoMdto.getFormaDosagem(); 
 				
 				dose = mpmcCalcDoseDisp(qtdeCalcSist24h, pmeData, pmeDthrFim, itemDose, formaDosagem.getSeq());
-				
-				/*if(pmdSeqAnt > 0 && (prescricaoMdto.getPrescricaoMdtoOrigem() != null && pmdSeqAnt != prescricaoMdto.getPrescricaoMdtoOrigem().getId().getSeq())
-						&& TipoOperacaoEnum.UPDATE.equals(operacaoAnt)
-								&& indSolucaoAnt){
-					excluirItensAposAlteracaoDeSolucao(pmeAtdSeq, pmeSeq, pmdSeqAnt, nomeMicrocomputador);
-					//Além de comentado na revision 170789 o flush mudou de local
-				}*/
-				
+
 				if(TipoOperacaoEnum.INSERT.equals(prescricaoMdto.getTipoOperacaoBanco())){
 					
 					try{
@@ -719,7 +717,6 @@ public class AfaDispensacaoMdtosRN extends BaseBusiness
 								itemPrescricaoMdto.getFormaDosagem().getSeq(),
 								DominioSituacaoItemPrescritoDispensacaoMdto.IS, null);
 						
-						// getAfaDispensacaoMdtosDAO().inserir(dispMdto, false);
 						criaDispMdtoTriagemPrescricao(dispMdto, nomeMicrocomputador);
 					}catch (BaseRuntimeException e) {
 						throw new ApplicationBusinessException(AfaDispensacaoMdtosRNExceptionCode.MPM_01574);

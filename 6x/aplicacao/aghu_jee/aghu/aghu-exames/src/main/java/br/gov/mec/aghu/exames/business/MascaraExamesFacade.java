@@ -264,8 +264,8 @@ public class MascaraExamesFacade extends BaseFacade implements IMascaraExamesFac
 	}
 
 	@Override
-	public Integer obterIdadePaciente(Object itemSolicitacaoExameObject) {
-		return mascaraExamesON.obterIdadePaciente(itemSolicitacaoExameObject);
+	public Date obterDtNascimentoPaciente(Object itemSolicitacaoExameObject) {
+		return mascaraExamesON.obterDtNascimentoPaciente(itemSolicitacaoExameObject);
 	}
 
 	@Override

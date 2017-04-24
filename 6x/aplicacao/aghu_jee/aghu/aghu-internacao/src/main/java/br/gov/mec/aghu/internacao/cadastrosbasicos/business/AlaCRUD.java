@@ -10,10 +10,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.business.IAghuFacade;
-import br.gov.mec.aghu.model.AghAla;
 import br.gov.mec.aghu.core.business.BaseBusiness;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.model.AghAla;
 
 @Stateless
 public class AlaCRUD extends BaseBusiness {
@@ -36,7 +36,7 @@ private ICadastrosBasicosInternacaoFacade cadastrosBasicosInternacaoFacade;
 	private static final long serialVersionUID = 900799621242899945L;
 	
 	private enum AlaCRUDExceptionCode implements BusinessExceptionCode {
-		ERRO_REMOVER_ALA, ALA_PK_DUPLICADA ;
+		ERRO_REMOVER_ALA, ALA_CODIGO_DESCRICAO_DUPLICADA;
 	}
 	
 
@@ -84,12 +84,11 @@ private ICadastrosBasicosInternacaoFacade cadastrosBasicosInternacaoFacade;
 	}
 	
 	private void validarInclusaoAlteracaoAla(AghAla ala, boolean isUpdate) throws ApplicationBusinessException {
-		if (!isUpdate) {
-			AghAla s = this.getAghuFacade().obterAghAlaPorChavePrimaria(ala.getCodigo());
+			AghAla s = this.getAghuFacade().obterAghAlaPorCodigoDescricao(ala,isUpdate);
+			
 			if (s != null) {
-				throw new ApplicationBusinessException(AlaCRUDExceptionCode.ALA_PK_DUPLICADA, ala.getCodigo());
+				throw new ApplicationBusinessException(AlaCRUDExceptionCode.ALA_CODIGO_DESCRICAO_DUPLICADA, ala.getCodigo());
 			}
-		}
 	}
 
 	protected IAghuFacade getAghuFacade() {

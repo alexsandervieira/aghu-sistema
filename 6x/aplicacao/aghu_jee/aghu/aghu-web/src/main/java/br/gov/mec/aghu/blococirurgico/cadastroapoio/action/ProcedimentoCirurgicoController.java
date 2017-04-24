@@ -297,11 +297,11 @@ public class ProcedimentoCirurgicoController extends ActionController {
 				relacionarPHISSMController.setItemProcedHospSus(fatConvGrupoItemProced.getItemProcedHospitalar());
 				List<FatProcedHospInternos> procedimentosIternos = faturamentoFacade.pesquisarProcedimentosInternosPeloSeqProcCirg(procedimentoCirurgico
 						.getSeq());
+				relacionarPHISSMController.setConvGrupoItemProced(fatConvGrupoItemProced);
 				if (procedimentosIternos != null && !procedimentosIternos.isEmpty()) {
 					relacionarPHISSMController.setProcedHospInterno(procedimentosIternos.get(0));
 					relacionarPHISSMController.adicionarProcedimento();
 				} 
-				relacionarPHISSMController.setConvGrupoItemProced(fatConvGrupoItemProced);
 			}
 			relacionarPHISSMController.criarNotificacoesUsuarios(getPhi(),convGrupoItemProcedList);
 		} catch (BaseException e) {
@@ -474,7 +474,6 @@ public class ProcedimentoCirurgicoController extends ActionController {
 			fatConvenioSaude.setDescricao(convenio.getCnvDescricao());
 			fatConvenioSaudePlano.setConvenioSaude(fatConvenioSaude);
 			
-			popularValoresPadroesConvGrupoItemProced();
 			FatConvGrupoItemProced fatConvGrupoItemProced = new FatConvGrupoItemProced(relacionarPHISSMController.getConvGrupoItemProced());
 			fatConvGrupoItemProced.setItemProcedHospitalar(relacionarPHISSMController.getItemProcedHospSus());
 			fatConvGrupoItemProced.setConvenioSaudePlano(fatConvenioSaudePlano);
@@ -513,17 +512,7 @@ public class ProcedimentoCirurgicoController extends ActionController {
 		}
 		iniciarVariaveisProcedimentosHospInternos();
 	}
-	
-	private void popularValoresPadroesConvGrupoItemProced() {
-		relacionarPHISSMController.getConvGrupoItemProced().setIndCobrancaFracionada(false);
-		relacionarPHISSMController.getConvGrupoItemProced().setIndExigeAutorPrevia(false);
-		relacionarPHISSMController.getConvGrupoItemProced().setIndExigeJustificativa(false);
-		relacionarPHISSMController.getConvGrupoItemProced().setIndExigeNotaFiscal(false);
-		relacionarPHISSMController.getConvGrupoItemProced().setIndImprimeLaudo(false);
-		relacionarPHISSMController.getConvGrupoItemProced().setIndInformaTempoTrat(false);
-		relacionarPHISSMController.getConvGrupoItemProced().setIndPaga(false);
-	}
-	
+		
 	public void excluir(FatConvGrupoItemProced item) {
 		relacionarPHISSMController.setAlterou(true);
 		convGrupoItemProcedListRemover.add(item);

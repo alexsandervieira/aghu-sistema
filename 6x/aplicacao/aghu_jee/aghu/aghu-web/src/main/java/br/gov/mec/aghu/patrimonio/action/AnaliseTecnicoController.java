@@ -118,7 +118,7 @@ public class AnaliseTecnicoController extends ActionController implements Action
 	 */
 	public String truncarCentroCusto(String descricao) {
 		StringBuilder str = new StringBuilder(100);
-		str.append("Centro de Custo: ").append(descricao);		
+		str.append("Centro de Atividade: ").append(descricao);		
 		return str.toString();
 	}
 

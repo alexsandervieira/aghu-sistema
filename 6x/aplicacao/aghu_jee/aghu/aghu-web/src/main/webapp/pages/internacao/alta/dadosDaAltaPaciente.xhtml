@@ -19,7 +19,7 @@
             <mec:inputText label="#{messages.LABEL_NOME_PACIENTE}" readonly="true" size="50" value="#{dadosAltaPacienteController.nomePaciente}" title="#{messages.LABEL_NOME_PACIENTE}" id="nomePac"/> 
           </aghu:linha>  
           <aghu:linha> 
-            <mec:suggestionBox label="#{messages.LABEL_TIPO_ALTA}" posSelectionAction="liberaCampoTransferencia" render="panelTransferencia, transferencia" converter="ainTiposAltaMedicaPorCodigoEDescricaoConverter" title="#{messages.TITLE_LABEL_TIPO_ALTA}" descricaoInput="codigo" descricaoLabel="descricao" suggestionAction="pesquisarTipoAltaMedicaPorCodigoEDescricao" readonly="#{dadosAltaPacienteController.readOnlyEdicaoTipoAltaMedica}" required="true" id="tipoAltaMedica" controller="#{dadosAltaPacienteController}" value="#{dadosAltaPacienteController.tipoAltaMedica}"> 
+            <mec:suggestionBox label="#{messages.LABEL_TIPO_ALTA}" posSelectionAction="liberaCampoTransferencia" render="panelTransferencia, transferencia" converter="ainTiposAltaMedicaPorCodigoEDescricaoConverter" title="#{messages.TITLE_LABEL_TIPO_ALTA}" descricaoInput="codigo" descricaoLabel="descricao" suggestionAction="pesquisarTipoAltaMedicaPorCodigoEDescricao" readonly="#{dadosAltaPacienteController.readOnlyEdicaoTipoAltaMedica}" required="true" id="tipoAltaMedica" controller="#{dadosAltaPacienteController}" value="#{dadosAltaPacienteController.tipoAltaMedica}" cache="false"> 
               <p:column>#{item.codigo}</p:column>  
               <p:column>#{item.descricao}</p:column> 
             </mec:suggestionBox>

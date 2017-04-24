@@ -1630,5 +1630,10 @@ List<AelAmostraExamesVO> listarItensAmostra(final Integer soeSeq,
 	public void setCaminhoLogo(String caminho);
 	
 	public void pesquisarUnidadeFuncionalColeta() throws ApplicationBusinessException;
+	
+	public void atualizarItemAgendamento(
+			AelItemSolicitacaoExames itemSolicitacaoExames,
+			AelItemSolicitacaoExames itemSolicitacaoExameOriginal,
+			String nomeMicrocomputador) throws BaseException;
 
 }

@@ -71,6 +71,13 @@
           <mec:commandButton id="bt_voltar" value="#{messages.LABEL_VOLTAR}" immediate="true" action="#{acompanhamentoCirurgiaController.voltar}" styleClass=" alinha-direita bt_cinza" profile="back"/> 
         </aghu:acao>  
         <p:outputPanel id="formAcaoAcompanharCirurgias" layout="inline" styleClass="aghu-panel-geral"> 
+           <!-- Css para o botão selecionado, apenas para os botões desse painel -->
+           <style type="text/css">
+				.aghu-stepbutton-bt-selected {
+				    background: #FFC926!important;
+					border-color: #DFA800!important;
+				}
+		  </style>
           <aghu:panelGeral legend="#{messages.LABEL_ACOMPANHAMENTO}"> 
             <div align="center" style="margin: 4px auto 2px; width: 100%;"> 
               <mec:commandButton id="agendada"
@@ -79,7 +86,7 @@
               	disabled="#{not mf:hasPermission(securityController,'permiteAtualizarAcompanharCirurgia,alterar')}"
               	immediate="true"
               	render="formAcaoAcompanharCirurgias, formAcompanharCirurgias"
-              	styleClass="aghu-stepbutton #{acompanhamentoCirurgiaController.selectedAGND}"
+              	styleClass="aghu-stepbutton #{acompanhamentoCirurgiaController.selectedAGND} aghu-stepbutton-#{acompanhamentoCirurgiaController.selectedAGND}"
 				icon="aghu-stepicon silk-cirurgia-agendada-32" 
               	ajax="true"
               	process="@this"/>  
@@ -91,7 +98,7 @@
               	action="#{acompanhamentoCirurgiaController.alterarSituacaoChamado}"
               	immediate="true"
               	render="formAcaoAcompanharCirurgias, formAcompanharCirurgias"
-              	styleClass="aghu-stepbutton #{acompanhamentoCirurgiaController.selectedCHAM}"
+              	styleClass="aghu-stepbutton #{acompanhamentoCirurgiaController.selectedCHAM} aghu-stepbutton-#{acompanhamentoCirurgiaController.selectedCHAM}"
 				icon="aghu-stepicon silk-paciente-chamado-32" 
               	ajax="true"
               	process="@this"/>  
@@ -102,7 +109,7 @@
               	disabled="#{not mf:hasPermission(securityController,'permiteAtualizarAcompanharCirurgia,alterar')}"
               	action="#{acompanhamentoCirurgiaController.alterarSituacaoPreparo}"
               	immediate="true"
-              	styleClass="aghu-stepbutton #{acompanhamentoCirurgiaController.selectedPREP}"
+              	styleClass="aghu-stepbutton #{acompanhamentoCirurgiaController.selectedPREP} aghu-stepbutton-#{acompanhamentoCirurgiaController.selectedPREP}"
 				icon="aghu-stepicon silk-paciente-preparo-32" 
               	ajax="true"
               	render="formAcaoAcompanharCirurgias, formAcompanharCirurgias"
@@ -114,7 +121,7 @@
               	disabled="#{not mf:hasPermission(securityController,'permiteAtualizarAcompanharCirurgia,alterar')}"
               	action="#{acompanhamentoCirurgiaController.alterarSituacaoTransOperatorio}"
               	immediate="true"
-              	styleClass="aghu-stepbutton #{acompanhamentoCirurgiaController.selectedTRAN}"
+              	styleClass="aghu-stepbutton #{acompanhamentoCirurgiaController.selectedTRAN} aghu-stepbutton-#{acompanhamentoCirurgiaController.selectedTRAN}"
 				icon="aghu-stepicon silk-paciente-transoperatorio-32" 
               	ajax="true"
               	render="formAcompanharCirurgias, formAcaoAcompanharCirurgias"
@@ -127,7 +134,7 @@
               	action="#{acompanhamentoCirurgiaController.limparDestinoPaciente()}"
               	immediate="true"
               	oncomplete="PF('modalSelecaoDestinoWG').show();"
-              	styleClass="aghu-stepbutton #{acompanhamentoCirurgiaController.selectedRZDA}"
+              	styleClass="aghu-stepbutton #{acompanhamentoCirurgiaController.selectedRZDA} aghu-stepbutton-#{acompanhamentoCirurgiaController.selectedRZDA}"
 				icon="aghu-stepicon silk-cirurgia-realizada-32" 
               	ajax="true"
               	render="formAcaoAcompanharCirurgias, modalSelecaoDestino, formAcompanharCirurgias"
@@ -140,7 +147,7 @@
               	disabled="#{not mf:hasPermission(securityController,'permiteAtualizarAcompanharCirurgia,alterar')}"
               	action="#{acompanhamentoCirurgiaController.setarDefaultDataHoraSaida()}"
               	oncomplete="PF('modalRealizaSaidaSalaRecuperacaoWG').show();"
-              	styleClass="aghu-stepbutton #{acompanhamentoCirurgiaController.selectedRZDASR}"
+              	styleClass="aghu-stepbutton #{acompanhamentoCirurgiaController.selectedRZDASR} aghu-stepbutton-#{acompanhamentoCirurgiaController.selectedRZDASR}"
 				icon="aghu-stepicon silk-paciente-recuperacao-32" 
               	ajax="true"
               	render="formAcaoAcompanharCirurgias, dataHoraSaida, modalRealizaSaidaSalaRecuperacao, formAcompanharCirurgias"

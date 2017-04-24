@@ -28,7 +28,6 @@ import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.core.report.DocumentoJasper;
 import br.gov.mec.aghu.impressao.SistemaImpressaoException;
-import br.gov.mec.aghu.internacao.cadastrosbasicos.business.ICadastrosBasicosInternacaoFacade;
 import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.model.MpmAltaSumario;
 import br.gov.mec.aghu.model.MpmAltaSumarioId;
@@ -52,10 +51,7 @@ public class RelatorioReceitaMedicaController extends ActionReport {
 	
 	@EJB
 	private IParametroFacade parametroFacade;
-	
-	@EJB
-	private ICadastrosBasicosInternacaoFacade cadastrosBasicosInternacaoFacade;
-	
+		
 	private List<ReceitaMedicaVO> colecao = new ArrayList<ReceitaMedicaVO>(0);
 
 	private static final Log LOG = LogFactory.getLog(RelatorioReceitaMedicaController.class);
@@ -119,18 +115,21 @@ public class RelatorioReceitaMedicaController extends ActionReport {
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("SUBREPORT_DIR", "br/gov/mec/aghu/prescricaomedica/report/");
+		
 		try {
-			params.put("LOGO_PATH", recuperarCaminhoLogo2());
+			params.put("footerNomeHospital", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_RAZAO_SOCIAL).getVlrTexto());
+			params.put("footerEnderecoHospitalLinha1", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_END_COMPLETO_LINHA1).getVlrTexto());
+			params.put("footerEnderecoHospitalLinha2", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_END_COMPLETO_LINHA2).getVlrTexto());
+			params.put("footerCaminhoLogo", parametroFacade.recuperarCaminhoLogo2Relativo());
+			
 		} catch (BaseException e) {
-			LOG.error("Erro ao tentar recuparar logotipo para o relatório",e);
+			LOG.error("Erro ao tentar recuparar logotipo para o relatório", e);
 		}
 		
 		String enderecoCompleto = getEnderecoCompleto();
 		if (!enderecoCompleto.isEmpty()) {
 			params.put("ENDERECO_COMPLETO", enderecoCompleto);
 		}
-		
-		params.put("nomeHospital", cadastrosBasicosInternacaoFacade.recuperarNomeInstituicaoLocal());
 		
 		return params;
 	}	
@@ -199,13 +198,15 @@ public class RelatorioReceitaMedicaController extends ActionReport {
 		}
 
 		try {
-			DocumentoJasper documento = gerarDocumento();
+			if(colecao.size() != 0){
+				DocumentoJasper documento = gerarDocumento();
 
-			this.sistemaImpressao.imprimir(documento.getJasperPrint(),
-					super.getEnderecoIPv4HostRemoto());
+				this.sistemaImpressao.imprimir(documento.getJasperPrint(),
+						super.getEnderecoIPv4HostRemoto());
 
-			apresentarMsgNegocio(Severity.INFO,
-					"MENSAGEM_SUCESSO_IMPRESSAO");
+				apresentarMsgNegocio(Severity.INFO,
+						"MENSAGEM_SUCESSO_IMPRESSAO");
+			}			
 		} catch (SistemaImpressaoException e) {
 			apresentarExcecaoNegocio(e);
 		} catch (Exception e) {

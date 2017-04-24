@@ -235,7 +235,7 @@ public class ListarAmostrasSolicitacaoRecebimentoRN extends BaseBusiness {
 		for (final AelAmostraItemExames amostraItemExame : amostra.getAelAmostraItemExames()) {
 
 			// Verifica "itens de amostra de exame" G (Gerado) ou C (Coletado)
-			if (DominioSituacaoAmostra.G.equals(amostraItemExame.getSituacao()) || DominioSituacaoAmostra.C.equals(amostraItemExame.getSituacao())) {
+			if (DominioSituacaoAmostra.G.equals(amostraItemExame.getSituacao()) || DominioSituacaoAmostra.C.equals(amostraItemExame.getSituacao()) || DominioSituacaoAmostra.M.equals(amostraItemExame.getSituacao())) {
 				
 				// Seta a situacao do "item de amostra de exame" para U
 				// (Recebida Unidade de Coleta)

@@ -197,8 +197,11 @@ public class EpeDiagnostico extends BaseEntityId<EpeDiagnosticoId> implements ja
 		SNB_GNB_SEQ("id.snbGnbSeq"), 
 		SNB_SEQUENCIA("id.snbSequencia"), 
 		SEQUENCIA("id.sequencia"), 
-		SUBGRUPO_NECES_BASICA("subgrupoNecesBasica");
-
+		SUBGRUPO_NECES_BASICA("subgrupoNecesBasica"),
+		ID("id"),
+		VERSION("version"),
+		DEFINICAO("definicao");
+		
 		private String field;
 
 		private Fields(String field) {

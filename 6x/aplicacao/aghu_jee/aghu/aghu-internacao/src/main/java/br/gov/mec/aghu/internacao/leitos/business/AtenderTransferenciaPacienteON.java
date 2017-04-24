@@ -151,18 +151,13 @@ private IAghuFacade aghuFacade;
 		// Valida se Leito está nulo. Campo obrigatório.
 		if (leitoConcedido == null
 				|| StringUtils.isBlank(leitoConcedido.getLeitoID())) {
-			throw new ApplicationBusinessException(
-					AtenderTransferenciaPacienteONExceptionCode.LEITO_OBRIGATORIO);
+			throw new ApplicationBusinessException(	AtenderTransferenciaPacienteONExceptionCode.LEITO_OBRIGATORIO);
 		}
 
-		this.validarPacienteJaPossuiAlta(solicitacao.getInternacao().getAtendimento());
-
 		if (solicitacao.getIndSitSolicLeito() == DominioSituacaoSolicitacaoInternacao.P) {
-			solicitacao
-					.setIndSitSolicLeito(DominioSituacaoSolicitacaoInternacao.A);
+			solicitacao	.setIndSitSolicLeito(DominioSituacaoSolicitacaoInternacao.A);
 			solicitacao.setDthrAtendimentoSolicitacao(new Date());
-			this.getSolicTransfPacienteRN().alteraLeitoSolicTransfPaciente(solicitacao,
-					leitoConcedido);
+			this.getSolicTransfPacienteRN().alteraLeitoSolicTransfPaciente(solicitacao,	leitoConcedido);
 		}
 	}
 	

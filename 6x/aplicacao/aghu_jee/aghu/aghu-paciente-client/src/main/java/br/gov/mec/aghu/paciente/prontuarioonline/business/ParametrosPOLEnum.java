@@ -1,6 +1,7 @@
 package br.gov.mec.aghu.paciente.prontuarioonline.business;
 
 public enum ParametrosPOLEnum {
+	ACESSO_PRONTUARIO_ONLINE,
 	ACESSO_LIVRE_POL,
 	ACESSO_COMISSAO_POL,
 	ACESSO_ESPECIAL_POL,

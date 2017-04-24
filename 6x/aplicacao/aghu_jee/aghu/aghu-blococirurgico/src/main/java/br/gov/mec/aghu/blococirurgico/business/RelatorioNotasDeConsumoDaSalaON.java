@@ -29,6 +29,7 @@ import br.gov.mec.aghu.blococirurgico.vo.DescricaoLateralidadeProcCirurgicoVO;
 import br.gov.mec.aghu.blococirurgico.vo.RelatorioNotasDeConsumoDaSalaVO;
 import br.gov.mec.aghu.blococirurgico.vo.SubRelatorioNotasDeConsumoDaSalaEquipamentosVO;
 import br.gov.mec.aghu.blococirurgico.vo.SubRelatorioNotasDeConsumoDaSalaMateriaisVO;
+import br.gov.mec.aghu.blococirurgico.vo.SubRelatorioNotasDeConsumoDaSalaOPMEVO;
 import br.gov.mec.aghu.core.business.BaseBusiness;
 import br.gov.mec.aghu.core.commons.CoreUtil;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
@@ -142,7 +143,8 @@ public class RelatorioNotasDeConsumoDaSalaON extends BaseBusiness {
 					vo.setDestinoPaciente(cirurgia.getDestinoPaciente().getDescricao());
 				}
 				preencherListaEquipamentosUtilizados(cirurgia.getSeq(), vo);
-				preencherListaOrteseProteseUtilizados(cirurgia.getSeq(), vo);
+				//preencherListaOrteseProteseUtilizados(cirurgia.getSeq(), vo);  comentado e substituido por falta do modulo de OPME
+				preencherListaOrteseProteseInformada(seqUnidadeCirurgica, cirurgia.getSeq(), cirurgia.getEspecialidade().getSeq(), vo);
 				preencherListaMateriaisUtilizados(cirurgia.getSeq(), vo);
 				
 			} else {
@@ -209,8 +211,7 @@ public class RelatorioNotasDeConsumoDaSalaON extends BaseBusiness {
 	}
 	
 	public void preencherEquipeCirurgiao(Integer crgSeq, RelatorioNotasDeConsumoDaSalaVO vo, DominioFuncaoProfissional tipoEquipe) {
-		List<Object[]> cirurgiao = this.getMbcProfCirurgiasDAO()
-			.obterEquipePorCrgSeqAgrupado(crgSeq, tipoEquipe);
+		List<Object[]> cirurgiao = this.getMbcProfCirurgiasDAO().obterEquipePorCrgSeqAgrupado(crgSeq, tipoEquipe);
 		
 		popularVoEquipeCirurgiaoAnestesista(cirurgiao, vo, tipoEquipe);
 	}
@@ -247,7 +248,7 @@ public class RelatorioNotasDeConsumoDaSalaON extends BaseBusiness {
 		for (Object[] obj : equipe) {
 			if ((String) obj[0] != null && tipoEquipe.equals(DominioFuncaoProfissional.MPF)) {
 				vo.setCirurgiaoMpf((String) obj[0]);
-				
+				vo.getCirurgiaoMpf();
 			} else if ((String) obj[0] != null && tipoEquipe.equals(DominioFuncaoProfissional.ANP)) {
 				vo.setAnestesistaAnp((String) obj[0]);
 			}
@@ -274,10 +275,10 @@ public class RelatorioNotasDeConsumoDaSalaON extends BaseBusiness {
 			String matricula = (((Integer) obj[1]).toString());
 			String nomeFormatado = "";
 
-			if ((String) obj[2] != null) {
+			if ((String) obj[2] != null && StringUtils.isNotBlank((String) obj[2])) {
 				nomeFormatado = ((String) obj[2]);
 			} else {
-				nomeFormatado = (((String) obj[3]).substring(0, 15));
+				nomeFormatado = (((String) obj[3]));
 			}
 			String retorno = StringUtils.leftPad(vinCodigo, 3, "0")
 					+ StringUtils.leftPad(matricula, 7, "0") + "-"
@@ -341,30 +342,43 @@ public class RelatorioNotasDeConsumoDaSalaON extends BaseBusiness {
 		String coluna2 = "";
 		String coluna3 = "";
 		String coluna4 = "";
+		int dez = 10;
+		int vinte = 20;
+		int trinta = 30;
+		
+		if(retorno.size() > 40) {
+			int qtdEquipamentos = retorno.size() + 1;
+			int tamanhoColuna = calcularTamanhoColunas(qtdEquipamentos);
+			
+			dez = dez + tamanhoColuna;
+			vinte = vinte + (tamanhoColuna * 2);
+			trinta = trinta + (tamanhoColuna * 3);
+		}
+		
 		for (SubRelatorioNotasDeConsumoDaSalaEquipamentosVO equipamento : retorno) {
 			rowNum = rowNum + 1;
-			if (rowNum <= 7) {
+			if (rowNum <= dez) {
 				if(coluna1.isEmpty()) {
 					coluna1 = coluna1.concat(equipamento.getDescricaoEquipamento());
 				}else{
 					coluna1 = coluna1.concat("\n").concat(equipamento.getDescricaoEquipamento());
 				}
 				
-			} else if (rowNum > 7 && rowNum <= 14) {
+			} else if (rowNum > dez && rowNum <= vinte) {
 				if(coluna2.isEmpty()) {
 					coluna2 = coluna2.concat(equipamento.getDescricaoEquipamento());
 				}else{
 					coluna2 = coluna2.concat("\n").concat(equipamento.getDescricaoEquipamento());
 				}
 				
-			} else if (rowNum > 14 && rowNum <= 21) {
+			} else if (rowNum > vinte && rowNum <= trinta) {
 				if(coluna3.isEmpty()) {
 					coluna3 = coluna3.concat(equipamento.getDescricaoEquipamento());
 				}else{
 					coluna3 = coluna3.concat("\n").concat(equipamento.getDescricaoEquipamento());
 				}
 				
-			} else if (rowNum > 21) {
+			} else if (rowNum > trinta) {
 				if(coluna4.isEmpty()) {
 					coluna4 = coluna4.concat(equipamento.getDescricaoEquipamento());
 				}else{
@@ -378,6 +392,15 @@ public class RelatorioNotasDeConsumoDaSalaON extends BaseBusiness {
 		vo.setDescricaoEquipamentoColuna4(coluna4);
 	}
 	
+	private int calcularTamanhoColunas(int qtdEquipamentos) {
+		int qtdLinhas =  qtdEquipamentos - 40; 
+		
+		qtdLinhas = qtdLinhas / 4;
+		qtdLinhas = qtdLinhas + 1;
+		return qtdLinhas;
+		
+	}
+
 	public void preencherListaEquipamentosUtilizados(Integer crgSeq, RelatorioNotasDeConsumoDaSalaVO vo) {
 		List<SubRelatorioNotasDeConsumoDaSalaEquipamentosVO> retorno = getMbcEquipamentoUtilCirgDAO().obterEquipamentosUtilizadosPorCrgSeq(crgSeq);
 		
@@ -388,28 +411,28 @@ public class RelatorioNotasDeConsumoDaSalaON extends BaseBusiness {
 		String coluna4 = "";
 		for (SubRelatorioNotasDeConsumoDaSalaEquipamentosVO equipamento : retorno) {
 			rowNum = rowNum + 1;
-			if (rowNum <= 7) {
+			if (rowNum <= 10) {
 				if(coluna1.isEmpty()) {
 					coluna1 = coluna1.concat(equipamento.getDescricaoEquipamento());
 				}else{
 					coluna1 = coluna1.concat("\n").concat(equipamento.getDescricaoEquipamento());
 				}
 				
-			} else if (rowNum > 7 && rowNum <= 14) {
+			} else if (rowNum > 10 && rowNum <= 20) {
 				if(coluna2.isEmpty()) {
 					coluna2 = coluna2.concat(equipamento.getDescricaoEquipamento());
 				}else{
 					coluna2 = coluna2.concat("\n").concat(equipamento.getDescricaoEquipamento());
 				}
 				
-			} else if (rowNum > 14 && rowNum <= 21) {
+			} else if (rowNum > 20 && rowNum <= 30) {
 				if(coluna3.isEmpty()) {
 					coluna3 = coluna3.concat(equipamento.getDescricaoEquipamento());
 				}else{
 					coluna3 = coluna3.concat("\n").concat(equipamento.getDescricaoEquipamento());
 				}
 				
-			} else if (rowNum > 21) {
+			} else if (rowNum > 30) {
 				if(coluna4.isEmpty()) {
 					coluna4 = coluna4.concat(equipamento.getDescricaoEquipamento());
 				}else{
@@ -453,8 +476,7 @@ public class RelatorioNotasDeConsumoDaSalaON extends BaseBusiness {
 	
 	public void preencherListaOrteseProteseUtilizados(Integer crgSeq, RelatorioNotasDeConsumoDaSalaVO vo) throws ApplicationBusinessException {
 		
-		List<String> retorno = 
-			getMbcMaterialPorCirurgiaDAO().obterListaOrteseProteseUtilizadosPorCrgSeq(crgSeq);
+		List<String> retorno = 	getMbcMaterialPorCirurgiaDAO().obterListaOrteseProteseUtilizadosPorCrgSeq(crgSeq);
 		
 		int rowNum = 0;
 		String coluna1 = "";
@@ -488,6 +510,47 @@ public class RelatorioNotasDeConsumoDaSalaON extends BaseBusiness {
 		vo.setDescricaoOrteseProteseColuna1(coluna1);
 		vo.setDescricaoOrteseProteseColuna2(coluna2);
 		vo.setDescricaoOrteseProteseColuna3(coluna3);
+	}
+	
+	public void preencherListaOrteseProteseInformada(Short seqUnidadeCirurgica, Integer crgSeq, Short crgEspSeq, RelatorioNotasDeConsumoDaSalaVO vo) throws ApplicationBusinessException {
+		Integer pciSeq = obterPciSeq(seqUnidadeCirurgica, crgSeq);
+		Short espSeq = obterEspSeq(seqUnidadeCirurgica, crgEspSeq, pciSeq);
+		
+		AghParametros parametroGrupo = getParametroFacade().buscarAghParametro(AghuParametrosEnum.GRPO_MAT_ORT_PROT);
+		Integer grupoMatOrtProt = parametroGrupo.getVlrNumerico().intValue();
+		
+		List<SubRelatorioNotasDeConsumoDaSalaOPMEVO > retorno = getMbcMaterialImpNotaSalaUnDAO().obterListaOrteseProteseInformadaPorUnfSeqCrgSeq(seqUnidadeCirurgica, crgSeq, pciSeq, espSeq, grupoMatOrtProt);
+
+		int rowNum = 0;
+		String coluna1 = "";
+		
+		for (SubRelatorioNotasDeConsumoDaSalaOPMEVO orteseProtese : retorno) {
+			if(orteseProtese == null) {
+				++rowNum;
+				continue;
+			}
+			rowNum = rowNum + 1;
+			if(coluna1.isEmpty()) {
+				coluna1 = coluna1.concat((String) orteseProtese.getNome());
+				coluna1 = coluna1.concat(" ");
+				coluna1 = coluna1.concat(converteValor(orteseProtese.getQuantidade().intValue()));
+			}else{
+				coluna1 = coluna1.concat("\n");
+				coluna1 = coluna1.concat((String) orteseProtese.getNome());
+				coluna1 = coluna1.concat(" ");
+				coluna1 = coluna1.concat(converteValor(orteseProtese.getQuantidade().intValue()));
+			}
+				
+		}
+		vo.setDescricaoOrteseProteseColuna1(coluna1);
+	}
+	
+	
+	public String converteValor(Integer valor){
+		if (valor != null){
+			return valor.toString();
+		}
+		return null;
 	}
 	
 	public void preencherListaMateriais(Short seqUnidadeCirurgica, Integer crgSeq, Short crgEspSeq, RelatorioNotasDeConsumoDaSalaVO vo) throws ApplicationBusinessException {

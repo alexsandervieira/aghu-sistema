@@ -28,7 +28,8 @@
 				descricaoInput="codigo" size="11" maxlength="9" width="500"
 				descricaoLabel="nome" suggestionAction="pesquisarPessoaFisica"
 				controller="#{servidorPaginatorController}"
-				value="#{servidorPaginatorController.pessoaFisica}">
+				value="#{servidorPaginatorController.pessoaFisica}"
+				readonly="#{servidorPaginatorController.origemPesquisaPessoas}">
               <p:column> 
                 <f:facet name="header"> 
                   <h:outputText value="#{messages.LABEL_CODIGO}"/> 

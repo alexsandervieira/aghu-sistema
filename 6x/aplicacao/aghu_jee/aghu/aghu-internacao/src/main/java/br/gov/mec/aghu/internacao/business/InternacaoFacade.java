@@ -1,5 +1,7 @@
 package br.gov.mec.aghu.internacao.business;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,7 @@ import javax.inject.Inject;
 
 import org.hibernate.HibernateException;
 
+import br.gov.mec.aghu.configuracao.dao.AghAtendimentoDAO;
 import br.gov.mec.aghu.constante.ConstanteAghCaractUnidFuncionais;
 import br.gov.mec.aghu.core.business.BaseFacade;
 import br.gov.mec.aghu.core.business.moduleintegration.BypassInactiveModule;
@@ -63,6 +66,7 @@ import br.gov.mec.aghu.internacao.dao.ReferencialClinicaEspecialidadeVODAO;
 import br.gov.mec.aghu.internacao.dao.VAinConvenioPlanoDAO;
 import br.gov.mec.aghu.internacao.dao.VAinInternacoesExcedentesDAO;
 import br.gov.mec.aghu.internacao.pesquisa.business.PesquisaInternacaoON;
+import br.gov.mec.aghu.internacao.pesquisa.business.PesquisaLeitosON;
 import br.gov.mec.aghu.internacao.pesquisa.vo.PacientesInternadosUltrapassadoVO;
 import br.gov.mec.aghu.internacao.vo.AltasPorPeriodoVO;
 import br.gov.mec.aghu.internacao.vo.AltasPorUnidadeVO;
@@ -78,6 +82,7 @@ import br.gov.mec.aghu.internacao.vo.PesquisaSituacoesLeitosVO;
 import br.gov.mec.aghu.internacao.vo.ProcedenciaPacientesInternadosVO;
 import br.gov.mec.aghu.internacao.vo.ProfessorCrmInternacaoVO;
 import br.gov.mec.aghu.internacao.vo.RelatorioAltasDiaVO;
+import br.gov.mec.aghu.internacao.vo.RelatorioAltasObitoVO;
 import br.gov.mec.aghu.internacao.vo.RelatorioBoletimInternacaoVO;
 import br.gov.mec.aghu.internacao.vo.RelatorioSolicitacaoInternacaoVO;
 import br.gov.mec.aghu.internacao.vo.ResponsaveisPacienteVO;
@@ -86,6 +91,7 @@ import br.gov.mec.aghu.internacao.vo.SituacaoLeitosVO;
 import br.gov.mec.aghu.internacao.vo.ValidaContaTrocaConvenioVO;
 import br.gov.mec.aghu.internacao.vo.VerificaPermissaoVO;
 import br.gov.mec.aghu.model.AelProjetoPesquisas;
+import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.AghCid;
 import br.gov.mec.aghu.model.AghClinicas;
 import br.gov.mec.aghu.model.AghEquipes;
@@ -114,6 +120,7 @@ import br.gov.mec.aghu.model.AinQuartos;
 import br.gov.mec.aghu.model.AinQuartos.Fields;
 import br.gov.mec.aghu.model.AinResponsaveisPaciente;
 import br.gov.mec.aghu.model.AinSolicitacoesInternacao;
+import br.gov.mec.aghu.model.AinTipoCaracteristicaLeito;
 import br.gov.mec.aghu.model.AinTiposAltaMedica;
 import br.gov.mec.aghu.model.AinTiposCaraterInternacao;
 import br.gov.mec.aghu.model.AipEtnia;
@@ -236,6 +243,9 @@ public class InternacaoFacade extends BaseFacade implements	IInternacaoFacade {
 	private CensoRN censoRN;
 	
 	@EJB
+	private PesquisaLeitosON pesquisaLeitosON;
+	
+	@EJB
 	private AtendimentoUrgenciaRN atendimentoUrgenciaRN;
 	
 	@Inject
@@ -310,6 +320,8 @@ public class InternacaoFacade extends BaseFacade implements	IInternacaoFacade {
 	@EJB
 	private RelatorioAltasPorPeriodoRN relatorioAltasPorPeriodoRN;
 	
+	@Inject
+	private AghAtendimentoDAO aghAtendimentoDAO;	
 	
 	/**
 	 * 
@@ -888,6 +900,11 @@ public class InternacaoFacade extends BaseFacade implements	IInternacaoFacade {
 		return getRelatorioAltasPorPeriodoRN().pesquisarAltasPorPeriodo(dataAltaInicio, dataAltaFinal);
 	}
 	
+	@Override
+	public List<AinSolicitacoesInternacao> pesquisaNegativasDia(Date dataNegativa, AghEspecialidades especialidade) throws ApplicationBusinessException {
+		return ainSolicitacoesInternacaoDAO.pesquisarNegativaSolicitacaoInternacao(dataNegativa, especialidade);
+	}
+	
 	protected RelatorioAltasDiaON getRelatorioAltasDiaON() {
 		return relatorioAltasDiaON;
 	}
@@ -986,10 +1003,8 @@ public class InternacaoFacade extends BaseFacade implements	IInternacaoFacade {
 	 */
 	@Override
 	@Secure("#{s:hasPermission('relatorio','pacientesAniversariantes')}")
-	public List<PacientesAniversariantesVO> pesquisaPacientesAniversariantes(
-			Date dtReferencia) {
-		return getPacientesAniversariantesON()
-				.pesquisaPacientesAniversariantes(dtReferencia);
+	public List<PacientesAniversariantesVO> pesquisaPacientesAniversariantes(Date dtReferencia) {
+		return getPacientesAniversariantesON().pesquisaPacientesAniversariantes(dtReferencia);
 	}
 
 	/**
@@ -1342,11 +1357,12 @@ public class InternacaoFacade extends BaseFacade implements	IInternacaoFacade {
 			List<AinResponsaveisPaciente> listaResponsaveis,
 			List<AinResponsaveisPaciente> listaResponsaveisExcluidos, 
 			String nomeMicrocomputador, final Date dataFimVinculoServidor,
-			final Boolean substituirProntuario)
+			final Boolean substituirProntuario,
+			final FatItensProcedHospitalar itemProcedHospitalar)
 			throws BaseException {
 		return getCadastroInternacaoON().persistirInternacao(internacao,
 				cidsInternacao, cidsInternacaoExcluidos, listaResponsaveis,
-				listaResponsaveisExcluidos, nomeMicrocomputador, dataFimVinculoServidor, substituirProntuario);
+				listaResponsaveisExcluidos, nomeMicrocomputador, dataFimVinculoServidor, substituirProntuario,itemProcedHospitalar);
 	}
 
 	/**
@@ -3164,7 +3180,6 @@ public class InternacaoFacade extends BaseFacade implements	IInternacaoFacade {
 			return this.getAinInternacaoDAO().obterInternacaoPacientePorSeq(seqInternacao);
 		}
 		
-		
 		@Override
 		public AinResponsaveisPaciente obterResponsaveisPacientePorNome(String nome) {
 			return this.ainResponsaveisPacienteDAO.obterResponsaveisPacientePorNome(nome);
@@ -3175,4 +3190,79 @@ public class InternacaoFacade extends BaseFacade implements	IInternacaoFacade {
 				throws ApplicationBusinessException {
 			return relatorioIdadeCIDRN.pesquisarPacientesPorIdadeECID(idadeInicial, idadeFinal, cid);
 		}
+
+		@Override
+		public List<RelatorioAltasObitoVO> pesquisaRelatorioAltasObito(
+				Date dataInicial, Date dataFinal)
+				throws ApplicationBusinessException {
+			return getRelatorioAltasDiaON().pesquisaAltasObito(dataInicial,dataFinal);
+		}
+
+		@Override
+		public File geraArquivoAltasObito(Date dataInicial, Date dataFinal) throws IOException, ApplicationBusinessException{
+			return getRelatorioAltasDiaON().gerarArquivoAltasObito(dataInicial,dataFinal);
+		}
+
+	@Override
+	public List<AinInternacao> pesquisarTipoCaracteristicasLeitos(Date dataInicial, Date dataFinal, Short unidadeFuncionalSeq,
+			AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito, AghEspecialidades especialidade) {
+		return this.ainInternacaoDAO.obterCaracteristicasLeitos(dataInicial, dataFinal, unidadeFuncionalSeq, ainTipoCaracteristicaLeito, especialidade);
+	}
+
+	@Override
+	public File geraArquivoCaracteristicasLeito(final Date dataInicial, final Date dataFinal, final AghEspecialidades especialidade, 
+			final Short unfSeq, final AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito) throws IOException, ApplicationBusinessException {
+		
+		return this.pesquisaLeitosON.gerarArquivoCaracteristicas(dataInicial, dataFinal, especialidade, unfSeq, ainTipoCaracteristicaLeito);
+		
+	}
+
+	@Override
+	public List<AinInternacao> pesquisaCaracteristicaList(Integer firstResult,	Integer maxResult, String orderProperty, boolean asc,
+			Date dataInicial, Date dataFinal, Short unidadeFuncionalSeq, AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito,	AghEspecialidades especialidade) {
+		
+		return this.ainInternacaoDAO.obterCaracteristicasLeitosList(firstResult, maxResult, orderProperty, asc, dataInicial, dataFinal, 
+				unidadeFuncionalSeq, ainTipoCaracteristicaLeito, especialidade);
+	}
+	
+	@Override
+	public Long pesquisaCaracteristicaListCount(Date dataInicial, Date dataFinal, Short unidadeFuncionalSeq,
+			AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito, AghEspecialidades especialidade){
+		
+		return this.ainInternacaoDAO.obterCaracteristicasLeitosCount(dataInicial, dataFinal, unidadeFuncionalSeq, 
+				ainTipoCaracteristicaLeito, especialidade);
+	}
+
+	@Override
+	public List<RelatorioAltasObitoVO> pesquisaRelatorioAltasObitoPaginado(
+			Integer firstResult, Integer maxResult, String orderProperty, boolean asc, Date dataInicial, Date dataFinal) {
+		return getRelatorioAltasDiaON().pesquisaAltasObitoPaginado(firstResult, maxResult, orderProperty, asc, dataInicial,dataFinal);
+	}
+
+	@Override
+	public Long pesquisaRelatorioAltasObitoCount(Date dataInicial, Date dataFinal) {
+		return getRelatorioAltasDiaON().pesquisaAltasObitoCount(dataInicial,dataFinal);
+	}
+
+	
+	@Override
+	public AghAtendimentos obterAtendimentoPorChavePrimaria(Integer seq,
+			Enum[] innerJoin, Enum[] leftJoin) {
+		return this.aghAtendimentoDAO.obterPorChavePrimaria(seq, innerJoin, leftJoin);
+	}
+
+	@Override
+	public List<AinInternacao> pesquisarPacientesComSumarioAltaPendente(Date dataInicial, Date dataFinal, Short unidadeFuncionalSeq) {
+		return this.ainInternacaoDAO.buscarPacientesSumarioAltaPendente(dataInicial, dataFinal, unidadeFuncionalSeq);
+	}	
+	
+	@Override
+	public List<AinInternacao> pesquisarPacientesComSumarioAltaPendenteList(Integer firstResult, Integer maxResult, String orderProperty, boolean asc, Date dataInicial, Date dataFinal, Short unidadeFuncionalSeq) {
+		return this.ainInternacaoDAO.buscarPacientesSumarioAltaPendenteList(firstResult, maxResult, orderProperty, asc, dataInicial, dataFinal, unidadeFuncionalSeq);
+	}
+	
+	@Override
+	public Long pesquisarPacientesComSumarioAltaPendenteCount(Date dataInicial, Date dataFinal, Short unidadeFuncionalSeq){
+		return this.ainInternacaoDAO.buscarPacientesSumarioAltaPendenteCount(dataInicial, dataFinal, unidadeFuncionalSeq);
+	}
 }

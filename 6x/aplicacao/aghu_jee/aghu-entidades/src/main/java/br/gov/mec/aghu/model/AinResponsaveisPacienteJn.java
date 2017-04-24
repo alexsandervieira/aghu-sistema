@@ -137,9 +137,9 @@ public class AinResponsaveisPacienteJn extends BaseJournal  implements java.io.S
 		this.fone = fone;
 	}
 	
-	@Column(name = "NOME", nullable = false, length = 60)
+	@Column(name = "NOME", nullable = false)
 	@NotNull
-	@Length(max = 60, message="Nome deve ter no máximo 60 caracteres.")
+	@Length(max = 100, message="Nome deve ter no máximo 100 caracteres.")
 	public String getNome() {
 		return this.nome;
 	}

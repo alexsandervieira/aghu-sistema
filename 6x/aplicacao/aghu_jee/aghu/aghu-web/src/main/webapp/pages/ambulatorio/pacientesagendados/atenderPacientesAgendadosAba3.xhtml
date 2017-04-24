@@ -11,7 +11,7 @@
         <aghu:acao> 
           <mec:commandButton process="@this, texto_evolucao" action="#{atenderPacientesAgendadosController.salvarEvolucao}" value="#{messages.LABEL_GRAVAR}" disabled="#{not atenderPacientesAgendadosController.gravaEvolucao or not mf:hasPermission(securityController,'realizarEvolucaoAmbulatorio,salvar')}" rendered="#{not atenderPacientesAgendadosController.readonlyEvolucao and atenderPacientesAgendadosController.tipoCorrente ne 'A'}" profile="ok" ajax="true" render="aba2,aba3"/>  
           <mec:commandButton value="#{messages.LABEL_GRAVAR}" oncomplete="PF('modalExcluirAnamneseWG').show();" disabled="#{not atenderPacientesAgendadosController.gravaEvolucao or not mf:hasPermission(securityController,'realizarEvolucaoAmbulatorio,salvar')}" rendered="#{not atenderPacientesAgendadosController.readonlyEvolucao and atenderPacientesAgendadosController.tipoCorrente eq 'A'}" profile="ok" ajax="true" process="@this"/>  
-          <mec:commandButton action="#{atenderPacientesAgendadosController.solicitarExames}" rendered="#{atenderPacientesAgendadosController.verificarModuloExameAtivo() and (mf:hasPermission(securityController,'/exames/solicitacao/solicitacaoExameList.xhtml,render') or mf:hasPermission(securityController,'/exames/solicitacao/solicitacaoExameCRUD.xhtml,render'))}" disabled="#{not atenderPacientesAgendadosController.gravaSolicitacaoExame}" value="#{messages.LABEL_ATENDER_PACIENTES_AGENDADOS_ATENDIMENTO_SOLICITAR_EXAMES}" ajax="true" process="@this" styleClass="bt_cinza">
+          <mec:commandButton action="#{atenderPacientesAgendadosController.solicitarExames}" rendered="#{atenderPacientesAgendadosController.verificarModuloExameAtivo() and (mf:hasPermission(securityController,'/exames/solicitacao/solicitacaoExameList.xhtml,render') and mf:hasPermission(securityController,'/exames/solicitacao/solicitacaoExameCRUD.xhtml,render') and atenderPacientesAgendadosController.buscaParametroAtivaDesativaSolicitacaoExames())}" disabled="#{not atenderPacientesAgendadosController.gravaSolicitacaoExame}" value="#{messages.LABEL_ATENDER_PACIENTES_AGENDADOS_ATENDIMENTO_SOLICITAR_EXAMES}" ajax="true" process="@this" styleClass="bt_cinza">
            		<f:setPropertyActionListener target="#{solicitacaoExameController.atendimentoSeq}" value="#{atenderPacientesAgendadosController.atendimento.seq}" for="command"/>  
 	            <f:setPropertyActionListener target="#{solicitacaoExameController.paginaChamadora}" value="ambulatorio-atenderPacientesAgendados" for="command"/>  
 	            <f:setPropertyActionListener target="#{solicitacaoExameController.origemAmbulatorio}" value="#{true}" for="command"/>
@@ -32,7 +32,7 @@
             <f:setPropertyActionListener target="#{verificarPrescricaoMedicaController.voltarPara}" value="ambulatorio-atenderPacientesAgendados" for="command"/> 
           </mec:commandButton>
           <mec:commandButton value="#{messages.LABEL_SOLICITAR_INTERNACAO}" action="#{atenderPacientesAgendadosController.solicitarInternacao}" 
-		          ajax="true" styleClass="bt_secund"> 
+		          ajax="true" styleClass="bt_secund" immediate="true"> 
 		     <f:setPropertyActionListener target="#{solicitacaoInternacaoController.aipPacienteCodigo}" value="#{atenderPacientesAgendadosController.pacienteInternacao.codigo}" for="command"/>  
 		    <f:setPropertyActionListener target="#{solicitacaoInternacaoController.origemChamada}" value="atenderPacientesAgendados" for="command"/> 
 	       </mec:commandButton> 

@@ -72,7 +72,7 @@
 		                  			value="false" for="command"/>
 							</mec:commandButton>
 						</aghu:acao>
-					</p:outputPanel> 
+			</p:outputPanel> 
           </aghu:linha>
           <aghu:linha> 
             <p:outputPanel id="atendimentoDecorate" layout="inline">
@@ -133,7 +133,7 @@
                       <p:outputPanel layout="inline">
                         <mec:commandLink 
                             id="idLink"
-	                        action="#{selecionarPrescricaoConsultarController.imprimirContraCheque(_prescricao)}"
+	                        action="#{selecionarPrescricaoConsultarController.imprimirPrescricaoMedica(_prescricao)}"
 	                        disabled="#{not mf:hasPermission(securityController, 'imprimirContraCheque,imprimir')}" 
 	                        oncomplete="content.donwloadAutomaticoRelatorios('#{sistemaImpressao.flagCups and not sistemaImpressaoClienteManager.isEmpty()}');"
 	                        styleClass=" silk-printer silk-icon"	                        
@@ -173,7 +173,8 @@
 	                      	rendered="#{selecionarPrescricaoConsultarController.listaItensPrescricao.size() gt 0}" 
 	                      	list="#{selecionarPrescricaoConsultarController.listaItensPrescricao}" scrollable="true"
 	                      	controller="#{selecionarPrescricaoConsultarController}"
-                    		draggableColumns="false" selection="itemPrescricaoMedica">
+                    		draggableColumns="false" selection="itemPrescricaoMedica"
+                    		render="tabelaItensPrescricaoDados_panel">
 	                        <c:set var="_item" value="#{item}"/>  
 	                        <p:column headerText="#{messages.LABEL_DESCRICAO}"> 
 	                          <p:outputPanel layout="block" styleClass="silk-icon icon-anchor" rendered="#{_item.hierarquico}"/>  
@@ -201,19 +202,19 @@
 		                <p:outputPanel id="tabelaItensPrescricaoDados_panel" layout="inline"> 
 		                  <mec:inputText label="#{messages.LABEL_PRESC_VALIDADA_POR}"
                                          size="40"
-                                         value="#{selecionarPrescricaoConsultarController.itemPrescricaoMedica.servidorValidacao.pessoaFisica.nome}"
+                                         value="#{selecionarPrescricaoConsultarController.itemPrescricaoMedica.servidorValidacaoNome}"
                                          readonly="true"
                                          styleclass="suggestion_input"
                                          style="text-transform:uppercase"
                                          id="prescValidPor"/>
 		                  <mec:inputText label="#{messages.LABEL_FIM_PRESC_VALIDADA_POR}"
                                          size="40"
-                                         value="#{selecionarPrescricaoConsultarController.itemPrescricaoMedica.servidorValidaMovimentacao.pessoaFisica.nome}"
+                                         value="#{selecionarPrescricaoConsultarController.itemPrescricaoMedica.servidorValidaMovimentacaoNome}"
                                          readonly="true"
                                          styleclass="suggestion_input"
                                          style="text-transform:uppercase"
                                          id="fimPrescValidPor"/>
-		                  <mec:inputText label="#{messages.LABEL_CRIADO_EM}" size="14"
+		                  <mec:inputText label="#{messages.LABEL_CRIADO_EM}" size="18"
                                          value="#{selecionarPrescricaoConsultarController.itemPrescricaoMedica.criadoEm}"
                                          readonly="true"
                                          datePattern="dd/MM/yyyy HH:mm"
@@ -221,7 +222,7 @@
                                          style="text-transform:uppercase"
                                          id="dthrInicio"/>
 		                  <mec:inputText label="#{messages.LABEL_ALTERADO_EM}"
-                                         size="14"
+                                         size="18"
                                          value="#{selecionarPrescricaoConsultarController.itemPrescricaoMedica.alteradoEm}"
                                          readonly="true"
                                          datePattern="dd/MM/yyyy HH:mm"

@@ -279,12 +279,7 @@ public class ProcedimentoAtendimentoConsultaON extends BaseBusiness {
 			listaSeqsExcluir.add((Integer) procedimento[0]);
 		}
 		
-		List<Object[]> listaProcedimentosObject4 = mamProcedimentoDAO.pesquisarProcedimentoPorNumeroConsultaUnion4(consultaNumero, espSeq, paiEspSeq, listaSeqsExcluir);
-		listaSeqsExcluir.clear();
-		for (Object[] procedimento : listaProcedimentosObject4) {
-			listaProcedimentos.add(popularProcedimentoAtendimentoConsultaVO(procedimento, seqProcNenhum));
-			listaSeqsExcluir.add((Integer) procedimento[0]);
-		}
+		this.adicionarProcedimentosGenericos(consultaNumero, espSeq, paiEspSeq, listaProcedimentos, mamProcedimentoDAO, seqProcNenhum,listaSeqsExcluir);
 				
 		List<Object[]> listaProcedimentosObject5 = mamProcedimentoDAO.pesquisarProcedimentoPorNumeroConsultaUnion5(consultaNumero, espSeq, paiEspSeq, listaSeqsExcluir);
 		List<ProcedimentoAtendimentoConsultaVO> listaProcedimentosPadraoConsulta = new ArrayList<ProcedimentoAtendimentoConsultaVO>();
@@ -393,6 +388,23 @@ public class ProcedimentoAtendimentoConsultaON extends BaseBusiness {
 		}		
 		
 		return listaProcedimentos;
+	}
+
+
+	public void adicionarProcedimentosGenericos(Integer consultaNumero, Short espSeq, Short paiEspSeq,
+			List<ProcedimentoAtendimentoConsultaVO> listaProcedimentos, MamProcedimentoDAO mamProcedimentoDAO,
+			BigDecimal seqProcNenhum, List<Integer> listaSeqsExcluir) throws ApplicationBusinessException {
+		
+		List<Object[]> listaProcedimentosObject4 = mamProcedimentoDAO.pesquisarProcedimentoPorNumeroConsultaUnion4(consultaNumero, espSeq, paiEspSeq, listaSeqsExcluir);
+		listaSeqsExcluir.clear();
+		
+		for (Object[] procedimento : listaProcedimentosObject4) {
+			ProcedimentoAtendimentoConsultaVO vo = popularProcedimentoAtendimentoConsultaVO(procedimento, seqProcNenhum);
+			if(vo.getDescricao().equalsIgnoreCase("NENHUM PROCEDIMENTO REALIZADO")){
+				listaProcedimentos.add(vo);
+				listaSeqsExcluir.add((Integer) procedimento[0]);
+			}
+		}
 	}
 	
 	

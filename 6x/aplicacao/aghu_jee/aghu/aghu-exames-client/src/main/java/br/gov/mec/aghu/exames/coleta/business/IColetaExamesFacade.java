@@ -118,9 +118,9 @@ public interface IColetaExamesFacade extends Serializable {
 	
 	public void voltarExame(AelAmostraItemExamesId amostraItemExamesId, String nomeMicrocomputador) throws BaseException;
 	
-	public void validarColetaExames(Integer amoSeqp, List<AelExamesAmostraVO> listaExamesAmostra) throws ApplicationBusinessException;
+	public void validarColetaExames(AelExamesAmostraVO exameAmostraVO) throws ApplicationBusinessException;
 	
-	public void validarVoltaExames(Integer amoSeqp, List<AelExamesAmostraVO> listaExamesAmostra) throws ApplicationBusinessException;
+	public void validarVoltaExames(AelExamesAmostraVO exameAmostraVO) throws ApplicationBusinessException;
 	
 	public void validarColetaExame(List<AelAmostraExamesVO> listaItensAmostra) throws ApplicationBusinessException;
 	

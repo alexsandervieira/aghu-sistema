@@ -89,7 +89,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 		<groupHeader>
 			<band height="37" splitType="Stretch">
 				<staticText>
-					<reportElement uuid="bfe8b5fe-a0be-4f0d-923d-0e8f3c34b751" key="staticText-4" x="1" y="14" width="74" height="13"/>
+					<reportElement key="staticText-4" x="1" y="14" width="65" height="13" uuid="bfe8b5fe-a0be-4f0d-923d-0e8f3c34b751"/>
 					<box>
 						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -102,7 +102,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 					<text><![CDATA[Prontuário]]></text>
 				</staticText>
 				<staticText>
-					<reportElement uuid="dbaab943-d462-4d4f-ac38-05d38cf1a580" key="staticText-5" x="83" y="14" width="63" height="13"/>
+					<reportElement key="staticText-5" x="69" y="14" width="90" height="13" uuid="dbaab943-d462-4d4f-ac38-05d38cf1a580"/>
 					<box>
 						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -115,7 +115,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 					<text><![CDATA[Local]]></text>
 				</staticText>
 				<staticText>
-					<reportElement uuid="de840c35-bcb3-49b8-8d55-a8e918f31596" key="staticText-6" x="154" y="14" width="237" height="13"/>
+					<reportElement key="staticText-6" x="160" y="14" width="237" height="13" uuid="de840c35-bcb3-49b8-8d55-a8e918f31596"/>
 					<box>
 						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -128,7 +128,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 					<text><![CDATA[Nome do Paciente]]></text>
 				</staticText>
 				<staticText>
-					<reportElement uuid="ec538ee7-d830-4fd4-a079-5bb01ddc282c" key="staticText-8" x="400" y="14" width="62" height="13"/>
+					<reportElement key="staticText-8" x="400" y="14" width="62" height="13" uuid="ec538ee7-d830-4fd4-a079-5bb01ddc282c"/>
 					<box>
 						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -141,7 +141,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 					<text><![CDATA[Quantidade]]></text>
 				</staticText>
 				<textField isBlankWhenNull="false">
-					<reportElement uuid="bd026d29-9049-49a3-ba2b-4075aad89bf5" key="textField-9" x="2" y="0" width="533" height="13"/>
+					<reportElement key="textField-9" x="2" y="0" width="533" height="13" uuid="bd026d29-9049-49a3-ba2b-4075aad89bf5"/>
 					<box>
 						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -154,33 +154,33 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 					<textFieldExpression><![CDATA[$F{descricao03}]]></textFieldExpression>
 				</textField>
 				<line>
-					<reportElement uuid="5a7a8d33-a5dd-4484-b65e-afb48bfa4dd1" key="line-1" x="1" y="29" width="74" height="1"/>
+					<reportElement key="line-1" x="1" y="29" width="65" height="1" uuid="5a7a8d33-a5dd-4484-b65e-afb48bfa4dd1"/>
 				</line>
 				<line>
-					<reportElement uuid="e658c955-eff1-439b-80e6-43d81dedff03" key="line-2" x="83" y="29" width="63" height="1"/>
+					<reportElement key="line-2" x="69" y="29" width="90" height="1" uuid="e658c955-eff1-439b-80e6-43d81dedff03"/>
 				</line>
 				<line>
-					<reportElement uuid="e33fedbf-fbb8-4bac-a366-d2cc0ff0305e" key="line-3" x="154" y="29" width="237" height="1"/>
+					<reportElement key="line-3" x="160" y="29" width="237" height="1" uuid="e33fedbf-fbb8-4bac-a366-d2cc0ff0305e"/>
 				</line>
 				<line>
-					<reportElement uuid="23969185-46fc-4b65-8191-3aefc9235f60" key="line-4" x="400" y="29" width="62" height="1"/>
+					<reportElement key="line-4" x="400" y="29" width="62" height="1" uuid="23969185-46fc-4b65-8191-3aefc9235f60"/>
 				</line>
 				<staticText>
-					<reportElement uuid="155431a3-1a93-42e2-8ed8-40a9b6153cc0" x="472" y="14" width="62" height="13"/>
+					<reportElement x="472" y="14" width="62" height="13" uuid="155431a3-1a93-42e2-8ed8-40a9b6153cc0"/>
 					<textElement>
 						<font fontName="Courier New" pdfFontName="Courier-Bold"/>
 					</textElement>
 					<text><![CDATA[Qtd.Dev.]]></text>
 				</staticText>
 				<line>
-					<reportElement uuid="e3a8061d-c6f8-44be-a4bd-4ee31605dbcf" x="472" y="29" width="62" height="1"/>
+					<reportElement x="472" y="29" width="62" height="1" uuid="e3a8061d-c6f8-44be-a4bd-4ee31605dbcf"/>
 				</line>
 			</band>
 		</groupHeader>
 		<groupFooter>
 			<band height="17" splitType="Stretch">
 				<staticText>
-					<reportElement uuid="5a49baf3-0ea3-4351-b9ae-2e1239e24f60" key="staticText-9" x="187" y="3" width="204" height="13"/>
+					<reportElement key="staticText-9" x="187" y="3" width="204" height="13" uuid="5a49baf3-0ea3-4351-b9ae-2e1239e24f60"/>
 					<box>
 						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -193,7 +193,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 					<text><![CDATA[Total de Medicamentos:]]></text>
 				</staticText>
 				<textField isBlankWhenNull="false">
-					<reportElement uuid="af481a6b-5bb5-402d-a570-78011909b0c1" key="textField-11" x="400" y="3" width="62" height="13"/>
+					<reportElement key="textField-11" x="400" y="3" width="62" height="13" uuid="af481a6b-5bb5-402d-a570-78011909b0c1"/>
 					<box>
 						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -220,10 +220,10 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 	<columnHeader>
 		<band height="70" splitType="Stretch">
 			<line>
-				<reportElement uuid="83ef74e5-9987-447f-a427-50d949a349ab" key="line" x="1" y="65" width="532" height="1"/>
+				<reportElement key="line" x="1" y="65" width="532" height="1" uuid="83ef74e5-9987-447f-a427-50d949a349ab"/>
 			</line>
 			<textField pattern="dd/MM/yyyy" isBlankWhenNull="false">
-				<reportElement uuid="0f94446a-db2c-4cc8-86d8-2a21f6ed2f98" key="textField-12" x="349" y="2" width="185" height="15"/>
+				<reportElement key="textField-12" x="349" y="2" width="185" height="15" uuid="0f94446a-db2c-4cc8-86d8-2a21f6ed2f98"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -236,7 +236,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 				<textFieldExpression><![CDATA[(new SimpleDateFormat("dd/MM/yyyy")).format(new Date())]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="false">
-				<reportElement uuid="5da88762-cfe8-4464-b0bd-4818b011ae52" key="textField-10" x="1" y="50" width="533" height="15"/>
+				<reportElement key="textField-10" x="1" y="50" width="533" height="15" uuid="5da88762-cfe8-4464-b0bd-4818b011ae52"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -249,7 +249,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 				<textFieldExpression><![CDATA[$F{descricao04}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="false">
-				<reportElement uuid="58d563aa-e901-4c55-b8b5-5396813f028a" key="textField-13" x="1" y="18" width="532" height="15"/>
+				<reportElement key="textField-13" x="1" y="18" width="532" height="15" uuid="58d563aa-e901-4c55-b8b5-5396813f028a"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -262,14 +262,14 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 				<textFieldExpression><![CDATA[$F{descricao02}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="41ac94f6-139e-4f52-bec4-7a262d91f3a4" x="1" y="2" width="315" height="15"/>
+				<reportElement x="1" y="2" width="315" height="15" uuid="41ac94f6-139e-4f52-bec4-7a262d91f3a4"/>
 				<textElement>
 					<font fontName="Courier New" isBold="true" pdfFontName="Courier-Bold"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{hospitalLocal}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="9d434f84-ebfc-466b-8349-430e2f383f69" x="1" y="34" width="532" height="15" isRemoveLineWhenBlank="true"/>
+				<reportElement x="1" y="34" width="532" height="15" isRemoveLineWhenBlank="true" uuid="9d434f84-ebfc-466b-8349-430e2f383f69"/>
 				<textElement>
 					<font fontName="Courier New" isBold="true" pdfFontName="Courier-Bold"/>
 				</textElement>
@@ -280,7 +280,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 	<detail>
 		<band height="14" splitType="Stretch">
 			<textField isBlankWhenNull="false">
-				<reportElement uuid="d9989fdf-0b7b-47b3-aab4-7181d363c611" key="textField-3" x="1" y="1" width="74" height="13"/>
+				<reportElement key="textField-3" x="1" y="1" width="65" height="13" uuid="d9989fdf-0b7b-47b3-aab4-7181d363c611"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -292,8 +292,8 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 				</textElement>
 				<textFieldExpression><![CDATA[$F{prontuario}]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="false">
-				<reportElement uuid="b9677455-247b-4f64-ad05-f77ec0b189bc" key="textField-4" x="83" y="1" width="63" height="13"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+				<reportElement key="textField-4" x="69" y="1" width="90" height="13" uuid="b9677455-247b-4f64-ad05-f77ec0b189bc"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -306,7 +306,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 				<textFieldExpression><![CDATA[$F{local}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="false">
-				<reportElement uuid="ea44bd1c-9c65-4e4a-bc7e-65c262abe728" key="textField-5" x="154" y="1" width="237" height="13"/>
+				<reportElement key="textField-5" x="160" y="1" width="237" height="13" uuid="ea44bd1c-9c65-4e4a-bc7e-65c262abe728"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -319,7 +319,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 				<textFieldExpression><![CDATA[$F{nome}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="false">
-				<reportElement uuid="391d892b-7147-465b-a50d-a42fcb318d14" key="textField-6" x="400" y="1" width="62" height="13"/>
+				<reportElement key="textField-6" x="400" y="1" width="62" height="13" uuid="391d892b-7147-465b-a50d-a42fcb318d14"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -339,7 +339,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 	<pageFooter>
 		<band height="23" splitType="Stretch">
 			<textField pattern="" isBlankWhenNull="false">
-				<reportElement uuid="f282a264-4340-4930-a802-bc9d2b00f75f" key="textField" x="311" y="7" width="178" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement key="textField" x="311" y="7" width="178" height="13" forecolor="#000000" backcolor="#FFFFFF" uuid="f282a264-4340-4930-a802-bc9d2b00f75f"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -352,7 +352,7 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " / "]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report" pattern="" isBlankWhenNull="false">
-				<reportElement uuid="c0f03e22-0c3f-4c8a-ba70-b8b6154986e2" key="textField" x="490" y="7" width="36" height="13" forecolor="#000000" backcolor="#FFFFFF"/>
+				<reportElement key="textField" x="490" y="7" width="36" height="13" forecolor="#000000" backcolor="#FFFFFF" uuid="c0f03e22-0c3f-4c8a-ba70-b8b6154986e2"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -365,10 +365,10 @@ ORDER BY MED.DESCRICAO||' '||decode(MED.CONCENTRACAO,null,null,
 				<textFieldExpression><![CDATA["" + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement uuid="1829d9a4-b8ab-41f0-acc0-b6bcdfa7989c" key="line" x="2" y="1" width="529" height="1"/>
+				<reportElement key="line" x="2" y="1" width="529" height="1" uuid="1829d9a4-b8ab-41f0-acc0-b6bcdfa7989c"/>
 			</line>
 			<staticText>
-				<reportElement uuid="c3e141bf-de41-4e7c-85a3-4257c7bed185" key="staticText-3" x="0" y="7" width="147" height="13"/>
+				<reportElement key="staticText-3" x="0" y="7" width="147" height="13" uuid="c3e141bf-de41-4e7c-85a3-4257c7bed185"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>

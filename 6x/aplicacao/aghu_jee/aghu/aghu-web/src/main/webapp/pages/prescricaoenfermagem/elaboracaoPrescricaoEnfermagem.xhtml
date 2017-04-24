@@ -112,22 +112,11 @@
                       <f:facet name="header"> 
                         <h:outputText value="#{messages.LABEL_ACAO}"/> 
                       </f:facet>  
-                        
-						<mec:commandLink title="#{messages.LABEL_EDITAR}"
+						<mec:commandLink id="cmlEditar" title="#{messages.LABEL_EDITAR}"
 							action="#{elaboracaoPrescricaoEnfermagemController.editarPrescricao(_prescricaoEnfermagem)}"
 							rendered="#{mf:hasPermission(securityController,'elaborarPrescricaoEnfermagem,editar')}"
-							oncomplete="PF('modalPrescricaoEmUsoWG').show();;"
 							profile="edit" ajax="true" render="panel1">
-							<!-- <f:setPropertyActionListener
-								target="#{manutencaoPrescricaoEnfermagemController.penSeq}"
-								value="#{elaboracaoPrescricaoEnfermagemController.prescricaoEnfermagem.id.seq}"
-								for="command" />
-							<f:setPropertyActionListener
-								target="#{manutencaoPrescricaoEnfermagemController.penSeqAtendimento}"
-								value="#{elaboracaoPrescricaoEnfermagemController.prescricaoEnfermagem.id.atdSeq}"
-								for="command" /> -->
                       </mec:commandLink>
-                       
                     </p:column>  
                     <p:column> 
                       <f:facet name="header"> 

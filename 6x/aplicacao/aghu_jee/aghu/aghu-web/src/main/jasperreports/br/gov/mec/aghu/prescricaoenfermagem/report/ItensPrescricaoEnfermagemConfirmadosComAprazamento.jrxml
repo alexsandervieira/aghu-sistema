@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.1.1.final using JasperReports Library version 6.1.1  -->
-<!-- 2015-11-16T18:27:39 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ItensPrescricaoEnfermagemConfirmados_cuidados" language="groovy" pageWidth="502" pageHeight="802" columnWidth="502" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="64f79d9a-ee8f-42fa-ba03-6171df2f04f5">
-	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="32"/>
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -30,55 +28,92 @@
 	<field name="tipo" class="java.lang.String">
 		<fieldDescription><![CDATA[tipo]]></fieldDescription>
 	</field>
+	<field name="descricaoDiagnostico" class="java.lang.String"/>
+	<field name="diagnostico" class="java.lang.Boolean"/>
 	<columnHeader>
 		<band height="17">
 			<rectangle>
-				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="383" height="17" uuid="f886a4a9-4557-4a1a-ad40-89e21a64fb6b"/>
+				<reportElement uuid="f886a4a9-4557-4a1a-ad40-89e21a64fb6b" stretchType="RelativeToTallestObject" x="0" y="0" width="394" height="17"/>
 			</rectangle>
 			<rectangle>
-				<reportElement x="383" y="0" width="119" height="17" uuid="2f12ff87-574d-4ff6-ae26-86571685ffe2"/>
+				<reportElement uuid="2f12ff87-574d-4ff6-ae26-86571685ffe2" x="394" y="0" width="139" height="17"/>
 			</rectangle>
 			<textField>
-				<reportElement x="0" y="0" width="383" height="17" uuid="c85caf90-370a-456c-85d6-5c44e3620f7d"/>
+				<reportElement uuid="c85caf90-370a-456c-85d6-5c44e3620f7d" x="1" y="0" width="393" height="17"/>
 				<textElement textAlignment="Center">
-					<font fontName="Arial" size="11" isBold="true" isItalic="true" pdfFontName="Helvetica-BoldOblique"/>
+					<font fontName="Arial" size="12" isBold="true" isItalic="true" pdfFontName="Helvetica-BoldOblique"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement uuid="8629b14c-a185-4cc7-96f1-2d1080e63e84" x="395" y="0" width="138" height="17"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="12" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[FREQUÊNCIA]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="16" splitType="Stretch">
+		<band height="15" splitType="Prevent">
 			<rectangle>
-				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="32" height="15" uuid="615c7240-5ba0-4e43-af9c-408255d1cfe5"/>
+				<reportElement uuid="615c7240-5ba0-4e43-af9c-408255d1cfe5" stretchType="RelativeToBandHeight" x="0" y="0" width="32" height="15">
+					<printWhenExpression><![CDATA[$F{diagnostico} == false]]></printWhenExpression>
+				</reportElement>
 			</rectangle>
 			<textField>
-				<reportElement x="0" y="0" width="27" height="14" uuid="82f3bd1e-e054-436f-bd05-d60dd00a5f5b"/>
-				<textElement textAlignment="Right" verticalAlignment="Top">
+				<reportElement uuid="82f3bd1e-e054-436f-bd05-d60dd00a5f5b" x="0" y="1" width="27" height="14">
+					<printWhenExpression><![CDATA[$F{diagnostico} == false]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
 			</textField>
 			<rectangle>
-				<reportElement stretchType="RelativeToTallestObject" x="32" y="0" width="351" height="15" uuid="56ba813e-c6ac-4a81-8bb9-72b9e337299b"/>
+				<reportElement uuid="56ba813e-c6ac-4a81-8bb9-72b9e337299b" stretchType="RelativeToTallestObject" x="32" y="0" width="362" height="15">
+					<printWhenExpression><![CDATA[$F{diagnostico} == false]]></printWhenExpression>
+				</reportElement>
 			</rectangle>
 			<textField isStretchWithOverflow="true" pattern="">
-				<reportElement x="35" y="0" width="348" height="14" uuid="ed1bfd01-b62e-45a0-851d-cc8ad16b38bf"/>
+				<reportElement uuid="ed1bfd01-b62e-45a0-851d-cc8ad16b38bf" x="35" y="0" width="359" height="15">
+					<printWhenExpression><![CDATA[$F{diagnostico} == false]]></printWhenExpression>
+				</reportElement>
 				<textElement markup="html">
 					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{descricao}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="27" y="0" width="5" height="14" uuid="ef751348-6f75-4a0e-86d5-8002a0985eee"/>
+				<reportElement uuid="ef751348-6f75-4a0e-86d5-8002a0985eee" x="27" y="0" width="5" height="14">
+					<printWhenExpression><![CDATA[$F{diagnostico} == false]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Left"/>
 				<text><![CDATA[.]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement stretchType="RelativeToBandHeight" x="383" y="0" width="119" height="15" uuid="ad55eae0-960c-4fe1-8fc2-3fb96ec9418d"/>
+				<reportElement uuid="2cb40a5f-52c3-4b9e-8329-fcc29a237b9f" stretchType="RelativeToTallestObject" x="0" y="0" width="533" height="15">
+					<printWhenExpression><![CDATA[$F{diagnostico} == true]]></printWhenExpression>
+				</reportElement>
 			</rectangle>
+			<rectangle>
+				<reportElement uuid="ad55eae0-960c-4fe1-8fc2-3fb96ec9418d" stretchType="RelativeToBandHeight" x="394" y="0" width="139" height="15">
+					<printWhenExpression><![CDATA[$F{diagnostico} == false]]></printWhenExpression>
+				</reportElement>
+			</rectangle>
+			<textField isStretchWithOverflow="true" pattern="">
+				<reportElement uuid="3303a2ce-4de8-42e4-9a1e-fb86304cc955" x="1" y="1" width="532" height="14">
+					<printWhenExpression><![CDATA[$F{diagnostico} == true]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" markup="html">
+					<font fontName="Arial" size="11" isBold="true" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricaoDiagnostico}]]></textFieldExpression>
+			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToBandHeight" x="395" y="1" width="107" height="14" uuid="b6aec4e3-948c-4661-90a1-c4f1a37375f7"/>
+				<reportElement uuid="b6aec4e3-948c-4661-90a1-c4f1a37375f7" stretchType="RelativeToBandHeight" x="399" y="1" width="135" height="14">
+					<printWhenExpression><![CDATA[$F{diagnostico} == false]]></printWhenExpression>
+				</reportElement>
 				<textElement markup="html">
 					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
 				</textElement>

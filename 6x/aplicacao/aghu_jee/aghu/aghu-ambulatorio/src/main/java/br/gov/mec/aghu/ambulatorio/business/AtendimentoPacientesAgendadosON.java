@@ -1910,7 +1910,7 @@ public class AtendimentoPacientesAgendadosON extends BaseBusiness {
 			PrescricaoMedicaTypes tipoPrescricao = null;
 			Integer indice = 1;
 			for(ItemPrescricaoMedicaVO item : itensPrescricaoVO){
-				if(tipoPrescricao == null || !item.getTipo().equals(tipoPrescricao)){
+				if (tipoPrescricao == null && item.getTipo() != tipoPrescricao)  {
 					texto.append('\n' + item.getTipo().getTituloAmbulatorial().toUpperCase() + '\n');
 					tipoPrescricao = item.getTipo();
 				}

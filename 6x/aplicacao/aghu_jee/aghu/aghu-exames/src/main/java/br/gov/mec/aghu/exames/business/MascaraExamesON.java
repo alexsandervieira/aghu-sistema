@@ -525,14 +525,14 @@ public class MascaraExamesON extends BaseBusiness {
 	 * @param itemSolicitacaoExame
 	 * @return
 	 */
-	public Integer obterIdadePaciente(Object itemSolicitacaoExameObject) {
-		Integer retorno = 0;
+	public Date obterDtNascimentoPaciente(Object itemSolicitacaoExameObject) {
+		Date retorno = null;
 		if (itemSolicitacaoExameObject instanceof AelItemSolicitacaoExames) {
 			AelItemSolicitacaoExames itemSolicitacaoExame = aelItemSolicitacaoExameDAO
 					.obterPorChavePrimaria(((AelItemSolicitacaoExames) itemSolicitacaoExameObject).getId());
 			if (itemSolicitacaoExame != null && itemSolicitacaoExame.getSolicitacaoExame().getAtendimento() != null
 					&& itemSolicitacaoExame.getSolicitacaoExame().getAtendimento().getPaciente() != null) {
-				retorno = itemSolicitacaoExame.getSolicitacaoExame().getAtendimento().getPaciente().getIdade();
+				retorno = itemSolicitacaoExame.getSolicitacaoExame().getAtendimento().getPaciente().getDtNascimento();
 			}
 		} else {
 			if (itemSolicitacaoExameObject instanceof AelItemSolicExameHist) {
@@ -540,12 +540,12 @@ public class MascaraExamesON extends BaseBusiness {
 						.obterPorChavePrimaria(((AelItemSolicExameHist) itemSolicitacaoExameObject).getId());
 				if (itemSolicitacaoExame != null && itemSolicitacaoExame.getSolicitacaoExame().getAtendimento() != null
 						&& itemSolicitacaoExame.getSolicitacaoExame().getAtendimento().getPaciente() != null) {
-					retorno = itemSolicitacaoExame.getSolicitacaoExame().getAtendimento().getPaciente().getIdade();
+					retorno = itemSolicitacaoExame.getSolicitacaoExame().getAtendimento().getPaciente().getDtNascimento();
 				}
 			}
 		}
 		return retorno;
-	}	
+	}
 
 	/** GET **/
 	private AelExameGrupoCaracteristicaDAO getAelExameGrupoCaracteristicaDAO() {

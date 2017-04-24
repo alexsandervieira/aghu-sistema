@@ -60,6 +60,7 @@ import br.gov.mec.aghu.financeiro.centrocusto.business.ICentroCustoFacade;
 import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.AghCaractMicrocomputador;
 import br.gov.mec.aghu.model.AghParametros;
+import br.gov.mec.aghu.model.AghSamis;
 import br.gov.mec.aghu.model.AipAlturaPacientes;
 import br.gov.mec.aghu.model.AipBairrosCepLogradouro;
 import br.gov.mec.aghu.model.AipBairrosCepLogradouroId;
@@ -98,6 +99,7 @@ import br.gov.mec.aghu.paciente.business.validacaoprontuario.InterfaceValidaPron
 import br.gov.mec.aghu.paciente.business.validacaoprontuario.ValidaProntuarioException;
 import br.gov.mec.aghu.paciente.business.validacaoprontuario.ValidaProntuarioFactory;
 import br.gov.mec.aghu.paciente.cadastrosbasicos.business.ICadastrosBasicosPacienteFacade;
+import br.gov.mec.aghu.paciente.dao.AghSamisDAO;
 import br.gov.mec.aghu.paciente.dao.AipCodeControlsDAO;
 import br.gov.mec.aghu.paciente.dao.AipConveniosSaudePacienteDAO;
 import br.gov.mec.aghu.paciente.dao.AipEnderecosPacientesJnDAO;
@@ -171,6 +173,9 @@ public class CadastroPacienteON extends BaseBusiness {
 	
 	@Inject
 	private AipPacientesDAO aipPacientesDAO;
+	
+	@Inject
+	private AghSamisDAO aghSamisDAO;
 	
 	@EJB
 	private IHistoricoPacienteFacade historicoPacienteFacade;
@@ -532,16 +537,13 @@ public class CadastroPacienteON extends BaseBusiness {
 			persistirCartaoSus(aipPaciente);
 		}
 
-		this.validarTelefones(aipPaciente);
+		this.validarTelefones(aipPaciente, false);
 	
 		this.verficaCepEnderecoCepLogradouro(aipPaciente);
 
 		if (aipPaciente.getCodigo() == null) {
 			// inclusão
 			try {
-				LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_3>>>>>>>>>>>>>>>>");
-				LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
-				
 				this.incluirPaciente(aipPaciente, nomeMicrocomputador);
 
 			} catch (BaseException e) {
@@ -564,15 +566,10 @@ public class CadastroPacienteON extends BaseBusiness {
 				if (aipPaciente.isGerarProntuario()) {
 					aipPaciente.setProntuario(null);
 				}
-				LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_4>>>>>>>>>>>>>>>>", e);
-				LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
 				throw e;
 			}
 		} else {
 			// edição
-			LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_5>>>>>>>>>>>>>>>>");
-			LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
-
 			aipPaciente = this.atualizarPaciente(aipPaciente, nomeMicrocomputador, servidorLogado, false);
 		}
 
@@ -584,15 +581,7 @@ public class CadastroPacienteON extends BaseBusiness {
 				this.getEnderecoON().aiptEnpAru(enderecoPacienteOld,enderecoPaciente);
 			}
 		}
-		
-		LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_6 Antes do flush >>>>>>>>>>>>>>>>");
-		LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
-
 		this.getAipPacientesDAO().flush();
-
-		LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_7 Após o flush >>>>>>>>>>>>>>>>");
-		LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
-
 		return aipPaciente;
 
 	}
@@ -626,7 +615,7 @@ public class CadastroPacienteON extends BaseBusiness {
 	 * @param aipPaciente
 	 * @throws ApplicationBusinessException
 	 */
-	private void validarTelefones(AipPacientes aipPaciente)
+	private void validarTelefones(AipPacientes aipPaciente, Boolean substituicaoProntuario)
 			throws ApplicationBusinessException {
 
 		Short dddFoneResidencial = aipPaciente.getDddFoneResidencial();
@@ -634,19 +623,20 @@ public class CadastroPacienteON extends BaseBusiness {
 		Short dddFoneRecado = aipPaciente.getDddFoneRecado();
 		String foneRecado = aipPaciente.getFoneRecado();
 
-		if ((dddFoneResidencial == null && foneResidencial != null)
-				|| (dddFoneResidencial != null && foneResidencial == null)) {
-			throw new ApplicationBusinessException(
-					CadastroPacienteONExceptionCode.ERRO_INFORMAR_TELEFONE);
+		if(!substituicaoProntuario) {
+			if ((dddFoneResidencial == null && foneResidencial != null)
+					|| (dddFoneResidencial != null && foneResidencial == null)) {
+				throw new ApplicationBusinessException(
+						CadastroPacienteONExceptionCode.ERRO_INFORMAR_TELEFONE);
+			}
+			
+			if ((dddFoneRecado != null && StringUtils.isBlank(foneRecado))
+					|| (dddFoneRecado == null && StringUtils.isNotBlank(foneRecado))) {
+				throw new ApplicationBusinessException(
+						CadastroPacienteONExceptionCode.ERRO_INFORMAR_TELEFONE);
+				
+			}
 		}
-
-		if ((dddFoneRecado != null && StringUtils.isBlank(foneRecado))
-				|| (dddFoneRecado == null && StringUtils.isNotBlank(foneRecado))) {
-			throw new ApplicationBusinessException(
-					CadastroPacienteONExceptionCode.ERRO_INFORMAR_TELEFONE);
-
-		}
-
 	}
 
 	/**
@@ -658,9 +648,6 @@ public class CadastroPacienteON extends BaseBusiness {
 	@SuppressWarnings("PMD.NPathComplexity")
 	private void incluirPaciente(AipPacientes aipPaciente, String nomeMicrocomputador) throws BaseException {
 		RapServidores servidorLogado = getServidorLogadoFacade().obterServidorLogadoSemCache();
-
-		LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_8>>>>>>>>>>>>>>>>");
-		LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
 
 		validarDadosPaciente(aipPaciente);
 		
@@ -694,10 +681,6 @@ public class CadastroPacienteON extends BaseBusiness {
 			persistirProntuarioSeNaoCadastrado(aipPaciente, servidorLogado);
 		}
 		this.validarProntuario(aipPaciente);
-
-		LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_9>>>>>>>>>>>>>>>>");
-		LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
-		
 		this.getCadastroPacienteRN().atualizarSituacaoProntuarioInclusao(aipPaciente, servidorLogado != null ? servidorLogado.getUsuario() : null);
 		
 		if (aipPaciente.getAipPacientesDadosCns() != null && aipPaciente.getAipPacientesDadosCns().getPacCodigo() == null) {
@@ -887,7 +870,7 @@ public class CadastroPacienteON extends BaseBusiness {
 		AipPacientesDadosCnsDAO aipPacientesDadosCnsDAO = this
 				.getAipPacientesDadosCnsDAO();
 
-		this.validarTelefones(aipPaciente);
+		this.validarTelefones(aipPaciente, substituirProntuario);
 
 		if (aipPaciente.getAipPacientesDadosCns() != null
 				&& aipPaciente.getAipPacientesDadosCns().getPacCodigo() == null) {
@@ -1235,10 +1218,6 @@ public class CadastroPacienteON extends BaseBusiness {
 				&& aipPaciente.getProntuario() != null && aipPaciente.getProntuario() <= VALOR_MAXIMO_PRONTUARIO) {
 			throw new ApplicationBusinessException(CadastroPacienteONExceptionCode.AIP_PRONTUARIO_JA_GERADO);
 		}
-
-		LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_10>>>>>>>>>>>>>>>>");
-		LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
-
 		// Se o paciente não tem prontuário ou tem um virtual, e o flag indica
 		// para gerar prontuário, ou tem flag que indica geração de prontuário
 		// virtual diferente de nulo e ligado, ou se indica pra não gerar 
@@ -1257,13 +1236,9 @@ public class CadastroPacienteON extends BaseBusiness {
 				prontuarioVirtual = aipPaciente.getProntuario(); 
 			}
 			try {
-				LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_11 Antes de obter prontuário>>>>>>>>>>>>>>>>");
-				LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
 				
 				aipPaciente.setProntuario(obterNumeroProntuario(aipPaciente));
 				
-				LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_12 Após obter prontuário>>>>>>>>>>>>>>>>");
-				LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
 			} catch (ApplicationBusinessException e) {
 				aipPaciente.setProntuario(prontuarioVirtual == null ? null : prontuarioVirtual);
 				throw e;
@@ -1293,9 +1268,6 @@ public class CadastroPacienteON extends BaseBusiness {
 		AghParametros parametroReutilizaProntuarios = this.getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_REUTILIZA_PRONTUARIOS);
 		if ("S".equals(parametroReutilizaProntuarios.getVlrTexto())) {
 
-			LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_13>>>>>>>>>>>>>>>>");
-			LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
-
 			getPacienteFacade().limpaProntuariosLiberados();
 			
 			reutilizaProntuario = true;
@@ -1307,51 +1279,37 @@ public class CadastroPacienteON extends BaseBusiness {
 			if (prontuarioLiberadoSemLock != null) {
 				// Aqui foi feito uso do lockMode.UPGRADE para fazer um lock
 				// pessimista na tabela AIP_PRONTUARIO_LIBERADOS
-				LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_14>>>>>>>>>>>>>>>>");
-				LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
-				
 				prontuarioLiberadoComLock = aipProntuarioLiberadosDAO.obterProntuarioLiberado(
 								prontuarioLiberadoSemLock.getProntuario(),LockOptions.UPGRADE);
-				LOG.info("Obtendo valor a partir da prontuários liberados. Prontuário: "+ prontuarioLiberadoComLock.getProntuario());
 			}
 		}
 
 		//ACHOU VALOR NA TABELA DE PRONTUÁRIO LIBERADO
 		if (prontuarioLiberadoComLock != null && reutilizaProntuario) {
-			LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_15>>>>>>>>>>>>>>>>");
-			LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
 
 			aipProntuarioLiberadosDAO.remover(prontuarioLiberadoComLock);
 			return prontuarioLiberadoComLock.getProntuario(); // / 10;
 		}
-		
-		//PROSEGUE SELECIONANDO O VALOR(SEQUENCE) NA TABELA CODE_CONTROLS
-		LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_16>>>>>>>>>>>>>>>>");
-		LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
 		
 		Integer novoProntuario = obterProntuarioCodeControls(aipPaciente);		
 		aipProntuarioLiberadosDAO.flush();
 		if (getAipPacientesDAO().pesquisarPacientePorProntuario(novoProntuario) == null){
 			inserirProntuario(novoProntuario);			
 		}
-		LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_21>>>>>>>>>>>>>>>>");
-		LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
 		return novoProntuario;
 	}
 	
 	private void inserirProntuario(Integer novoProntuario) {
-		LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_22>>>>>>>>>>>>>>>>");
-		LOG.info("INSERIR NOVO PRONTUÁRIO: " + novoProntuario);
-
+		
 		AipPacienteProntuario pacienteProntuario = new AipPacienteProntuario();
 		pacienteProntuario.setCriadoEm(new Date());
 		pacienteProntuario.setProntuario(novoProntuario);
 		pacienteProntuario.setServidor(servidorLogadoFacade.obterServidorLogado());
+		AghSamis samis = aghSamisDAO.buscarOrigemPadrão();
+		pacienteProntuario.setSamis(samis);
 		getAipPacienteProntuarioDAO().persistir(pacienteProntuario);
 		getAipPacienteProntuarioDAO().flush();
 		
-		LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_23>>>>>>>>>>>>>>>>");
-		LOG.info("INSERIR NOVO PRONTUÁRIO: " + novoProntuario);
 	}
 
 	private Integer obterProntuarioCodeControls(AipPacientes aipPaciente) throws ApplicationBusinessException, ValidaProntuarioException {		
@@ -1362,26 +1320,17 @@ public class CadastroPacienteON extends BaseBusiness {
 		InterfaceValidaProntuario validadorProntuario = validaProntuarioFactory.getValidaProntuario(true);
 		
 		if (aipPaciente.getInsereProntuario() != null && aipPaciente.getInsereProntuario() && aipPaciente.getProntuarioEditado() != null) {
-			LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_17>>>>>>>>>>>>>>>>");
-			LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
 
 			// #54094 - Solicitação e Análise da Deise Moura - Restringir a geração do digito verificador quando indicação do prontuário for manual
 			AghParametros paramPermiteProntuarioManual = this.getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_AGHU_PERMITE_PRONTUARIO_MANUAL);
 			AghParametros paramDigitoVerificador = this.getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_AGHU_GERA_DIG_PRONT);
 			if(paramPermiteProntuarioManual!= null && paramPermiteProntuarioManual.getVlrTexto()!=null && "true".equals(paramPermiteProntuarioManual.getVlrTexto()) &&
 				paramDigitoVerificador!=null && paramDigitoVerificador.getVlrTexto()!=null && "N".equals(paramDigitoVerificador.getVlrTexto())) {
-				LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_18>>>>>>>>>>>>>>>>");
-				LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
-				LOG.info("PRONTUARIO EDITADO: " + aipPaciente.getProntuarioEditado().toString());
 				return Integer.valueOf(aipPaciente.getProntuarioEditado().toString());
 			}
 			else {
 				strValorNovoProntuario = aipPaciente.getProntuarioEditado().toString()
 						+ validadorProntuario.executaModulo(aipPaciente.getProntuarioEditado());
-
-				LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_19>>>>>>>>>>>>>>>>");
-				LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
-				LOG.info("PRONTUARIO GERADO: " + strValorNovoProntuario);
 
 				return Integer.valueOf(strValorNovoProntuario);
 			}	
@@ -1401,18 +1350,12 @@ public class CadastroPacienteON extends BaseBusiness {
 		AipCodeControls aipCodeControlsComLock = aipCodeControlsDAO.obterCodeControlLockForce(sequenceProntuario);
 		Integer valorNovoProntuario = aipCodeControlsComLock.getNextValue();
 
-		LOG.info("Leu da AIP_CODE_CONTROLS o prontuário: "+ valorNovoProntuario);
 		aipCodeControlsComLock.setNextValue(valorNovoProntuario + 1);
 
 		//Teste para validar se executou corretamente
 		aipCodeControlsComLock = aipCodeControlsDAO.obterCodeControlLockForce(sequenceProntuario);
 		valorNovoProntuario = aipCodeControlsComLock.getNextValue();
-		LOG.info("Atualizou AIP_CODE_CONTROLS, novo valor: "	+  valorNovoProntuario);
 		strValorNovoProntuario = valorNovoProntuario.toString() + validadorProntuario.executaModulo(valorNovoProntuario);
-
-		LOG.info("<<<<<<<<<<<<<<<<<<AIP_PACIENTE_20>>>>>>>>>>>>>>>>");
-		LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
-		LOG.info("PRONTUARIO GERADO: " + strValorNovoProntuario);
 
 		return Integer.valueOf(strValorNovoProntuario);
 	}

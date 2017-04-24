@@ -1,5 +1,6 @@
 package br.gov.mec.aghu.exames.business;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -133,13 +134,14 @@ public class AelResultadosExamesON extends BaseBusiness {
 
 			AelParametroCamposLaudo parametroCampoLaudo = entry.getKey();
 			Object valor = entry.getValue();
-
-			if (valor != null) {
+			
+			AelResultadoExame resultado = getAelResultadoExameDAO()
+					.buscaMaximoResultadosExamePorPCLeItemSolicitacaoExame(parametroCampoLaudo, soeSeq, seqp);
+			
+			if (valor != null || resultado != null) {
 				/**
 				 * Busca o último para anular ou cria um novo para inserir RN2
 				 */
-				AelResultadoExame resultado = getAelResultadoExameDAO()
-						.buscaMaximoResultadosExamePorPCLeItemSolicitacaoExame(parametroCampoLaudo, soeSeq, seqp);
 
 				if (resultado == null) {
 
@@ -161,6 +163,12 @@ public class AelResultadosExamesON extends BaseBusiness {
 				} else {
 					resultado.setAnulacaoLaudo(true);
 					resultado.setAlteradoEm(new Date());
+					if(entry.getValue() instanceof Long){
+						Long LongValor = (Long) entry.getValue();
+						resultado.setValor(LongValor);
+					} else {
+						resultado.setValor(trataValorResultado(parametroCampoLaudo, valor));
+					}
 					/* Atualiza */
 					getAelResultadoExameRN().atualizar(resultado, nomeMicrocomputador);
 				}
@@ -375,17 +383,31 @@ public class AelResultadosExamesON extends BaseBusiness {
 	}
 
 	private Long trataValorResultado(AelParametroCamposLaudo parametroCampoLaudo, Object valor) {
-		String valorTemp = valor.toString();
+		String valorTemp;
+		boolean pontoEhVirgula = false;
+		
+		if(valor == null) {
+			valor = "";
+		}
+		if(valor instanceof Double) {
+			BigDecimal vlr = new BigDecimal((Double) valor);
+			valorTemp = vlr.toString();
+			pontoEhVirgula = true;
+		} else {
+			valorTemp = valor.toString();
+		}
 
 		if (valorTemp.indexOf(',') > -1 || valorTemp.indexOf('.') > -1) {
 
-			if (valorTemp.indexOf('.') > -1) {
+			if (valorTemp.indexOf('.') > -1) { //tem ponto
 
-				if (valorTemp.indexOf(',') == -1) {
+				if (valorTemp.indexOf(',') == -1 && parametroCampoLaudo.getQuantidadeCasasDecimais() != null) { //nao tem virgula
 					int casasFaltando = parametroCampoLaudo.getQuantidadeCasasDecimais()
 							- valorTemp.substring(valorTemp.lastIndexOf('.') + 1, valorTemp.length()).length();
 					if (casasFaltando > 0) {
 						valorTemp = StringUtils.rightPad(valorTemp, valorTemp.length() + (casasFaltando), "0");
+					} else if(casasFaltando < 0 && pontoEhVirgula) {
+						valorTemp = StringUtils.substring(valorTemp, 0, valorTemp.length() + (casasFaltando));
 					}
 				}
 
@@ -393,11 +415,13 @@ public class AelResultadosExamesON extends BaseBusiness {
 
 			}
 
-			if (valorTemp.indexOf(',') > -1) {
+			if (valorTemp.indexOf(',') > -1 && parametroCampoLaudo.getQuantidadeCasasDecimais() != null) { //tem virgula
 				int casasFaltando = parametroCampoLaudo.getQuantidadeCasasDecimais()
 						- valorTemp.substring(valorTemp.indexOf(',') + 1, valorTemp.length()).length();
 				if (casasFaltando > 0) {
 					valorTemp = StringUtils.rightPad(valorTemp, valorTemp.length() + (casasFaltando - 1), "0");
+				} else if(casasFaltando < 0) {
+					valorTemp = StringUtils.substring(valorTemp, 0, valorTemp.length() + (casasFaltando));
 				}
 				valorTemp = valorTemp.replace(",", "");
 			}

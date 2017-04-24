@@ -96,13 +96,13 @@ public class ItemSolicitacaoExameVO implements BaseEntity, Serializable, Cloneab
 	private List<AelRecomendacaoExame> recomendacaoExameList;
 	
 	//Flags para aparecerem ou não as abas internas dependendo do exame selecionado
-	private Boolean mostrarAbaTipoTransporte = Boolean.TRUE;
-	private Boolean mostrarAbaIntervColeta = Boolean.TRUE;
-	private Boolean mostrarAbaNoAmostras = Boolean.TRUE;
-	private Boolean mostrarAbaConcentO2 = Boolean.TRUE;
+	private Boolean mostrarAbaTipoTransporte = Boolean.FALSE;
+	private Boolean mostrarAbaIntervColeta = Boolean.FALSE;
+	private Boolean mostrarAbaNoAmostras = Boolean.FALSE;
+	private Boolean mostrarAbaConcentO2 = Boolean.FALSE;
 	private Boolean mostrarAbaRegMatAnalise = Boolean.FALSE;
 	private Boolean mostrarAbaRecomendacoes = Boolean.FALSE;
-	private Boolean mostrarAbaExamesOpcionais = Boolean.TRUE;
+	private Boolean mostrarAbaExamesOpcionais = Boolean.FALSE;
 	private Boolean mostrarAbaQuestionario = Boolean.FALSE;
 	private Boolean mostrarAbaQuestionarioSismama = Boolean.FALSE;
 	private Boolean mostrarAbaQuestionarioSismamaBiopsia = Boolean.FALSE;

@@ -92,6 +92,7 @@ import br.gov.mec.aghu.model.AipUfs;
 import br.gov.mec.aghu.model.FatConvenioSaudePlano;
 import br.gov.mec.aghu.model.FccCentroCustos;
 import br.gov.mec.aghu.model.MamAltaSumario;
+import br.gov.mec.aghu.model.MbcCirurgias;
 import br.gov.mec.aghu.model.MbcProcedimentoCirurgicos;
 import br.gov.mec.aghu.model.McoRecemNascidos;
 import br.gov.mec.aghu.model.MpmAltaSumario;
@@ -2266,6 +2267,13 @@ public class PacienteFacade extends BaseFacade implements IPacienteFacade {
 						pacCodigo, codEvento, origemEmergencia);
 	}
 
+	@Override
+	public List<AipMovimentacaoProntuarios> listarMovimentacoesProntuariosPorCodigoPaciente(
+			Integer pacCodigo) {
+		return getAipMovimentacaoProntuarioDAO()
+				.listarMovimentacoesProntuariosPorCodigoPaciente(pacCodigo);
+	}
+
 	protected AipAvisoAgendamentoCirurgiaDAO getAipAvisoAgendamentoCirurgiaDAO() {
 		return aipAvisoAgendamentoCirurgiaDAO;
 	}
@@ -2818,6 +2826,44 @@ public class PacienteFacade extends BaseFacade implements IPacienteFacade {
 	public void persistirAipMovimentacaoProntuario(AipMovimentacaoProntuarios aipMovimentacaoProntuarios){
 		getAipMovimentacaoProntuarioDAO().persistir(aipMovimentacaoProntuarios);
 		getAipMovimentacaoProntuarioDAO().flush();
+	}
+
+	@Override
+	public void gerarSolicitacaoProntuarioConsultas(AacConsultas consultas, Boolean exibeMsgSolicitanteInexistente) throws ApplicationBusinessException {
+		this.getMovimentacaoProntuarioON().requererProntuariosConsultas(consultas, exibeMsgSolicitanteInexistente);
+	}
+	
+	@Override
+	public void gerarSolicitacaoProntuarioCirurgia(MbcCirurgias cirurgia) throws ApplicationBusinessException {
+		this.getMovimentacaoProntuarioON().requererProntuariosCirurgia(cirurgia);
+	}
+	
+	
+	@Override
+	public Integer obterProntuarioMaePorProntuarioPaciente(Integer nroProntuario) throws ApplicationBusinessException {
+		return this.getPacienteON().obterProntuarioMaePorProntuarioPaciente(nroProntuario);
+	}
+
+	@Override
+	public void gerarPendenciasSolicitacaoArquivoClinico() {
+		this.getMovimentacaoProntuarioRN().gerarPendenciasSolicitacaoArquivoClinico();
+		
+	}
+
+	@Override
+	public AipSolicitantesProntuario pesquisarSolicitantesProntuarioPorOrigemEventos(Short origemEventosSeq) {
+		return getAipSolicitantesProntuarioDAO().pesquisarSolicitantesProntuarioPorOrigemEventos(origemEventosSeq); 
+	}
+
+	@Override
+	public void gerarMovimentacaoProntuario(AinInternacao internacao)
+			throws ApplicationBusinessException {
+		this.getMovimentacaoProntuarioON().requererProntuarios(internacao);
+	}
+
+	@Override
+	public void gerarSolicitacaoProntuario(AinInternacao internacao) throws ApplicationBusinessException {
+		this.getMovimentacaoProntuarioON().requererProntuarios(internacao);
 	}
 	
 }

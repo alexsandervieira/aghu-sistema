@@ -35,6 +35,7 @@ import br.gov.mec.aghu.ambulatorio.dao.AacHorarioGradeConsultaDAO;
 import br.gov.mec.aghu.ambulatorio.dao.AacMotivosDAO;
 import br.gov.mec.aghu.ambulatorio.dao.AacNivelBuscaDAO;
 import br.gov.mec.aghu.ambulatorio.dao.AacPagadorDAO;
+import br.gov.mec.aghu.ambulatorio.dao.AacPermissoesAgendamentoConsultasDAO;
 import br.gov.mec.aghu.ambulatorio.dao.AacProcedHospEspecialidadesDAO;
 import br.gov.mec.aghu.ambulatorio.dao.AacRetornosDAO;
 import br.gov.mec.aghu.ambulatorio.dao.AacSisPrenatalDAO;
@@ -241,6 +242,8 @@ import br.gov.mec.aghu.registrocolaborador.dao.VRapServidorConselhoDAO;
 import br.gov.mec.aghu.util.CapitalizeEnum;
 import br.gov.mec.aghu.view.VMamReceitas;
 import br.gov.mec.aghu.vo.RapServidoresVO;
+import br.gov.mec.aghu.dominio.DominioTipoAgendamentoSisreg;
+
 
 /**
  * Porta de entrada da camada de negócio do módulo de ambulatório.
@@ -266,6 +269,9 @@ public class AmbulatorioFacade extends BaseFacade implements IAmbulatorioFacade 
 	@EJB
 	private AmbulatorioConsultaON ambulatorioConsultaON;
 
+	@EJB
+	ManterPermissoesAgendamentoConsultaON manterPermissoesAgendamentoConsultaON;
+	
 	@EJB
 	private GerarDiariasProntuariosSamisON gerarDiariasProntuariosSamisON;
 
@@ -808,7 +814,10 @@ public class AmbulatorioFacade extends BaseFacade implements IAmbulatorioFacade 
 	
 	@Inject
 	private CseCategoriaProfissionalDAO cseCategoriaProfissionalDAO;
-		
+
+	@Inject
+	private AacPermissoesAgendamentoConsultasDAO aacPermissoesAgendamentoConsultasDAO;
+
 	private static final long serialVersionUID = -6863585348339275639L;
 
 	@Override
@@ -837,8 +846,8 @@ public class AmbulatorioFacade extends BaseFacade implements IAmbulatorioFacade 
 	}
 	
 	@Override
-	public void movimentarProntuariosParaDesarquivamento(Date dataDiaria, String usuarioLogado,Boolean exibeMsgProntuarioJaMovimentado) throws ApplicationBusinessException {
-		getGerarDiariasProntuariosSamisON().getConsultasDiariaParaMovimentar(dataDiaria, exibeMsgProntuarioJaMovimentado);
+	public void movimentarProntuariosParaDesarquivamento(Date dataDiaria) throws ApplicationBusinessException {
+		getGerarDiariasProntuariosSamisON().getConsultasDiariaParaMovimentar(dataDiaria);
 		
 	}
 	
@@ -1166,6 +1175,12 @@ public class AmbulatorioFacade extends BaseFacade implements IAmbulatorioFacade 
 	public void validaHorarioSobreposto(AacHorarioGradeConsulta entity, AacGradeAgendamenConsultas grade)
 			throws ApplicationBusinessException {
 		getManterGradeAgendamentoON().verificaDataHoraIgualAC(entity, grade);
+	}
+
+	@Override
+	public void validaHorarioAgendadoSobreposto(AacHorarioGradeConsulta entity, AacGradeAgendamenConsultas grade, Date dataInicial, Date dataFinal)
+			throws ApplicationBusinessException {
+		getManterGradeAgendamentoON().verificaAgendamentosExistentesGrade(entity, grade, dataInicial, dataFinal);
 	}
 
 	@Override
@@ -2315,6 +2330,11 @@ public class AmbulatorioFacade extends BaseFacade implements IAmbulatorioFacade 
 	public List<AacRetornos> getListaRetornos(String objPesquisa) {
 		return getAacRetornosDAO().obterListaRetornosAtivos(objPesquisa);
 	}
+	
+	@Override
+	public List<AacRetornos> getListaAacRetornos(String objPesquisa, AacRetornos retornoAtual) throws ApplicationBusinessException{
+		return this.getAmbulatorioConsultaRN().obterListaAacRetornosAtivos(objPesquisa,retornoAtual);
+	}
 
 	@Override
 	public List<AacRetornos> getListaRetornosAtivos(String objPesquisa) {
@@ -2530,11 +2550,10 @@ public class AmbulatorioFacade extends BaseFacade implements IAmbulatorioFacade 
 	}
 
 	@Override
-	public StringBuilder marcarConsultas(List<AacConsultasSisreg> consultasSisreg, Integer totalConsultas, String nomeMicrocomputador) {
-
-		return getMarcacaoConsultaSisregON().marcarConsultas(consultasSisreg, totalConsultas, nomeMicrocomputador);
+	public StringBuilder marcarConsultas(List<AacConsultasSisreg> consultasSisreg, Integer totalConsultas, String nomeMicrocomputador, DominioTipoAgendamentoSisreg tipoAgendamentoSisreg) {
+		return getMarcacaoConsultaSisregON().marcarConsultas(consultasSisreg, totalConsultas, nomeMicrocomputador, tipoAgendamentoSisreg);
 	}
-
+	
 	@Override
 	public List<AacConsultasSisreg> obterConsultasSisreg() {
 		return getMarcacaoConsultaSisregON().obterConsultasSisreg();
@@ -4657,6 +4676,11 @@ public class AmbulatorioFacade extends BaseFacade implements IAmbulatorioFacade 
 	public List<AghAtendimentos> pesquisarAtendimentoParaPrescricaoMedica(Integer codigoPac, Integer atdSeq) {
 		return prescricaoAmbulatorialON.pesquisarAtendimentoParaPrescricaoMedica(codigoPac, atdSeq);
 	}
+	
+	@Override
+	public List<AghAtendimentos> pesquisarAtendimentoParaPrescricaoMedicaSemRestricaoDeHorario(Integer codigoPac, Integer atdSeq) {
+		return prescricaoAmbulatorialON.pesquisarAtendimentoParaPrescricaoMedicaSemRestricaoDeHorario(codigoPac, atdSeq);
+	}
 
 	@Override
 	@Secure("#{s:hasPermission('manterTipoAutorizacao','pesquisar')}")
@@ -4749,6 +4773,10 @@ public class AmbulatorioFacade extends BaseFacade implements IAmbulatorioFacade 
 		return getAtendimentoPacientesAgendadosRN().listarTodos();
 	}
 	
+	@Override
+	public List<MamTipoAtestado> buscarTodosAtestados() throws ApplicationBusinessException{
+		return getAtendimentoPacientesAgendadosRN().buscarTodosAtestados();
+	}
 	@Override
 	public List<RelatorioAtestadoVO> recuperarInfConsultaAtestados(List<MamAtestados> atestado) throws ApplicationBusinessException {
 		  return getAtendimentoPacientesAgendadosRN().recuperarInformacoesConsultaAtestados(atestado);
@@ -5456,7 +5484,7 @@ public class AmbulatorioFacade extends BaseFacade implements IAmbulatorioFacade 
 	}
 
 	@Override
-	public String obterDataLocalFormula(Integer nroConsulta) {
+	public String obterDataLocalFormula(Integer nroConsulta) throws ApplicationBusinessException {
 		return relatorioControleFrequenciaRN.obterDataLocalFormula(nroConsulta);
 	}
 
@@ -6610,4 +6638,98 @@ public List<RelatorioProgramacaoGradeVO> obterRelatorioProgramacaoGrade(
 	public AghAtendimentos buscarAtendimentoPossuiMesmoLeitoUnidFuncional(AghAtendimentos atendimento,AghUnidadesFuncionais unidadeFuncional) {
 		return aghAtendimentosDAO.buscarLeitoPorUnidFuncional(atendimento, unidadeFuncional);
 	}
+
+	@Override
+	public List<AacPermissaoAgendamentoConsultas> pesquisarPermissoesAgendamentoConsulta(Short vinculoServidor,
+			Integer matriculaServidor, String nomeServidor) {
+		return aacPermissoesAgendamentoConsultasDAO.pesquisarPermissoesAgendamentoConsulta(vinculoServidor,
+				matriculaServidor, nomeServidor);
+	}
+
+	@Override
+	public void persistirPermissaoAgendamentoConsultas(
+			AacPermissaoAgendamentoConsultas entity) throws ApplicationBusinessException{
+		
+		manterPermissoesAgendamentoConsultaON.inserirPermissoesAgendamentoConsulta(entity);
+	}
+
+	@Override
+	public List<AacPermissaoAgendamentoConsultas> obterListaPermAgndConsPorServidorTipo(
+			RapServidores servidor, String tipo) {
+		return aacPermissoesAgendamentoConsultasDAO.obterListaPermAgndConsPorServidorTipo(servidor,tipo);
+	}
+
+	@Override
+	public void removerPermissaoAgendamentoConsultas(
+			AacPermissaoAgendamentoConsultas parametroSelecionado)
+			throws ApplicationBusinessException {
+		aacPermissoesAgendamentoConsultasDAO.removerPorId(parametroSelecionado.getSeq());
+		
+	}
+	@Override
+	public void persistirPermissoesAgendamentoConsultas(RapServidores rapServidores,
+			List<AacPermissaoAgendamentoConsultas> listPermissoesInserir)
+			throws ApplicationBusinessException {
+		manterPermissoesAgendamentoConsultaON.inserirPermissoesAgendamentoConsulta(rapServidores,
+				listPermissoesInserir);
+		
+	}
+
+	@Override
+	public List<Integer> obterListaIdsPermAgndConsPorServidorTipo(
+			RapServidores servidor, String tipo) {
+		return aacPermissoesAgendamentoConsultasDAO.obterListaIdsPermAgndConsPorServidorTipo(servidor,tipo);
+	}
+
+	@Override
+	public List<RapServidoresId> obterListaProfPermAgndConsPorServidor(
+			RapServidores servidor) {
+		return aacPermissoesAgendamentoConsultasDAO.obterListaProfPermAgndConsPorServidor(servidor);
+	}
+
+	@Override
+	public List<VAacSiglaUnfSalaVO> pesquisarTodasZonas(String objPesquisa,
+			List<Integer> listIdsZona) {
+		return getVAacSiglaUnfSalaDAO().pesquisarTodasZonas(objPesquisa, listIdsZona);
+	}
+
+	@Override
+	public AacPermissaoAgendamentoConsultas obterAacPermissaoAgendConsultaPorServidorGrade(
+			RapServidores servidor, Integer grade) {
+		return aacPermissoesAgendamentoConsultasDAO.obterAacPermissaoAgendConsultaPorServidorGrade(servidor,grade);
+	}
+
+	@Override
+	public List<DisponibilidadeHorariosVO> listarDisponibilidadeHorarios(Integer filtroSeq,
+			Short filtroUslUnfSeq, AghEspecialidades filtroEspecialidade, AghEquipes filtroEquipe, RapServidores filtroProfissional,
+			AacPagador pagador, AacTipoAgendamento tipoAgendamento, AacCondicaoAtendimento condicaoAtendimento, Date dtConsulta,
+			Date horaConsulta, Date mesInicio, Date mesFim, DominioDiaSemana dia, Boolean disponibilidade,
+			VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,	DataInicioFimVO turno, List<AghEspecialidades> listEspecialidade,
+			Boolean visualizarPrimeirasConsultasSMS, List<Integer> listIdsEspe, List<Integer> listIdsEqp, List<Integer> listIdsUnf,
+			List<Integer> listIdsGrd, List<RapServidoresId> listIdsProf) throws ApplicationBusinessException {
+
+		return getDisponibilidadeHorariosON().listarDisponibilidadeHorarios(filtroSeq, filtroUslUnfSeq, filtroEspecialidade, filtroEquipe,
+				filtroProfissional, pagador, tipoAgendamento, condicaoAtendimento, dtConsulta, horaConsulta, mesInicio, mesFim, dia,
+				disponibilidade, zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS, listIdsEspe, listIdsEqp,
+				listIdsUnf, listIdsGrd, listIdsProf);
+
+	}
+
+	@Override
+	public Long listarDisponibilidadeHorariosCount(Integer filtroSeq, Short filtroUslUnfSeq, AghEspecialidades filtroEspecialidade,
+			AghEquipes filtroEquipe, RapServidores filtroProfissional, AacPagador pagador, AacTipoAgendamento tipoAgendamento,
+			AacCondicaoAtendimento condicaoAtendimento, Date dtConsulta, Date horaConsulta, Date mesInicio, Date mesFim,
+			DominioDiaSemana dia, Boolean disponibilidade, VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,	DataInicioFimVO turno,
+			List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS, List<Integer> listIdsEspe,
+			List<Integer> listIdsEqp, List<Integer> listIdsUnf, List<Integer> listIdsGrd, List<RapServidoresId> listIdsProf) {
+		try {
+			return getDisponibilidadeHorariosON().listarDisponibilidadeHorariosCount(filtroSeq, filtroUslUnfSeq, filtroEspecialidade,
+					filtroEquipe, filtroProfissional, pagador, tipoAgendamento, condicaoAtendimento, dtConsulta, horaConsulta, mesInicio,
+					mesFim, dia, disponibilidade, zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS, listIdsEspe,
+					listIdsEqp,	listIdsUnf, listIdsGrd, listIdsProf);
+		} catch (ApplicationBusinessException e) {
+			return 0L;
+		}
+	}
+
 }

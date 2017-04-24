@@ -6,20 +6,19 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.exames.dao.AelGrupoRecomendacaoDAO;
 import br.gov.mec.aghu.exames.dao.VAelExameMatAnaliseDAO;
 import br.gov.mec.aghu.model.AelGrupoRecomendacao;
 import br.gov.mec.aghu.model.AelGrupoRecomendacaoExame;
 import br.gov.mec.aghu.model.VAelExameMatAnalise;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 @Stateless
 public class GrupoRecomendacaoON extends BaseBusiness {
@@ -91,10 +90,6 @@ private AelGrupoRecomendacaoDAO aelGrupoRecomendacaoDAO;
     }
 
 	public List<VAelExameMatAnalise> buscaEXADEPVAelExameMatAnalisePelaSigla(String siglaDescViewExaMatAnalise) throws ApplicationBusinessException {
-		if (StringUtils.isBlank(siglaDescViewExaMatAnalise) || (siglaDescViewExaMatAnalise!=null && siglaDescViewExaMatAnalise.trim().length()<=3)) {
-			// Deve ser informado mais que três caracteres pra realizar a pesquisa.
-			throw new ApplicationBusinessException(GrupoRecomendacaoONExceptionCode.ERROR_TAMANHO_FILTRO_MINIMO);
-		}
 		List<VAelExameMatAnalise> lista = this.getVAelExameMatAnaliseDAO().buscarVAelExameMatAnalisePelaSigla(siglaDescViewExaMatAnalise, DominioSimNao.S.name());
  		
 		if (lista == null || lista.isEmpty()) {

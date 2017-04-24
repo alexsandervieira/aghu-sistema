@@ -142,7 +142,7 @@
               <p:ajax event="change" update="@(#tipoAgendamento) @(#condicaoAtendimento)" process="@this" listener="#{manterGradeAgendamentoController.popularCombosAba1}"/> 
             </mec:selectOneMenu>  
             <mec:selectOneMenu label="#{messages.LABEL_MANTER_GRADE_AGENDAMENTO_TIPO}" style="width: calc(100% - 14px)!important;"  title="#{messages.TITLE_MANTER_GRADE_AGENDAMENTO_TIPO}" value="#{manterGradeAgendamentoController.formaAgendamentoAba1.tipoAgendamento}" requiredMessage="Um valor é obrigatório para o campo #{messages.LABEL_MANTER_GRADE_AGENDAMENTO_TIPO}" items="#{manterGradeAgendamentoController.formaAgendamentoAba1.tipoAgendamentoList}" itemLabel="descricao" id="tipoAgendamento"> 
-              <p:ajax event="change" update="@this" process="@this" listener="#{manterGradeAgendamentoController.popularCombosAba1}"/> 
+              <p:ajax event="change" update="@(#condicaoAtendimento)" listener="#{manterGradeAgendamentoController.popularCombosAba1}"/> 
             </mec:selectOneMenu>  
             <mec:selectOneMenu label="#{messages.LABEL_MANTER_GRADE_AGENDAMENTO_CONDICAO}" style="width: calc(100% - 14px)!important;"  title="#{messages.TITLE_MANTER_GRADE_AGENDAMENTO_CONDICAO}" value="#{manterGradeAgendamentoController.formaAgendamentoAba1.condicaoAtendimento}" requiredMessage="Um valor é obrigatório para o campo #{messages.LABEL_MANTER_GRADE_AGENDAMENTO_CONDICAO}" converter="#{aghCondicaoAtendimentoConverter}" items="#{manterGradeAgendamentoController.formaAgendamentoAba1.condicaoAtendimentoList}" itemLabel="descricao" id="condicaoAtendimento">  
               <p:ajax event="change"  update="@this" process="@this"/>	

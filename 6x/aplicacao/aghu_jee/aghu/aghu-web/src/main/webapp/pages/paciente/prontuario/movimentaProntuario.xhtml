@@ -174,11 +174,12 @@
               <aghu:linha> 
                 <!-- SUGGESTION BOX PARA UNIDADE FUNCIONAL -->  
                 <mec:suggestionBox id="movimentacaoModal" label="#{messages.LABEL_MOVIMENTAR_PRONTUARIO_UNIDADE_SOLICITANTE}" 
-                	title="#{messages.TITLE_SELECAO_MOVIMENTACAO_PRONTUARIO}" 
+                	title="#{messages.TITLE_SELECAO_MOVIMENTACAO_PRONTUARIO}"
+                	cache="false" 
                 	value="#{movimentarProntuarioPaginatorController.unidadeSolicitanteAlteracao}" descricaoInput="unidadesFuncionais.seq" descricaoLabel="unidadesFuncionais.descricao" 
 					suggestionAction="verificaLocalParaMovimentacao" controller="#{movimentarProntuarioPaginatorController}" > 
-                  <h:column>#{item.unidadesFuncionais.seq}</h:column>  
-                  <h:column>#{item.unidadesFuncionais.descricao}</h:column> 
+                  <p:column>#{item.unidadesFuncionais.seq}</p:column>  
+                  <p:column>#{item.unidadesFuncionais.descricao}</p:column> 
                 </mec:suggestionBox> 
               </aghu:linha> 
             </p:outputPanel> 

@@ -10,21 +10,16 @@ import javax.ejb.EJB;
 import javax.inject.Inject;
 import javax.transaction.SystemException;
 
-import net.sf.jasperreports.engine.JRException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.itextpdf.text.DocumentException;
 
 import br.gov.mec.aghu.blococirurgico.action.RelatorioEscalaCirurgiasAghuController;
 import br.gov.mec.aghu.blococirurgico.action.RelatorioSolicitacaoEscalaCirurgiasController;
 import br.gov.mec.aghu.blococirurgico.business.IBlocoCirurgicoFacade;
 import br.gov.mec.aghu.blococirurgico.cadastroapoio.business.IBlocoCirurgicoCadastroApoioFacade;
 import br.gov.mec.aghu.business.IAghuFacade;
-import br.gov.mec.aghu.dominio.DominioTipoEscala;
-import br.gov.mec.aghu.model.AghUnidadesFuncionais;
-import br.gov.mec.aghu.model.MbcControleEscalaCirurgica;
-import br.gov.mec.aghu.model.MbcControleEscalaCirurgicaId;
-import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 import br.gov.mec.aghu.core.action.ActionController;
 import br.gov.mec.aghu.core.action.ActionPaginator;
 import br.gov.mec.aghu.core.etc.DynamicDataModel;
@@ -32,8 +27,12 @@ import br.gov.mec.aghu.core.etc.Paginator;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.exception.Severity;
-
-import com.itextpdf.text.DocumentException;
+import br.gov.mec.aghu.dominio.DominioTipoEscala;
+import br.gov.mec.aghu.model.AghUnidadesFuncionais;
+import br.gov.mec.aghu.model.MbcControleEscalaCirurgica;
+import br.gov.mec.aghu.model.MbcControleEscalaCirurgicaId;
+import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
+import net.sf.jasperreports.engine.JRException;
 
 
 public class SolicitarEscalaCirurgicaPaginatorController extends ActionController implements ActionPaginator {
@@ -80,6 +79,8 @@ public class SolicitarEscalaCirurgicaPaginatorController extends ActionControlle
 	 */
 	private AghUnidadesFuncionais unidadeFuncional;
 	private Date dataEscala;
+	private Date dtInicio;
+	private Date dtFim;
 	private DominioTipoEscala tipoEscala;
 
 	// Item para exclusão
@@ -131,6 +132,9 @@ public class SolicitarEscalaCirurgicaPaginatorController extends ActionControlle
 		// Limpa filtro
 		this.tipoEscala = null;
 		this.dataEscala = null;
+		this.dtInicio = null;
+		this.dtFim = null;
+		this.unidadeFuncional = null;
 		// Apaga resultados da exibição
 		this.dataModel.setPesquisaAtiva(false);
 		this.itemExclusao = null;
@@ -140,7 +144,7 @@ public class SolicitarEscalaCirurgicaPaginatorController extends ActionControlle
 
 	@Override
 	public List<MbcControleEscalaCirurgica> recuperarListaPaginada(Integer firstResult, Integer maxResult, String orderProperty, boolean asc) {
-		return this.blocoCirurgicoCadastroApoioFacade.pesquisarEscalasCirurgicas(firstResult, maxResult, orderProperty, asc, unidadeFuncional);
+		return this.blocoCirurgicoCadastroApoioFacade.pesquisarEscalasCirurgicas(firstResult, maxResult, orderProperty, asc, unidadeFuncional, dtInicio, dtFim);
 	}
 
 	@Override
@@ -314,8 +318,22 @@ public class SolicitarEscalaCirurgicaPaginatorController extends ActionControlle
 	public void setOutraUnidadeFuncional(Boolean outraUnidadeFuncional) {
 		this.outraUnidadeFuncional = outraUnidadeFuncional;
 	}
- 
 
+	public Date getDtInicio() {
+		return dtInicio;
+	}
+
+	public void setDtInicio(Date dtInicio) {
+		this.dtInicio = dtInicio;
+	}
+
+	public Date getDtFim() {
+		return dtFim;
+	}
+
+	public void setDtFim(Date dtFim) {
+		this.dtFim = dtFim;
+	}
 
 	public DynamicDataModel<MbcControleEscalaCirurgica> getDataModel() {
 	 return dataModel;

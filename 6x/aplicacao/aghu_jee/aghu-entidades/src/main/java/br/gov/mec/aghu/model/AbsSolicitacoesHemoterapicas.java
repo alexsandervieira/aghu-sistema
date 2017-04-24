@@ -31,6 +31,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.Length;
 
@@ -90,6 +91,7 @@ public class AbsSolicitacoesHemoterapicas extends ItemPrescricaoMedica<AbsSolici
 	
 	private Integer version;
 	
+	private Integer ordem;
 	private List<AbsItensSolHemoterapicas> itensSolHemoterapicas = new ArrayList<AbsItensSolHemoterapicas>(0);
 	private Set<AbsSolicitacoesHemoterapicas> solicitacaoHemoterapicas = new HashSet<AbsSolicitacoesHemoterapicas>(0);
 
@@ -370,6 +372,15 @@ public class AbsSolicitacoesHemoterapicas extends ItemPrescricaoMedica<AbsSolici
 	public void setVersion(Integer version) {
 		this.version = version;
 	}
+	
+	@Column(name = "ORDEM", nullable = false)
+	public Integer getOrdem() {
+		return this.ordem;
+	}
+	public void setOrdem(Integer ordem) {
+		this.ordem = ordem;
+	}
+
 
 	/* (non-Javadoc)
 	 * @see br.gov.mec.aghu.model.interfaces.PrescricaoMedicaDescricao#getDescricaoFormatada()
@@ -449,7 +460,7 @@ public class AbsSolicitacoesHemoterapicas extends ItemPrescricaoMedica<AbsSolici
 		SOLICITACAO_HEMOTERAPICA("solicitacaoHemoterapica"),
 		SOLICITACAO_HEMOTERAPICA_SEQ("solicitacaoHemoterapica.id.seq"),
 		SOLICITACAO_HEMOTERAPICA_ATD_SEQ("solicitacaoHemoterapica.id.atdSeq"),
-		ITENS_SOLICITACOES_HEMOTERAPICAS("itensSolHemoterapicas");
+		ITENS_SOLICITACOES_HEMOTERAPICAS("itensSolHemoterapicas"), ORDEM("ordem");
 
 		private String fields;
 

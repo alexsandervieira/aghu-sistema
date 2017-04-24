@@ -139,24 +139,6 @@ public class ScoMaterialDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao
 		return this.executeCriteria(criteria);
 	}
 	
-	private void ordernarCodigoENome(DetachedCriteria criteria) {
-		criteria.addOrder(Order.asc(ScoMaterial.Fields.CODIGO.toString()));
-		criteria.addOrder(Order.asc(ScoMaterial.Fields.NOME.toString()));
-
-	}
-	
-	private void adicionaClausulaCodigoAlmoxarifado(Short almCodigo, DetachedCriteria cri) {
-		if (almCodigo != null) {
-			cri.add(Restrictions.eq(ScoMaterial.Fields.ALMOXARIFADO_SEQ.toString(), almCodigo));
-		}
-	}
-	
-	private void adicionaClausulaGrupoMaterial(Integer gmtCodigo, DetachedCriteria cri) {
-		if (gmtCodigo != null) {
-			cri.add(Restrictions.eq(ScoMaterial.Fields.GRUPO_MATERIAL_CODIGO.toString(), gmtCodigo));
-		}
-	}
-	
 	private void adicionaClausulaIndicadorEstocavel(Boolean indEstocavel, DetachedCriteria cri) {
 		if (indEstocavel != null) {
 			cri.add(Restrictions.eq(ScoMaterial.Fields.IND_ESTOCAVEL.toString(), indEstocavel));
@@ -760,11 +742,20 @@ public class ScoMaterialDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao
 		
 		criteria.add(Restrictions.eq(ScoMaterial.Fields.SITUACAO.toString(), DominioSituacao.A));
 
-		adicionaClausulaIndicadorEstocavel(indEstocavel, criteria);
-		adicionaClausulaGrupoMaterial(gmtCodigo, criteria);
-		adicionaClausulaCodigoAlmoxarifado(almCodigo, criteria);
+		if (indEstocavel != null) {
+			criteria.add(Restrictions.eq(ScoMaterial.Fields.IND_ESTOCAVEL.toString(), indEstocavel));
+		}
+	
+		if (gmtCodigo != null) {
+			criteria.add(Restrictions.eq(ScoMaterial.Fields.GRUPO_MATERIAL_CODIGO.toString(), gmtCodigo));
+		}
 
-		ordernarCodigoENome(criteria);
+		if (almCodigo != null) {
+			criteria.add(Restrictions.eq(ScoMaterial.Fields.ALMOXARIFADO_SEQ.toString(), almCodigo));
+		}
+		
+		criteria.addOrder(Order.asc(ScoMaterial.Fields.CODIGO.toString()));
+		criteria.addOrder(Order.asc(ScoMaterial.Fields.NOME.toString()));
 
 		String strPesquisa = (String)objPesquisa;
 		if (CoreUtil.isNumeroInteger(strPesquisa)) {
@@ -779,7 +770,8 @@ public class ScoMaterialDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao
 			
 		}
 		
-		return executeCriteria(criteria, 0, MAX_RESULTS, null, Boolean.FALSE);
+		List<ScoMaterial> listarMateriais = executeCriteria(criteria, 0, MAX_RESULTS, null, Boolean.FALSE);
+		return listarMateriais;
 
 	}
 

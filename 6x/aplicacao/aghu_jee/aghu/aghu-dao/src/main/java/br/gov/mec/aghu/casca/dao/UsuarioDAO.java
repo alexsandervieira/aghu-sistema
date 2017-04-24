@@ -20,6 +20,7 @@ import br.gov.mec.aghu.casca.model.PerfisPermissoes;
 import br.gov.mec.aghu.casca.model.PerfisUsuarios;
 import br.gov.mec.aghu.casca.model.Permissao;
 import br.gov.mec.aghu.casca.model.Usuario;
+import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
@@ -134,10 +135,9 @@ public class UsuarioDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<Usu
 					MatchMode.ANYWHERE);
 			criteria.add(Restrictions.or(restrictionNome, restrictionLogin));
 		}
-
 		return criteria;
 	}
-
+	
 	public List<String> pesquisarUsuariosPorPerfil(String perfil) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(Usuario.class);
 
@@ -227,5 +227,30 @@ public class UsuarioDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<Usu
 		
 		return (Usuario)executeCriteriaUniqueResult(criteria); 
 	}
+
+	public List<Usuario> pesquisarUsuariosPatologia(Integer firstResult,
+			Integer maxResult, String orderProperty, boolean asc,
+			String nomeOuLogin) throws ApplicationBusinessException {
+		return executeCriteria(criarCriteriaPesquisaUsuariosPatologia(nomeOuLogin),
+				firstResult, maxResult, orderProperty, asc);
+	}
 	
+	/**
+	 * Cria criteria para pesquisa de usuarios para a patologia.
+	 * 
+	 * @param nomeOuLogin
+	 *            Nome ou login do usuario
+	 * @return Um DetachedCriteria pronto pra pesquisa.
+	 */
+	private DetachedCriteria criarCriteriaPesquisaUsuariosPatologia(String nomeOuLogin) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(Usuario.class);
+
+		if (!StringUtils.isBlank(nomeOuLogin)) {
+			Criterion restrictionNome = Restrictions.eq(Usuario.Fields.NOME.toString(), nomeOuLogin);
+			Criterion restrictionLogin = Restrictions.eq(Usuario.Fields.LOGIN.toString(), nomeOuLogin);
+			Restrictions.eq(Usuario.Fields.ATIVO.toString(), DominioSimNao.S);
+			criteria.add(Restrictions.or(restrictionNome, restrictionLogin));
+		}
+		return criteria;
+	}
 }

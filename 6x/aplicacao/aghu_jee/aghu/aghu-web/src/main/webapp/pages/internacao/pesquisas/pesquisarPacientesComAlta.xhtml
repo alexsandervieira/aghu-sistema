@@ -8,16 +8,18 @@
     <ui:define name="body"> 
       <mec:pageConfig controller="#{pesquisaPacientesComAltaPaginatorController}"/>  
       <h:form prependId="false" id="formPesquisa"> 
-        <aghu:panelGeral legend="#{messages.LABEL_PESQUISA_PACIENTES_COM_ALTA}"> 
+        <aghu:panelGeral id="panelPesquisa" legend="#{messages.LABEL_PESQUISA_PACIENTES_COM_ALTA}"> 
           <aghu:linha> 
             <mec:inputTextData label="#{messages.LABEL_DE}" value="#{pesquisaPacientesComAltaPaginatorController.dataInicial}" title="#{messages.TITLE_LABEL_DATA_INICIAL_PESQ}" required="true" id="dataInicial" tipo="data"/>  
             <mec:inputTextData label="#{messages.LABEL_ATE}" value="#{pesquisaPacientesComAltaPaginatorController.dataFinal}" title="#{messages.TITLE_LABEL_DATA_FINAL_PESQ}" required="true" id="dataFinal" tipo="data"/>  
-            <mec:selectBooleanCheckbox label="#{messages.LABEL_ALTA_ADMINISTRATIVA}" title="#{messages.TITLE_ALTA_ADMINISTRATIVA}" value="#{pesquisaPacientesComAltaPaginatorController.altaAdministrativa}" id="incluirPassivos"/>  
+            <mec:selectBooleanCheckbox label="#{messages.LABEL_ALTA_ADMINISTRATIVA}" title="#{messages.TITLE_ALTA_ADMINISTRATIVA}" value="#{pesquisaPacientesComAltaPaginatorController.altaAdministrativa}" id="incluirPassivos">
+                 <p:ajax event="change" update="@(#panelPesquisa)" listener="#{pesquisaPacientesComAltaPaginatorController.limparTipoAltaAdm}"/>  
+            </mec:selectBooleanCheckbox>
             <mec:selectOneMenu enum="DominioOrdenacaoPesquisaPacComAlta" label="#{messages.LABEL_ORDENACAO}" value="#{pesquisaPacientesComAltaPaginatorController.ordenacao}" title="#{messages.TITLE_ORDENACAO}" id="ordenacao"/>  
-            <mec:selectOneMenu enum="DominioTipoAlta" label="#{messages.LABEL_TIPOS_ALTA}" value="#{pesquisaPacientesComAltaPaginatorController.tipoAlta}" title="#{messages.TITLE_TIPOS_ALTA}" id="tipoAlta"/> 
+            <mec:selectOneMenu enum="DominioTipoAlta" label="#{messages.LABEL_TIPOS_ALTA}" noSelectionOption="false" value="#{pesquisaPacientesComAltaPaginatorController.tipoAlta}" title="#{messages.TITLE_TIPOS_ALTA}" id="tipoAlta"/> 
           </aghu:linha>  
           <aghu:linha> 
-            <mec:suggestionBox label="#{messages.LABEL_TIPO_ALTA}" title="#{messages.TITLE_LABEL_TIPO_ALTA_PESQ}" converter="#{ainTiposAltaMedicaConverter}" descricaoInput="codigo" descricaoLabel="descricao" suggestionAction="pesquisarTipoAltaMedicaPorCodigoEDescricao" id="suggestionTipoAltaMedica" controller="#{pesquisaPacientesComAltaPaginatorController}" value="#{pesquisaPacientesComAltaPaginatorController.tipoAltaMedica}"> 
+            <mec:suggestionBox label="#{messages.LABEL_TIPO_ALTA}" title="#{messages.TITLE_LABEL_TIPO_ALTA_PESQ}"  readonly="#{not pesquisaPacientesComAltaPaginatorController.altaAdministrativa}" converter="#{ainTiposAltaMedicaConverter}" descricaoInput="codigo" descricaoLabel="descricao" suggestionAction="pesquisarTipoAltaMedicaPorCodigoEDescricao" id="suggestionTipoAltaMedica" controller="#{pesquisaPacientesComAltaPaginatorController}" value="#{pesquisaPacientesComAltaPaginatorController.tipoAltaMedica}"> 
               <p:column>#{item.codigo}</p:column>  
               <p:column>#{item.descricao}</p:column> 
             </mec:suggestionBox>  

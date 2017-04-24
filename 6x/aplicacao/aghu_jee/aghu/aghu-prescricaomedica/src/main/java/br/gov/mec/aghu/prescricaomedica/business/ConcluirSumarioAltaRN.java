@@ -679,10 +679,13 @@ public class ConcluirSumarioAltaRN extends BaseBusiness {
 	 * @return
 	 * @throws BaseException
 	 */
-	public Boolean existeAmbulatorio() throws BaseException {
+	public Boolean existeAmbulatorio(){
 		
-		final AghParametros aghParametros = this.getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_TEM_AMBULATORIA);
 		Boolean status = false;
+		AghParametros aghParametros = null;
+		if(this.getParametroFacade().verificarExisteAghParametro(AghuParametrosEnum.P_TEM_AMBULATORIA)){
+			aghParametros = this.getParametroFacade().getAghParametro(AghuParametrosEnum.P_TEM_AMBULATORIA);
+		}
 		
 		if(aghParametros != null && 
 				DominioSimNao.S.toString().equals(aghParametros.getVlrTexto())){

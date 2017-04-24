@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import br.gov.mec.aghu.dominio.DominioIndPendenteItemPrescricao;
 import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.model.MpmPrescricaoMdto;
-import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.prescricaomedica.util.PrescricaoMedicaTypes;
 
 /**
@@ -45,8 +44,8 @@ public class ItemPrescricaoMedicaVO implements Serializable {
 	private Date criadoEm;
 	private Date alteradoEm;
 	private DominioIndPendenteItemPrescricao situacao;
-	private RapServidores servidorValidacao;
-	private RapServidores servidorValidaMovimentacao;
+	private String servidorValidacaoNome;
+	private String servidorValidaMovimentacaoNome;
 	
 	private String nomeMedicamento;
 	private String dosagem;
@@ -54,6 +53,9 @@ public class ItemPrescricaoMedicaVO implements Serializable {
 	private String via;
 	private String dias;
 	private Date dtFimTratamento;
+	private Boolean isItemPrescricao = Boolean.TRUE;
+	private Integer ordem;
+	
 	
 	private Short seqp;
 	
@@ -102,8 +104,8 @@ public class ItemPrescricaoMedicaVO implements Serializable {
 		this.setMarcado(item.getMarcado());
 		this.setMesclado(item.getMesclado());
 		this.setPrescricaoMedicamento(item.getPrescricaoMedicamento());
-		this.setServidorValidacao(item.getServidorValidacao());
-		this.setServidorValidaMovimentacao(item.getServidorValidaMovimentacao());
+		this.setServidorValidacaoNome(item.getServidorValidacaoNome());
+		this.setServidorValidaMovimentacaoNome(item.getServidorValidaMovimentacaoNome());
 		this.setSituacao(item.getSituacao());
 		this.setTipo(item.getTipo());
 	}
@@ -205,22 +207,22 @@ public class ItemPrescricaoMedicaVO implements Serializable {
 	public void setSituacao(DominioIndPendenteItemPrescricao situacao) {
 		this.situacao = situacao;
 	}
-	
-	public RapServidores getServidorValidacao() {
-		return servidorValidacao;
+
+	public String getServidorValidacaoNome() {
+		return servidorValidacaoNome;
 	}
 
-	public void setServidorValidacao(RapServidores servidorValidacao) {
-		this.servidorValidacao = servidorValidacao;
+	public void setServidorValidacaoNome(String servidorValidacaoNome) {
+		this.servidorValidacaoNome = servidorValidacaoNome;
 	}
 
-	public RapServidores getServidorValidaMovimentacao() {
-		return servidorValidaMovimentacao;
+	public String getServidorValidaMovimentacaoNome() {
+		return servidorValidaMovimentacaoNome;
 	}
 
-	public void setServidorValidaMovimentacao(
-			RapServidores servidorValidaMovimentacao) {
-		this.servidorValidaMovimentacao = servidorValidaMovimentacao;
+	public void setServidorValidaMovimentacaoNome(
+			String servidorValidaMovimentacaoNome) {
+		this.servidorValidaMovimentacaoNome = servidorValidaMovimentacaoNome;
 	}
 
 	public boolean isValid() {
@@ -412,8 +414,8 @@ public class ItemPrescricaoMedicaVO implements Serializable {
 
 	public void setSeqp(Short seqp) {
 		this.seqp = seqp;
-	}
 
+	}
 	public String getNomeMedicamento() {
 		return nomeMedicamento;
 	}
@@ -422,5 +424,20 @@ public class ItemPrescricaoMedicaVO implements Serializable {
 		this.nomeMedicamento = nomeMedicamento;
 	}
 
+	public Boolean getIsItemPrescricao() {
+		return isItemPrescricao;
+	}
+
+	public void setIsItemPrescricao(Boolean isItemPrescricao) {
+		this.isItemPrescricao = isItemPrescricao;
+	}
+
+	public Integer getOrdem() {
+		return ordem;
+	}
+
+	public void setOrdem(Integer ordem) {
+		this.ordem = ordem;
+	}
 	
 }

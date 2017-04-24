@@ -17,10 +17,17 @@ import org.apache.commons.logging.LogFactory;
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.ambulatorio.dao.AacConsultasDAO;
+import br.gov.mec.aghu.ambulatorio.dao.AacRetornosDAO;
 import br.gov.mec.aghu.ambulatorio.dao.MamControlesDAO;
 import br.gov.mec.aghu.ambulatorio.dao.VAacSiglaUnfSalaDAO;
 import br.gov.mec.aghu.ambulatorio.vo.ConsultaAmbulatorioVO;
 import br.gov.mec.aghu.ambulatorio.vo.DataInicioFimVO;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.utils.DateUtil;
+import br.gov.mec.aghu.dominio.DominioSituacaoAtendimento;
 import br.gov.mec.aghu.dominio.DominioTurno;
 import br.gov.mec.aghu.model.AacConsultas;
 import br.gov.mec.aghu.model.AghParametros;
@@ -30,11 +37,6 @@ import br.gov.mec.aghu.model.MamSituacaoAtendimentos;
 import br.gov.mec.aghu.model.VAacSiglaUnfSala;
 import br.gov.mec.aghu.paciente.business.IPacienteFacade;
 import br.gov.mec.aghu.paciente.vo.SolicitanteVO;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
-import br.gov.mec.aghu.core.utils.DateUtil;
 
 @Stateless
 public class PesquisarPacientesAgendadosON extends BaseBusiness {
@@ -65,6 +67,9 @@ public class PesquisarPacientesAgendadosON extends BaseBusiness {
 	
 	@Inject
 	private MamControlesDAO mamControlesDAO;
+	
+	@Inject 
+	private AacRetornosDAO aacRetornosDAO;
 
 	/**
 	 * 
@@ -212,10 +217,13 @@ public class PesquisarPacientesAgendadosON extends BaseBusiness {
 
 	public void registraChegadaPaciente(AacConsultas consulta,	String nomeMicrocomputador)	throws BaseException {
 		MamControles controle = mamControlesDAO.obterMamControlePorNumeroConsulta(consulta.getNumero());
+		Integer codigoRetornoOld = this.aacRetornosDAO.obterCodigoSituacaoAtendPorConsulta(consulta.getNumero());                
 		
 		if (controle != null
 				&& !controle.getSituacaoAtendimento()
-						.getAgendado()) {
+						.getAgendado() && codigoRetornoOld != null
+						               && codigoRetornoOld != DominioSituacaoAtendimento.PROFISSIONAL_FALTOU.getCodigo()
+						               && codigoRetornoOld != DominioSituacaoAtendimento.PACIENTE_DESISTIU_CONS.getCodigo()) {
 			PesquisarPacientesAgendadosONExceptionCode.MAM_01508
 					.throwException();
 		}

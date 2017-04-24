@@ -65,7 +65,8 @@
                 		suggestionAction="pesquisarPermitemConsultoriaPorSigla" 
                 		readonly="#{solicitarConsultoriaController.readOnly}" 
                 		posSelectionAction="verificarConsultoriaExistente" 
-                		id="especialidade" 
+                		id="especialidade"
+                		render="modalPanel" 
                 		controller="#{solicitarConsultoriaController}" 
                 		value="#{solicitarConsultoriaController.solicitacaoConsultoria.especialidade}"> 
                   <p:column>#{_especialidade.nomeEspecialidade}</p:column>  
@@ -202,8 +203,11 @@
               	profile="ok" 
               	ajax="true"/>  
               <mec:commandButton value="#{messages.LABEL_CANCELAR}" 
-              	action="#{solicitarConsultoriaController.voltar}" 
-              	profile="cancel"> 
+              	action="#{solicitarConsultoriaController.cancelar}" 
+              	profile="cancel"
+				immediate="true" 
+            	ajax="true"
+            	render="panelModalVoltar"> 
                 <f:setPropertyActionListener target="#{manterPrescricaoMedicaController.pmeSeqAtendimento}" value="#{solicitarConsultoriaController.prescricaoMedicaVO.prescricaoMedica.id.atdSeq}" for="command"/>  
                 <f:setPropertyActionListener target="#{manterPrescricaoMedicaController.pmeSeq}" value="#{solicitarConsultoriaController.prescricaoMedicaVO.prescricaoMedica.id.seq}" for="command"/> 
               </mec:commandButton> 

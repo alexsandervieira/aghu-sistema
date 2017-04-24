@@ -323,6 +323,7 @@ public class BancoDeSangueFacade extends BaseFacade implements IBancoDeSangueFac
 	 * @param atendimento
 	 */
 	@Override
+	@BypassInactiveModule
 	public void excluirSolicitacoesHemoterapicasPorAtendimeto(final AghAtendimentos atendimento){
 		this.getSolicitacaoHemoterapicaRN().excluirSolicitacoesHemoterapicasPorAtendimeto(atendimento);
 	}

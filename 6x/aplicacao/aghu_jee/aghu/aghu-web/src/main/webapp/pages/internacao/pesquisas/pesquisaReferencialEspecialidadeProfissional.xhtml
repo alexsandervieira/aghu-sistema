@@ -27,7 +27,7 @@
         <aghu:acao> 
           <mec:commandButton id="bt_pesquisar" value="#{messages.LABEL_PESQUISAR}" block="true" action="#{pesquisaReferencialEspecialidadeProfissionalPaginatorController.pesquisar}" styleClass="bt_cinza" profile="search"/>  
           <mec:commandButton value="#{messages.LABEL_LIMPAR}" id="bt_limpar" action="#{pesquisaReferencialEspecialidadeProfissionalPaginatorController.limparPesquisa}" styleClass="bt_cinza" profile="clear"/>  
-          <mec:commandButton value="#{messages.LABEL_CANCELAR}" id="bt_cancelar" rendered="#{pesquisaReferencialEspecialidadeProfissionalPaginatorController.cameFrom == 'refCliEsp'}" action="#{pesquisaReferencialEspecialidadeProfissionalPaginatorController.cancelarPesquisaReferencialEspecialidadeProfissional}" profile="cancel"/> 
+          <mec:commandButton value="#{messages.LABEL_CANCELAR}" id="bt_cancelar" rendered="#{pesquisaReferencialEspecialidadeProfissionalPaginatorController.cameFrom == 'refCliEsp'}" action="#{pesquisaReferencialEspecialidadeProfissionalPaginatorController.cancelarPesquisaReferencialEspecialidadeProfissional}" profile="cancel" immediate="true"/> 
         </aghu:acao> 
       </h:form>  
       <h:form prependId="false" id="resultados"> 

@@ -13,7 +13,9 @@
             <mec:inputText label="#{messages.CASCA_LABEL_NOME}" style="width: 400px;" value="#{perfilController.perfil.nome}" required="true" title="#{messages.CASCA_TITULO_PERFIL}" caixaAlta="false" id="nome"/> 
           </aghu:linha>  
           <aghu:linha> 
-            <mec:inputTextArea label="#{messages.CASCA_LABEL_DESCRICAO_COMPLETA}" cols="80" rows="4" value="#{perfilController.perfil.descricao}" style="width: 400px;" maxlength="100" required="true" title="#{messages.CASCA_TITULO_DESCRICAO_COMPLETA}" id="descricao"/> 
+<!-- 			Melhoria #85670 -->
+<!-- 			Alterar tamanho máximo da descrição de 100 para 300 caracteres -->
+            <mec:inputTextArea label="#{messages.CASCA_LABEL_DESCRICAO_COMPLETA}" cols="80" rows="4" value="#{perfilController.perfil.descricao}" style="width: 400px;" maxlength="300" required="true" title="#{messages.CASCA_TITULO_DESCRICAO_COMPLETA}" id="descricao"/> 
           </aghu:linha>  
           <aghu:linha> 
             <mec:inputText label="#{messages.CASCA_LABEL_DESCRICAO}" value="#{perfilController.perfil.descricaoResumida}" required="true" caixaAlta="false" style="width: 400px;" title="#{messages.CASCA_TITULO_DESCRICAO}" id="descricaoResumida"/> 

@@ -746,22 +746,12 @@ public class ConcluirSumarioAltaRNTest extends AGHUBaseUnitTest<ConcluirSumarioA
 	 */
 	@Test
 	public void testarExisteAmbulatorio001(){
-				
-		try {
-			final AghParametros parametro = new AghParametros();
-			parametro.setVlrTexto("S");
-			Mockito.when(mockedParametroFacade.buscarAghParametro(Mockito.any(AghuParametrosEnum.class))).thenReturn(parametro);
-		} catch (BaseException e1) {
-			Assert.assertFalse("Erro ao criar mock do metodo buscarAghParametro.", true);
-		}
-		
-		try {
-			boolean value = systemUnderTest.existeAmbulatorio();
-			Assert.assertTrue(value);
-			
-		} catch (BaseException e) {
-			Assert.assertFalse(true);
-		}
+		final AghParametros parametro = new AghParametros();
+		parametro.setVlrTexto("S");
+		Mockito.when(mockedParametroFacade.getAghParametro(Mockito.any(AghuParametrosEnum.class))).thenReturn(parametro);
+		Mockito.when(mockedParametroFacade.verificarExisteAghParametro(Mockito.any(AghuParametrosEnum.class))).thenReturn(Boolean.TRUE);
+	    boolean value = systemUnderTest.existeAmbulatorio();
+		Assert.assertTrue(value);
 	}
 	
 	/**
@@ -770,22 +760,12 @@ public class ConcluirSumarioAltaRNTest extends AGHUBaseUnitTest<ConcluirSumarioA
 	 */
 	@Test
 	public void testarExisteAmbulatorio002(){
-				
-		try {
-			final AghParametros parametro = new AghParametros();
-			parametro.setVlrTexto("N");
-			Mockito.when(mockedParametroFacade.buscarAghParametro(Mockito.any(AghuParametrosEnum.class))).thenReturn(parametro);
-		} catch (BaseException e1) {
-			Assert.assertFalse("Erro ao criar mock do metodo buscarAghParametro.", true);
-		}
-		
-		try {
-			boolean value = systemUnderTest.existeAmbulatorio();
-			Assert.assertFalse(value);
-			
-		} catch (BaseException e) {
-			Assert.assertFalse(true);
-		}
+		final AghParametros parametro = new AghParametros();
+		parametro.setVlrTexto("N");
+		Mockito.when(mockedParametroFacade.getAghParametro(Mockito.any(AghuParametrosEnum.class))).thenReturn(parametro);
+		Mockito.when(mockedParametroFacade.verificarExisteAghParametro(Mockito.any(AghuParametrosEnum.class))).thenReturn(Boolean.TRUE);
+	    boolean value = systemUnderTest.existeAmbulatorio();
+	    Assert.assertFalse(value);
 	}
 	
 	/**

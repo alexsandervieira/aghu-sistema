@@ -86,7 +86,10 @@ public class DarAltaPacienteON extends BaseBusiness{
 	
 	@EJB
 	private IPesquisaInternacaoFacade pesquisaInternacaoFacade;
-		
+
+	@EJB
+	private InternacaoRN internacaoRN;
+	
 	/**
 	 * 
 	 */
@@ -99,7 +102,7 @@ public class DarAltaPacienteON extends BaseBusiness{
 	private enum DarAltaPacienteExceptionCode implements BusinessExceptionCode {
 		ERRO_PERSISTIR_DADOS_ALTA_PACIENTE, ERRO_NEGOCIO_ORA, AIN_00151, AIN_00432, AIN_00147, AIN_00146, AIN_00852, AIN_00394, AIN_DOC_OBITO,
 		AIN_00145, AIN_00132, AIN_00736, AIN_00421, AIN_00505, AIN_00334, AIN_00890, AIN_00395, ERRO_DT_SAIDA_PAC, AIN_00396, AIN_00391,
-		AEL_01094, MENSAGEM_LCTOS_FAT;
+		AEL_01094, MENSAGEM_LCTOS_FAT,AIN_00506,MSG_WARNING_ERRO_BUSCAR_TIPO_ALTA_OBITO;
 	}
 	
 	
@@ -150,6 +153,9 @@ public class DarAltaPacienteON extends BaseBusiness{
 		final AghParametros pDocObito = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_AGHU_CONVENIO_NAO_DOC_OBITO);
 		final short conv = pDocObito.getVlrNumerico().shortValue();
 		
+		if(internacao.getDthrUltimoEvento() != null && internacao.getDtSaidaPaciente() != null && !internacao.getDthrUltimoEvento().before(internacao.getDtSaidaPaciente())){
+			throw new ApplicationBusinessException(DarAltaPacienteExceptionCode.AIN_00506);
+		}
 		if(internacao.getDthrAltaMedica() != null && internacao.getDthrAltaMedica().after(new Date())){
 			//AIN-00394 - A data de alta médica não deve ser posterior a data corrente.
 			throw new ApplicationBusinessException(DarAltaPacienteExceptionCode.AIN_00394);
@@ -199,10 +205,13 @@ public class DarAltaPacienteON extends BaseBusiness{
 			//AIN-00421 - Instituição Hospitalar de transferência não pode ser informada sem preencher dados da alta
 			throw new ApplicationBusinessException(DarAltaPacienteExceptionCode.AIN_00421);
 		}
-		if(internacao.getDthrUltimoEvento() != null && internacao.getDthrAltaMedica() != null && internacao.getDthrAltaMedica().before(internacao.getDthrUltimoEvento())){
-			//AIN-00505 - Data de alta médica não pode ser menor que a data do último evento do paciente.
-			throw new ApplicationBusinessException(DarAltaPacienteExceptionCode.AIN_00505);
-		}
+		
+		//Validação retirada, porque o paciente mesmo com alta médica ainda pode ter movimentos futuros.
+//		if(internacao.getDthrUltimoEvento() != null && internacao.getDthrAltaMedica() != null && internacao.getDthrAltaMedica().before(internacao.getDthrUltimoEvento())){
+//			//AIN-00505 - Data de alta médica não pode ser menor que a data do último evento do paciente.
+//			throw new ApplicationBusinessException(DarAltaPacienteExceptionCode.AIN_00505);
+//		}
+		
 		//### Validacao nao implementada ###
 		//AIN-00284
 		//AIN_INT_CK12 ((IHO_SEQ_ORIGEM IS NULL AND ATU_SEQ IS NOT NULL) OR (ATU_SEQ IS NULL AND IHO_SEQ_ORIGEM IS NOT NULL) OR (IHO_SEQ_ORIGEM IS NULL AND ATU_SEQ IS NULL)       )
@@ -426,12 +435,10 @@ public class DarAltaPacienteON extends BaseBusiness{
 				}
 				final Calendar auxCal = Calendar.getInstance();
 				auxCal.setTime(dthrAltaMedica);
-				//auxCal.add(Calendar.DAY_OF_MONTH, 1);
 				final Calendar auxCal2 = Calendar.getInstance();
 				auxCal2.setTime(atendimento.getDthrInicio());
 	
 				if(((auxCal.getTimeInMillis() - auxCal2.getTimeInMillis())/(24*60*60*1000)) < 1){
-//				if(auxCal.getTime().before(dthrAltaMedica)){
 					codigoTipoAltaMedica = "C";
 				}else{
 					codigoTipoAltaMedica = "D";
@@ -528,11 +535,14 @@ public class DarAltaPacienteON extends BaseBusiness{
 	@SuppressWarnings({"PMD.NPathComplexity"})
 	public boolean gravarDataAltaPaciente(final FlagsValidacaoDadosAltaPacienteVO flagsValidacaoDadosAltaPacienteVO, VerificaPermissaoVO verificaPermissaoVO,
 			final DominioTipoDadosAltaPaciente tipoDadoAltaPaciente, final AinInternacao internacao,  final AinTiposAltaMedica tipoAltaMedica,
-			final AghInstituicoesHospitalares instituicaoHospitalar, final Date dthrAltaMedica, final Date dtSaidaPaciente, final Integer docObito,
+			final AghInstituicoesHospitalares instituicaoHospitalar, Date dthrAltaMedica, final Date dtSaidaPaciente, final Integer docObito,
 			final boolean dtSaidaPacBD, final boolean dthrAltaMedicaBD, final boolean tipoAltaMedicaBD, String nomeMicrocomputador, final Date dataFimVinculoServidor) throws BaseException {
 
 		DarAltaPacienteCode exCode = null;
-
+		
+		Boolean permiteAltaAdministrativa = tipoAltaMedica.getPermiteAltaAdministrativa() == null ? false : tipoAltaMedica.getPermiteAltaAdministrativa(); 
+		internacaoRN.validarPacienteJaPossuiAlta(internacao.getAtendimento(), permiteAltaAdministrativa);
+		
 		if (flagsValidacaoDadosAltaPacienteVO.isValidaDados()) {
 			if (tipoDadoAltaPaciente.equals(DominioTipoDadosAltaPaciente.M)) {
 				internacao.setIndAltaManual(DominioSimNao.S);
@@ -541,7 +551,14 @@ public class DarAltaPacienteON extends BaseBusiness{
 			}
 			internacao.setTipoAltaMedica(tipoAltaMedica);
 			internacao.setInstituicaoHospitalarTransferencia(instituicaoHospitalar);
-			dthrAltaMedica.setSeconds(0); //Remove qualquer diferença em segundos para futuras comparações
+
+			//#84440
+			Calendar calDthrAltaMedica = Calendar.getInstance();
+			calDthrAltaMedica.setTime(dthrAltaMedica);
+			calDthrAltaMedica.set(Calendar.SECOND, 0);
+			calDthrAltaMedica.set(Calendar.MILLISECOND, 0);
+			dthrAltaMedica = calDthrAltaMedica.getTime();
+			
 			internacao.setDthrAltaMedica(dthrAltaMedica);
 			internacao.setDtSaidaPaciente(dtSaidaPaciente);
 			internacao.setDocObito(docObito);
@@ -608,8 +625,13 @@ public class DarAltaPacienteON extends BaseBusiness{
 			final String codigoTipoAltaMedica = this.alterarTipoAltaObito(internacao.getPaciente().getCodigo(), internacao.getSeq(),
 					internacao.getDtSaidaPaciente(), internacao.getDthrAltaMedica());
 			if (codigoTipoAltaMedica != null) {
-				internacao.setTipoAltaMedica(getCadastrosBasicosInternacaoFacade().pesquisarTipoAltaMedicaPorCodigo(
-						codigoTipoAltaMedica, null));
+				AinTiposAltaMedica tipoAltaMedicaObito = getCadastrosBasicosInternacaoFacade().pesquisarTipoAltaMedicaPorCodigo(
+						                                                                       codigoTipoAltaMedica, null);
+				if(tipoAltaMedicaObito == null){
+					throw new ApplicationBusinessException(DarAltaPacienteExceptionCode.MSG_WARNING_ERRO_BUSCAR_TIPO_ALTA_OBITO);
+				}else{
+					internacao.setTipoAltaMedica(tipoAltaMedicaObito);
+				}
 			}
 		}
 

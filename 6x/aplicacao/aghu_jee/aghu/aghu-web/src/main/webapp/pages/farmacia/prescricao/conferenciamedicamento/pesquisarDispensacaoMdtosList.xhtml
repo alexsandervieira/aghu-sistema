@@ -12,7 +12,13 @@
     </ui:define>  
     <ui:define name="body"> 
       <mec:pageConfig controller="#{pesquisaDispensacaoMdtosPaginatorController}"/>  
-      <h:form prependId="false" id="formPesquisa"> 
+      <h:form prependId="false" id="formPesquisa">
+      	<!-- Retirar letras da String -->
+		<script language="JavaScript" type="text/javascript">
+			function soNumeros(campo){                       
+              		campo.value = campo.value.replace(/[^\d]+/g,'');
+           	}
+		</script>
         <aghu:panelGeral legend="#{messages['LABEL_PESQ_DISP_MDTOS']}"> 
           <aghu:linha> 
             <p:outputPanel id="pacienteDecorate" layout="inline"> 
@@ -99,9 +105,10 @@
             </mec:suggestionBox> 
           </aghu:linha>  
           <aghu:linha> 
-            <mec:inputNumero name="etiquetaEnt" label="#{messages.LABEL_NUMERO_ETIQUETA}" title="#{messages.LABEL_NUMERO_ETIQUETA_DISPENS_MDTO}"
-             		id="etiqueta" size="18" readonly="#{pesquisaDispensacaoMdtosPaginatorController.isLock}" 
-             		value="#{pesquisaDispensacaoMdtosPaginatorController.etiqueta}"/> 
+            <mec:inputText name="etiquetaEnt" label="#{messages.LABEL_NUMERO_ETIQUETA}" title="#{messages.LABEL_NUMERO_ETIQUETA_DISPENS_MDTO}"
+             		id="etiqueta" size="18" maxlength="14" readonly="#{pesquisaDispensacaoMdtosPaginatorController.isLock}" 
+             		value="#{pesquisaDispensacaoMdtosPaginatorController.etiqueta}"
+             		onkeyup="soNumeros(this);"/> 
             <mec:inputText label="#{messages.LABEL_LOTE}" title="#{messages.LABEL_LOTE_DISPENS_MDTO}" size="15" maxlength="15" value="#{pesquisaDispensacaoMdtosPaginatorController.loteCodigo}" styleclass="suggestion_input" style="text-transform:uppercase" readonly="#{pesquisaDispensacaoMdtosPaginatorController.isLock}" id="nome"/> 
           </aghu:linha> 
         </aghu:panelGeral>  

@@ -97,6 +97,7 @@
                         <p:outputPanel style="width:40%;float:right;padding:10px" >
 	               		  <aghu:panelGeral id="panelDocumentoAnexo" rendered="#{mf:hasPermission(securityController,'anexarDocLaudoAutomatic,executar') and cadastroResultadosNotaAdicionalController.permiteAnexarDocumento}" 
 	                                       legend="#{messages.TITLE_DOCUMENTO_EM_ANEXO}"> 
+								
 								<p:fileUpload id="upload" 
 											  label="#{messages.TITLE_UPLOAD_DOCUMENTO}" 
 											  fileUploadListener="#{cadastroResultadosNotaAdicionalController.listenerUploadArquivoLaudo}"

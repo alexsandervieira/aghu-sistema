@@ -275,6 +275,12 @@ public class ServidorPaginatorController extends ActionController implements Act
 		return CADASTRAR_SERVIDOR;
 	}
 	
+	public boolean isOrigemPesquisaPessoas(){
+		if(this.voltarPara != null && this.voltarPara.equals("pesquisarPessoaFisica")){
+			return Boolean.TRUE;
+		}
+		return Boolean.FALSE;
+	}
 	/**
 	 * Buscar a descrição da ocupação que será apresentada na tooltip da lista de pesquisa
 	 */

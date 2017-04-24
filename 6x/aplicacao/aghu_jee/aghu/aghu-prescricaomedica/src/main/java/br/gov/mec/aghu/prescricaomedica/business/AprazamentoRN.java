@@ -15,22 +15,27 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.business.IAghuFacade;
+import br.gov.mec.aghu.constante.ConstanteAghCaractUnidFuncionais;
 import br.gov.mec.aghu.constantes.TipoItemAprazamento;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.utils.DateUtil;
+import br.gov.mec.aghu.core.utils.DateValidator;
 import br.gov.mec.aghu.dominio.DominioFormaCalculoAprazamento;
+import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.model.MpmAprazamentoFrequencia;
+import br.gov.mec.aghu.model.MpmHorarioInicAprazamento;
+import br.gov.mec.aghu.model.MpmItemPrescricaoDieta;
+import br.gov.mec.aghu.model.MpmPrescricaoDieta;
 import br.gov.mec.aghu.model.MpmPrescricaoMedica;
 import br.gov.mec.aghu.model.MpmPrescricaoMedicaId;
 import br.gov.mec.aghu.model.MpmTipoFrequenciaAprazamento;
 import br.gov.mec.aghu.prescricaomedica.dao.MpmAprazamentoFrequenciasDAO;
 import br.gov.mec.aghu.prescricaomedica.dao.MpmHorarioInicAprazamentoDAO;
+import br.gov.mec.aghu.prescricaomedica.dao.MpmItemPrescricaoDietaDAO;
 import br.gov.mec.aghu.prescricaomedica.dao.MpmPrescricaoMedicaDAO;
 import br.gov.mec.aghu.prescricaomedica.dao.MpmTipoFrequenciaAprazamentoDAO;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.constante.ConstanteAghCaractUnidFuncionais;
-import br.gov.mec.aghu.core.utils.DateUtil;
-import br.gov.mec.aghu.core.utils.DateValidator;
 
 /**
  * Regras de geração do aprazamento para o relatório de itens confirmados da
@@ -67,6 +72,10 @@ public class AprazamentoRN extends BaseBusiness {
 
 	@Inject
 	private MpmTipoFrequenciaAprazamentoDAO mpmTipoFrequenciaAprazamentoDAO;
+	
+	@Inject
+	private MpmItemPrescricaoDietaDAO mpmItemPrescricaoDietaDAO;
+	
 
 	/**
 	 * 
@@ -234,7 +243,7 @@ public class AprazamentoRN extends BaseBusiness {
 		AghAtendimentos atendimento = prescricao.getAtendimento();
 		AghUnidadesFuncionais unidade = atendimento.getUnidadeFuncional();
 
-		if (tipoItem == TipoItemAprazamento.MEDICAMENTO || tipoItem == TipoItemAprazamento.SOLUCAO) {
+		if (tipoItem == TipoItemAprazamento.MEDICAMENTO || tipoItem == TipoItemAprazamento.SOLUCAO || tipoItem == TipoItemAprazamento.DIETA) {
 			
 			boolean possuiCaracteristica = aghuFacade.possuiCaracteristicaPorUnidadeEConstante(unidade.getSeq(), ConstanteAghCaractUnidFuncionais.NAO_APRAZA_MDTO_PME);
 			if (possuiCaracteristica) {
@@ -407,5 +416,33 @@ public class AprazamentoRN extends BaseBusiness {
 
 	public IAghuFacade getAghuFacade() {
 		return aghuFacade;
+	}
+
+	public List<String> obterAprazamentoDieta(MpmPrescricaoDieta dieta) {
+		
+		List<MpmItemPrescricaoDieta> listaPrescricaoDieta = mpmItemPrescricaoDietaDAO.pesquisarItensDietaOrdenadoPorTipo(dieta);
+		if (listaPrescricaoDieta == null || listaPrescricaoDieta.isEmpty()) {
+			return null;
+		}
+		MpmItemPrescricaoDieta mpmItemPrescricaoDieta = listaPrescricaoDieta.get(0);
+		AghUnidadesFuncionais unidadeFuncional = mpmItemPrescricaoDieta.getPrescricaoDieta().getPrescricaoMedica().getAtendimento().getUnidadeFuncional();
+		MpmHorarioInicAprazamento horarioInicAprazamento = mpmHorarioInicAprazamentoDAO.pesquisarHorarioAprazamentoDieta(
+																			unidadeFuncional.getSeq(),
+																			DominioSituacao.A,
+																			mpmItemPrescricaoDieta.getFrequencia(), 
+																			mpmItemPrescricaoDieta.getTipoFreqAprazamento());
+		
+		if (horarioInicAprazamento == null ) {
+			return null;
+		}
+		
+		return gerarAprazamentoComFrequencia(	mpmItemPrescricaoDieta.getPrescricaoDieta().getPrescricaoMedica(), 
+												dieta.getDthrInicio(), 
+												dieta.getDthrFim(), 
+												mpmItemPrescricaoDieta.getTipoFreqAprazamento(), 
+												mpmItemPrescricaoDieta.getFrequencia(),  
+												null, 
+												TipoItemAprazamento.DIETA, 
+												false);
 	}
 }

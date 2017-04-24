@@ -51,7 +51,7 @@
             <aghu:acao> 
               <mec:commandButton value="#{messages.LABEL_ALTERAR}" id="bt_alterar" rendered="#{!manterTipoItensAnamneseController.exibirBotaoAdicionar}" action="#{manterTipoItensAnamneseController.salvar}" profile="ok"/>  
               <mec:commandButton value="#{messages.LABEL_ADICIONAR}" id="bt_adicionar" rendered="#{manterTipoItensAnamneseController.exibirBotaoAdicionar}" action="#{manterTipoItensAnamneseController.salvar}" profile="ok"/>
-              <mec:commandButton includePageParams="false" id="bt_cancelarEdic" value="#{messages.LABEL_CANCELAR_EDICAO}" action="#{manterTipoItensAnamneseController.cancelarEdicaoTipoItemAnamnese}" rendered="#{!manterTipoItensAnamneseController.exibirBotaoAdicionar}" immediate="true" profile="cancel" ajax="true"/> 
+              <mec:commandButton includePageParams="false" id="bt_cancelarEdic" value="#{messages.LABEL_CANCELAR_EDICAO}" action="#{manterTipoItensAnamneseController.cancelarEdicaoTipoItemAnamnese}" rendered="#{!manterTipoItensAnamneseController.exibirBotaoAdicionar}" immediate="true" profile="cancel" style="float: none;" ajax="true"/> 
             </aghu:acao> 
           </aghu:panelGeral> 
         </p:outputPanel>  

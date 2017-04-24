@@ -172,12 +172,12 @@ public class AnaliseHistoricoON extends BaseBusiness {
 			return;
 		}
 
-		StringBuilder acao = new StringBuilder(68);
+		StringBuilder acao = new StringBuilder(100);
 		acao.append("Objeto de custo " + objetoCustoVersao.getSeq() + STRING
 				+ objetoCustoVersao.getSigObjetoCustos().getNome());
 
 		if (objetoCustoVersao.getListObjetoCustoCcts().size() > 0) {
-			acao.append(" do centro de custo "
+			acao.append(" do centro de atividade "
 					+ ((SigObjetoCustoCcts) objetoCustoVersao.getListObjetoCustoCcts().toArray()[0]).getFccCentroCustos().getCodigo());
 		}
 		acao.append(": incluído um item na composição ");
@@ -233,12 +233,12 @@ public class AnaliseHistoricoON extends BaseBusiness {
 		List<String> acoes = new ArrayList<String>();
 		Map<String, String> componente = new HashMap<String, String>();
 
-		StringBuilder acao = new StringBuilder(37);
+		StringBuilder acao = new StringBuilder(50);
 		acao.append("Objeto de custo ").append(objetoCustoVersao.getSeq()).append(STRING
 				).append(objetoCustoVersao.getSigObjetoCustos().getNome());
 		
 		if (objetoCustoVersao.getListObjetoCustoCcts().size() > 0) {
-			acao.append(" do centro de custo "
+			acao.append(" do centro de atividade "
 					+ ((SigObjetoCustoCcts) objetoCustoVersao.getListObjetoCustoCcts().toArray()[0]).getFccCentroCustos().getCodigo()
 					+ ": ");
 		}
@@ -267,7 +267,7 @@ public class AnaliseHistoricoON extends BaseBusiness {
 			List<SigObjetoCustoComposicoes> listaObjetoCustoComposicoes, List<SigObjetoCustoPhis> listaPhis,
 			List<SigObjetoCustoPhis> listaPhisExcluir, RapServidores rapServidores, List<String> acoes,
 			SigObjetoCustoVersoes objetoCustoClone, Map<String, String> componente) {
-		StringBuilder acaoGeral = new StringBuilder(73);
+		StringBuilder acaoGeral = new StringBuilder(100);
 
 		if (!objetoCustoVersao.getSigObjetoCustos().getNome().equals(objetoCustoClone.getSigObjetoCustos().getNome())) {
 			acaoGeral.append("nome alterado de " + objetoCustoClone.getSigObjetoCustos().getNome() + PARA
@@ -283,7 +283,7 @@ public class AnaliseHistoricoON extends BaseBusiness {
 					if (!acaoGeral.toString().trim().equals("")) {
 						acaoGeral.append(", ");
 					}
-					acaoGeral.append("centro de custo alterado de "
+					acaoGeral.append("centro de atividade alterado de "
 							+ objetoCustoCcts.getFccCentroCustos().getCodigo()
 							+ PARA
 							+ ((SigObjetoCustoCcts) objetoCustoVersao.getListObjetoCustoCcts().toArray()[0]).getFccCentroCustos()
@@ -457,7 +457,7 @@ public class AnaliseHistoricoON extends BaseBusiness {
 		.append(", associada ao objeto de custo :objetoCustoVersao");
 
 		if (atividade.getSigAtividadeCentroCustos().getFccCentroCustos().getCodigo() != null) {
-			acao.append(", do centro de custo " + atividade.getSigAtividadeCentroCustos().getFccCentroCustos().getCodigo() + ": ");
+			acao.append(", do centro de atividade " + atividade.getSigAtividadeCentroCustos().getFccCentroCustos().getCodigo() + ": ");
 		} else {
 			acao.append(": ");
 		}
@@ -498,7 +498,7 @@ public class AnaliseHistoricoON extends BaseBusiness {
 			List<SigAtividadeServicos> listaServicos, RapServidores rapServidores, List<String> acoes, SigAtividades atividadeClone,
 			Map<String, String> componente) {
 
-		StringBuilder acaoGeral = new StringBuilder(73);
+		StringBuilder acaoGeral = new StringBuilder(100);
 		if (!atividade.getNome().equals(atividadeClone.getNome())) {
 			acaoGeral.append("nome alterado de " + atividadeClone.getNome() + PARA + atividade.getNome());
 		}
@@ -516,7 +516,7 @@ public class AnaliseHistoricoON extends BaseBusiness {
 			if (!acaoGeral.toString().trim().equals("")) {
 				acaoGeral.append(", ");
 			}
-			acaoGeral.append("centro de custo alterado de "
+			acaoGeral.append("centro de atividade alterado de "
 					+ formatarValor(atividadeClone.getSigAtividadeCentroCustos().getFccCentroCustos().getCodigo()) + PARA
 					+ formatarValor(atividade.getSigAtividadeCentroCustos().getFccCentroCustos().getCodigo()));
 		}

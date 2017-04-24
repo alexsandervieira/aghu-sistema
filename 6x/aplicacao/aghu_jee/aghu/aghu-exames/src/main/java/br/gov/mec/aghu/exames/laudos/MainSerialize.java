@@ -38,7 +38,7 @@ public class MainSerialize {
 		// laudo.reportFooterConfig();
 		// //
 		// laudo.runReport();
-		laudo.executar();
+		laudo.executar(false);
 		try {
 			laudo.toPdf(new FileOutputStream(DIR_TMP + fileName
 					+ ".pdf"));

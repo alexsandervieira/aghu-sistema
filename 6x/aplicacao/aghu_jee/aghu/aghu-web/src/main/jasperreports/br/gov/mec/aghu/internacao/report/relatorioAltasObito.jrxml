@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="relatorioAltasDia" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="91d5d79c-ec3e-4b06-9576-6c31724a6396">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="dataAtual" class="java.lang.String"/>
+	<parameter name="tituloRelatorio" class="java.lang.String"/>
+	<parameter name="nomeRelatorio" class="java.lang.String"/>
+	<parameter name="hospitalLocal" class="java.lang.String"/>
+	<field name="prontuario" class="java.lang.String"/>
+	<field name="obito" class="java.lang.String"/>
+	<field name="nomePaciente" class="java.lang.String"/>
+	<field name="leito" class="java.lang.String"/>
+	<field name="siglaEspecialidade" class="java.lang.String"/>
+	<field name="crm" class="java.lang.String"/>
+	<field name="nomeMedico" class="java.lang.String"/>
+	<field name="dataAlta" class="java.lang.String"/>
+	<field name="dataNascimento" class="java.lang.String"/>
+	<field name="senha" class="java.lang.String"/>
+	<field name="codigoConvenio" class="java.lang.String"/>
+	<field name="descricaoConvenioData" class="java.lang.String"/>
+	<group name="Convenio">
+		<groupExpression><![CDATA[$F{descricaoConvenioData}]]></groupExpression>
+		<groupHeader>
+			<band height="51">
+				<staticText>
+					<reportElement x="0" y="10" width="80" height="16" uuid="c1096dc9-88f2-476c-be3a-f3ac1450196f"/>
+					<textElement>
+						<font fontName="Courier New" size="14" isBold="false" pdfFontName="Courier"/>
+					</textElement>
+					<text><![CDATA[Convênio:]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="80" y="10" width="60" height="16" uuid="23d18202-f241-45e9-94de-8f932825b941"/>
+					<textElement>
+						<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{codigoConvenio}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="140" y="10" width="660" height="16" uuid="8b2c089d-20ba-4301-8475-86771a87daec"/>
+					<textElement>
+						<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{descricaoConvenioData}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="612" y="31" width="60" height="16" uuid="59e32d64-854d-46e4-a924-8874fa52fe65"/>
+					<textElement>
+						<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+					</textElement>
+					<text><![CDATA[Esp]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="680" y="31" width="120" height="16" uuid="baae319b-7405-4916-b907-67ee54882519"/>
+					<textElement>
+						<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+					</textElement>
+					<text><![CDATA[Data Alta]]></text>
+				</staticText>
+				<line>
+					<reportElement x="612" y="47" width="60" height="1" uuid="399d9d2d-fe67-4579-bf63-abdea6e15fe1"/>
+				</line>
+				<line>
+					<reportElement x="0" y="47" width="90" height="1" uuid="ecc1424c-8ad3-490e-9576-40c655b9ada1"/>
+				</line>
+				<line>
+					<reportElement x="100" y="47" width="45" height="1" uuid="d10b7626-6b9e-45cb-868a-38100b03b91d"/>
+				</line>
+				<line>
+					<reportElement x="155" y="47" width="330" height="1" uuid="c67d12be-0579-438d-ad5f-524c153190c2"/>
+				</line>
+				<line>
+					<reportElement x="680" y="47" width="120" height="1" uuid="7505ad6e-8f0f-47a5-9879-1f08b90c7a57"/>
+				</line>
+				<staticText>
+					<reportElement x="0" y="31" width="90" height="16" uuid="2bbfa361-17c9-4d50-b464-d18712f272f0"/>
+					<textElement>
+						<font fontName="Courier New" size="13" pdfFontName="Courier"/>
+					</textElement>
+					<text><![CDATA[Prontuário]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="100" y="31" width="45" height="16" uuid="f5b7fa1b-012f-4e65-a044-77aedf1af878"/>
+					<textElement>
+						<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+					</textElement>
+					<text><![CDATA[Obt]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="155" y="31" width="330" height="16" uuid="587c79ef-0427-4706-9f85-e8eb5d267349"/>
+					<textElement>
+						<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+					</textElement>
+					<text><![CDATA[Nome Paciente]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="493" y="31" width="110" height="16" uuid="652c4777-ce13-4fbd-998e-21d8be1b5c6c"/>
+					<textElement>
+						<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+					</textElement>
+					<text><![CDATA[Dt Nasc.]]></text>
+				</staticText>
+				<line>
+					<reportElement x="493" y="47" width="110" height="1" uuid="d63492f9-6daa-49ef-984f-9ef18766d199"/>
+				</line>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="30" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="654" y="-4" width="147" height="16" uuid="11af8028-39bf-4c56-a790-3523a57ed24a"/>
+				<textElement>
+					<font fontName="Courier New" size="14" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{dataAtual}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="1" y="29" width="801" height="1" uuid="1e201f21-ee13-4ee8-be17-0477ab08ea07"/>
+			</line>
+			<textField>
+				<reportElement x="2" y="14" width="600" height="16" uuid="5c5cee6b-1431-4271-aa55-e38b9d577768"/>
+				<textElement>
+					<font fontName="Courier New" size="14" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{tituloRelatorio}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2" y="-4" width="600" height="16" uuid="a547898c-cb83-4bee-a9fb-a454992fdd2d"/>
+				<textElement>
+					<font fontName="Courier New" size="14" isBold="true" pdfFontName="Courier-Bold"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{hospitalLocal}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="16" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="90" height="16" uuid="00465568-9ff4-4ef2-bdce-1ec185dc1474"/>
+				<textElement textAlignment="Right">
+					<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{prontuario}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="100" y="0" width="45" height="16" uuid="201916f8-89a8-4b78-a3ed-78100200d51f"/>
+				<textElement textAlignment="Center">
+					<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{obito}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="155" y="0" width="330" height="16" uuid="23dcca6c-8f7c-4d11-b2d1-ab8de8d1f352"/>
+				<textElement>
+					<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nomePaciente}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="680" y="0" width="120" height="16" uuid="66c3abd1-eed7-4c65-b64f-31658a69f78f"/>
+				<textElement>
+					<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dataAlta}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="612" y="0" width="60" height="16" uuid="04728c6e-de57-4757-9b06-aa48ef5ff5f8"/>
+				<textElement>
+					<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{siglaEspecialidade}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="493" y="0" width="110" height="16" uuid="8323e275-20cd-468a-b66d-1f19939b5790"/>
+				<textElement>
+					<font fontName="Courier New" size="14" pdfFontName="Courier"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dataNascimento}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="30" splitType="Stretch">
+			<textField>
+				<reportElement x="3" y="9" width="274" height="20" uuid="9b95d0cb-a23b-42b5-b466-c2fca339f8d1"/>
+				<textElement>
+					<font fontName="Courier New" pdfFontName="Courier"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{nomeRelatorio}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="1" y="4" width="801" height="1" uuid="548c0c7e-1248-4ab8-97fa-a00f9fc81052"/>
+			</line>
+			<textField evaluationTime="Report">
+				<reportElement x="761" y="10" width="40" height="20" uuid="cab8b0a7-6809-45ef-a613-3affd1f6cdcf"/>
+				<textElement>
+					<font fontName="Courier New" pdfFontName="Courier"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="592" y="10" width="169" height="20" uuid="e3cedfd5-daa2-4a48-9419-a01f8459ab21"/>
+				<textElement textAlignment="Right">
+					<font fontName="Courier New" pdfFontName="Courier"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página: "+$V{PAGE_NUMBER}+" / "]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

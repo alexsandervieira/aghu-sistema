@@ -1,7 +1,9 @@
 package br.gov.mec.aghu.registrocolaborador.business;
 
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -13,9 +15,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.dominio.DominioOperacoesJournal;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.factory.BaseJournalFactory;
 import br.gov.mec.aghu.dao.ObjetosOracleDAO;
 import br.gov.mec.aghu.dominio.DominioSituacaoQualificacao;
 import br.gov.mec.aghu.dominio.DominioTipoQualificacao;
+import br.gov.mec.aghu.dominio.DominioTipoQualificacaoGraduacao;
 import br.gov.mec.aghu.model.RapPessoasFisicas;
 import br.gov.mec.aghu.model.RapQualificacao;
 import br.gov.mec.aghu.model.RapQualificacaoJn;
@@ -27,11 +35,6 @@ import br.gov.mec.aghu.registrocolaborador.dao.RapPessoasFisicasDAO;
 import br.gov.mec.aghu.registrocolaborador.dao.RapQualificacaoDAO;
 import br.gov.mec.aghu.registrocolaborador.dao.RapQualificacaoJnDAO;
 import br.gov.mec.aghu.registrocolaborador.dao.RapServidoresDAO;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.dominio.DominioOperacoesJournal;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
-import br.gov.mec.aghu.core.factory.BaseJournalFactory;
 
 /**
  * 
@@ -109,7 +112,8 @@ public class QualificacaoRN extends BaseBusiness {
 		/** RAP-00531 - Data final informada, após data atual. */
 		MENSAGEM_DATA_FINAL_APOS_DATA_ATUAL, //
 		/** Não pode ser excluido pelo aghu pois há contrato ativo na starh. */
-		MENSAGEM_EXISTE_CONTRATO_ATIVO_STARH;
+		MENSAGEM_EXISTE_CONTRATO_ATIVO_STARH,
+		MENSAGEM_SERVIDOR_NAO_POSSUI_REGISTRO;
 	}
 
 	/**
@@ -121,6 +125,27 @@ public class QualificacaoRN extends BaseBusiness {
 	private class ContratoAtivoStarhException extends Exception {
 
 	private static final long serialVersionUID = 1058629824841935183L;}
+	
+	public Collection<RapQualificacao> pesquisarRapQualificacaoServidor(RapServidores rapServidor) throws ApplicationBusinessException{
+		Collection<RapQualificacao> qualificacoes = rapQualificacaoDAO.pesquisarRapQualificacaoPorServidor(rapServidor);
+		if (qualificacoes == null || qualificacoes.isEmpty()) {
+			throw new ApplicationBusinessException(QualificacaoRNExceptionCode.MENSAGEM_SERVIDOR_NAO_POSSUI_REGISTRO);
+		}
+		return qualificacoes;
+	}	
+	
+	public Boolean isProfissionalMedicoOuEnfermeiro(RapServidores rapServidor) throws ApplicationBusinessException {
+		Collection<RapQualificacao> qualificacoes = new HashSet<RapQualificacao>();
+		qualificacoes = pesquisarRapQualificacaoServidor(rapServidor);
+		boolean retorno = false;
+		for (RapQualificacao qualificacao : qualificacoes) {
+			if (qualificacao.getTipoQualificacao().getDescricao().equalsIgnoreCase(DominioTipoQualificacaoGraduacao.MEDICINA.getDescricao())
+					|| qualificacao.getTipoQualificacao().getDescricao().equalsIgnoreCase(DominioTipoQualificacaoGraduacao.ENFERMAGEM.getDescricao())) {
+				retorno = true;
+			} 
+		}
+		return retorno;
+	}
 
 	public void insert(RapQualificacao qualificacao)
 			throws ApplicationBusinessException {

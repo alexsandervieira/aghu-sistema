@@ -327,6 +327,11 @@ public class MonitorarColetasEmergenciaController  extends ActionReport {
 	 */
 	public String visualizarImpressaoTodosItens() throws BaseException, JRException, SystemException, IOException {
 		List<Integer> listaSoeSeq = new ArrayList<Integer>();
+		
+		if(listaSolicitacoesColeta == null || listaSolicitacoesColeta.isEmpty()){
+			this.apresentarMsgNegocio(Severity.WARN,"AEL_00895");
+			return null;
+		}
 		for(VAelSolicAtendsVO vo :listaSolicitacoesColeta){
 			listaSoeSeq.add(vo.getNumero());
 		}

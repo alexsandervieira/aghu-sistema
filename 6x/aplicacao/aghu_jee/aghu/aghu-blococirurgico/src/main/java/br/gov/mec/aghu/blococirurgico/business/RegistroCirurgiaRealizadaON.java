@@ -491,7 +491,7 @@ public class RegistroCirurgiaRealizadaON extends BaseBusiness {
 				final Boolean isUnidadeFuncionalBloco = this.getAghuFacade().verificarCaracteristicaUnidadeFuncional(cirurgia.getUnidadeFuncional().getSeq(),
 						ConstanteAghCaractUnidFuncionais.BLOCO);
 				if (isUnidadeFuncionalBloco) {
-					this.getMbcCirurgiasVerificacoes2RN().verificarProfissionalEnfermagem(cirurgia.getSeq());
+					this.getMbcCirurgiasVerificacoes2RN().verificarProfissionalEnfermagem(cirurgia.getSeq(), vo.getListaProfissionaisVO());
 				}
 
 				// RN 1.5.4 Garante que tenha sido informado pelo menos um tipo de anestesia

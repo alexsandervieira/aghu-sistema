@@ -1,5 +1,6 @@
 package br.gov.mec.aghu.prescricaoenfermagem.action;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -10,15 +11,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.business.prescricaoenfermagem.IPrescricaoEnfermagemFacade;
+import br.gov.mec.aghu.core.action.ActionController;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagem;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagemId;
 import br.gov.mec.aghu.prescricaoenfermagem.cadastrosapoio.action.PrescricaoEnfermagemTemplateController;
 import br.gov.mec.aghu.prescricaoenfermagem.vo.DiagnosticoEtiologiaVO;
 import br.gov.mec.aghu.prescricaoenfermagem.vo.PrescricaoEnfermagemVO;
-import br.gov.mec.aghu.core.action.ActionController;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.Severity;
 
 /**
  * 
@@ -61,6 +62,10 @@ public class EncerramentoDiagnosticoController extends ActionController {
 	private EpePrescricaoEnfermagem prescricaoEnfermagem;
 	
 	private int idConversacaoAnterior;
+	
+	private boolean allChecked;
+
+	private List<DiagnosticoEtiologiaVO> listaDiagnosticosSelecionadas;
 	
 	public void iniciar() {
 	 
@@ -114,7 +119,7 @@ public class EncerramentoDiagnosticoController extends ActionController {
 			prescricaoEnfermagemFacade.removerPrescCuidadosDiagnosticosSelecionados(
 					listaDiagnosticoEtiologiaVO, 
 					prescricaoEnfermagem.getAtendimento().getSeq(), 
-					prescricaoEnfermagem.getId().getSeq());
+					prescricaoEnfermagem.getId().getSeq(), cameFrom != null && cameFrom.equalsIgnoreCase("prescricaoenfermagem-manterPrescricaoEnfermagem"));
 			this.apresentarMsgNegocio(Severity.INFO,
 					"MENSAGEM_DIAGNOSTICO_ETIOLOGIA_ENCERRADO_SUCESSO");
 			this.carregarListaDiagnosticoEtiologiaVO();
@@ -124,7 +129,30 @@ public class EncerramentoDiagnosticoController extends ActionController {
 			LOG.error("Erro",e);
 		}
 	}
+	
+	public void checkAll() {
+		for (DiagnosticoEtiologiaVO diagonostivoVo : listaDiagnosticoEtiologiaVO) {
+			if (this.allChecked) {
+				diagonostivoVo.setSelecionado(Boolean.TRUE);
+				this.existeDiagnosticoSelecionado = true;
+			} else {
+				diagonostivoVo.setSelecionado(Boolean.FALSE);
+				this.existeDiagnosticoSelecionado = false;
+			}
+		}
 
+		atualizarDianosticosSelecionados();
+	}
+	
+	public void atualizarDianosticosSelecionados() {
+		this.listaDiagnosticosSelecionadas = new ArrayList<DiagnosticoEtiologiaVO>();
+		for (DiagnosticoEtiologiaVO diganosticoVo : listaDiagnosticoEtiologiaVO) {
+			if (diganosticoVo != null && Boolean.TRUE.equals(diganosticoVo.getSelecionado())) {
+				this.listaDiagnosticosSelecionadas.add(diganosticoVo);
+			}
+		}
+	}
+	
 	public IPrescricaoEnfermagemFacade getPrescricaoEnfermagemFacade() {
 		return prescricaoEnfermagemFacade;
 	}
@@ -198,5 +226,14 @@ public class EncerramentoDiagnosticoController extends ActionController {
 
 	public void setIdConversacaoAnterior(int idConversacaoAnterior) {
 		this.idConversacaoAnterior = idConversacaoAnterior;
+	}
+
+	public boolean isAllChecked() {
+		return allChecked;
+	}
+
+	public void setAllChecked(boolean allChecked) {
+		this.allChecked = allChecked;
 	}	
+	
 }

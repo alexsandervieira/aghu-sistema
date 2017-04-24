@@ -17,6 +17,10 @@ import org.joda.time.Period;
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.business.IAghuFacade;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioOrigemAtendimento;
 import br.gov.mec.aghu.dominio.DominioSituacaoHorario;
 import br.gov.mec.aghu.dominio.DominioSituacaoItemSolicitacaoExame;
@@ -54,10 +58,6 @@ import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.model.VAelGradeHrAgenda;
 import br.gov.mec.aghu.model.VAelSolicPac;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 /**
  * 
@@ -244,7 +244,10 @@ public class ItemHorarioAgendadoON extends BaseBusiness {
 		
 		// Verifica dthrAgenda (caso seja null, indica que o itemSolicitacaoExame 
 		// não possui horário agendado para cancelamento).
-		if (dthrAgenda == null) {
+		AghParametros parametroAgendado = this.getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_SITUACAO_AGENDADO);
+		String sitAg = parametroAgendado.getVlrTexto();
+		
+		if (dthrAgenda == null && !sitAg.equals(itemSolicitacaoExame.getSitCodigo())) {
 			throw new ApplicationBusinessException(ItemHorarioAgendadoONExceptionCode.AEL_01002);
 		}
 		
@@ -258,6 +261,10 @@ public class ItemHorarioAgendadoON extends BaseBusiness {
 			/* Verifica outros exames agendados do mesmo grupo neste mesmo horário
 		 	a fim de efetuar o cancelamento dos mesmos */
 			getExamesFacade().cancelarHorariosExamesAgendados(itemHorarioAgendado, globalUnfSeq, nomeMicrocomputador);		
+		}
+		
+		if(sitAg.equals(itemSolicitacaoExame.getSitCodigo())) {
+			getExamesFacade().atualizarItemAgendamento(itemSolicitacaoExame, itemSolicitacaoExameOriginal, nomeMicrocomputador);
 		}
 	}
 	

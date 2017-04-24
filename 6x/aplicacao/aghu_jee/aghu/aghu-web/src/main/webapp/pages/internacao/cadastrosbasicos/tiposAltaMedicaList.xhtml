@@ -18,7 +18,6 @@
         <aghu:acao> 
           <mec:commandButton value="#{messages.LABEL_PESQUISAR}" id="bt_pesquisar" action="#{tiposAltaMedicaPaginatorController.pesquisar}" profile="search"/>  
           <mec:commandButton id="bt_limpar" value="#{messages.LABEL_LIMPAR}" action="#{tiposAltaMedicaPaginatorController.limparPesquisa}" styleClass="bt_cinza" profile="clear"/>  
-          <mec:commandButton value="#{messages.LABEL_NOVO}" id="bt_novo" action="#{tiposAltaMedicaPaginatorController.iniciarInclusao}" rendered="#{tiposAltaMedicaPaginatorController.dataModel.pesquisaAtiva}" profile="add"/> 
         </aghu:acao> 
       </h:form>  
       <h:form prependId="false" id="formTiposAltaMedica"> 
@@ -28,10 +27,7 @@
             <mec:commandLink id="tabelaResult_link_editar" profile="edit" title="editar" action="#{tiposAltaMedicaPaginatorController.editar}"> 
               <f:setPropertyActionListener target="#{tiposAltaMedicaController.tipoAltaMedica}" value="#{_item}" for="command"/>  
               <f:setPropertyActionListener for="command" target="#{tiposAltaMedicaPaginatorController.tipoAltaMedicaSelecionada}" value="#{_item}"/> 
-            </mec:commandLink>  
-            <mec:commandLink id="tabelaResult_link_remover" profile="delete" title="excluir" action="#{tiposAltaMedicaPaginatorController.excluir}"> 
-              <f:setPropertyActionListener for="command" target="#{tiposAltaMedicaPaginatorController.tipoAltaMedicaSelecionada}" value="#{_item}"/> 
-            </mec:commandLink> 
+            </mec:commandLink>
           </p:column>  
           <p:column width="50px;"> 
             <h:outputText value="#{_item.codigo}"/>  

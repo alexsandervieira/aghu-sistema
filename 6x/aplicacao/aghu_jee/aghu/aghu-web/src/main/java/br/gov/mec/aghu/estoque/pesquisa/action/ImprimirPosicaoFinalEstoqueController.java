@@ -46,6 +46,7 @@ import br.gov.mec.aghu.model.AfaTipoUsoMdto;
 import br.gov.mec.aghu.model.SceAlmoxarifado;
 import br.gov.mec.aghu.model.ScoFornecedor;
 import br.gov.mec.aghu.model.ScoGrupoMaterial;
+import br.gov.mec.aghu.dominio.DominioSimNao;
 import net.sf.jasperreports.engine.JRException;
 
 public class ImprimirPosicaoFinalEstoqueController extends ActionReport {
@@ -103,9 +104,34 @@ public class ImprimirPosicaoFinalEstoqueController extends ActionReport {
 	private MovimentoMaterialVO mvtodataCompetencia;
 	private ScoGrupoMaterial grupo;
 	
+	private Boolean mostraSoAtivos;
+	
 	@PostConstruct
 	protected void inicializar() {
 		this.begin(conversation);
+		this.mostraSoAtivos = getFiltroSoAtivos();
+	}
+	
+	/**
+	 * Determina se o relatório constará somente os itens de estoque ativos
+	 * @return
+	 */
+	private Boolean getFiltroSoAtivos(){
+		
+		if(this.mostraSoAtivos != null){
+			// Prepara a consulta através do fornecedor informado
+			return mostraSoAtivos;
+			
+		} else {
+			// Prepara a consulta através do fornecedor padrão do HU
+			try {
+				return DominioSimNao.valueOf(parametroFacade.buscarValorTexto(AghuParametrosEnum.P_SOMENTE_MATERIAL_ATIVO)).isSim();
+			} catch (ApplicationBusinessException e) {
+				apresentarExcecaoNegocio(e);
+			}
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -154,7 +180,7 @@ public class ImprimirPosicaoFinalEstoqueController extends ActionReport {
 			String siglaTipoUsoMdto = this.tipoUsoMdto != null ? this.tipoUsoMdto.getSigla() : null;
 			Short almoxSeq = this.almoxarifado != null ? this.almoxarifado.getSeq() : null;
 
-			this.colecao = this.estoqueFacade.buscaDadosPosicaoFinalEstoque(dtcomp, grupoSeq, estocavel.toString(), orderBy.toString(), this.getFiltroFornecedor(), siglaTipoUsoMdto, almoxSeq);
+			this.colecao = this.estoqueFacade.buscaDadosPosicaoFinalEstoque(dtcomp, grupoSeq, estocavel.toString(), orderBy.toString(), this.getFiltroFornecedor(), siglaTipoUsoMdto, almoxSeq, this.getFiltroSoAtivos());
 
 		} catch (BaseException e) {
 			apresentarExcecaoNegocio(e);
@@ -178,7 +204,7 @@ public class ImprimirPosicaoFinalEstoqueController extends ActionReport {
 			String siglaTipoUsoMdto = this.tipoUsoMdto != null ? this.tipoUsoMdto.getSigla() : null;
 			Short almoxSeq = this.almoxarifado != null ? this.almoxarifado.getSeq() : null;
 
-			this.colecao = estoqueFacade.buscaDadosPosicaoFinalEstoque(dtcomp, grupoSeq, estocavel.toString(), orderBy.toString(), this.getFiltroFornecedor(), siglaTipoUsoMdto, almoxSeq);
+			this.colecao = estoqueFacade.buscaDadosPosicaoFinalEstoque(dtcomp, grupoSeq, estocavel.toString(), orderBy.toString(), this.getFiltroFornecedor(), siglaTipoUsoMdto, almoxSeq, this.getFiltroSoAtivos());
 
 		} catch (BaseException e) {
 			apresentarExcecaoNegocio(e);
@@ -384,5 +410,13 @@ public class ImprimirPosicaoFinalEstoqueController extends ActionReport {
 
 	public void setAlmoxarifado(SceAlmoxarifado almoxarifado) {
 		this.almoxarifado = almoxarifado;
+	}
+	
+	public Boolean getMostraSoAtivos() {
+		return this.mostraSoAtivos;
+	}
+	
+	public void setMostraSoAtivos(Boolean mostraSoAtivos) {
+		this.mostraSoAtivos = mostraSoAtivos;
 	}
 }

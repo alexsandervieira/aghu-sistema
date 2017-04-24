@@ -23,7 +23,6 @@ import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.core.report.DocumentoJasper;
 import br.gov.mec.aghu.impressao.SistemaImpressaoException;
-import br.gov.mec.aghu.internacao.cadastrosbasicos.business.ICadastrosBasicosInternacaoFacade;
 import br.gov.mec.aghu.model.AacConsultas;
 import br.gov.mec.aghu.model.MamAtestados;
 import br.gov.mec.aghu.model.MamTipoAtestado;
@@ -41,9 +40,6 @@ public class RelatorioAtestadoAcompanhanteController extends ActionReport {
 	@Inject
 	private SistemaImpressao sistemaImpressao;
 
-	@EJB
-	private ICadastrosBasicosInternacaoFacade cadastrosBasicosInternacaoFacade;
-	
 	@EJB
 	private IParametroFacade parametroFacade;
 	
@@ -101,9 +97,12 @@ public class RelatorioAtestadoAcompanhanteController extends ActionReport {
 	@Override
 	public Map<String, Object> recuperarParametros() {
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("nomeHospital", cadastrosBasicosInternacaoFacade.recuperarNomeInstituicaoLocal());
 		try {
-			params.put("footerCaminhoLogo", recuperarCaminhoLogo2());
+			params.put("footerNomeHospital", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_RAZAO_SOCIAL).getVlrTexto());
+			params.put("footerEnderecoHospitalLinha1", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_END_COMPLETO_LINHA1).getVlrTexto());
+			params.put("footerEnderecoHospitalLinha2", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_END_COMPLETO_LINHA2).getVlrTexto());
+			params.put("footerCaminhoLogo", parametroFacade.recuperarCaminhoLogo2Relativo());
+			
 			params.put("nomeCidade", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_END_CIDADE).getVlrTexto());
 			params.put("nomeUf", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_UF_SEDE_HU).getVlrTexto());
 		} catch (BaseException e) {

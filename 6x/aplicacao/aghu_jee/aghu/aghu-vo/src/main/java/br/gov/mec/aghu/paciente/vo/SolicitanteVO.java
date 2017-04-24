@@ -9,6 +9,7 @@ public class SolicitanteVO {
 	private DominioTodosUltimo volumesManuseados;
 	
 	private String zonaSala;
+	private String origemEventos;
 	
 	public Short getSeq() {
 		return seq;
@@ -27,6 +28,12 @@ public class SolicitanteVO {
 	}
 	public void setZonaSala(String zonaSala) {
 		this.zonaSala = zonaSala;
+	}
+	public String getOrigemEventos() {
+		return origemEventos;
+	}
+	public void setOrigemEventos(String origemEventos) {
+		this.origemEventos = origemEventos;
 	}
 	
 	

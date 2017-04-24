@@ -84,6 +84,7 @@ import br.gov.mec.aghu.prescricaomedica.vo.DadosDialiseVO;
 import br.gov.mec.aghu.prescricaomedica.vo.DadosPesoAlturaVO;
 import br.gov.mec.aghu.prescricaomedica.vo.DetalhesParecerMedicamentosVO;
 import br.gov.mec.aghu.prescricaomedica.vo.EstadoPacienteVO;
+import br.gov.mec.aghu.prescricaomedica.vo.EvolucaoPrescricaoVO;
 import br.gov.mec.aghu.prescricaomedica.vo.GerarPDFSinanVO;
 import br.gov.mec.aghu.prescricaomedica.vo.HistoricoParecerMedicamentosJnVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ItemDispensacaoFarmaciaVO;
@@ -102,6 +103,7 @@ import br.gov.mec.aghu.prescricaomedica.vo.MpmSolicitacaoConsultoriaVO;
 import br.gov.mec.aghu.prescricaomedica.vo.PacienteListaProfissionalVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ParametrosProcedureVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ParecerPendenteVO;
+import br.gov.mec.aghu.prescricaomedica.vo.PosolociaDosagemMedicamentoVO;
 import br.gov.mec.aghu.prescricaomedica.vo.PrescricaoMedicaVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ProcedimentoEspecialVO;
 import br.gov.mec.aghu.prescricaomedica.vo.RelSolHemoterapicaVO;
@@ -843,7 +845,7 @@ public interface IPrescricaoMedicaFacade extends Serializable {
 	public String obterDescricaoAlteracaoCuidadoRelatorioItensConfirmados(
 			final MpmPrescricaoCuidado cuidado);
 
-	public String obterDescricaoFormatadaMedicamentoSolucaoRelatorioItensConfirmados(
+	public List<PosolociaDosagemMedicamentoVO> obterDescricaoFormatadaMedicamentoSolucaoRelatorioItensConfirmados(
 			final MpmPrescricaoMdto medicamentoConfirmada,
 			final Boolean inclusaoExclusao, final Boolean impressaoTotal,
 			final Boolean isUpperCase,
@@ -858,7 +860,7 @@ public interface IPrescricaoMedicaFacade extends Serializable {
 	public List<ItemDispensacaoFarmaciaVO> obterDescricaoDosagemAlteracaoItensMedicamentoSolucaoDispensacaoFarmacia(
 			final MpmPrescricaoMdto medicamentoSolucao, final Boolean isUpperCase);
 	
-	public String obterDescricaoAlteracaoMedicamentoSolucaoRelatorioItensConfirmados(
+	public List<PosolociaDosagemMedicamentoVO> obterDescricaoAlteracaoMedicamentoSolucaoRelatorioItensConfirmados(
 			final MpmPrescricaoMdto medicamentoConfirmada,
 			final Boolean isUpperCase) throws ApplicationBusinessException;
 
@@ -1672,7 +1674,7 @@ public interface IPrescricaoMedicaFacade extends Serializable {
 	 * @return
 	 * @throws BaseException
 	 */
-	public Boolean existeAmbulatorio() throws BaseException;
+	public Boolean existeAmbulatorio();
 
 	public void inativarAltaRecomendacaoCadastrada(
 			final MpmAltaSumario altaSumario,
@@ -3481,9 +3483,9 @@ public interface IPrescricaoMedicaFacade extends Serializable {
 
 	List<MpmEvolucoes> obterEvolucoesAnamnese(MpmAnamneses anamnese, Date data, DominioIndPendenteAmbulatorio situacao);
 
-	void atualizarMpmEvolucaoEmUso(MpmEvolucoes evolucao, RapServidores servidor);
+	void atualizarMpmEvolucaoEmUso(EvolucaoPrescricaoVO evolucao, RapServidores servidor);
 
-	void validarEvolucaoEmUso(MpmEvolucoes evolucao) throws ApplicationBusinessException;
+	void validarEvolucaoEmUso(EvolucaoPrescricaoVO evolucao) throws ApplicationBusinessException;
 
 	MpmAnamneses obterAnamneseValidadaPorAtendimento(Integer seqAtendimento);
 
@@ -3558,4 +3560,23 @@ public interface IPrescricaoMedicaFacade extends Serializable {
 			throws BaseException;
 	
 	String buscarResumoLocalPacienteUniFuncional(AghAtendimentos atendimento) throws ApplicationBusinessException;
+	
+	void trocarOrdemItemPrescricaoMedica(ItemPrescricaoMedicaVO item,
+			ItemPrescricaoMedicaVO itemNovaOrdem, String nomeMicrocomputador) throws BaseException;
+	List<ItemPrescricaoMedica> listarItensPrescricaoMedica(
+			MpmPrescricaoMedica prescricaoMedica);
+
+	List<EvolucaoPrescricaoVO> obterEvolucoesVO(MpmAnamneses anamnese, List<DominioIndPendenteAmbulatorio> situacoes,
+			Date dataInicioEvolucao, Date dataFimEvolucao);
+
+	EvolucaoPrescricaoVO criarEvolucaoPrescricao(MpmAnamneses anamnese,
+			Date dataReferencia, RapServidores servidor)
+			throws ApplicationBusinessException ;
+	
+	EvolucaoPrescricaoVO criarEvolucaoVoComDescricao(String descricao,
+			MpmAnamneses anamnese, Date dataReferencia, RapServidores servidor) 
+			throws ApplicationBusinessException;
+	
+	public List<String> obterAprazamentoDieta(MpmPrescricaoDieta dieta);
+	
 }

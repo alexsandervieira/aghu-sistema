@@ -13,6 +13,7 @@
 	<f:view>
     
 	    <h:head>  
+	    
 	        <meta name="viewport" content="width=device-width"/>
 	        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 			
@@ -109,7 +110,7 @@
 						</pe:remoteCommand>
 					
 						<pe:remoteCommand name="closePOL" action="#{arvorePOLController.limparTudo}" process="@this"  />
-						<pe:remoteCommand name="logoutOnUnload" action="#{loginController.logout}" process="@this" immediate="true"/>
+						<pe:remoteCommand name="logoutOnUnload" action="#{loginController.logout('LOGOUT ACIONADO PELO USUÁRIO')}" process="@this" immediate="true"/>
     				    				
 		    			<ui:insert name="menu_esquerda" />
 			    	</h:form>	
@@ -151,7 +152,7 @@
 		    <p:confirmDialog id="casca_endsession" widgetVar="cascaEndSessionWG" showEffect="bounce" closable="false" width="350" height="80" resizable="false"
 		    	message="Sua sessão expirou por inatividade. Por favor faça login novamente.">
 		    	<h:form prependId="false">
-			        <h:commandButton value="OK" target="_blank" action="casca-inicio" onclick="session.desativaSessionOnUnload();" style="margin: 10px" icon="ui-icon-check" styleClass="ui-confirmdialog-yes" />
+			        <mec:commandButton id="logoutBtn" value="OK" target="_blank" action="#{loginController.logoutAndRedirect('SESSÃO EXPIRADA')}" onclick="session.desativaSessionOnUnload();" style="margin: 10px" icon="ui-icon-check" styleClass="ui-confirmdialog-yes" />
 		        </h:form>
 		    </p:confirmDialog>			
 					
@@ -170,8 +171,12 @@
 					PF('bemvindoWG').show();
 					setTimeout(function(){PF('bemvindoWG').hide()}, 5000);
 		    	});
+		    	function deslogaAplicacao(){
+		    		document.getElementById('logoutBtn:button').click();
+		    	}		    	
 		    	function timeoutSession(){
 			    	PF('cascaEndSessionWG').show();
+			    	setTimeout(deslogaAplicacao, 30000);
 			    }
 		    	if (#{cascaController.ativaLogoutOnUnload}){
 		    		window.onbeforeunload = function(e) {

@@ -120,7 +120,7 @@ import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
  * 
  * @author Marcelo Tocchetto
  */
-@SuppressWarnings({"PMD.AghuTooManyMethods", "PMD.ExcessiveClassLength","PMD.AtributoEmSeamContextManager"})
+@SuppressWarnings({"PMD.AghuTooManyMethods", "PMD.ExcessiveClassLength","PMD.CouplingBetweenObjects"})
 @Stateless
 public class AtualizaInternacaoRN extends BaseBusiness {
 
@@ -129,6 +129,9 @@ public class AtualizaInternacaoRN extends BaseBusiness {
 	
 	@EJB
 	private InternacaoRN internacaoRN;
+	
+	@EJB
+	private AtualizaInternacaoON atualizaInternacaoON;
 	
 	@EJB
 	private InternacaoUtilRN internacaoUtilRN;
@@ -222,7 +225,7 @@ public class AtualizaInternacaoRN extends BaseBusiness {
 
 	private enum AtualizaInternacaoRNExceptionCode implements
 			BusinessExceptionCode {
-		AIN_00000, AIN_00338, AIN_00339, AIN_00341, AIN_00342, AIN_00343, AIN_00344, AIN_00346, AIN_00347, AIN_00348, AIN_00352, AIN_00353, AIN_00355, AIN_00356, AIN_00357, AIN_00400, AIN_00401, AIN_00406, AIN_00408, AIN_00422, AIN_00610, AIN_00659, AIN_00660, AIN_00663, AIN_00664, AIN_00670, AIN_00671, AIN_00672, AIN_00689, AIN_00690, AIN_00691, AIN_00692, AIN_00693, AIN_00694, AIN_00695, AIN_00696, AIN_00697, AIN_00698, AIN_00699, AIN_00700, AIN_00701, AIN_00702, AIN_00703, AIN_00706, AIN_00734, AIN_00739, AIN_00794, AIN_00795, AIN_00840, AIN_00842, AIN_00870, AIN_00896, AIN_00282, AIN_00351, PACIENTES_DE_AMBOS_OS_SEXOS_INTERNADOS_NO_MESMO_QUARTO, ERRO_CLONAR_CONTA_HOSPITALAR,
+		AIN_ERRO_MOV_INTERNACAO,AIN_00000, AIN_00338, AIN_00339, AIN_00341, AIN_00342, AIN_00343, AIN_00344, AIN_00346, AIN_00347, AIN_00348, AIN_00352, AIN_00353, AIN_00355, AIN_00356, AIN_00357, AIN_00400, AIN_00401, AIN_00406, AIN_00408, AIN_00422, AIN_00610, AIN_00659, AIN_00660, AIN_00663, AIN_00664, AIN_00670, AIN_00671, AIN_00672, AIN_00689, AIN_00690, AIN_00691, AIN_00692, AIN_00693, AIN_00694, AIN_00695, AIN_00696, AIN_00697, AIN_00698, AIN_00699, AIN_00700, AIN_00701, AIN_00702, AIN_00703, AIN_00706, AIN_00734, AIN_00739, AIN_00794, AIN_00795, AIN_00840, AIN_00842, AIN_00870, AIN_00896, AIN_00282, AIN_00351, PACIENTES_DE_AMBOS_OS_SEXOS_INTERNADOS_NO_MESMO_QUARTO, ERRO_CLONAR_CONTA_HOSPITALAR,
 		LABEL_OPERACAO_INVALIDA_MODULO_INATIVO, MENSAGEM_ERRO_HIBERNATE_VALIDATION;
 
 		public void throwException() throws ApplicationBusinessException {
@@ -1174,8 +1177,9 @@ public class AtualizaInternacaoRN extends BaseBusiness {
 		if (Objects.equals(codTipoAltaMedica, getCodTipoAltaObito())
 				|| Objects.equals(codTipoAltaMedica,
 						getCodTipoAltaObitoMais48h())) {
-			paciente.setDtObito(null);
-			this.getCadastroPacienteFacade().atualizarPacienteParcial(paciente, nomeMicrocomputador, dataFimVinculoServidor);
+			AipPacientes pac = getPacienteFacade().obterAipPacientesPorChavePrimaria(paciente.getCodigo());
+			pac.setDtObito(null);
+			this.getCadastroPacienteFacade().atualizarPacienteParcial(pac, nomeMicrocomputador, dataFimVinculoServidor);
 		}
 	}
 
@@ -1642,7 +1646,7 @@ public class AtualizaInternacaoRN extends BaseBusiness {
 			codigosMovimento.add(this.codigoMovimentoLeitoTecnico);
 			codigosMovimento.add(this.codigoMovimentoLeitoPatologia);
 
-			final List<RegistraExtratoLeitoVO> lista = this.getAinLeitosDAO().pesquisarRegistraExtratoLeitoVO(leitoID, codigosMovimento);
+			final List<RegistraExtratoLeitoVO> lista = this.getAinLeitosDAO().pesquisarRegistraExtratoLeitoVO(leitoID);
 
 			if (lista != null && !lista.isEmpty()) {
 				for (final RegistraExtratoLeitoVO registraExtratoLeitoVO : lista) {
@@ -1723,15 +1727,18 @@ public class AtualizaInternacaoRN extends BaseBusiness {
 				throw new ApplicationBusinessException(
 						AtualizaInternacaoRNExceptionCode.AIN_00282);
 			}
-
 			Integer tmi;
 			Date dataHoraLancamento;
+			Integer qtdMovimentos = this.getAinMovimentoInternacaoDAO().pesquisarPorInternacaoSeqOrderDtHrLanc(seqInternacao).size();
 			if (DominioTransacaoAltaPaciente.PROCESSA_ALTA.equals(transacao)) {
 				tmi = codigoMovimentoAlta;
 				dataHoraLancamento = dtSaidaPaciente;
 			} else if (DominioTransacaoAltaPaciente.INTERNACAO
 					.equals(transacao)) {
 				tmi = codigoMovimentoInternacao;
+				dataHoraLancamento = dthrInternacao;
+			} else if(qtdMovimentos == 1 && (DominioTransacaoAltaPaciente.ESTORNA_ALTA.equals(transacao) || DominioTransacaoAltaPaciente.INTERNACAO_ATUALIZADA.equals(transacao))) {
+				tmi = tmiSeq;
 				dataHoraLancamento = dthrInternacao;
 			} else {
 				tmi = tmiSeq;
@@ -1776,6 +1783,7 @@ public class AtualizaInternacaoRN extends BaseBusiness {
 							.getSeqUnidadeFuncional());
 			registrarMovimentoInternacoesVO.setLeitoID(buscarLocalInternacaoVO
 					.getLeitoID());
+			registrarMovimentoInternacoesVO.setUltimoEvento(movimentoInternacao.getDthrLancamento());
 
 			return registrarMovimentoInternacoesVO;
 		} catch (final BaseRuntimeException e) {
@@ -1819,43 +1827,20 @@ public class AtualizaInternacaoRN extends BaseBusiness {
 	/**
 	 * ORADB Function AINK_INT_ATU.DEFINE_TRANSACAO
 	 */
-	public DominioTransacaoAltaPaciente defineTransacao(final String oldTamCodigo,
-			final String newTamCodigo, final Date oldDthrAltaMedica,
-			final Date newDthrAltaMedica, final Date oldDtSaidaPaciente,
-			final Date newDtSaidaPaciente) throws ApplicationBusinessException {
-		DominioTransacaoAltaPaciente transacao = null;
-
-		try {
-			// Rotina de saída do paciente
-			if (newDthrAltaMedica != null && oldDtSaidaPaciente == null
-					&& newDtSaidaPaciente != null) {
-				transacao = DominioTransacaoAltaPaciente.PROCESSA_ALTA;
-			} else
-			// Rotina de estorno da alta/data de saída do paciente
-			if ((oldTamCodigo != null && newTamCodigo == null
-					&& oldDthrAltaMedica != null && newDthrAltaMedica == null)
-					|| (oldTamCodigo != null && newTamCodigo != null
-							&& oldDthrAltaMedica != null
-							&& newDthrAltaMedica != null
-							&& oldDtSaidaPaciente != null && newDtSaidaPaciente == null)) {
-				transacao = DominioTransacaoAltaPaciente.ESTORNA_ALTA;
-			} else
-			// Rotina de Alteração dos dados da alta do paciente
-			if ((oldDthrAltaMedica != null && newDthrAltaMedica != null && !oldDthrAltaMedica
-					.equals(newDthrAltaMedica))
-					|| (oldTamCodigo != null && newTamCodigo != null && !oldTamCodigo
-							.equals(newTamCodigo))
-					|| (oldDtSaidaPaciente != null
-							&& newDtSaidaPaciente != null && !oldDtSaidaPaciente
-							.equals(newDtSaidaPaciente))) {
-				transacao = DominioTransacaoAltaPaciente.ALTERA_ALTA;
-			}
-		} catch (final Exception e) {
-			logError(e.getMessage(), e);
-			AtualizaInternacaoRNExceptionCode.AIN_00706.throwException(e);
-		}
-
-		return transacao;
+	public DominioTransacaoAltaPaciente defineTransacao(final String oldTamCodigo, final String newTamCodigo,
+			                                            final AinInternacao internacaoOld,
+			                                            final AinInternacao internacao) throws ApplicationBusinessException {
+		return this.getAtualizaInternacaoON().defineTransacao(oldTamCodigo, newTamCodigo, internacaoOld, internacao);
+	}
+	
+	private boolean transacaoEstornaAlta(DominioTransacaoAltaPaciente transacao) {
+		return transacao!=null && transacao.equals(DominioTransacaoAltaPaciente.ESTORNA_ALTA);
+	}
+	private boolean transacaoProcessaAlta(DominioTransacaoAltaPaciente transacao) {
+		return transacao!=null && transacao.equals(DominioTransacaoAltaPaciente.PROCESSA_ALTA);
+	}
+	private boolean transacaoAtualizacaoInternacao(DominioTransacaoAltaPaciente transacao) {
+		return transacao!=null && transacao.equals(DominioTransacaoAltaPaciente.INTERNACAO_ATUALIZADA);
 	}
 
 	/**
@@ -1869,7 +1854,8 @@ public class AtualizaInternacaoRN extends BaseBusiness {
 			final AghUnidadesFuncionais unidadeFuncionalNova,
 			final AghUnidadesFuncionais unidadeFuncionalAntiga,
 			final AghEspecialidades especialidadeNova,
-			final AghEspecialidades especialidadeAntiga) throws ApplicationBusinessException {
+			final AghEspecialidades especialidadeAntiga,
+			final DominioTransacaoAltaPaciente transacao) throws ApplicationBusinessException {
 		// ------------------------------------------------------------------------
 		// -- Define Tipo Movimento Internacao
 		// -- 1. Avalia qual o tipo de movimento paciente através da comparação
@@ -1885,96 +1871,90 @@ public class AtualizaInternacaoRN extends BaseBusiness {
 		// -- [11] Profissional
 		// ------------------------------------------------------------------------
 		try {
-			// Obtém dados para comparação
-			final Short seqUnidadeFuncionalAntiga = this.getInternacaoUtilRN().obtemUnf(
-					leitoAntigo != null ? leitoAntigo.getLeitoID() : null,
-					quartoAntigo != null ? quartoAntigo.getNumero() : null,
-					unidadeFuncionalAntiga != null ? unidadeFuncionalAntiga
-							.getSeq() : null);
-			final Short seqUnidadeFuncionalNova = this.getInternacaoUtilRN().obtemUnf(
-					leitoNovo != null ? leitoNovo.getLeitoID() : null,
-					quartoNovo != null ? quartoNovo.getNumero() : null,
-					unidadeFuncionalNova != null ? unidadeFuncionalNova
-							.getSeq() : null);
-
-			final DominioSimNao indUnidadeEmergenciaAntiga = this.getInternacaoUtilRN()
-					.obtemIndUnidEmergencia(seqUnidadeFuncionalAntiga);
-			final DominioSimNao indUnidadeEmergenciaNova = this.getInternacaoUtilRN()
-					.obtemIndUnidEmergencia(seqUnidadeFuncionalNova);
-			
-			/*-------------------------------------------------------------------------*/
-			//twickert: Essa parte estava com problema apos o refactory
-			//de forma intermitente ocorre entity is not managed pq pela fachada pega
-			//o entity manualmente, sendo que em determinados casos deve estar criando ele
-			//o que nao associa ele a atual conversação e ao usar lança a exceção:
-			//08:17:19,365 ERROR [AtualizaInternacaoRN] Entity not managed
-			//java.lang.IllegalArgumentException: Entity not managed
-			
-			//Analisando o codigo abaixo, aparentemente está incorreto e não é necessário
-			//por isso foi comentado.
-			//Caso tenha problema no futuro usar o obter por chave primaria e o obter original.
-			
-			//TODO: REVER ESTES REFRESH. CRUDS DOS ITENS DA PRESCRIÇÃO NÃO DEVERIAM
-			//LANÇAR EXCEPTIONS COM ROLLBACK
-//			if (especialidadeNova != null){
-//				aghuFacade.refresh(especialidadeNova);				
-//			}
-//			if (especialidadeAntiga != null){
-//				aghuFacade.refresh(especialidadeAntiga);				
-//			}
-			/*-------------------------------------------------------------------------*/
-
 			String param = null;
-			// Início das comparações
-			if (this.getInternacaoUtilRN().modificados(indUnidadeEmergenciaAntiga,
-					indUnidadeEmergenciaNova)) {
-				param = AghuParametrosEnum.P_COD_MVTO_INT_TRSF_SO.toString();
-			} else {
-				final Integer codigoEspecialidadeAntiga = this.getInternacaoUtilRN()
-						.obtemClinicaEspecialidade(especialidadeAntiga.getSeq());
-				final Integer codigoEspecialidadeNova = this.getInternacaoUtilRN()
-						.obtemClinicaEspecialidade(especialidadeNova.getSeq());
-
-				if (this.getInternacaoUtilRN().modificados(
-						codigoEspecialidadeAntiga, codigoEspecialidadeNova)) {
-					param = AghuParametrosEnum.P_COD_MVTO_INT_TRSF_CLIN
-							.toString();
-				} else if (this.getInternacaoUtilRN().modificados(
-						seqUnidadeFuncionalAntiga, seqUnidadeFuncionalNova)) {
-					param = AghuParametrosEnum.P_COD_MVTO_INT_TRSF_UNIDADE
-							.toString();
-				} else if (this.getInternacaoUtilRN().modificados(leitoAntigo,
-						leitoNovo)
-						|| this.getInternacaoUtilRN().modificados(quartoAntigo,
-								quartoNovo)) {
-					param = AghuParametrosEnum.P_COD_MVTO_INT_TRSF_LTO
-							.toString();
-				} else if (this.getInternacaoUtilRN().modificados(
-						especialidadeAntiga, especialidadeNova)) {
-					param = AghuParametrosEnum.P_COD_MVTO_INT_TRSF_ESP
-							.toString();
-				} else if (this.getInternacaoUtilRN().modificados(professorAntigo,
-						professorNovo)) {
-					param = AghuParametrosEnum.P_COD_MVTO_INT_TRSF_EQPE
-							.toString();
-				}
+			//Verifica se é uma internação ou alta administrativa
+			if(transacaoProcessaAlta(transacao)){
+				param = AghuParametrosEnum.P_COD_MVTO_INT_ALTA.toString();
+			}
+			//Verifica se é uma estorno de alta internação
+			else if(transacaoEstornaAlta(transacao)){
+				param = AghuParametrosEnum.P_COD_MVTO_ESTORNO_ALTA_INTERNACAO.toString();
+			}
+			else if(transacaoAtualizacaoInternacao(transacao)){
+				param = AghuParametrosEnum.P_COD_MVTO_ATUALIZACAO_INTERNACAO.toString();				
+		    }else{
+				
+					// Obtém dados para comparação
+					final Short seqUnidadeFuncionalAntiga = this.getInternacaoUtilRN().obtemUnf(
+							leitoAntigo != null ? leitoAntigo.getLeitoID() : null,
+									quartoAntigo != null ? quartoAntigo.getNumero() : null,
+											unidadeFuncionalAntiga != null ? unidadeFuncionalAntiga
+													.getSeq() : null);
+					final Short seqUnidadeFuncionalNova = this.getInternacaoUtilRN().obtemUnf(
+							leitoNovo != null ? leitoNovo.getLeitoID() : null,
+									quartoNovo != null ? quartoNovo.getNumero() : null,
+											unidadeFuncionalNova != null ? unidadeFuncionalNova
+													.getSeq() : null);
+					
+					final DominioSimNao indUnidadeEmergenciaAntiga = this.getInternacaoUtilRN()
+							.obtemIndUnidEmergencia(seqUnidadeFuncionalAntiga);
+					final DominioSimNao indUnidadeEmergenciaNova = this.getInternacaoUtilRN()
+							.obtemIndUnidEmergencia(seqUnidadeFuncionalNova);
+									
+					// Início das comparações
+					if (this.getInternacaoUtilRN().modificados(indUnidadeEmergenciaAntiga,
+							indUnidadeEmergenciaNova)) {
+						
+						param = AghuParametrosEnum.P_COD_MVTO_INT_TRSF_SO.toString();
+					} else {
+						
+						final Integer codigoEspecialidadeAntiga = this.getInternacaoUtilRN()
+								.obtemClinicaEspecialidade(especialidadeAntiga.getSeq());
+						final Integer codigoEspecialidadeNova = this.getInternacaoUtilRN()
+								.obtemClinicaEspecialidade(especialidadeNova.getSeq());
+						
+						if (this.getInternacaoUtilRN().modificados(
+								codigoEspecialidadeAntiga, codigoEspecialidadeNova)) {
+							
+							param = AghuParametrosEnum.P_COD_MVTO_INT_TRSF_CLIN
+									.toString();
+						} else if (this.getInternacaoUtilRN().modificados(
+								seqUnidadeFuncionalAntiga, seqUnidadeFuncionalNova)) {
+							
+							param = AghuParametrosEnum.P_COD_MVTO_INT_TRSF_UNIDADE
+									.toString();
+						} else if (this.getInternacaoUtilRN().modificados(leitoAntigo,
+								leitoNovo)
+								|| this.getInternacaoUtilRN().modificados(quartoAntigo,
+										quartoNovo)) {
+							
+							param = AghuParametrosEnum.P_COD_MVTO_INT_TRSF_LTO
+									.toString();
+						} else if (this.getInternacaoUtilRN().modificados(
+								especialidadeAntiga, especialidadeNova)) {
+							
+							param = AghuParametrosEnum.P_COD_MVTO_INT_TRSF_ESP
+									.toString();
+						} else if (this.getInternacaoUtilRN().modificados(professorAntigo,
+								professorNovo)) {
+							
+							param = AghuParametrosEnum.P_COD_MVTO_INT_TRSF_EQPE
+									.toString();
+						}
+					}
 			}
 
 			if (param != null) {
 				return getAinTiposMvtoInternacaoDAO().buscarPorParametroNumerico(param);
 			} else {
-				String retValue = null;
-				final AghParametros aghParametros = this.getParametroFacade()
-						.buscarAghParametro(AghuParametrosEnum.P_COD_MVTO_TRSF_INEXISTENTE);
-				if (aghParametros != null
-						&& aghParametros.getVlrTexto() != null) {
-					retValue = aghParametros.getVlrTexto();
-				}
-
-				return retValue != null ? retValue
-						: "TRANSFERENCIA INEXISTENTE";
+				throw new ApplicationBusinessException(
+						AtualizaInternacaoRNExceptionCode.AIN_ERRO_MOV_INTERNACAO);
 			}
-		} catch (final Exception e) {
+		} catch(ApplicationBusinessException ae){
+			logError(ae.getMessage(), ae);
+			throw new ApplicationBusinessException(
+					AtualizaInternacaoRNExceptionCode.AIN_ERRO_MOV_INTERNACAO);
+		}catch (final Exception e) {
 			logError(e.getMessage(), e);
 			throw new ApplicationBusinessException(
 					AtualizaInternacaoRNExceptionCode.AIN_00672);
@@ -2005,6 +1985,62 @@ public class AtualizaInternacaoRN extends BaseBusiness {
 		}
 		
 		final List<AghAtendimentos> atendimentos = this.getAghuFacade().pesquisarAtendimentosGestacoesEmAtendimento(gsoPacCodigo,gsoSeqp);
+
+		if (atendimentos != null && !atendimentos.isEmpty()) {
+			try {
+				// Atualizadas as informações de Leito do recem-nascido.
+				for (final AghAtendimentos atendimento : atendimentos) {
+					if (StringUtils.isNotBlank(buscarLocalInternacaoVO.getLeitoID())){
+						atendimento.setLeito(this.getAinLeitosDAO().obterPorChavePrimaria(buscarLocalInternacaoVO.getLeitoID()));						
+					}
+					else{
+						atendimento.setLeito(null);
+					}
+					if (buscarLocalInternacaoVO.getNumeroQuarto() != null){
+						atendimento.setQuarto(getCadastrosBasicosInternacaoFacade()
+								.obterQuarto(buscarLocalInternacaoVO
+										.getNumeroQuarto()));						
+					}
+					else{
+						atendimento.setQuarto(null);
+					}
+					atendimento.setUnidadeFuncional(this.getAghuFacade().obterAghUnidadesFuncionaisPorChavePrimaria(
+							buscarLocalInternacaoVO.getSeqUnidadeFuncional()));
+
+					if (rapServidorResponsavel != null) {
+						atendimento.setServidor(rapServidorResponsavel);
+					}
+
+					final AghAtendimentos atendimentoOld = getPacienteFacade().clonarAtendimento(atendimento);
+					this.getPacienteFacade().persistirAtendimento(atendimento, atendimentoOld, nomeMicrocomputador, dataFimVinculoServidor);
+				}
+			} catch (final Exception e) {
+				logError(e.getMessage(), e);
+				throw new ApplicationBusinessException(
+						AtualizaInternacaoRNExceptionCode.AIN_00842);
+			}
+		}
+	}
+	
+	@SuppressWarnings("PMD.NPathComplexity")
+	public void atualizaInformacoesLeito(AghAtendimentos atendimentoMae, final AinLeitos leito, final AinQuartos quarto,
+			final AghUnidadesFuncionais unidadeFuncional, String nomeMicrocomputador, final Date dataFimVinculoServidor) throws ApplicationBusinessException {
+
+		final BuscarLocalInternacaoVO buscarLocalInternacaoVO = buscarLocalInternacao(
+				(leito != null) ? leito.getLeitoID() : null,
+				(quarto != null) ? quarto.getNumero() : null,
+				(unidadeFuncional != null) ? unidadeFuncional.getSeq() : null);
+
+		final McoEscalaLeitoRns escalaLeitoRns = this.getPerinatologiaFacade().obterMcoEscalaLeitoRnsPorLeito(
+				buscarLocalInternacaoVO.getLeitoID());
+
+		RapServidores rapServidorResponsavel = null;
+		if (escalaLeitoRns != null) {
+			rapServidorResponsavel = escalaLeitoRns.getServidorResponsavel();
+		}
+		
+		final List<AghAtendimentos> atendimentos = this.getAghuFacade().pesquisarAtendimentosEmAtendimentoPeloAtendimentoMae(
+				atendimentoMae);
 
 		if (atendimentos != null && !atendimentos.isEmpty()) {
 			try {
@@ -2469,5 +2505,7 @@ public class AtualizaInternacaoRN extends BaseBusiness {
 	protected IServidorLogadoFacade getServidorLogadoFacade() {
 		return this.servidorLogadoFacade;
 	}
-		
+	private AtualizaInternacaoON getAtualizaInternacaoON() {
+		return atualizaInternacaoON;
+	}	
 }

@@ -197,7 +197,10 @@ public class RelatorioMateriaisColetarController extends ActionReport {
 	public String voltar(){
 		return RELATORIO_MATERIAIS_COLETAR_INTERNACAO;
 	}
-
+    public void directPrintPDF() throws SistemaImpressaoException, ApplicationBusinessException{
+    	this.filtro.setIndImpressaoEtiquetas(DominioSimNao.N);
+    	this.directPrint();
+    }
 	/**
 	 * Impressão direta usando o CUPS.
 	 */
@@ -210,8 +213,10 @@ public class RelatorioMateriaisColetarController extends ActionReport {
 			} catch (UnknownHostException e) {
 				LOG.error("Exceção caputada:", e);
 			}
-
-			this.colecao = solicitacaoExameFacade.buscaMateriaisColetarInternacao(this.filtro, nomeMicrocomputador);
+			
+			if(this.colecao == null){
+				this.colecao = solicitacaoExameFacade.buscaMateriaisColetarInternacao(this.filtro, nomeMicrocomputador);
+			}	
 		} catch (BaseException e) {
 			apresentarExcecaoNegocio(e);
 			return;

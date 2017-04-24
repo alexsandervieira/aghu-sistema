@@ -68,14 +68,17 @@
           <h:outputText value="#{registrosPacienteController.obterSomatorioTaxaBalancoHidrico(ind)}" title="#{registrosPacienteController.obterSomatorioTaxaBalancoHidrico(ind)}" style="font-weight:bold; color:#000000; text-align:right;"/> 
         </f:facet>  
 
-        <p:outputPanel rendered="#{not _listaBh.limite[ind]}" layout="inline"> 
+        <p:outputPanel id="panelLimiteBh" rendered="#{not _listaBh.limite[ind]}" layout="inline"> 
           <div style="text-align: center !important;" class="#{_colunaBH.grupo.tipo == 'CE'  ? 'scrollTable_selected_vivid_green' : ''} #{_colunaBH.grupo.tipo == 'CA'  ? 'scrollTable_selected_sky_blue' : '' }"> 
             <p:outputPanel rendered="#{registrosPacienteController.apresentaToolTip(_listaBh.valor[ind])}" layout="inline"> 
               <h:outputText value="#{registrosPacienteController.mostrarValorFormatado(_listaBh.valor[ind])}" title="#{_listaBh.valor[ind]}"/> 
             </p:outputPanel>  
             <p:outputPanel rendered="#{!registrosPacienteController.apresentaToolTip(_listaBh.valor[ind])}" layout="inline"> 
               <h:outputText value="#{registrosPacienteController.mostrarValorFormatado(_listaBh.valor[ind])}"/> 
-            </p:outputPanel> 
+            </p:outputPanel>
+            <p:tooltip for="panelLimiteBh" direction="bottom-right" styleClass="tooltip" layout="block"> 
+              <h:outputText value="#{_listaBh.valorTextoMedicao[ind]}"/> 
+            </p:tooltip>
           </div> 
         </p:outputPanel>  
         

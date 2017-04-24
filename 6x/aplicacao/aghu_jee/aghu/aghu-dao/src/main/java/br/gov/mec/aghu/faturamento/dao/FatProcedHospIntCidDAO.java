@@ -69,6 +69,7 @@ public class FatProcedHospIntCidDAO extends br.gov.mec.aghu.core.persistence.dao
 		
 		DetachedCriteria criteria = DetachedCriteria.forClass(FatProcedHospIntCid.class);
 		criteria.createAlias(FatProcedHospIntCid.Fields.CID.toString(), FatProcedHospIntCid.Fields.CID.toString(), JoinType.LEFT_OUTER_JOIN);
+		criteria.addOrder(Order.asc(FatProcedHospIntCid.Fields.CID.toString()+".codigo"));
 		if (phiSeq != null){
 			criteria.add(Restrictions.eq(FatProcedHospIntCid.Fields.PHI_SEQ.toString(), phiSeq));
 		}

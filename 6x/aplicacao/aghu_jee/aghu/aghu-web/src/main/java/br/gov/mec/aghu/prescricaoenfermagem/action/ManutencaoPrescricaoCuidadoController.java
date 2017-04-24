@@ -1,6 +1,7 @@
 package br.gov.mec.aghu.prescricaoenfermagem.action;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,7 +13,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.business.prescricaoenfermagem.IPrescricaoEnfermagemFacade;
+import br.gov.mec.aghu.business.prescricaoenfermagem.cadastrosapoio.IPrescricaoEnfermagemApoioFacade;
+import br.gov.mec.aghu.core.action.ActionController;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.dominio.DominioIndPendentePrescricoesCuidados;
+import br.gov.mec.aghu.dominio.DominioSituacaoHistPrescDiagnosticos;
+import br.gov.mec.aghu.model.EpeFatRelDiagnostico;
+import br.gov.mec.aghu.model.EpeFatRelDiagnosticoId;
+import br.gov.mec.aghu.model.EpeHistoricoPrescDiagnosticos;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagemId;
 import br.gov.mec.aghu.model.EpePrescricoesCuidados;
 import br.gov.mec.aghu.model.MpmTipoFrequenciaAprazamento;
@@ -20,10 +30,6 @@ import br.gov.mec.aghu.prescricaoenfermagem.cadastrosapoio.action.PrescricaoEnfe
 import br.gov.mec.aghu.prescricaoenfermagem.vo.CuidadoVO;
 import br.gov.mec.aghu.prescricaoenfermagem.vo.PrescricaoEnfermagemVO;
 import br.gov.mec.aghu.prescricaomedica.business.IPrescricaoMedicaFacade;
-import br.gov.mec.aghu.core.action.ActionController;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.Severity;
 
 /**
  * 
@@ -64,6 +70,9 @@ public class ManutencaoPrescricaoCuidadoController extends ActionController {
 	
 	@EJB
 	private IPrescricaoEnfermagemFacade prescricaoEnfermagemFacade;
+
+	@EJB
+	private IPrescricaoEnfermagemApoioFacade prescricaoEnfermagemApoioFacade;
 	
 	@EJB
 	private IPrescricaoMedicaFacade prescricaoMedicaFacade;	
@@ -380,13 +389,15 @@ public class ManutencaoPrescricaoCuidadoController extends ActionController {
 	public String gravar() {
 		
 		this.ocorreuErro = Boolean.FALSE;
-		
 		for(CuidadoVO cuidadoVO : listaCuidadoVO){
 			if (cuidadoVO.getPrescricaoCuidado().getId()!=null 
 					&& cuidadoVO.getPrescricaoCuidado().getId().getSeq()!=null){
 				alterarCuidado(cuidadoVO);
 			}else{
 				inserirCuidado(cuidadoVO);
+				if(cuidadoVO.getFdgFreSeq() != null ){
+					inserirHistoricoPrescDiagnostico(cuidadoVO);
+				}
 			}
 		}
 		
@@ -451,6 +462,33 @@ public class ManutencaoPrescricaoCuidadoController extends ActionController {
 		this.cuidadoVO = null;
 	}
 	
+	private void inserirHistoricoPrescDiagnostico(CuidadoVO cuidadoVO) {
+		
+		EpeFatRelDiagnosticoId fatRelDiagnosticoId = new EpeFatRelDiagnosticoId();
+		fatRelDiagnosticoId.setDgnSnbGnbSeq(cuidadoVO.getFdgDgnSnbGnbSeq());
+		fatRelDiagnosticoId.setDgnSnbSequencia(cuidadoVO.getFdgDgnSnbSequencia());
+		fatRelDiagnosticoId.setDgnSequencia(cuidadoVO.getFdgDgnSequencia());
+		fatRelDiagnosticoId.setFreSeq(cuidadoVO.getFdgFreSeq());
+
+		EpeFatRelDiagnostico fatRelDiagnostico = prescricaoEnfermagemApoioFacade.obterEpeFatRelDiagnosticoPorId(fatRelDiagnosticoId);
+		EpeHistoricoPrescDiagnosticos historicoDiagnostico = prescricaoEnfermagemFacade.obterEpeHistoricoPrescDiagnosticosPorPrescDiag(fatRelDiagnostico, cuidadoVO.getPrescricaoEnfermagem(), true);
+
+		if(historicoDiagnostico == null){
+			historicoDiagnostico = new EpeHistoricoPrescDiagnosticos();
+			historicoDiagnostico.setPrescricaoEnfermagem(cuidadoVO.getPrescricaoEnfermagem());
+			historicoDiagnostico.setCriadoEm(new Date());
+			if(fatRelDiagnostico != null){
+				historicoDiagnostico.setDescricao(fatRelDiagnostico.getDiagnostico().getDescricao().concat(" - ").concat(fatRelDiagnostico.getFatRelacionado().getDescricao()));
+			}
+			
+			historicoDiagnostico.setDiagnostico(fatRelDiagnostico.getDiagnostico());
+			historicoDiagnostico.setFatRelacionado(fatRelDiagnostico.getFatRelacionado());
+			historicoDiagnostico.setIndPendente(Boolean.TRUE);
+			historicoDiagnostico.setSituacao(DominioSituacaoHistPrescDiagnosticos.I);
+			this.prescricaoEnfermagemFacade.inserirHistoricoPrescDiagnostico(historicoDiagnostico);
+		}
+	}
+
 	public void alterarCuidado(CuidadoVO cuidadoVO){
 		this.cuidadoVO = cuidadoVO;
 		try {

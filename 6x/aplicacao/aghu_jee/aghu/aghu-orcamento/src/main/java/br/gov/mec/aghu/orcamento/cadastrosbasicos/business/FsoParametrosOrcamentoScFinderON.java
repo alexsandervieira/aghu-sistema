@@ -87,7 +87,7 @@ return LOG;
 				try {
 					FsoParametrosOrcamentoCriteriaVO criteria5 = criteria4.clone();
 					criteria5.setCentroCusto(criteria.getCentroCusto());
-					logInfo("Buscando parâmetros SC geral por centro de custo");
+					logInfo("Buscando parâmetros SC geral por centro de atividade");
 					T result2 = strategy.find(criteria5);
 					
 					if (result2 != null) {

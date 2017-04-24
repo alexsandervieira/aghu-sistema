@@ -44,7 +44,7 @@ import br.gov.mec.aghu.prescricaomedica.business.IPrescricaoMedicaFacade;
 @Stateless
 public class AprazamentoPrescricaoEnfermagemRN extends BaseBusiness {
 	
-	private static final String ESPACO_EM_BRANCO_RELATORIO_RETRATO = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+	private static final String ESPACO_EM_BRANCO_RELATORIO_RETRATO = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 	
 	private static final String ESPACO_EM_BRANCO_RELATORIO_PAISAGEM = ESPACO_EM_BRANCO_RELATORIO_RETRATO 
 						+ ESPACO_EM_BRANCO_RELATORIO_RETRATO;
@@ -138,7 +138,7 @@ public class AprazamentoPrescricaoEnfermagemRN extends BaseBusiness {
 			if (tipoItem == TipoItemAprazamento.MEDICAMENTO || tipoItem == TipoItemAprazamento.SOLUCAO) {
 				aprazamento.add("I=        T=        I=        T=        I=        T=        ");
 			} else {
-				aprazamento.add("I=          T=          ");
+				aprazamento.add("I=" + ESPACO_EM_BRANCO_RELATORIO_RETRATO + "T=" + ESPACO_EM_BRANCO_RELATORIO_RETRATO);
 			}
 			return aprazamento;
 		}

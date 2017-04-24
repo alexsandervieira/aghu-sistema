@@ -23,6 +23,13 @@ import br.gov.mec.aghu.ambulatorio.vo.ConsultaDisponibilidadeHorarioVO;
 import br.gov.mec.aghu.ambulatorio.vo.DataInicioFimVO;
 import br.gov.mec.aghu.ambulatorio.vo.DisponibilidadeHorariosVO;
 import br.gov.mec.aghu.ambulatorio.vo.VAacSiglaUnfSalaVO;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.dominio.DominioDiaSemana;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.utils.DateUtil;
+import br.gov.mec.aghu.core.utils.DateValidator;
 import br.gov.mec.aghu.dominio.DominioTurno;
 import br.gov.mec.aghu.model.AacCondicaoAtendimento;
 import br.gov.mec.aghu.model.AacGradeAgendamenConsultas;
@@ -31,14 +38,8 @@ import br.gov.mec.aghu.model.AacTipoAgendamento;
 import br.gov.mec.aghu.model.AghEquipes;
 import br.gov.mec.aghu.model.AghEspecialidades;
 import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.model.RapServidoresId;
 import br.gov.mec.aghu.model.VAacSiglaUnfSala;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.commons.CoreUtil;
-import br.gov.mec.aghu.core.dominio.DominioDiaSemana;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
-import br.gov.mec.aghu.core.utils.DateUtil;
-import br.gov.mec.aghu.core.utils.DateValidator;
 
 @SuppressWarnings("PMD.CyclomaticComplexity")
 @Stateless
@@ -132,22 +133,47 @@ public class DisponibilidadeHorariosON extends BaseBusiness {
 			DominioDiaSemana dia, Boolean disponibilidade, VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,	DataInicioFimVO turno,
 			List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS) throws ApplicationBusinessException {
 
+	return this.listarDisponibilidadeHorariosCount(filtroSeq, filtroUslUnfSeq, filtroEspecialidade,
+			filtroEquipe, filtroProfissional, pagador, tipoAgendamento, condicaoAtendimento, dtConsulta, horaConsulta, mesInicio,
+			mesFim, dia, disponibilidade, zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS,
+			null, null, null, null, null);
+    }
+
+    public Long listarDisponibilidadeHorariosCount(Integer filtroSeq, Short filtroUslUnfSeq, AghEspecialidades filtroEspecialidade,
+			AghEquipes filtroEquipe, RapServidores filtroProfissional, AacPagador pagador, AacTipoAgendamento tipoAgendamento,
+			AacCondicaoAtendimento condicaoAtendimento, Date dtConsulta, Date horaConsulta, Date mesInicio, Date mesFim,
+			DominioDiaSemana dia, Boolean disponibilidade, VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,	DataInicioFimVO turno,
+			List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS, List<Integer> listIdsEspe,
+			List<Integer> listIdsEqp, List<Integer> listIdsUnf, List<Integer> listIdsGrd, List<RapServidoresId> listIdsProf) throws ApplicationBusinessException {
+
 	return this.getAacGradeAgendamenConsultasDAO().listarDisponibilidadeHorariosCount(filtroSeq, filtroUslUnfSeq, filtroEspecialidade,
 			filtroEquipe, filtroProfissional, pagador, tipoAgendamento, condicaoAtendimento, dtConsulta, horaConsulta, mesInicio,
-			mesFim, dia, disponibilidade, zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS);
+			mesFim, dia, disponibilidade, zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS,
+			listIdsEspe, listIdsEqp, listIdsUnf, listIdsGrd, listIdsProf);
     }
 
     public List<DisponibilidadeHorariosVO> listarDisponibilidadeHorarios(Integer filtroSeq, Short filtroUslUnfSeq,
     	    AghEspecialidades filtroEspecialidade, AghEquipes filtroEquipe, RapServidores filtroProfissional, AacPagador pagador,
-    	    AacTipoAgendamento tipoAgendamento, AacCondicaoAtendimento condicao, Date dtConsulta, Date horaConsulta, Date mesInicio,
+    	    AacTipoAgendamento tipoAgendamento, AacCondicaoAtendimento condicaoAtendimento, Date dtConsulta, Date horaConsulta, Date mesInicio,
     	    Date mesFim, DominioDiaSemana dia, Boolean disponibilidade, VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,
     	    DataInicioFimVO turno, List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS) throws ApplicationBusinessException {
+    	return listarDisponibilidadeHorarios(filtroSeq, filtroUslUnfSeq, filtroEspecialidade, filtroEquipe,
+				filtroProfissional, pagador, tipoAgendamento, condicaoAtendimento, dtConsulta, horaConsulta, mesInicio, mesFim, dia,
+				disponibilidade, zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS, null, null, null, null, null);
+    }
+    	
+    public List<DisponibilidadeHorariosVO> listarDisponibilidadeHorarios(Integer filtroSeq, Short filtroUslUnfSeq,
+    	    AghEspecialidades filtroEspecialidade, AghEquipes filtroEquipe, RapServidores filtroProfissional, AacPagador pagador,
+    	    AacTipoAgendamento tipoAgendamento, AacCondicaoAtendimento condicao, Date dtConsulta, Date horaConsulta, Date mesInicio,
+    	    Date mesFim, DominioDiaSemana dia, Boolean disponibilidade, VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,
+    	    DataInicioFimVO turno, List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS,
+    	    List<Integer> listIdsEspe, List<Integer> listIdsEqp, List<Integer> listIdsUnf, List<Integer> listIdsGrd, List<RapServidoresId> listIdsProf) throws ApplicationBusinessException {
 
     	List<AacGradeAgendamenConsultas> listaGrade = new ArrayList<AacGradeAgendamenConsultas>();
 
     	listaGrade = this.getAacGradeAgendamenConsultasDAO().listarDisponibilidadeHorarios(filtroSeq, filtroUslUnfSeq, filtroEspecialidade,
     		filtroEquipe, filtroProfissional, pagador, tipoAgendamento, condicao, dtConsulta, horaConsulta, mesInicio, mesFim, dia,
-    		zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS);
+    		zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS, listIdsEspe, listIdsEqp, listIdsUnf, listIdsGrd, listIdsProf);
     	
     	List<DisponibilidadeHorariosVO> listaVO = this.popularListaDisponibilidadeHorarios(listaGrade, pagador, tipoAgendamento, condicao,
     		dtConsulta, horaConsulta, mesInicio, mesFim, dia, disponibilidade, visualizarPrimeirasConsultasSMS);

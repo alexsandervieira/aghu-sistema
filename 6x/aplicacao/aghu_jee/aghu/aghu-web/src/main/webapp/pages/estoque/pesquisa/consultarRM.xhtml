@@ -123,8 +123,8 @@
                          <f:facet name="header"> 
                            <h:outputText value="#{messages.LABEL_GRID_GRUPO_CONSULTAR_RM}"/> 
                          </f:facet>  
-                         <h:outputText value="#{_req.codigoGrupoMaterial}"/>  
-                         <p:tooltip rendered="#{_req.codigoGrupoMaterial!=null}" direction="bottom-right" styleClass="tooltip" layout="block"> 
+                         <h:outputText value="#{_req.codigoGrupoMaterial}" id="grupoMaterial"/>  
+                         <p:tooltip rendered="#{_req.codigoGrupoMaterial!=null}" direction="bottom-right" styleClass="tooltip" layout="block" for="grupoMaterial"> 
                            <h:outputText value="#{_req.codigoGrupoMaterial} - #{_req.descricaoGrupoMaterial}"/> 
                          </p:tooltip> 
                        </p:column>  
@@ -148,8 +148,8 @@
                          <f:facet name="header"> 
                            <h:outputText value="#{messages.LABEL_GRID_ALMOXARIFADO_CONSULTAR_RM}"/> 
                          </f:facet>  
-                         <h:outputText value="#{_req.seqAlmoxarifado}"/>  
-                         <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
+                         <h:outputText value="#{_req.seqAlmoxarifado}" id="almoxarifado"/>  
+                         <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block" for="almoxarifado"> 
                            <h:outputText value="#{_req.seqAlmoxarifado} - #{_req.descricaoAlmoxarifado}"/> 
                          </p:tooltip> 
                        </p:column>  
@@ -157,8 +157,8 @@
                          <f:facet name="header"> 
                            <h:outputText value="#{messages.LABEL_GRID_CCREQ_CONSULTAR_RM}"/> 
                          </f:facet>  
-                         <h:outputText value="#{_req.codigoCentroCustoRequisitante}"/>  
-                         <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
+                         <h:outputText value="#{_req.codigoCentroCustoRequisitante}" id="centroCusto"/>  
+                         <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block" for="centroCusto"> 
                            <h:outputText value="#{_req.codigoCentroCustoRequisitante} - #{_req.descricaoCentroCustoRequisitante}"/> 
                          </p:tooltip> 
                        </p:column>  
@@ -166,8 +166,8 @@
                          <f:facet name="header"> 
                            <h:outputText value="#{messages.LABEL_GRID_CCAPL_CONSULTAR_RM}"/> 
                          </f:facet>  
-                         <h:outputText value="#{_req.codigoCentroCustoAplicacao}"/>  
-                         <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
+                         <h:outputText value="#{_req.codigoCentroCustoAplicacao}" id="centroCustoAplicacao"/>  
+                         <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block" for="centroCustoAplicacao"> 
                            <h:outputText value="#{_req.codigoCentroCustoAplicacao} - #{_req.descricaoCentroCustoAplicacao}"/> 
                          </p:tooltip> 
                        </p:column>  
@@ -189,8 +189,8 @@
                          <f:facet name="header"> 
                            <h:outputText value="#{messages.LABEL_GRID_IMPRESSAO_CONSULTAR_RM}"/> 
                          </f:facet>  
-                         <h:outputText value="#{_req.indImpresso.descricao}"/>  
-                         <p:tooltip rendered="#{_req.nomeImpressora ne null || _req.observacao ne null}" direction="bottom-right" styleClass="tooltip" layout="block"> 
+                         <h:outputText value="#{_req.indImpresso.descricao}" id="observacao"/>  
+                         <p:tooltip rendered="#{_req.nomeImpressora ne null || _req.observacao ne null}" direction="bottom-right" styleClass="tooltip" layout="block" for="observacao"> 
                            <h:outputText value="Impressora: #{_req.nomeImpressora}" rendered="#{_req.nomeImpressora!=null}"/>  
                            <br clear="none"/>  
                            <h:outputText value="Obs. #{_req.observacao}" rendered="#{_req.observacao!=null}"/> 
@@ -211,7 +211,7 @@
                        <f:setPropertyActionListener target="#{visualizacaoItemRequisicaoMaterialController.origem}" value="estoque-consultarRM" for="command"/>  
                        <f:setPropertyActionListener target="#{visualizacaoItemRequisicaoMaterialController.seqRequisicaoMaterial}" value="#{consultaGeralRequisicaoMaterialPaginatorController.requisicaoSelecionada.seq}" for="command"/> 
                      </mec:commandButton>  
-                     <mec:commandButton id="bt_imprimir" disabled="#{consultaGeralRequisicaoMaterialPaginatorController.desabilitarBotaoImprimir()}" value="#{messages.LABEL_IMPRIMIR_CONSULTAR_RM}" action="#{consultaGeralRequisicaoMaterialPaginatorController.imprimirRM}" styleClass="bt_cinza"> 
+                     <mec:commandButton id="bt_imprimir" disabled="#{consultaGeralRequisicaoMaterialPaginatorController.desabilitarBotaoImprimir()}" value="#{messages.LABEL_IMPRIMIR_CONSULTAR_RM}" action="#{consultaGeralRequisicaoMaterialPaginatorController.imprimirRM}" styleClass="bt_cinza"  onclick="PF('loadDialogWG').show();"> 
                        <f:setPropertyActionListener target="#{imprimirRequisicaoMaterialController.voltarPara}" value="estoque-consultarRM" for="command"/>  
                        <f:setPropertyActionListener target="#{imprimirRequisicaoMaterialController.numeroRM}" value="#{consultaGeralRequisicaoMaterialPaginatorController.requisicaoConfirmada.seq}" for="command"/> 
                      </mec:commandButton>

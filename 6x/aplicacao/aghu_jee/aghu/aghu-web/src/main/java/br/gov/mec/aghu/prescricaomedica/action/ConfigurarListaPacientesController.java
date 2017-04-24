@@ -13,6 +13,10 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 
+import br.gov.mec.aghu.core.action.ActionController;
+import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.internacao.business.IInternacaoFacade;
 import br.gov.mec.aghu.internacao.vo.ProfessorCrmInternacaoVO;
 import br.gov.mec.aghu.model.AghAtendimentos;
@@ -26,10 +30,6 @@ import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.paciente.business.IPacienteFacade;
 import br.gov.mec.aghu.prescricaomedica.business.IPrescricaoMedicaFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
-import br.gov.mec.aghu.core.action.ActionController;
-import br.gov.mec.aghu.core.commons.CoreUtil;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.Severity;
 
 
 public class ConfigurarListaPacientesController extends ActionController {
@@ -83,9 +83,9 @@ public class ConfigurarListaPacientesController extends ActionController {
 
 	private boolean incluirPacientesCuidadosPosAnestesicos = false;
 	private boolean incluirPacientesCuidadosPosAnestesicosCarregado = false;
-	private final String PAGE_LISTAR_PACIENTES_INTERNADOS = "pesquisarListaPacientesInternados";
-	private final String PAGE_LISTAR_PACIENTES_ENFERMAGEM = "prescricaoenfermagem-listaPacientesEnfermagem";
-	private final String PAGE_PESQUISA_FONETICA_PRESCRICAO = "pesquisaFoneticaPrescricao";
+	private static final String PAGE_LISTAR_PACIENTES_INTERNADOS = "pesquisarListaPacientesInternados";
+	private static final String PAGE_LISTAR_PACIENTES_ENFERMAGEM = "prescricaoenfermagem-listaPacientesEnfermagem";
+	private static final String PAGE_PESQUISA_FONETICA_PRESCRICAO = "pesquisaFoneticaPrescricao";
 	
 	/* CRM PROFESSOR */
 	private ProfessorCrmInternacaoVO responsavel, responsavelSelecionado;
@@ -97,6 +97,8 @@ public class ConfigurarListaPacientesController extends ActionController {
 	private String cameFrom;
 		
 	private String leitoID;
+	
+	private boolean realizaPesquisa = true;
 	
 	@Inject
     private PesquisaFoneticaPrescricaoController pesquisaFoneticaPrescricaoController;
@@ -168,6 +170,7 @@ public class ConfigurarListaPacientesController extends ActionController {
 			apresentarExcecaoNegocio(e);
 		}
 		setConfirmaVoltar(false);
+		setRealizaPesquisa(true);
 	}
 
 	/**
@@ -175,7 +178,7 @@ public class ConfigurarListaPacientesController extends ActionController {
 	 * 
 	 * @return
 	 */
-	public void salvar() {
+	public String salvar() {
 		try {
 			// salva lista de especialidades
 			getPrescricaoMedicaFacade().salvarListaEspecialidades(
@@ -198,11 +201,22 @@ public class ConfigurarListaPacientesController extends ActionController {
 			getPrescricaoMedicaFacade().salvarIndicadorPacientesAtendimento(
 					isIncluirPacientesCuidadosPosAnestesicos(), getServidor());
 
+			setRealizaPesquisa(false);
 			limpar();
 		} catch (ApplicationBusinessException e) {
 			apresentarExcecaoNegocio(e);
+			return null;
 		}
-		apresentarMsgNegocio(Severity.INFO,	"MENSAGEM_LISTA_PACIENTES_CONFIGURADA_SUCESSO");
+		
+		if(cameFrom.equals("listaPacientesEnfermagem")){
+			apresentarMsgNegocio(Severity.INFO,	"MENSAGEM_LISTA_PACIENTES_CONFIGURADA_SUCESSO");
+			return PAGE_LISTAR_PACIENTES_ENFERMAGEM;	
+		} else if(cameFrom.equals("listaPacientesPrescricaoMedica")){
+            listaPacienteInternadoController.reiniciaBotoes();
+            apresentarMsgNegocio(Severity.INFO,	"MENSAGEM_LISTA_PACIENTES_CONFIGURADA_SUCESSO");
+			return PAGE_LISTAR_PACIENTES_INTERNADOS;
+		}
+		return null;
 	}
 
 	/**
@@ -235,11 +249,7 @@ public class ConfigurarListaPacientesController extends ActionController {
 //		//debug("ConfigurarListaPacientesController.pesquisarEspecialidades(): parametro = ["
 	//			+ parametro + "].");
 		Set<AghEspecialidades> result = new HashSet<AghEspecialidades>();
-		if ((especialidadeSelecionada == null)
-				|| !(StringUtils.equalsIgnoreCase(paramString,
-						especialidadeSelecionada.getSigla()) || StringUtils
-						.equalsIgnoreCase(paramString, especialidadeSelecionada
-								.getNomeEspecialidade()))) {
+		if (this.realizaPesquisa &&  ((especialidadeSelecionada == null) || !(StringUtils.equalsIgnoreCase(paramString, especialidadeSelecionada.getSigla()) || StringUtils.equalsIgnoreCase(paramString, especialidadeSelecionada.getNomeEspecialidade()))) ) {
 			try {
 				result = new HashSet<AghEspecialidades>(
 						getPrescricaoMedicaFacade().getListaEspecialidades(
@@ -282,16 +292,13 @@ public class ConfigurarListaPacientesController extends ActionController {
 	 */
 	public void adicionarEspecialidade() {
 		////debug("ConfigurarListaPacientesController.adicionarEspecialidade(): Entrando.");
+		setSelecionouEspecialidade();
 		if (getEspecialidadeSelecionada() != null) {
 			if (listaServEspecialidades == null) {
 				listaServEspecialidades = new ArrayList<AghEspecialidades>();
 			}
 			if (!listaServEspecialidades
 					.contains(getEspecialidadeSelecionada())) {
-			//	//debug("ConfigurarListaPacientesController.adicionarEspecialidade(): Especialidade = ["
-				//		+ (getEspecialidadeSelecionada() != null ? getEspecialidadeSelecionada()
-					//			.getSigla()
-						//		: "") + "].");
 				listaServEspecialidades.add(getEspecialidadeSelecionada());
 				Collections.sort(listaServEspecialidades,
 						especialidadeComparator);
@@ -303,13 +310,11 @@ public class ConfigurarListaPacientesController extends ActionController {
 				"MENSAGEM_CONFIG_LISTA_ESPECIALIDADE_JA_ADICIONADA");
 			}
 		}
-		////debug("ConfigurarListaPacientesController.adicionarEspecialidade(): Saindo.");
 	}
 
 	public void setSelecionouEspecialidade() {
 		setEspecialidadeSelecionada(getEspecialidade());
 	}
-
 	/**
 	 * Método da suggestion box para pesquisa de equipes a incluir na lista
 	 * Exclui da listagem os itens que já estão na tela Ignora a pesquisa caso o
@@ -321,17 +326,15 @@ public class ConfigurarListaPacientesController extends ActionController {
 	 */
 	public List<AghEquipes> pesquisarEquipes(String parametro) {
 		String paramString = (String) parametro;
-		//getLog().info("ConfigurarListaPacientesController.pesquisarEquipes(): parametro = ["+ parametro + "].");
 		Set<AghEquipes> result = new HashSet<AghEquipes>();
-		if ((equipeSelecionada == null)
+		if ( this.realizaPesquisa && ((equipeSelecionada == null)
 				|| !(StringUtils.equalsIgnoreCase(paramString, String
 						.valueOf(equipeSelecionada.getSeq())) || StringUtils
 						.equalsIgnoreCase(paramString, String
-								.valueOf(equipeSelecionada.getNome())))) {
+								.valueOf(equipeSelecionada.getNome())))) ) {
 			try {
 				result = new HashSet<AghEquipes>(getPrescricaoMedicaFacade()
 						.getListaEquipes(paramString));
-				// result.removeAll(getListaServEquipes());
 			} catch (ApplicationBusinessException e) {
 				apresentarExcecaoNegocio(e);
 			}
@@ -343,24 +346,17 @@ public class ConfigurarListaPacientesController extends ActionController {
 		Collections.sort(resultReturn, equipeComparator);
 		return resultReturn;
 	}
-
 	/**
 	 * Método que exclui uma equipe da lista em memória Ignora nulos
 	 * 
 	 * @param espParaExcluir
 	 */
 	public void excluirEquipe(AghEquipes eqParaExcluir) {
-//		//debug("ConfigurarListaPacientesController.excluirEquipe(): Entrando.");
 		if (eqParaExcluir != null) {
-	//		//debug("ConfigurarListaPacientesController.excluirEquipe(): Equipe = ["
-		//			+ (eqParaExcluir != null ? eqParaExcluir.getNome() : "")
-			//		+ "].");
 			listaServEquipes.remove(eqParaExcluir);
 			setConfirmaVoltar(true);
 		}
-		////debug("ConfigurarListaPacientesController.excluirEquipe(): Saindo.");
 	}
-	
 	/**
 	 * Método que exclui um responsável da lista em memória Ignora nulos
 	 * 
@@ -372,22 +368,17 @@ public class ConfigurarListaPacientesController extends ActionController {
 			setConfirmaVoltar(true);
 		}
 	}
-
 	/**
 	 * Adiciona uma equipe na lista em memória Caso a especialidade já esteja na
 	 * lista, ou seja nula, ignora
 	 */
 	public void adicionarEquipe() {
-		//debug("ConfigurarListaPacientesController.adicionarEquipe(): Entrando.");
+		setSelecionouEquipe();
 		if (getEquipeSelecionada() != null) {
 			if (listaServEquipes == null) {
 				listaServEquipes = new ArrayList<AghEquipes>();
 			}
 			if (!listaServEquipes.contains(getEquipeSelecionada())) {
-				//debug("ConfigurarListaPacientesController.adicionarEquipe(): Equipe = ["
-						//+ (getEquipeSelecionada() != null ? getEquipeSelecionada()
-							//	.getNome()
-								//: "") + "].");
 				listaServEquipes.add(getEquipeSelecionada());
 				Collections.sort(listaServEquipes, equipeComparator);
 				setEquipe(null);
@@ -397,9 +388,7 @@ public class ConfigurarListaPacientesController extends ActionController {
 				apresentarMsgNegocio(Severity.WARN,
 				"MENSAGEM_CONFIG_LISTA_EQUIPE_JA_ADICIONADA");
 			}
-
 		}
-		//debug("ConfigurarListaPacientesController.adicionarEquipe(): Saindo.");
 	}
 	
 	/**
@@ -407,6 +396,7 @@ public class ConfigurarListaPacientesController extends ActionController {
 	 * lista, ou seja nula, ignora
 	 */
 	public void adicionarResponsavel() {
+		setSelecionouResponsavel();
 		if (getResponsavelSelecionado() != null) {
 			if (listaProfessorCrmInternacaoVO == null) {
 				listaProfessorCrmInternacaoVO = new ArrayList<ProfessorCrmInternacaoVO>();
@@ -445,20 +435,17 @@ public class ConfigurarListaPacientesController extends ActionController {
 	public List<AghUnidadesFuncionais> pesquisarUnidadesFuncionais(
 			String parametro) {
 		String paramString = (String) parametro;
-		//debug("ConfigurarListaPacientesController.pesquisarUnidadesFuncionais(): parametro = ["
-				//+ parametro + "].");
 		Set<AghUnidadesFuncionais> result = new HashSet<AghUnidadesFuncionais>();
-		if ((unidadeFuncionalSelecionada == null)
+		if ( this.realizaPesquisa && (unidadeFuncionalSelecionada == null
 				|| !(StringUtils.equalsIgnoreCase(paramString, String
 						.valueOf(unidadeFuncionalSelecionada.getSeq())) || StringUtils
 						.equalsIgnoreCase(paramString,
 								unidadeFuncionalSelecionada
-								.getLPADAndarAlaDescricao()))) {
+								.getLPADAndarAlaDescricao()))) ) {
 			try {
 				result = new HashSet<AghUnidadesFuncionais>(
 						getPrescricaoMedicaFacade().getListaUnidadesFuncionais(
 								paramString));
-				// result.removeAll(getListaServUnFuncionais());
 			} catch (ApplicationBusinessException e) {
 				apresentarExcecaoNegocio(e);
 			}
@@ -471,39 +458,30 @@ public class ConfigurarListaPacientesController extends ActionController {
 		Collections.sort(resultReturn, unidadeComparator);
 		return resultReturn;
 	}
-
 	/**
 	 * Método que exclui uma unidade funcional da lista em memória Ignora nulos
 	 * 
 	 * @param espParaExcluir
 	 */
 	public void excluirUnidadeFuncional(AghUnidadesFuncionais unidade) {
-		//debug("ConfigurarListaPacientesController.excluirUnidadeFuncional(): Entrando.");
 		if (unidade != null) {
-			//debug("ConfigurarListaPacientesController.excluirUnidadeFuncional(): UnidadeFuncional = ["
-					//+ (unidade != null ? unidade.getDescricao() : "") + "].");
 			listaServUnFuncionais.remove(unidade);
 			setConfirmaVoltar(true);
 		}
-		//debug("ConfigurarListaPacientesController.excluirUnidadeFuncional(): Saindo.");
 	}
-
 	/**
 	 * Adiciona uma equipe na lista em memória Caso a especialidade já esteja na
 	 * lista, ou seja nula, ignora
 	 */
 	public void adicionarUnidadeFuncional() {
 		//debug("ConfigurarListaPacientesController.adicionarUnidadeFuncional(): Entrando.");
+		setSelecionouUnidadeFuncional();
 		if (getUnidadeFuncionalSelecionada() != null) {
 			if (listaServUnFuncionais == null) {
 				listaServUnFuncionais = new ArrayList<AghUnidadesFuncionais>();
 			}
 			if (!listaServUnFuncionais
 					.contains(getUnidadeFuncionalSelecionada())) {
-				//debug("ConfigurarListaPacientesController.adicionarUnidadeFuncional(): UnidadeFuncional = ["
-						//+ (getUnidadeFuncionalSelecionada() != null ? getUnidadeFuncionalSelecionada()
-							//	.getDescricao()
-								//: "") + "].");
 				listaServUnFuncionais.add(getUnidadeFuncionalSelecionada());
 				Collections.sort(listaServUnFuncionais, unidadeComparator);
 				setUnidadeFuncional(null);
@@ -514,7 +492,6 @@ public class ConfigurarListaPacientesController extends ActionController {
 						"MENSAGEM_CONFIG_LISTA_UNIDADE_FUNCIONAL_JA_ADICIONADA");
 			}
 		}
-		//debug("ConfigurarListaPacientesController.adicionarUnidadeFuncional(): Saindo.");
 	}
 
 	public void setSelecionouUnidadeFuncional() {
@@ -565,8 +542,6 @@ public class ConfigurarListaPacientesController extends ActionController {
 		setAtendimentoSelecionado(atendimento);
 	}
 	
-	
-	
 	/**
 	 * Método da suggestion box para pesquisa de unidades funcionais a incluir
 	 * na lista Exclui da listagem os itens que já estão na tela Ignora a
@@ -579,8 +554,6 @@ public class ConfigurarListaPacientesController extends ActionController {
 	public List<AghUnidadesFuncionais> pesquisarUnidadesFuncionaisFonetica(
 			Object parametro) {
 		String paramString = (String) parametro;
-		//debug("ConfigurarListaPacientesController.pesquisarUnidadesFuncionaisFonetica(): parametro = ["
-				//+ parametro + "].");
 		List<AghUnidadesFuncionais> result = new ArrayList<AghUnidadesFuncionais>();
 		if ((unidadeFuncionalPesquisaFoneticaSelecionada == null)
 				|| !(StringUtils.equalsIgnoreCase(paramString, String
@@ -619,7 +592,6 @@ public class ConfigurarListaPacientesController extends ActionController {
 			apresentarExcecaoNegocio(e);
 		}
 		setListaAtendimentosPacientesPesquisa(resultadoPesquisaFonetica);
-	//	getLog().info("ConfigurarListaPacientesController.pesquisarAtendimentoFonetica(): Saindo.");
 	}
 
 	/**
@@ -631,9 +603,6 @@ public class ConfigurarListaPacientesController extends ActionController {
 	public void excluirAtendimento(AghAtendimentos aParaExcluir) {
 		//debug("ConfigurarListaPacientesController.excluirAtendimento(): Entrando.");
 		if (aParaExcluir != null) {
-			//debug("ConfigurarListaPacientesController.excluirAtendimento(): Atendimento = ["
-		//			+ (aParaExcluir != null ? aParaExcluir.getPaciente()
-			//				.getNome() : "") + "].");
 			listaServAtendimentos.remove(aParaExcluir);
 			setConfirmaVoltar(true);
 		}
@@ -645,13 +614,7 @@ public class ConfigurarListaPacientesController extends ActionController {
 	 * lista, ou seja nula, ignora
 	 */
 	public void adicionarAtendimento() {
-		//debug("ConfigurarListaPacientesController.adicionarAtendimento(): Entrando.");
-		//setAtendimentoSelecionado(obterPacienteAtendimento(getNumeroProntuario(), getLeitoID()));
-		
-		/*if (getNumeroProntuario() != null
-				&& getAtendimentoSelecionado() == null) {
-			pesquisarAtendimento();
-		}*/
+
 		if (getAtendimentoSelecionado() != null) {
 			if (listaServAtendimentos == null) {
 				listaServAtendimentos = new ArrayList<AghAtendimentos>();
@@ -691,11 +654,11 @@ public class ConfigurarListaPacientesController extends ActionController {
 	
 	public String getVerificaPendenciasVoltar() {
 		this.verificarRetornoPesquisaFonetica();
-		if (!isConfirmaVoltar()
-				&& (incluirPacientesCuidadosPosAnestesicosCarregado != incluirPacientesCuidadosPosAnestesicos)) {
+		if (!isConfirmaVoltar() && (incluirPacientesCuidadosPosAnestesicosCarregado != incluirPacientesCuidadosPosAnestesicos)) {
 			setConfirmaVoltar(true);
 		}
 		if (isConfirmaVoltar()) {
+			setRealizaPesquisa(false); // Não realiza pesquisa nas suggestions
 			return null;
 		}
 		return voltar();
@@ -958,7 +921,7 @@ public class ConfigurarListaPacientesController extends ActionController {
 	}
 
 	public List<ProfessorCrmInternacaoVO> pesquisarProfessor(String strParam) {
-		return internacaoFacade.pesquisarProfessoresCrm(strParam, null, null);
+		return this.realizaPesquisa ? internacaoFacade.pesquisarProfessoresCrm(strParam, null, null) : null;
 	}
 
 	public ProfessorCrmInternacaoVO getResponsavel() {
@@ -1009,6 +972,14 @@ public class ConfigurarListaPacientesController extends ActionController {
 
 	public void setLeitoID(String leitoID) {
 		this.leitoID = leitoID;
+	}
+
+	public boolean isRealizaPesquisa() {
+		return realizaPesquisa;
+	}
+
+	public void setRealizaPesquisa(boolean realizaPesquisa) {
+		this.realizaPesquisa = realizaPesquisa;
 	}
 	
 	

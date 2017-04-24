@@ -22,6 +22,7 @@ import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.AinInternacao;
 import br.gov.mec.aghu.model.MpmAnamneses;
 import br.gov.mec.aghu.model.MpmEvolucoes;
+import br.gov.mec.aghu.model.RapQualificacao;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.paciente.business.IPacienteFacade;
 import br.gov.mec.aghu.prescricaomedica.anamneseevolucao.action.CabecalhoAnamneseEvolucaoController;
@@ -30,6 +31,7 @@ import br.gov.mec.aghu.prescricaomedica.anamneseevolucao.action.ManterAnamneseEv
 import br.gov.mec.aghu.prescricaomedica.anamneseevolucao.action.RelatorioAnamnesePacienteController;
 import br.gov.mec.aghu.prescricaomedica.anamneseevolucao.action.RelatorioEvolucoesPacienteController;
 import br.gov.mec.aghu.prescricaomedica.business.IPrescricaoMedicaFacade;
+import br.gov.mec.aghu.prescricaomedica.vo.EvolucaoPrescricaoVO;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 
 
@@ -71,7 +73,7 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 
 	
 	
-	private List<MpmEvolucoes> evolucoes;
+	private List<EvolucaoPrescricaoVO> evolucoes;
 	private List<MpmAnamneses> anamneses;
 
 	private Integer atdSeq;
@@ -81,9 +83,10 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 	private Boolean habilitaBotaoEvolucao;
 
 	private MpmAnamneses anamnese;
-	private MpmEvolucoes evolucao;
+	private EvolucaoPrescricaoVO evolucao;
 	private AghAtendimentos atendimento;
 	private AinInternacao internacao;
+	private RapQualificacao qualificacaoAnamnese;
 
 	private String selectedTab;
 	private String voltarPara;
@@ -109,7 +112,8 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 	private static final String MANTER_EVOLUCAO_ANAMNESE = "prescricaomedica-manterAnamneseEvolucao";
 	private static final String INCLUIR_NOTA_ADICIONAL_ANAMNESE = "prescricaomedica-manterAnamneseEvolucao";
 	private static final String INCLUIR_NOTA_ADICIONAL_EVOLUCAO = "prescricaomedica-manterAnamneseEvolucao";
-	private static final String REDIRECIONA_LISTA_PACIENTES_INTERNADOS = "prescricaomedica-pesquisarListaPacientesInternados";
+	private static final String PAGE_LISTA_PACIENTES_INTERNADOS_MEDICO = "prescricaomedica-pesquisarListaPacientesInternados";
+	private static final String PAGINA_LISTA_PACIENTES_INTERNADOS_ENFERMAGEM = "prescricaoenfermagem-listaPacientesEnfermagem";
 
 	public void inicio() {
 		this.manterAnamneseEvolucaoController.setIncluirNotaAdicionalEvolucao(false);
@@ -125,9 +129,13 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 			getCarregarEvolucoes();
 			getCarregarDataReferencia();
 			verificarStatusBotaoEvolucao();
+			if (anamnese != null) {
+				qualificacaoAnamnese = registroColaboradorFacade.obterRapQualificacaoPorServidor(anamnese.getServidor());
+			} 
 		}
 	}
 	
+
 	public void filtrarPeriodoEvolucao() {
 		getCarregarEvolucoes();
 	}
@@ -183,7 +191,7 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 
 		this.evolucoes = null;
 		if (this.atendimentoComAnamneseConcluida) {
-			this.evolucoes = this.prescricaoMedicaFacade.obterEvolucoesAnamnese(
+			this.evolucoes = this.prescricaoMedicaFacade.obterEvolucoesVO(
 					this.anamnese, situacoes, this.dataInicioEvolucao, this.dataFimEvolucao);
 		}
 	}
@@ -198,12 +206,24 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 
 		if (this.atendimentoComAnamneseConcluida) {
 			List<MpmEvolucoes> evolucoesNaoConcluidas = this.prescricaoMedicaFacade.obterEvolucoesAnamnese(this.anamnese, new Date(), situacoes);
-			if (evolucoesNaoConcluidas.isEmpty()) {
+			if (evolucoesNaoConcluidas.isEmpty() || profissionalMedicoOuEnfermeiro()) {
 				this.habilitaBotaoEvolucao = Boolean.TRUE;
 			}
 		}
 	}
 
+	public Boolean profissionalMedicoOuEnfermeiro() {
+		Boolean retorno = false;
+		try {
+			RapServidores servidorLogado = registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado());
+			retorno = registroColaboradorFacade.isProfissionalMedicoOuEnfermeiro(servidorLogado);
+		} catch (ApplicationBusinessException e) {
+			apresentarExcecaoNegocio(e);
+		}
+		return retorno;
+	}
+	
+	
 	public String verificarAdiantamentoEvolucao() {
 
 		this.showModalAdiantarEvolucao = Boolean.FALSE;
@@ -220,8 +240,11 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 		this.limparCampos();
 		if(paginaChamadora != null){
 			if ("prescricaomedica-pesquisarListaPacientesInternados".equalsIgnoreCase(paginaChamadora)) {
-				return REDIRECIONA_LISTA_PACIENTES_INTERNADOS;
+				return PAGE_LISTA_PACIENTES_INTERNADOS_MEDICO;
 			}  
+			if (paginaChamadora.equalsIgnoreCase(PAGINA_LISTA_PACIENTES_INTERNADOS_ENFERMAGEM)) {
+				return PAGINA_LISTA_PACIENTES_INTERNADOS_ENFERMAGEM;
+			}
 		}
 		return voltarPara;
 	}	
@@ -262,7 +285,7 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 		return null;
 	}
 
-	public Boolean verificaEdicaoEvolucao(MpmEvolucoes evolucao) {
+	public Boolean verificaEdicaoEvolucao(EvolucaoPrescricaoVO evolucao) {
 		if (!evolucao.getPendente().equals(DominioIndPendenteAmbulatorio.V)) {
 			return Boolean.TRUE;
 		}
@@ -309,12 +332,12 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 	
 	private void criarEvolucao() throws ApplicationBusinessException, ApplicationBusinessException {
 		RapServidores servidorLogado = registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado());
-		this.evolucao = this.prescricaoMedicaFacade.criarEvolucao(this.anamnese, this.dataReferencia, servidorLogado);
+		this.evolucao = this.prescricaoMedicaFacade.criarEvolucaoPrescricao(this.anamnese, this.dataReferencia, servidorLogado);
 	}
 
 	public String criarEvolucaoComDescricao() throws ApplicationBusinessException, ApplicationBusinessException {
 		RapServidores servidorLogado = registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado());
-		this.evolucao = this.prescricaoMedicaFacade.criarMpmEvolucaoComDescricao(this.evolucao.getDescricao(), this.anamnese, this.dataReferencia, servidorLogado);
+		this.evolucao = this.prescricaoMedicaFacade.criarEvolucaoVoComDescricao(this.evolucao.getDescricao(), this.anamnese, this.dataReferencia, servidorLogado);
 		return visualizarEvolucao(this.evolucao);
 	}
 
@@ -328,7 +351,7 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 		}
 	}
 
-	public String editarEvolucao(MpmEvolucoes evolucao) {
+	public String editarEvolucao(EvolucaoPrescricaoVO evolucao) {
 		this.setEvolucao(evolucao);
 		try {
 			this.prescricaoMedicaFacade.validarEvolucaoEmUso(evolucao);
@@ -362,7 +385,7 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 		this.manterAnamneseEvolucaoController.setSelectedTab(this.selectedTab);
 	}
 	
-	public String visualizarEvolucao(MpmEvolucoes evolucao) {
+	public String visualizarEvolucao(EvolucaoPrescricaoVO evolucao) {
 		this.setEvolucao(evolucao);
 		this.seqAnamnese = this.anamnese.getSeq();
 		this.seqEvolucao = this.evolucao.getSeq();
@@ -376,7 +399,7 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 		return this.anamnese != null && this.anamnese.getPendente().equals(DominioIndPendenteAmbulatorio.V);
 	}
 
-	public boolean habilitarIncluirNotaAdicionalEvolucao(MpmEvolucoes evolucao) {
+	public boolean habilitarIncluirNotaAdicionalEvolucao(EvolucaoPrescricaoVO evolucao) {
 		return evolucao.getPendente().equals(DominioIndPendenteAmbulatorio.V);
 	}
 
@@ -392,7 +415,7 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 		return INCLUIR_NOTA_ADICIONAL_ANAMNESE;
 	}
 
-	public String incluirNotaAdicioanalEvolucao(MpmEvolucoes evolucao) {
+	public String incluirNotaAdicioanalEvolucao(EvolucaoPrescricaoVO evolucao) {
 		this.seqEvolucao = evolucao.getSeq();
 		this.seqAnamnese = this.anamnese.getSeq();
 		this.selectedTab = ABA_3;
@@ -401,7 +424,7 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 		return INCLUIR_NOTA_ADICIONAL_EVOLUCAO;
 	}
 
-	public void imprimirEvolucao(MpmEvolucoes evolucao) {
+	public void imprimirEvolucao(EvolucaoPrescricaoVO evolucao) {
 		this.relatorioEvolucoesPacienteController.imprimirEvolucao(evolucao.getSeq());
 		this.apresentarMsgNegocio(Severity.INFO, "MENSAGEM_SUCESSO_IMPRESSAO");
 	}
@@ -415,11 +438,11 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 		return "voltar";
 	}
 
-	public List<MpmEvolucoes> getEvolucoes() {
+	public List<EvolucaoPrescricaoVO> getEvolucoes() {
 		return evolucoes;
 	}
 
-	public void setEvolucoes(List<MpmEvolucoes> evolucoes) {
+	public void setEvolucoes(List<EvolucaoPrescricaoVO> evolucoes) {
 		this.evolucoes = evolucoes;
 	}
 
@@ -455,11 +478,11 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 		this.habilitaBotaoEvolucao = habilitaBotaoEvolucao;
 	}
 
-	public MpmEvolucoes getEvolucao() {
+	public EvolucaoPrescricaoVO getEvolucao() {
 		return evolucao;
 	}
 
-	public void setEvolucao(MpmEvolucoes evolucao) {
+	public void setEvolucao(EvolucaoPrescricaoVO evolucao) {
 		this.evolucao = evolucao;
 	}
 
@@ -591,5 +614,12 @@ public class ListarAnamneseEvolucaoController extends ActionController {
 		this.dataFimEvolucao = dataFimEvolucao;
 	}
 
-
+	public RapQualificacao getQualificacaoAnamnese() {
+		return qualificacaoAnamnese;
+	}
+	
+	public void setQualificacaoAnamnese(RapQualificacao qualificacaoAnamnese) {
+		this.qualificacaoAnamnese = qualificacaoAnamnese;
+	}
+	
 }

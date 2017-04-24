@@ -2,6 +2,7 @@ package br.gov.mec.aghu.farmacia.dao;
 
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 
 import br.gov.mec.aghu.model.AfaMedicamento;
 import br.gov.mec.aghu.model.AfaMedicamentoEquivalente;
@@ -26,7 +27,7 @@ public class AfaMedicamentoEquivalenteDAO extends AbstractMedicamentoDAO<AfaMedi
 		DetachedCriteria criteria = DetachedCriteria.forClass(AfaMedicamentoEquivalente.class);
 		
 		criteria.createAlias("medicamentoEquivalente"/*AfaMedicamentoEquivalente.Fields.MEDICAMENTO_EQUIVALENTE.toString()*/, "medicamentoEquivalente");
-		criteria.createAlias("medicamentoEquivalente."+AfaMedicamento.Fields.UNIDADE_MEDIDA_MEDICAS.toString(), "mpmUnidadeMedidaMedicas");
+		criteria.createAlias("medicamentoEquivalente."+AfaMedicamento.Fields.UNIDADE_MEDIDA_MEDICAS.toString(), "mpmUnidadeMedidaMedicas",JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias("medicamentoEquivalente."+AfaMedicamento.Fields.TPR.toString(), "tipoApresentacaoMedicamento");
 		criteria.createAlias("rapServidores"/*AfaMedicamentoEquivalente.Fields.SERVIDOR.toString()*/, "rapServidores");
 		criteria.createAlias("rapServidores."+RapServidores.Fields.PESSOA_FISICA.toString()/*AfaMedicamentoEquivalente.Fields.SERVIDOR.toString()*/, "pessoaFisica");

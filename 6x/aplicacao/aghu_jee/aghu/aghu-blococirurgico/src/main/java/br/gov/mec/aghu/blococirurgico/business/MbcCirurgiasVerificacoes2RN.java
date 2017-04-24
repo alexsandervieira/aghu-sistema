@@ -167,16 +167,33 @@ public class MbcCirurgiasVerificacoes2RN extends BaseBusiness {
 	 * ORADB PROCEDURE mbck_crg_rn.rn_crgp_ver_prof_enf
 	 * 
 	 * Garantir que tenha pelo menos um profissional de enfermagem vinculado à cirurgia
+	 * @param cirurgia.getSeq(), 
 	 * 
-	 * @param crgSeq
+	 * @param list
 	 * @throws ApplicationBusinessException
 	 */
-	public void verificarProfissionalEnfermagem(Integer crgSeq) throws ApplicationBusinessException {
-		List<MbcProfCirurgias> listaProfissionaisEnfermagem = this.getMbcProfCirurgiasDAO().pesquisarProfissionalEnfermagem(crgSeq);
-		if (listaProfissionaisEnfermagem.isEmpty()) {
-			// Ao menos um profissional da enfermagem deve esta vinculado à cirurgia
-			throw new ApplicationBusinessException(MbcCirurgiasRNExceptionCode.MBC_00482);
+	public void verificarProfissionalEnfermagem(Integer cirSeq, List<CirurgiaTelaProfissionalVO> listaProfissionaisVo) throws ApplicationBusinessException { 
+		if(listaProfissionaisVo != null){
+			boolean existe = false;
+			for (CirurgiaTelaProfissionalVO profVO : listaProfissionaisVo) {
+				if(profVO.getFuncaoProfissional().equals(DominioFuncaoProfissional.CIR) || 
+						profVO.getFuncaoProfissional().equals(DominioFuncaoProfissional.ENF)){
+					existe = true;
+				}
+			}
+			if (existe == false) {
+				// Ao menos um profissional da enfermagem deve esta vinculado à cirurgia
+				throw new ApplicationBusinessException(MbcCirurgiasRNExceptionCode.MBC_00482);
+			}
+		} else {
+			List<MbcProfCirurgias> listaProfissionaisEnfermagem = this.getMbcProfCirurgiasDAO().pesquisarProfissionalEnfermagem(cirSeq);
+			if(listaProfissionaisEnfermagem.isEmpty()) {
+				// Ao menos um profissional da enfermagem deve esta vinculado à cirurgia
+				throw new ApplicationBusinessException(MbcCirurgiasRNExceptionCode.MBC_00482);
+			}
+			
 		}
+		
 	}
 
 	/**

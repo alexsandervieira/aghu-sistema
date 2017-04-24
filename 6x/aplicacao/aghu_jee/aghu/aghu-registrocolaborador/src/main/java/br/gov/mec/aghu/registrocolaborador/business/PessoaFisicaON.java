@@ -15,6 +15,13 @@ import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.business.fonetizador.FonetizadorUtil;
+import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.dominio.DominioOperacoesJournal;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.factory.BaseJournalFactory;
 import br.gov.mec.aghu.dao.ObjetosOracleDAO;
 import br.gov.mec.aghu.dominio.DominioLadoEndereco;
 import br.gov.mec.aghu.model.AghParametros;
@@ -30,13 +37,6 @@ import br.gov.mec.aghu.registrocolaborador.dao.RapDependentesDAO;
 import br.gov.mec.aghu.registrocolaborador.dao.RapPessoasFisicasDAO;
 import br.gov.mec.aghu.registrocolaborador.dao.RapPessoasFisicasJnDAO;
 import br.gov.mec.aghu.registrocolaborador.dao.RapServidoresDAO;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.business.fonetizador.FonetizadorUtil;
-import br.gov.mec.aghu.core.commons.CoreUtil;
-import br.gov.mec.aghu.core.dominio.DominioOperacoesJournal;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
-import br.gov.mec.aghu.core.factory.BaseJournalFactory;
 
 @SuppressWarnings("PMD.CyclomaticComplexity")
 @Stateless
@@ -98,8 +98,7 @@ public class PessoaFisicaON extends BaseBusiness {
 	}
 	
 	
-	public RapPessoasFisicas obterPessoaFisicaCRUD(Integer codigo)
-			throws ApplicationBusinessException {
+	public RapPessoasFisicas obterPessoaFisicaCRUD(Integer codigo)	throws ApplicationBusinessException {
 		
 		if (codigo == null) {
 			throw new ApplicationBusinessException(
@@ -107,7 +106,8 @@ public class PessoaFisicaON extends BaseBusiness {
 		}
 
 		return getRapPessoasFisicasDAO().obterPorChavePrimaria(codigo, true, RapPessoasFisicas.Fields.CIDADE, RapPessoasFisicas.Fields.BAIRRO_CEP_LOGRADOURO, 
-						RapPessoasFisicas.Fields.NACIONALIDADE, RapPessoasFisicas.Fields.PACIENTE);
+						RapPessoasFisicas.Fields.NACIONALIDADE, RapPessoasFisicas.Fields.PACIENTE, RapPessoasFisicas.Fields.CDD_CODIGO_MUNICIPIO,
+						RapPessoasFisicas.Fields.ORGAO_EMISSOR, RapPessoasFisicas.Fields.UF_ORGAO);
 	
 	}
 
@@ -156,8 +156,10 @@ public class PessoaFisicaON extends BaseBusiness {
 			}
 		}
 	}
-		
 	
+	public String ajustarNomePesquisa(String nome){
+		return FonetizadorUtil.ajustarNome(nome);
+	}
 	
 	public void salvar(RapPessoasFisicas pessoaFisica)
 			throws ApplicationBusinessException {
@@ -174,6 +176,7 @@ public class PessoaFisicaON extends BaseBusiness {
 		this.validarEndereco(pessoaFisica);
 
 		RapPessoasFisicasDAO pessoasFisicasDAO = getRapPessoasFisicasDAO();
+
 		
 		if (pessoaFisica.getCpf() != null) {
 			if (pessoasFisicasDAO.pesquisarPessoaFisicaCount(pessoaFisica.getCpf()) > 0) {
@@ -210,7 +213,7 @@ public class PessoaFisicaON extends BaseBusiness {
 			}
 		}
 	}	
-
+	
 	@SuppressWarnings("PMD.NPathComplexity")
 	private void validarTelefones(RapPessoasFisicas rapPessoasFisicas)
 			throws ApplicationBusinessException {
@@ -355,39 +358,19 @@ public class PessoaFisicaON extends BaseBusiness {
 	private void validarEndereco(RapPessoasFisicas pessoaFisica)
 			throws ApplicationBusinessException {
 
-		if (pessoaFisica.getAipBairrosCepLogradouro() == null
-				&& pessoaFisica.getAipCidades() == null
-				&& StringUtils.isBlank(pessoaFisica.getLogradouro())
-				&& pessoaFisica.getCep() == null
-				&& StringUtils.isBlank(pessoaFisica.getBairro())) {
-			throw new ApplicationBusinessException(
-					PessoaFisicaONExceptionCode.ERRO_ENDERECO_NAO_INFORMADO);
+		if (pessoaFisica.getAipBairrosCepLogradouro() == null && pessoaFisica.getAipCidades() == null && StringUtils.isBlank(pessoaFisica.getLogradouro())
+				&& pessoaFisica.getCep() == null && StringUtils.isBlank(pessoaFisica.getBairro())) {
+			throw new ApplicationBusinessException(PessoaFisicaONExceptionCode.ERRO_ENDERECO_NAO_INFORMADO);
 		}
 
-		/*
-		 * if (pessoaFisica.getAipBairrosCepLogradouro() != null &&
-		 * (pessoaFisica.getAipCidades() != null ||
-		 * !StringUtils.isBlank(pessoaFisica.getLogradouro()) ||
-		 * pessoaFisica.getCep() != null ||
-		 * !StringUtils.isBlank(pessoaFisica.getBairro()))) { throw new
-		 * ApplicationBusinessException(
-		 * PessoaFisicaONExceptionCode.ERRO_ENDERECO_CADASTRADO_NAO_CADASTRADO);
-		 * }
-		 */
-
-		if (pessoaFisica.getAipCidades() == null
-				&& (!StringUtils.isBlank(pessoaFisica.getLogradouro())
-						|| pessoaFisica.getCep() != null || !StringUtils
-						.isBlank(pessoaFisica.getBairro()))) {
-			throw new ApplicationBusinessException(
-					PessoaFisicaONExceptionCode.ERRO_CIDADE_ENDERECO_NAO_CADASTRADO);
+		if (pessoaFisica.getAipCidades() == null && (!StringUtils.isBlank(pessoaFisica.getLogradouro())	
+				|| pessoaFisica.getCep() != null || !StringUtils.isBlank(pessoaFisica.getBairro()))) {
+			throw new ApplicationBusinessException(PessoaFisicaONExceptionCode.ERRO_CIDADE_ENDERECO_NAO_CADASTRADO);
 		}
 
-		if (pessoaFisica.getAipBairrosCepLogradouro() != null
-				&& pessoaFisica.getAipBairrosCepLogradouro().getCepLogradouro() != null) {
+		if (pessoaFisica.getAipBairrosCepLogradouro() != null && pessoaFisica.getAipBairrosCepLogradouro().getCepLogradouro() != null) {
 
-			DominioLadoEndereco ladoEndereco = pessoaFisica
-					.getAipBairrosCepLogradouro().getCepLogradouro().getLado();
+			DominioLadoEndereco ladoEndereco = pessoaFisica.getAipBairrosCepLogradouro().getCepLogradouro().getLado();
 			Integer nroLogradouro = pessoaFisica.getNroLogradouro();
 			String nroInicial = pessoaFisica.getAipBairrosCepLogradouro().getCepLogradouro().getNroInicial();
 			String nroFinal = pessoaFisica.getAipBairrosCepLogradouro().getCepLogradouro().getNroFinal();
@@ -428,18 +411,15 @@ public class PessoaFisicaON extends BaseBusiness {
 
 			Integer cepNaoCadastrado = pessoaFisica.getCep();
 			if (cepNaoCadastrado != null) {
-				List<AipBairrosCepLogradouro> lista = getCadastroPacienteFacade().pesquisarCeps(
-						cepNaoCadastrado, null);
+				List<AipBairrosCepLogradouro> lista = getCadastroPacienteFacade().pesquisarCeps(cepNaoCadastrado, null);
 				if (!lista.isEmpty()) {
-
 					// limpar as informações do logradouro não cadastrado quando
 					// houver esta crítica
 					pessoaFisica.setLogradouro(null);
 					pessoaFisica.setBairro(null);
 					pessoaFisica.setCep(null);
 
-					throw new ApplicationBusinessException(
-							PessoaFisicaONExceptionCode.ERRO_CEP_CADASTRADO);
+					throw new ApplicationBusinessException(PessoaFisicaONExceptionCode.ERRO_CEP_CADASTRADO);
 
 				}
 			}
@@ -527,10 +507,15 @@ public class PessoaFisicaON extends BaseBusiness {
 			pessoaFisicaJn.setNroLogradouro(velho.getNroLogradouro());
 			pessoaFisicaJn.setCep(velho.getCep());
 			pessoaFisicaJn.setBairro(velho.getBairro());
-			pessoaFisicaJn.setCidadeNascimento(velho.getCidadeNascimento());
+			
+			if (velho.getCddCodigoMunicipio() != null) {
+				pessoaFisicaJn.setCddCodigoMunicipio(velho.getCddCodigoMunicipio().getCodigo());
+			}
+			
 			if (velho.getAipUfs() != null) {
 				pessoaFisicaJn.setUfSigla(velho.getAipUfs().getSigla());
 			}
+			
 			pessoaFisicaJn.setNroIdentidade(velho.getNroIdentidade());
 			pessoaFisicaJn.setNroCartProfissional(velho
 					.getNroCartProfissional());
@@ -631,8 +616,7 @@ public class PessoaFisicaON extends BaseBusiness {
 						novo.getNroLogradouro())
 				|| !CoreUtil.igual(velho.getCep(), novo.getCep())
 				|| !CoreUtil.igual(velho.getBairro(), novo.getBairro())
-				|| !CoreUtil.igual(velho.getCidadeNascimento(),
-						novo.getCidadeNascimento())
+				|| !CoreUtil.igual(velho.getCddCodigoMunicipio(), novo.getCddCodigoMunicipio())
 				|| !CoreUtil.igual(velho.getAipUfs(), novo.getAipUfs())
 				|| !CoreUtil.igual(velho.getNroIdentidade(),
 						novo.getNroIdentidade())

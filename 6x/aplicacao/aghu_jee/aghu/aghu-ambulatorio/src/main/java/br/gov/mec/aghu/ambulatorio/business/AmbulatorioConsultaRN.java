@@ -5,6 +5,8 @@ import static br.gov.mec.aghu.model.AipPacientes.VALOR_MAXIMO_PRONTUARIO;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -816,7 +818,7 @@ public class AmbulatorioConsultaRN extends BaseBusiness {
 	// TODO Alguns trechos de código estão comentados e não foram implementados
 	// por não serem do escopo da estória, os mesmos devem ser implementados
 	// quando necessários
-	@SuppressWarnings("PMD.ExcessiveMethodLength")
+	@SuppressWarnings({"PMD.ExcessiveMethodLength", "PMD.NPathComplexity"})
 	public AacConsultas atualizarConsultaBeforeRowUpdate(
 			AacConsultas consultaAnterior, AacConsultas consulta, String nomeMicrocomputador, Boolean substituirProntuario, Boolean aack_prh_rn_v_apac_diaria)
 			throws BaseException {
@@ -1086,10 +1088,12 @@ public class AmbulatorioConsultaRN extends BaseBusiness {
 		
 		this.getAmbulatorioRN().atualizaServidor(consulta.getServidor());
 		
-		if (consulta.getSituacaoConsulta() != null) {
-			this.verificarConsultaRetorno(consulta.getSituacaoConsulta().getSituacao(), consulta.getRetorno());
-		} else {
-			this.verificarConsultaRetorno(null, consulta.getRetorno());
+		if(!substituirProntuario) {
+			if (consulta.getSituacaoConsulta() != null) {
+				this.verificarConsultaRetorno(consulta.getSituacaoConsulta().getSituacao(), consulta.getRetorno());
+			} else {
+				this.verificarConsultaRetorno(null, consulta.getRetorno());
+			}
 		}
 
 		if (consultaAnterior.getDthrInicio() != null) {
@@ -2036,9 +2040,7 @@ public class AmbulatorioConsultaRN extends BaseBusiness {
 				.getIdade(consulta.getDtConsulta()) <= consulta
 				.getGradeAgendamenConsulta().getEspecialidade()
 				.getIdadeMaxPacAmbulatorio())) {
-			if (consulta.getCodCentral() == null) {
 				AmbulatorioConsultasRNExceptionCode.AAC_00265.throwException();
-			}
 		}
 	}
 
@@ -5256,35 +5258,25 @@ public class AmbulatorioConsultaRN extends BaseBusiness {
 	 * 
 	 * @throws ApplicationBusinessException
 	 */
-	public void verificarProfissionalAtendidoPor(RapServidores servidor,
-			Integer grdSeq) throws ApplicationBusinessException,
+	public void verificarProfissionalAtendidoPor(RapServidores servidor, Integer grdSeq) throws ApplicationBusinessException,
 			ApplicationBusinessException {
 
-		AacGradeAgendamenConsultas grade = this
-				.getAacGradeAgendamentoConsultasDAO().obterPorChavePrimaria(
-						grdSeq);
+		AacGradeAgendamenConsultas grade = this.getAacGradeAgendamentoConsultasDAO().obterPorChavePrimaria(grdSeq);
 
-		if (grade.getProfEspecialidade() != null
-				&& grade.getProfEspecialidade().getId() != null
+		if (grade.getProfEspecialidade() != null && grade.getProfEspecialidade().getId() != null
 				&& grade.getProfEspecialidade().getId().getSerMatricula() != null) {
-			if (servidor != null && servidor.getId() != null
-					&& servidor.getId().getMatricula() != null) {
-				if (grade.getProfEspecialidade().getId().getSerMatricula() != servidor
-						.getId().getMatricula()) {
-					throw new ApplicationBusinessException(
-							AmbulatorioConsultasRNExceptionCode.AAC_00697);
+			if (servidor != null && servidor.getId() != null && servidor.getId().getMatricula() != null) {
+				if (!grade.getProfEspecialidade().getId().getSerMatricula().equals(servidor.getId().getMatricula())) {
+					throw new ApplicationBusinessException(	AmbulatorioConsultasRNExceptionCode.AAC_00697);
 				}
 			}
 		}
 
-		if (servidor != null && servidor.getId() != null
-				&& servidor.getId().getMatricula() != null) {
-			List<AghProfEspecialidades> lista = this
-					.getAghuFacade().listaProfEspecialidades(
+		if (servidor != null && servidor.getId() != null && servidor.getId().getMatricula() != null) {
+			List<AghProfEspecialidades> lista = this.getAghuFacade().listaProfEspecialidades(
 							servidor, grade.getEspecialidade().getSeq());
 			if (lista.isEmpty()) {
-				throw new ApplicationBusinessException(
-						AmbulatorioConsultasRNExceptionCode.AAC_00698);
+				throw new ApplicationBusinessException(AmbulatorioConsultasRNExceptionCode.AAC_00698);
 			}
 		}
 
@@ -6716,6 +6708,63 @@ public class AmbulatorioConsultaRN extends BaseBusiness {
 				getObjetosOracleDAO().ffcInterfaceAACPRJ(pData, pNumero, oldSitCodigo, newSitCodigo, null, null,this.servidorLogadoFacade.obterServidorLogado().getUsuario());
 			}
 		}
+	}
+	
+	public List<AacRetornos> obterListaAacRetornosAtivos(String objPesquisa, AacRetornos retornoAtual) throws ApplicationBusinessException{
+		if(retornoAtual == null || retornoAtual.getSeq() == null){ return null; }
+		
+		RapServidores servidorLogado = getServidorLogadoFacade().obterServidorLogado();
+		Integer retornoSeq = retornoAtual.getSeq();
+		Boolean atendeConsulta = getICascaFacade().usuarioTemPermissao(servidorLogado != null ? servidorLogado.getUsuario() : null,
+                                                                       "atenderConsulta", "atender");
+		
+		List<Integer> listaCodRetorno = this.obterListaCodRetornoNaoAtende(atendeConsulta);
+		
+		switch (retornoSeq) {
+			//PACIENTE_AGENDADO(9)
+			case 9:
+				listaCodRetorno.addAll(Arrays.asList(new Integer[]{9,10,50,60}));
+				break;
+			//PACIENTE_ATENDIDO(10)
+			case 10:
+				listaCodRetorno.addAll(Arrays.asList(new Integer[]{9,10,20,30,40,50}));
+				break;
+			//AGUARDANDO_ATENDIMENTO(20) 
+			case 20:
+				listaCodRetorno.addAll(Arrays.asList(new Integer[]{10,20,40}));
+				break;
+			/*PROFISSIONAL_FALTOU(30) 
+			  PACIENTE_FALTOU(40) 
+			  PACIENTE_DESISTIU_CONS(50)*/
+			case 30:
+			case 40:
+			case 50:
+				listaCodRetorno.addAll(Arrays.asList(new Integer[]{10,30,40,50,60}));
+				break;
+			//EM_ATENDIMENTO(60)
+			case 60:
+				listaCodRetorno.addAll(Arrays.asList(new Integer[]{9,30,40,50,60}));
+				break;
+		}		
+		return this.aacRetornosDAO.obterListaRetornosAtivos(objPesquisa, listaCodRetorno);
+	}
+
+	private List<Integer> obterListaCodRetornoNaoAtende(Boolean atendeConsulta) throws ApplicationBusinessException {
+		List<Integer> listaCodRetorno = new ArrayList<>();
+		if(!atendeConsulta){
+			AghParametros parametro = this.getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_LIST_COD_RETORNO_NAO_ATENDE);
+			if(parametro != null && parametro.getVlrTexto() != null){
+				
+				String[] valoresParametro = parametro.getVlrTexto().trim().split(",");
+				for (int i = 0; i < valoresParametro.length; i++) {
+					if(CoreUtil.isNumeroInteger(valoresParametro[i])){						
+						listaCodRetorno.add(Integer.parseInt(valoresParametro[i]));
+					}
+				}
+				return listaCodRetorno;
+			}
+		}
+		return listaCodRetorno;
 	}
 	
 	protected ObjetosOracleDAO getObjetosOracleDAO() {

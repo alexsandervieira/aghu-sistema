@@ -27,12 +27,13 @@ import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioOrigemConsulta;
 import br.gov.mec.aghu.dominio.DominioSimNao;
+import br.gov.mec.aghu.dominio.DominioTipoAgendamentoSisreg;
 import br.gov.mec.aghu.dominio.DominioTipoEndereco;
 import br.gov.mec.aghu.faturamento.business.IFaturamentoFacade;
 import br.gov.mec.aghu.model.AacConsultas;
 import br.gov.mec.aghu.model.AacConsultasSisreg;
+import br.gov.mec.aghu.model.AacFormaAgendamento;
 import br.gov.mec.aghu.model.AacSituacaoConsultas;
-import br.gov.mec.aghu.model.AacTipoConsultaSisreg;
 import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.model.AipEnderecosPacientes;
 import br.gov.mec.aghu.model.AipEnderecosPacientesId;
@@ -44,6 +45,7 @@ import br.gov.mec.aghu.paciente.cadastro.business.ICadastroPacienteFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 
+
 @Stateless
 public class MarcacaoConsultaSisRegBean extends BaseBusiness {
 	
@@ -54,7 +56,11 @@ public class MarcacaoConsultaSisRegBean extends BaseBusiness {
 	public enum MarcacaoConsultaSisRegBeanExceptionCode implements BusinessExceptionCode {
 		ERRO_MARCACAO_CONSULTA_SISREG_CONSULTA_CORRESPONDENTE, ERRO_MARCACAO_CONSULTA_SISREG_CONVENIO_DEFAULT,
 		ERRO_MARCACAO_CONSULTA_SISREG_INSERIR_PACIENTE, ERRO_MARCACAO_CONSULTA_SISREG_PESQUISAR_PACIENTE_DADOS_DUPLICIDADE,
-		ERRO_MARCACAO_CONSULTA_SISREG_PESQUISAR_PACIENTE_CNS_DUPLICIDADE, ERRO_MARCACAO_CONSULTA_SISREG_SERVIDOR_NAO_ENCONTRADO;
+		ERRO_MARCACAO_CONSULTA_SISREG_PESQUISAR_PACIENTE_CNS_DUPLICIDADE, ERRO_MARCACAO_CONSULTA_SISREG_SERVIDOR_NAO_ENCONTRADO,
+		ERRO_FALTA_PARAMETRO_P_AGHU_SEQ_SISREG_ESTADUAL, ERRO_FALTA_PARAMETRO_P_AGHU_SEQ_SISREG_MUNICIPAL,
+		ERRO_FALTA_PARAMETRO_P_AGHU_SEQ_SISREG_CONDICAO_ATENDIMENTO_PRIMEIRA_CONSULTA,
+		ERRO_FALTA_PARAMETRO_P_AGHU_SEQ_SISREG_CONDICAO_ATENDIMENTO_RETORNO,
+		ERRO_FALTA_PARAMETRO_P_AGHU_SEQ_SISREG_CONDICAO_ATENDIMENTO_RESERVA_TECNICA;
 	}
 	
 	
@@ -97,7 +103,7 @@ public class MarcacaoConsultaSisRegBean extends BaseBusiness {
 	
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public void processarRegistroSisreg(AacConsultasSisreg consultaSisreg, String nomeMicrocomputador) throws ApplicationBusinessException {
+	public void processarRegistroSisreg(AacConsultasSisreg consultaSisreg, String nomeMicrocomputador, DominioTipoAgendamentoSisreg tipoAgendamentoSisreg) throws ApplicationBusinessException {
 		try {
 			AipPacientes paciente;
 			paciente = this.pesquisarPacientePorCns(consultaSisreg.getCnsPaciente());
@@ -109,11 +115,12 @@ public class MarcacaoConsultaSisRegBean extends BaseBusiness {
 				}
 			}
 
-			AacConsultas consulta = pesquisarHorarioConsulta(consultaSisreg);
+			AacConsultas consulta = pesquisarHorarioConsulta(consultaSisreg, tipoAgendamentoSisreg);
 			if (consulta == null) {
 				throw new ApplicationBusinessException(
 						MarcacaoConsultaSisRegBeanExceptionCode.ERRO_MARCACAO_CONSULTA_SISREG_CONSULTA_CORRESPONDENTE);
 			}
+			RapServidores servidorLogado = getServidorLogadoFacade().obterServidorLogado();
 			
 			AacSituacaoConsultas situacaoMarcada = getAacSituacaoConsultasDAO().obterSituacaoConsultaPeloId("M");
 
@@ -124,6 +131,7 @@ public class MarcacaoConsultaSisRegBean extends BaseBusiness {
 			consulta.setSituacaoConsulta(situacaoMarcada);
 			consulta.setDthrMarcacao(new Date());
 			consulta.setCodCentralSol(consultaSisreg.getSeq());
+			consulta.setServidorMarcacao(servidorLogado);
 			FatConvenioSaudePlano convenioPlano = obterConvenioAmbulatorio();
 			if (convenioPlano == null) {
 				throw new ApplicationBusinessException(
@@ -220,8 +228,7 @@ public class MarcacaoConsultaSisRegBean extends BaseBusiness {
 			throws ApplicationBusinessException {
 		AipPacientes paciente = null;
 
-		List<AipPacientes> listaPac = getPacienteFacade()
-				.pesquisarPacientePorNumeroCartaoSaude(numCartaoSaude);
+		List<AipPacientes> listaPac = getPacienteFacade().pesquisarPacientePorNumeroCartaoSaude(numCartaoSaude);
 
 		if (listaPac.size() > 1) {
 			throw new ApplicationBusinessException(
@@ -233,17 +240,43 @@ public class MarcacaoConsultaSisRegBean extends BaseBusiness {
 		return paciente;
 	}
 	
-	private AacConsultas pesquisarHorarioConsulta(AacConsultasSisreg consultaSisreg) throws ApplicationBusinessException {
-		
+	private AacConsultas pesquisarHorarioConsulta(AacConsultasSisreg consultaSisreg, DominioTipoAgendamentoSisreg tipoAgendamentoSisreg) throws ApplicationBusinessException {
+
 		RapServidores servidor = getRegistroColaboradorFacade().obterServidorAtivoPorCpf(consultaSisreg.getCpfMedicoSolicitante());
-		
+
 		if (servidor==null){
 			throw new ApplicationBusinessException(
 					MarcacaoConsultaSisRegBeanExceptionCode.ERRO_MARCACAO_CONSULTA_SISREG_SERVIDOR_NAO_ENCONTRADO);
 		}
-		
+
 		AacConsultas consulta = null;
 		String tipoConsulta = "U";
+		
+		tipoConsulta = validaParametroSituacaoConsSisreg();
+		
+		Short tipoConsultaTratada = trataTipoConsulta(consultaSisreg.getTipoConsulta());
+
+		Short seqTipoAgendamento = obtemSeqTipoAgendamentoPorParametro(tipoAgendamentoSisreg);
+				
+		Short convenioPadrao = obtemConvenioPadraoSus();
+
+		AacFormaAgendamento formaAgendamento = getAacTipoConsultaSisregDAO().listarFormasAgendamentosSisreg(tipoConsultaTratada, seqTipoAgendamento, convenioPadrao);
+
+		if (formaAgendamento != null && servidor !=null) {
+			consulta = getAacConsultasDAO().obterConsultaPorCpfGrade(servidor, formaAgendamento, consultaSisreg.getDtConsulta(), tipoConsulta);
+		}
+
+		return consulta;
+	}
+
+	private Short obtemConvenioPadraoSus() throws ApplicationBusinessException {
+		
+		Short convenioPadrao = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_SEQ_CONVENIO_PADRAO_AMB_V1).getVlrNumerico().shortValue();
+		return convenioPadrao;
+	}
+
+	private String validaParametroSituacaoConsSisreg() {
+		String tipoConsulta;
 		AghParametros parametro;
 		try {
 			parametro = this.getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_SIT_CONS_SISREG);
@@ -251,19 +284,84 @@ public class MarcacaoConsultaSisRegBean extends BaseBusiness {
 		} catch (ApplicationBusinessException e) {
 			tipoConsulta = "U";
 		}
-		
-		AacTipoConsultaSisreg tipoConsultaSisreg = getAacTipoConsultaSisregDAO()
-				.obterTipoConsultaSisregPorSeq(consultaSisreg.getTipoConsulta());
-
-		if (tipoConsultaSisreg != null && servidor !=null) {
-			consulta = getAacConsultasDAO().obterConsultaPorCpfGrade(
-					servidor, tipoConsultaSisreg.getFormaAgendamento(),
-					consultaSisreg.getDtConsulta(), tipoConsulta);
-		}
-		return consulta;
+		return tipoConsulta;
 	}
 	
-	private FatConvenioSaudePlano obterConvenioAmbulatorio() throws ApplicationBusinessException{	
+
+	private Short obtemSeqTipoAgendamentoPorParametro(DominioTipoAgendamentoSisreg tipoAgendamentoSisreg) throws ApplicationBusinessException {
+
+		Short seqTipoAgendmento = null;
+
+		if (tipoAgendamentoSisreg == DominioTipoAgendamentoSisreg.M) {
+			seqTipoAgendmento = obtemParametroSeqMunicipal();
+		}
+
+		if (tipoAgendamentoSisreg == DominioTipoAgendamentoSisreg.E) {
+			seqTipoAgendmento = obtemParametroSeqEstadual();
+		}
+		return seqTipoAgendmento;
+	}
+	
+
+	public Short trataTipoConsulta(Short tipoConsulta) throws ApplicationBusinessException {
+		switch (tipoConsulta) {
+		case 0: //primeira consulta
+			return tipoConsulta = obtemParametroCondicaoAtendmentoPrimeiraConsulta();
+		case 1: //retorno
+			return tipoConsulta = obtemParametroCondicaoAtendmentoRetorno();
+		case 2: //reserva tecnica
+			return tipoConsulta = obtemParametroCondicaoAtendmentoReservaTecnica();
+		}
+		return tipoConsulta;
+	}
+	
+	public Short obtemParametroCondicaoAtendmentoPrimeiraConsulta() throws ApplicationBusinessException{
+    	AghParametros seqPrimeiraConsulta = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_AGHU_SEQ_SISREG_CONDICAO_ATENDIMENTO_PRIMEIRA_CONSULTA);
+    	if (seqPrimeiraConsulta != null) {
+    		 Short seq = seqPrimeiraConsulta.getVlrNumerico().shortValue();
+    		 return seq;
+    	}
+    	throw new ApplicationBusinessException(
+    			MarcacaoConsultaSisRegBeanExceptionCode.ERRO_FALTA_PARAMETRO_P_AGHU_SEQ_SISREG_CONDICAO_ATENDIMENTO_PRIMEIRA_CONSULTA); 
+    }
+	
+	public Short obtemParametroCondicaoAtendmentoRetorno() throws ApplicationBusinessException{
+    	AghParametros seqRetorno = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_AGHU_SEQ_SISREG_CONDICAO_ATENDIMENTO_RETORNO);
+    	if (seqRetorno != null) {
+    		 Short seq = seqRetorno.getVlrNumerico().shortValue();
+    		 return seq;
+    	}
+    	throw new ApplicationBusinessException(MarcacaoConsultaSisRegBeanExceptionCode.ERRO_FALTA_PARAMETRO_P_AGHU_SEQ_SISREG_CONDICAO_ATENDIMENTO_RETORNO); 
+    }
+	
+	public Short obtemParametroCondicaoAtendmentoReservaTecnica() throws ApplicationBusinessException{
+    	AghParametros seqReservaTecnica = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_AGHU_SEQ_SISREG_CONDICAO_ATENDIMENTO_RESERVA_TECNICA);
+    	if (seqReservaTecnica != null) {
+    		 Short seq = seqReservaTecnica.getVlrNumerico().shortValue();
+    		 return seq;
+    	}
+    	throw new ApplicationBusinessException(MarcacaoConsultaSisRegBeanExceptionCode.ERRO_FALTA_PARAMETRO_P_AGHU_SEQ_SISREG_CONDICAO_ATENDIMENTO_RESERVA_TECNICA); 
+    }
+	
+	public Short obtemParametroSeqMunicipal() throws ApplicationBusinessException{
+    	AghParametros seqMunicipal = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_AGHU_SEQ_SISREG_MUNICIPAL);
+    	if (seqMunicipal != null) {
+    		 Short seq = seqMunicipal.getVlrNumerico().shortValue();
+    		 return seq;
+    	}
+    	throw new ApplicationBusinessException(MarcacaoConsultaSisRegBeanExceptionCode.ERRO_FALTA_PARAMETRO_P_AGHU_SEQ_SISREG_MUNICIPAL); 
+    }
+   
+	public Short obtemParametroSeqEstadual() throws ApplicationBusinessException{
+		AghParametros seqEstadual = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_AGHU_SEQ_SISREG_ESTADUAL);
+		if (seqEstadual != null) {
+			Short seq = seqEstadual.getVlrNumerico().shortValue();
+			return seq;
+		} 
+		throw new ApplicationBusinessException(MarcacaoConsultaSisRegBeanExceptionCode.ERRO_FALTA_PARAMETRO_P_AGHU_SEQ_SISREG_ESTADUAL);
+	}
+	
+	private FatConvenioSaudePlano obterConvenioAmbulatorio() throws ApplicationBusinessException {	
 		Short convenioPadrao = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_SEQ_CONVENIO_PADRAO_AMB_V1).getVlrNumerico().shortValue();
 		Byte planoPadrao = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_SEQ_PLANO_PADRAO_AMB_V1).getVlrNumerico().byteValue();
 		

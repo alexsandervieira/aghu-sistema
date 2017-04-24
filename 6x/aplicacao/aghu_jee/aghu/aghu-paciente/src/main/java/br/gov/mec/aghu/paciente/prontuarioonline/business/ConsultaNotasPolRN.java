@@ -121,7 +121,7 @@ public class ConsultaNotasPolRN extends BaseBusiness {
 		if(getAmbulatorioFacade().obterDescricaoCidCapitalizada(nome).length() < 35){
 			nome = getAmbulatorioFacade().obterDescricaoCidCapitalizada(nome, CapitalizeEnum.TODAS);
 		}else{
-			nome = getAmbulatorioFacade().obterDescricaoCidCapitalizada(nome, CapitalizeEnum.TODAS).substring(0, 35);
+			nome = getAmbulatorioFacade().obterDescricaoCidCapitalizada(nome, CapitalizeEnum.TODAS).substring(0, getAmbulatorioFacade().obterDescricaoCidCapitalizada(nome).length()-1);
 		}
 		
 		return DateUtil.dataToString(nota.getDthrValida(), "dd/MM/yyyy") + " - " + nome;
@@ -142,7 +142,7 @@ public class ConsultaNotasPolRN extends BaseBusiness {
 		if(getAmbulatorioFacade().obterDescricaoCidCapitalizada(nome).length() < 35){
 			nome = getAmbulatorioFacade().obterDescricaoCidCapitalizada(nome, CapitalizeEnum.TODAS);
 		}else{
-			nome = getAmbulatorioFacade().obterDescricaoCidCapitalizada(nome, CapitalizeEnum.TODAS).substring(0, 35);
+			nome = getAmbulatorioFacade().obterDescricaoCidCapitalizada(nome, CapitalizeEnum.TODAS).substring(0, getAmbulatorioFacade().obterDescricaoCidCapitalizada(nome).length()-1);
 		}
 		
 		return "Assinado por " + nome 

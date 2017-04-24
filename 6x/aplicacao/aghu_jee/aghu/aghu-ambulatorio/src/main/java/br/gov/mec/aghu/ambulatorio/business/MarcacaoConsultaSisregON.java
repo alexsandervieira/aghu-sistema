@@ -10,10 +10,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.ambulatorio.dao.AacConsultasSisregDAO;
-import br.gov.mec.aghu.model.AacConsultasSisreg;
 import br.gov.mec.aghu.core.business.BaseBusiness;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.dominio.DominioTipoAgendamentoSisreg;
+import br.gov.mec.aghu.model.AacConsultasSisreg;
+
+
+
 
 /**
  * Classe contendo os métodos negociais necessários para a marcação de consultas
@@ -47,8 +51,9 @@ public class MarcacaoConsultaSisregON extends BaseBusiness {
 			BusinessExceptionCode {
 		ERRO_MARCACAO_CONSULTA_SISREG_INSERIR_PACIENTE, 
 		ERRO_MARCACAO_CONSULTA_SISREG_PESQUISAR_PACIENTE_CNS_DUPLICIDADE, ERRO_MARCACAO_CONSULTA_SISREG_PESQUISAR_PACIENTE_DADOS_DUPLICIDADE,
-		ERRO_MARCACAO_CONSULTA_SISREG_CONSULTA_CORRESPONDENTE,
-		ERRO_MARCACAO_CONSULTA_SISREG_SERVIDOR_NAO_ENCONTRADO,ERRO_MARCACAO_CONSULTA_SISREG_CONVENIO_DEFAULT;
+		ERRO_MARCACAO_CONSULTA_SISREG_CONSULTA_CORRESPONDENTE, ERRO_MARCACAO_CONSULTA_SISREG_SERVIDOR_NAO_ENCONTRADO,
+		ERRO_MARCACAO_CONSULTA_SISREG_CONVENIO_DEFAULT, ERRO_TIPO_AGENDAMENTO_SISREG_NAO_INFORMADO;
+
 
 		public void throwException(Object... params)
 				throws ApplicationBusinessException{
@@ -61,7 +66,7 @@ public class MarcacaoConsultaSisregON extends BaseBusiness {
 		return getAacConsultasSisregDAO().pesquisarConsultasSisregNaoImportadas();
 	}
 	
-	public StringBuilder marcarConsultas(List<AacConsultasSisreg> consultasSisreg, Integer totalConsultas, String nomeMicrocomputador) {
+	public StringBuilder marcarConsultas(List<AacConsultasSisreg> consultasSisreg, Integer totalConsultas, String nomeMicrocomputador, DominioTipoAgendamentoSisreg tipoAgendamentoSisreg) {
 		Integer consultasMarcadas = 0;
 		Integer consultasComErro = 0;
 
@@ -72,9 +77,11 @@ public class MarcacaoConsultaSisregON extends BaseBusiness {
 			Integer linha = consultaSisreg.getLinhaArquivo();
 			LOG.info("LINHA:::::::: " + linha);
 			LOG.info("TIPO::::::::: " + consultaSisreg.getTipoConsulta());
+			
 			try {				
-				marcacaoConsultaSisRegBean.processarRegistroSisreg(consultaSisreg, nomeMicrocomputador);
-				
+			
+				marcacaoConsultaSisRegBean.processarRegistroSisreg(consultaSisreg, nomeMicrocomputador, tipoAgendamentoSisreg);
+
 			} catch (ApplicationBusinessException e) {
 				log.append(NEWLINE)
 				.append("Erro ao processar consulta da linha ").append(linha).append(", do paciente com o CNS ").append(consultaSisreg.getCnsPaciente())
@@ -109,5 +116,4 @@ public class MarcacaoConsultaSisregON extends BaseBusiness {
 		return aacConsultasSisregDAO;
 	}
 	
-		
 }

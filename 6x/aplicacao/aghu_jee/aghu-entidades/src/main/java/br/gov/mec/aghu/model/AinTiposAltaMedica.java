@@ -14,6 +14,10 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 
+
+
+
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.Length;
 
 import br.gov.mec.aghu.dominio.DominioSituacao;
@@ -35,14 +39,15 @@ public class AinTiposAltaMedica extends BaseEntityCodigo<String> implements java
 	private MpmMotivoAltaMedica motivoAltaMedicas;
 	private String descricao;
 	private DominioSituacao indSituacao;
+	private Boolean permiteAltaAdministrativa = Boolean.FALSE; // Permitir alta administrativa sem sumário de alta
+	private Boolean permitePermanenciaComAlta = Boolean.FALSE; // Permitir permanência/transferência no sistema com alta adminstrativa
 	
 	private Integer version;
 	
 	public AinTiposAltaMedica() {
 	}
 
-	public AinTiposAltaMedica(String codigo, String descricao,
-			DominioSituacao indSituacao) {
+	public AinTiposAltaMedica(String codigo, String descricao, DominioSituacao indSituacao) {
 		this.codigo = codigo;
 		this.descricao = descricao;
 		this.indSituacao = indSituacao;
@@ -98,6 +103,26 @@ public class AinTiposAltaMedica extends BaseEntityCodigo<String> implements java
 		this.indSituacao = indSituacao;
 	}
 	
+	@Column(name = "PERMITE_ALTA_ADM", nullable = false, length = 1)
+	@Type(type="br.gov.mec.aghu.core.persistence.type.BooleanUserType")
+	public Boolean getPermiteAltaAdministrativa() {
+		return permiteAltaAdministrativa;
+	}
+	
+	public void setPermiteAltaAdministrativa(Boolean permiteAltaAdministrativa) {
+		this.permiteAltaAdministrativa = permiteAltaAdministrativa;
+	}
+
+	@Column(name = "PERMITE_PERMANENCIA_COM_ALTA", nullable = false, length = 1)
+	@Type(type="br.gov.mec.aghu.core.persistence.type.BooleanUserType")
+	public Boolean getpermitePermanenciaComAlta() {
+		return permitePermanenciaComAlta;
+	}
+
+	public void setpermitePermanenciaComAlta(Boolean permitePermanenciaComAlta) {
+		this.permitePermanenciaComAlta = permitePermanenciaComAlta;
+	}
+	
 	@Version
 	@Column(name = "VERSION", nullable = false)
 	public Integer getVersion() {
@@ -143,7 +168,9 @@ public class AinTiposAltaMedica extends BaseEntityCodigo<String> implements java
 		DESCRICAO("descricao"),
 		IND_SITUACAO("indSituacao"),
 		MOTIVO_ALTA_MEDICAS("motivoAltaMedicas"),
-		MOTIVO_ALTA_MEDICA("motivoAltaMedicas.seq");
+		MOTIVO_ALTA_MEDICA("motivoAltaMedicas.seq"),
+		PERMITE_ALTA_ADM("permiteAltaAdministrativa"),
+		PERMITE_PERMANENCIA_COM_ALTA("permitePermanenciaComAlta");
 
 		private String fields;
 

@@ -150,6 +150,8 @@ public class ManterGradeAgendamentoController extends ActionController  {
 	private boolean habilitarAbasSecundariaGrade;
 	private Integer seqGradeAnteriorCopia;
 	private boolean houveCopiaDeGrade;
+
+	private String mensagemGradesSobrepostas;
 	
 	@PostConstruct
 	protected void inicializar(){
@@ -333,6 +335,30 @@ public class ManterGradeAgendamentoController extends ActionController  {
 		}
 	}
 	
+	public void validarHorariosSobrepostos(){
+		boolean existeHorarioSobreposto = false;
+		if (horarioGradeConsultaList == null || horarioGradeConsultaList.isEmpty()){
+			horarioGradeConsultaList = ambulatorioFacade.pesquisarHorariosPorGrade(gradeAgendamenConsultas);
+		}
+		if (horarioGradeConsultaList != null){
+			for (AacHorarioGradeConsulta horario : horarioGradeConsultaList) {
+				if(horario.getSituacao().equals(DominioSituacao.A)){
+					try{
+						ambulatorioFacade.validaHorarioAgendadoSobreposto(horario, gradeAgendamenConsultas, dataInicial, dataFinal);
+					} catch (BaseException e) {			
+						existeHorarioSobreposto = true;
+						break;
+					}
+				}
+			}
+		}
+		if(existeHorarioSobreposto){
+			mensagemGradesSobrepostas = "O intervalo informado implicará em sobreposição de horários para a Grade: " + gradeAgendamenConsultas.getSeq() + ".\n\nDeseja continuar?";
+			openDialog("modalMensagemGradesSobrepostasWG");
+		}else {
+			gerarDisponibilidade();
+		}
+	}
 	
 	public void gerarDisponibilidade(){
 		try {
@@ -351,7 +377,6 @@ public class ManterGradeAgendamentoController extends ActionController  {
 				LOG.error("Exceção capturada:", e1);
 			}
 			
-			
 			Integer count=ambulatorioFacade.gerarDisponibilidade(gradeAgendamenConsultas, dataInicial, dataFinal, nomeMicrocomputador);
 			
 			gradeAgendamenConsultas = this.ambulatorioFacade.obterGrade(gradeAgendamenConsultas.getSeq());
@@ -361,7 +386,9 @@ public class ManterGradeAgendamentoController extends ActionController  {
 					count,sdf.format(dataInicial), sdf.format(dataFinal));
 			dataInicial=null;
 			dataFinal=null;
-			
+
+			horarioGradeConsultaList = ambulatorioFacade.pesquisarHorariosPorGrade(gradeAgendamenConsultas);
+
 		} catch (BaseException e) {
 			apresentarExcecaoNegocio(e);
 			LOG.error(e.getMessage(),e);
@@ -624,115 +651,115 @@ public class ManterGradeAgendamentoController extends ActionController  {
 	
 	
 	//--[ABA HORÁRIOS AGENDADOS(Mehoria #34579)]
-			public void adicionaVarios() {
-				if (horarioGradeConsulta.getHoraFim()!=null && !horarioGradeConsulta.getHoraFim().after(horarioGradeConsulta.getHoraInicio())){
-					apresentarMsgNegocio(Severity.ERROR,"MSG_MANTER_GRADE_AGENDAMENTO_HORARIO_FIM");
-					return;
+	public void adicionaVarios() {
+		if (horarioGradeConsulta.getHoraFim()!=null && !horarioGradeConsulta.getHoraFim().after(horarioGradeConsulta.getHoraInicio())){
+			apresentarMsgNegocio(Severity.ERROR,"MSG_MANTER_GRADE_AGENDAMENTO_HORARIO_FIM");
+			return;
+		}
+		//busca forma de agendamento a ser setado em todos os dias marcados
+		AacFormaAgendamento formaAgendamento = ambulatorioFacade.findFormaAgendamento(formaAgendamentoAba2
+				.getPagador(), formaAgendamentoAba2.getTipoAgendamento(), formaAgendamentoAba2.getCondicaoAtendimento());
+
+		//seta em uma lista todos os dias que foram selecionados na tela
+		setarDiasSemanaSelecionados();
+
+		boolean problemaInsererirRegistro=false;
+		if(validarCampos()){
+			for(AacHorarioGradeConsulta horarioGradeCon:listaHorarioGradeConsulta){
+				horarioGradeCon.setFormaAgendamento(formaAgendamento);
+				if(!gravarHorarioGrade(horarioGradeCon)){
+					problemaInsererirRegistro=true;
 				}
-				//busca forma de agendamento a ser setado em todos os dias marcados
-				AacFormaAgendamento formaAgendamento = ambulatorioFacade.findFormaAgendamento(formaAgendamentoAba2
-						.getPagador(), formaAgendamentoAba2.getTipoAgendamento(), formaAgendamentoAba2.getCondicaoAtendimento());
-				
-				//seta em uma lista todos os dias que foram selecionados na tela
-				setarDiasSemanaSelecionados();
-				
-				boolean problemaInsererirRegistro=false;
-					if(validarCampos()){
-					for(AacHorarioGradeConsulta horarioGradeCon:listaHorarioGradeConsulta){
-						horarioGradeCon.setFormaAgendamento(formaAgendamento);
-						if(!gravarHorarioGrade(horarioGradeCon)){
-							problemaInsererirRegistro=true;
-						}
-					}
-					listaHorarioGradeConsulta=null;
-					if(!problemaInsererirRegistro){
-							apresentarMsgNegocio(Severity.INFO,"MSG_MANTER_GRADE_AGENDAMENTO_HORARIOS_SALVO");
-					}
-						setFalseTodosDias();
-						horarioGradeConsulta= new AacHorarioGradeConsulta();
-					horarioGradeConsultaList = ambulatorioFacade.pesquisarHorariosPorGrade(gradeAgendamenConsultas);
-				}
-				}
-				
-			private boolean validarCampos() {
-				boolean validos= true;
-				if(horarioGradeConsulta.getHoraInicio()==null){
-					validos=false;
-					apresentarMsgNegocio(Severity.ERROR,"MSG_HORA_INICIO_OBRIGATORIO");					
 			}
-				if(horarioGradeConsulta.getDuracao()==null){
-					validos=false;
-					apresentarMsgNegocio(Severity.ERROR,"MSG_DURACAO_OBRIGATORIO");
-				}
-				if(formaAgendamentoAba2.getPagador()==null){
-					validos=false;
-					apresentarMsgNegocio(Severity.ERROR,"MSG_PAGADOR_OBRIGATORIO");
-				}
-				if(formaAgendamentoAba2.getTipoAgendamento()==null){
-					validos=false;
-					apresentarMsgNegocio(Severity.ERROR,"MSG_TIPO_AGENDAMENTO_OBRIGATORIO");
-				}
-				if(formaAgendamentoAba2.getCondicaoAtendimento()==null){
-					validos=false;
-					apresentarMsgNegocio(Severity.ERROR,"MSG_CONDICAO_OBRIGATORIO");
-				}
-				if(horarioGradeConsulta.getSituacao()==null){
-					validos=false;
-					apresentarMsgNegocio(Severity.ERROR,"MSG_SITUACAO_OBRIGATORIO");
-				}
-				if(listaHorarioGradeConsulta==null || listaHorarioGradeConsulta.isEmpty()){
-					validos=false;
-					apresentarMsgNegocio(Severity.ERROR,"MSG_SELECIONAR_UM_DIA");
-				}
-				if(validos && !verificaViolacaoRegra()){
-					validos=false;
-				}
-				
+			listaHorarioGradeConsulta=null;
+			if(!problemaInsererirRegistro){
+				apresentarMsgNegocio(Severity.INFO,"MSG_MANTER_GRADE_AGENDAMENTO_HORARIOS_SALVO");
+			}
+			setFalseTodosDias();
+			horarioGradeConsulta= new AacHorarioGradeConsulta();
+			horarioGradeConsultaList = ambulatorioFacade.pesquisarHorariosPorGrade(gradeAgendamenConsultas);
+		}
+	}
+
+	private boolean validarCampos() {
+		boolean validos= true;
+		if(horarioGradeConsulta.getHoraInicio()==null){
+			validos=false;
+			apresentarMsgNegocio(Severity.ERROR,"MSG_HORA_INICIO_OBRIGATORIO");					
+		}
+		if(horarioGradeConsulta.getDuracao()==null){
+			validos=false;
+			apresentarMsgNegocio(Severity.ERROR,"MSG_DURACAO_OBRIGATORIO");
+		}
+		if(formaAgendamentoAba2.getPagador()==null){
+			validos=false;
+			apresentarMsgNegocio(Severity.ERROR,"MSG_PAGADOR_OBRIGATORIO");
+		}
+		if(formaAgendamentoAba2.getTipoAgendamento()==null){
+			validos=false;
+			apresentarMsgNegocio(Severity.ERROR,"MSG_TIPO_AGENDAMENTO_OBRIGATORIO");
+		}
+		if(formaAgendamentoAba2.getCondicaoAtendimento()==null){
+			validos=false;
+			apresentarMsgNegocio(Severity.ERROR,"MSG_CONDICAO_OBRIGATORIO");
+		}
+		if(horarioGradeConsulta.getSituacao()==null){
+			validos=false;
+			apresentarMsgNegocio(Severity.ERROR,"MSG_SITUACAO_OBRIGATORIO");
+		}
+		if(listaHorarioGradeConsulta==null || listaHorarioGradeConsulta.isEmpty()){
+			validos=false;
+			apresentarMsgNegocio(Severity.ERROR,"MSG_SELECIONAR_UM_DIA");
+		}
+		if(validos && !verificaViolacaoRegra()){
+			validos=false;
+		}
+
 		return validos;
 	}
 
-			public boolean verificaViolacaoRegra(){
-				if (horarioGradeConsulta.getHoraFim() != null && horarioGradeConsulta.getNumHorario() != null) {
-					apresentarMsgNegocio(Severity.ERROR,"AAC_00075");
-					return false;
-				}
+	public boolean verificaViolacaoRegra(){
+		if (horarioGradeConsulta.getHoraFim() != null && horarioGradeConsulta.getNumHorario() != null) {
+			apresentarMsgNegocio(Severity.ERROR,"AAC_00075");
+			return false;
+		}
 
-				if (horarioGradeConsulta.getHoraFim() == null && horarioGradeConsulta.getNumHorario() == null) {
-					apresentarMsgNegocio(Severity.ERROR,"AAC_00076");
-					return false;
-				}
-				return true;
-			}
+		if (horarioGradeConsulta.getHoraFim() == null && horarioGradeConsulta.getNumHorario() == null) {
+			apresentarMsgNegocio(Severity.ERROR,"AAC_00076");
+			return false;
+		}
+		return true;
+	}
 
-			//retorna falso caso o registro não seja inserido
-			private boolean gravarHorarioGrade(
-					AacHorarioGradeConsulta horarioGradeCon) {
-				try{
-					ambulatorioFacade.validaHorarioSobreposto(horarioGradeCon, gradeAgendamenConsultas);
-				} catch (BaseException e) {			
-					apresentarMsgNegocio(Severity.WARN,e.getLocalizedMessage(), e.getParameters());			
-					LOG.warn(e.getMessage(),e);
-				}
-				boolean novo = horarioGradeCon.getId()==null;
-				try {			
-					
-					ambulatorioFacade.salvarHorarioGradeConsulta(horarioGradeCon, gradeAgendamenConsultas);
-					criarAgendamento(horarioGradeCon);
-					horarioGradeCon = new AacHorarioGradeConsulta();
-					formaAgendamentoAba2.limpaSelecionados();
-					return true;
-				} catch (BaseException e) {
-					if (novo){
-						horarioGradeCon.setId(null);
-					}	
-					apresentarExcecaoNegocio(e);
-					LOG.error(e.getMessage(),e);
-					return false;
-				}
-				
+	//retorna falso caso o registro não seja inserido
+	private boolean gravarHorarioGrade(
+			AacHorarioGradeConsulta horarioGradeCon) {
+		try{
+			ambulatorioFacade.validaHorarioSobreposto(horarioGradeCon, gradeAgendamenConsultas);
+		} catch (BaseException e) {			
+			apresentarMsgNegocio(Severity.WARN,e.getLocalizedMessage(), e.getParameters());			
+			LOG.warn(e.getMessage(),e);
+		}
+		boolean novo = horarioGradeCon.getId()==null;
+		try {			
+
+			ambulatorioFacade.salvarHorarioGradeConsulta(horarioGradeCon, gradeAgendamenConsultas);
+			criarAgendamento(horarioGradeCon);
+			horarioGradeCon = new AacHorarioGradeConsulta();
+			formaAgendamentoAba2.limpaSelecionados();
+			return true;
+		} catch (BaseException e) {
+			if (novo){
+				horarioGradeCon.setId(null);
 			}	
-		
-	
+			apresentarExcecaoNegocio(e);
+			LOG.error(e.getMessage(),e);
+			return false;
+		}
+
+	}	
+
+
 	
 	public void criarAgendamento() {
 		criarAgendamento(null);
@@ -800,6 +827,33 @@ public class ManterGradeAgendamentoController extends ActionController  {
 			LOG.error(e.getMessage(),e);
 		}		
 	}	
+	
+	public void ativarInativarHorarioGradeConsulta(AacHorarioGradeConsulta horarioGrade){
+		try {
+			if(horarioGrade.getSituacao().equals(DominioSituacao.A)){
+				horarioGrade.setSituacao(DominioSituacao.I);
+			}else{
+				horarioGrade.setSituacao(DominioSituacao.A);
+			}
+			ambulatorioFacade.salvarHorarioGradeConsulta(horarioGrade, gradeAgendamenConsultas);
+			horarioGradeConsultaList = ambulatorioFacade.pesquisarHorariosPorGrade(gradeAgendamenConsultas);
+
+		} catch (BaseException e) {
+			apresentarExcecaoNegocio(e);
+			LOG.error(e.getMessage(),e);
+		}		
+		
+	}
+
+	public void validarHorariosAtivos(){
+		for (AacHorarioGradeConsulta horario : horarioGradeConsultaList) {
+			if(DominioSituacao.A.equals(horario.getSituacao())){
+				openDialog("modalGerarDisponibilidadeWG");
+				return;
+			}
+		}
+		apresentarMsgNegocio(Severity.ERROR,"MSG_ERRO_HORARIOS_GRADE_INATIVOS");
+	}
 	
 	public void removerAgendamentoTodos(){
 		if(horarioGradeConsultaList!= null && !horarioGradeConsultaList.isEmpty()){
@@ -1414,11 +1468,9 @@ public class ManterGradeAgendamentoController extends ActionController  {
 		this.sab = sab;
 	}
 
-
 	public boolean isAcaoEditar() {
 		return acaoEditar;
 	}
-
 
 	public void setAcaoEditar(boolean acaoEditar) {
 		this.acaoEditar = acaoEditar;
@@ -1428,8 +1480,19 @@ public class ManterGradeAgendamentoController extends ActionController  {
 		return seqGradeAnteriorCopia;
 	}
 
-
 	public void setSeqGradeAnteriorCopia(Integer seqGradeAnteriorCopia) {
 		this.seqGradeAnteriorCopia = seqGradeAnteriorCopia;
 	}
+
+
+	public String getMensagemGradesSobrepostas() {
+		return mensagemGradesSobrepostas;
+	}
+
+
+	public void setMensagemGradesSobrepostas(String mensagemGradesSobrepostas) {
+		this.mensagemGradesSobrepostas = mensagemGradesSobrepostas;
+	}
+	
+	
 }

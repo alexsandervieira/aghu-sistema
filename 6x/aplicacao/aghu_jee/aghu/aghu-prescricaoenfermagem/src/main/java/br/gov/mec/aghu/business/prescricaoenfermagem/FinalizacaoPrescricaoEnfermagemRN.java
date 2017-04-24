@@ -10,17 +10,19 @@ import javax.inject.Inject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import br.gov.mec.aghu.dominio.DominioIndPendentePrescricoesCuidados;
-import br.gov.mec.aghu.dominio.DominioSituacaoPrescricao;
-import br.gov.mec.aghu.model.EpePrescricaoEnfermagem;
-import br.gov.mec.aghu.model.EpePrescricoesCuidados;
-import br.gov.mec.aghu.model.RapServidores;
-import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescricoesCuidadosDAO;
-import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 import br.gov.mec.aghu.core.business.BaseBusiness;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.dominio.DominioIndPendentePrescricoesCuidados;
+import br.gov.mec.aghu.dominio.DominioSituacaoPrescricao;
+import br.gov.mec.aghu.model.EpeHistoricoPrescDiagnosticos;
+import br.gov.mec.aghu.model.EpePrescricaoEnfermagem;
+import br.gov.mec.aghu.model.EpePrescricoesCuidados;
+import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeHistoricoPrescDiagnosticosDAO;
+import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescricoesCuidadosDAO;
+import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 
 /**
  * Regras para finalização de uma prescrição de enfermagem
@@ -50,6 +52,7 @@ public class FinalizacaoPrescricaoEnfermagemRN extends BaseBusiness {
 	@Inject
 	private EpePrescricoesCuidadosDAO epePrescricoesCuidadosDAO;
 
+	@Inject EpeHistoricoPrescDiagnosticosDAO epeHistoricoPrescDiagnosticosDAO;
 	/**
 	 * 
 	 */
@@ -90,8 +93,19 @@ public class FinalizacaoPrescricaoEnfermagemRN extends BaseBusiness {
 		}		
 		confirmarCuidados(prescricaoEnfermagem,dthrUsado);
 		confirmarTiraDeUso(prescricaoEnfermagem);
+		confirmarHistoricosPendentes(prescricaoEnfermagem);
 	}
 	
+	public void confirmarHistoricosPendentes(EpePrescricaoEnfermagem prescricaoEnfermagem) {
+		List<EpeHistoricoPrescDiagnosticos> listHistoricos = epeHistoricoPrescDiagnosticosDAO.listarEpeHistPrescDiagPorPrescSituacao(prescricaoEnfermagem, Boolean.TRUE);
+		
+		for(EpeHistoricoPrescDiagnosticos historico : listHistoricos){
+			historico.setIndPendente(Boolean.FALSE);
+			historico.setServidor(getServidorLogadoFacade().obterServidorLogado());
+			epeHistoricoPrescDiagnosticosDAO.atualizar(historico);
+		}
+	}
+
 	/** Esta procedure libera a prescrição médica após confirmação. 
 	 * 
 	 * @ORADB EPEK_CONFIRMA.EPEP_CONF_TIRA_USO

@@ -7,14 +7,19 @@ import java.util.List;
 
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
+import org.hibernate.transform.Transformers;
 
 import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dominio.DominioIndPendenteAmbulatorio;
 import br.gov.mec.aghu.model.MpmAnamneses;
 import br.gov.mec.aghu.model.MpmEvolucoes;
+import br.gov.mec.aghu.model.RapPessoasFisicas;
+import br.gov.mec.aghu.model.RapQualificacao;
 import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.prescricaomedica.vo.EvolucaoPrescricaoVO;
 
 public class MpmEvolucoesDAO  extends br.gov.mec.aghu.core.persistence.dao.BaseDao<MpmEvolucoes> {
 	
@@ -206,39 +211,70 @@ public class MpmEvolucoesDAO  extends br.gov.mec.aghu.core.persistence.dao.BaseD
 		}
 
 		DetachedCriteria criteria = DetachedCriteria.forClass(MpmEvolucoes.class, "MPM");
-		criteria.createAlias("MPM." + MpmEvolucoes.Fields.SERVIDOR.toString(), "SER");
-		criteria.createAlias("SER." + RapServidores.Fields.PESSOA_FISICA.toString(), "PES");
+		criteria.createAlias("MPM." + MpmEvolucoes.Fields.SERVIDOR.toString(), "SER", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("SER." + RapServidores.Fields.PESSOA_FISICA.toString(), "PES", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("PES." + RapPessoasFisicas.Fields.QUALIFICACOES.toString(), "QUA", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("QUA." + RapQualificacao.Fields.TIPO_QUALIFICACAO.toString(), "TIP", JoinType.LEFT_OUTER_JOIN);
+		
+		criteria = createFiltro(criteria, anamnese, situacoes, dataFim, dataFim);
+		criteria.addOrder(Order.asc("MPM." + MpmEvolucoes.Fields.DTHR_FIM.toString()));
+		return executeCriteria(criteria);
+	}
+	
+	public List<EvolucaoPrescricaoVO> obterEvolucoesAnamneseProjection(MpmAnamneses anamnese, List<DominioIndPendenteAmbulatorio> situacoes, Date dataInicio, Date dataFim) {	
+		if (anamnese == null) {
+			return null;
+		}
+		
+		DetachedCriteria criteria = DetachedCriteria.forClass(MpmEvolucoes.class,"MPM");
+		
+		criteria.createAlias("MPM." + MpmEvolucoes.Fields.SERVIDOR.toString(), "SER", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("SER." + RapServidores.Fields.PESSOA_FISICA.toString(), "PES", JoinType.LEFT_OUTER_JOIN);
+		
+		criteria = createFiltro(criteria, anamnese, situacoes, dataFim, dataFim);
+		
+		criteria.setProjection(Projections.projectionList()
+				.add(Projections.property("MPM."+MpmEvolucoes.Fields.SEQ.toString()), EvolucaoPrescricaoVO.Fields.SEQ.toString())
+				.add(Projections.property("MPM."+MpmEvolucoes.Fields.DTHR_CRIACAO.toString()), EvolucaoPrescricaoVO.Fields.DTHR_CRIACAO.toString())
+				.add(Projections.property("MPM."+MpmEvolucoes.Fields.DTHR_FIM.toString()), EvolucaoPrescricaoVO.Fields.DTHR_FIM.toString())
+				.add(Projections.property("MPM."+MpmEvolucoes.Fields.DTHR_REFERENCIA.toString()), EvolucaoPrescricaoVO.Fields.DTHR_REFERENCIA.toString())
+				.add(Projections.property("MPM."+MpmEvolucoes.Fields.PENDENTE.toString()), EvolucaoPrescricaoVO.Fields.PENDENTE.toString())
+				.add(Projections.property("MPM."+MpmEvolucoes.Fields.SITUACAO.toString()), EvolucaoPrescricaoVO.Fields.SITUACAO.toString())
+				.add(Projections.property("MPM."+MpmEvolucoes.Fields.DTHR_PENDENTE.toString()), EvolucaoPrescricaoVO.Fields.DTHR_PENDENTE.toString())
+				.add(Projections.property("PES."+RapPessoasFisicas.Fields.NOME.toString()), EvolucaoPrescricaoVO.Fields.NOME_PROF.toString())
+				.add(Projections.property("SER."+RapServidores.Fields.MATRICULA.toString()), EvolucaoPrescricaoVO.Fields.MATRICULA.toString())
+				.add(Projections.property("SER."+RapServidores.Fields.VIN_CODIGO.toString()), EvolucaoPrescricaoVO.Fields.VIN_CODIGO.toString())
+		);		
+		criteria.addOrder(Order.desc("MPM." + MpmEvolucoes.Fields.DTHR_CRIACAO.toString()));
+		
+		criteria.setResultTransformer(Transformers.aliasToBean(EvolucaoPrescricaoVO.class));
+		
+		return executeCriteria(criteria);
+	}
+	
+	
+	private DetachedCriteria createFiltro(DetachedCriteria criteria, MpmAnamneses anamnese, 
+			List<DominioIndPendenteAmbulatorio> situacoes, Date dataInicio, Date dataFim ) {
 		criteria.add(Restrictions.eq("MPM." + MpmEvolucoes.Fields.ANA_SEQ.toString(), anamnese.getSeq()));
-
 		if (situacoes != null && !situacoes.isEmpty()) {
 			criteria.add(Restrictions.in("MPM." + MpmEvolucoes.Fields.PENDENTE.toString(), situacoes));
 		}
-
 		if (dataInicio != null) {
             Calendar dataInicial = Calendar.getInstance();
             dataInicial.setTime(dataInicio);
             dataInicial.set(Calendar.HOUR_OF_DAY,0);
             dataInicial.set(Calendar.MINUTE,0);
             dataInicial.set(Calendar.SECOND,0);
-
             criteria.add(Restrictions.ge("MPM." + MpmEvolucoes.Fields.DTHR_CRIACAO.toString(), dataInicial.getTime()));
-
 		}
-
 		if (dataFim != null) {
             Calendar dataFinal = Calendar.getInstance();
             dataFinal.setTime(dataFim);        
             dataFinal.set(Calendar.HOUR_OF_DAY,23);
             dataFinal.set(Calendar.MINUTE,59);
             dataFinal.set(Calendar.SECOND,59);
-
             criteria.add(Restrictions.le("MPM." + MpmEvolucoes.Fields.DTHR_FIM.toString(), dataFinal.getTime()));
-			
 		}
-
-		criteria.addOrder(Order.asc("MPM." + MpmEvolucoes.Fields.DTHR_FIM.toString()));
-
-		return executeCriteria(criteria);
+		return criteria;
 	}
-
 }

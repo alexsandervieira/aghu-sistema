@@ -7,6 +7,7 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
+import br.gov.mec.aghu.model.cups.ImpImpressora;
 import br.gov.mec.aghu.model.cups.ImpServidorCups;
 
 public class ImpServidorCupsDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<ImpServidorCups> {
@@ -119,4 +120,21 @@ public class ImpServidorCupsDAO extends br.gov.mec.aghu.core.persistence.dao.Bas
 		}
 		return objServidorCups == null ? false : true;
 	}
+	//Pesquisar Cups existente por fila de impressão
+	public ImpServidorCups pesquisarServidorCupsPorFila(String fila){
+		
+		DetachedCriteria criteria = DetachedCriteria
+				.forClass(ImpImpressora.class,"imp");
+		criteria.createAlias("imp."+ImpImpressora.Fields.SERVIDOR_CUPS, "cups");
+		
+		criteria.add(Restrictions.eq("imp."+ImpImpressora.Fields.FILA,fila));
+				
+		List<ImpImpressora> list = executeCriteria(criteria);
+		if (list != null && !list.isEmpty()) {
+			ImpServidorCups cups = list.get(0).getImpServidorCups();
+			return cups;
+		}
+		return null;
+	}
+	
 }

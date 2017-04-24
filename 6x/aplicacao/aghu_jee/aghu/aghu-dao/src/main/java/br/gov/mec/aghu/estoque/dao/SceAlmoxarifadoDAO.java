@@ -42,6 +42,35 @@ public class SceAlmoxarifadoDAO extends br.gov.mec.aghu.core.persistence.dao.Bas
 		return (SceAlmoxarifado) this.executeCriteriaUniqueResult(criteria);
 	}
 	
+	public List<SceAlmoxarifado> obterAlmoxarifadoPorSeqDescricao(String param, Short seqAlmox) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(SceAlmoxarifado.class);
+		
+		criteria.createAlias(SceAlmoxarifado.Fields.CCT_CODIGO.toString(), "centroCusto", JoinType.LEFT_OUTER_JOIN);
+		
+		String strPesquisa = param;
+
+		if (StringUtils.isNotBlank(strPesquisa)) {
+
+			if (CoreUtil.isNumeroShort(strPesquisa)) {
+				criteria.add(Restrictions.eq(SceAlmoxarifado.Fields.SEQ.toString(), Short.parseShort(strPesquisa)));
+			} else {
+				criteria.add(Restrictions.ilike(SceAlmoxarifado.Fields.DESCRICAO.toString(), StringUtils.trim(strPesquisa), MatchMode.ANYWHERE));
+			}
+		}
+		
+		if(seqAlmox != null){
+			criteria.add(Restrictions.ne(SceAlmoxarifado.Fields.SEQ.toString(),seqAlmox));		
+		}
+
+		criteria.add(Restrictions.eq(SceAlmoxarifado.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
+		
+		//criteria.addOrder(Order.asc(SceAlmoxarifado.Fields.DESCRICAO.toString()));
+		criteria.addOrder(Order.asc(SceAlmoxarifado.Fields.SEQ.toString()));
+		
+		return this.executeCriteria(criteria);
+	}
+	
+	
 	public List<SceAlmoxarifado> obterAlmoxarifadoPorSeqDescricao(String param) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(SceAlmoxarifado.class);
 		

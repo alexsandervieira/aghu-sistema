@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import br.gov.mec.aghu.dominio.DominioSituacaoSolicitacaoInternacao;
 import br.gov.mec.aghu.internacao.cadastrosbasicos.business.ICadastrosBasicosInternacaoFacade;
 import br.gov.mec.aghu.internacao.leitos.business.ILeitosInternacaoFacade;
+import br.gov.mec.aghu.internacao.transferir.business.ITransferirPacienteFacade;
 import br.gov.mec.aghu.model.AinLeitos;
 import br.gov.mec.aghu.model.AinSolicTransfPacientes;
 import br.gov.mec.aghu.core.action.ActionController;
@@ -42,6 +43,9 @@ public class AtenderTransferenciaPacienteController extends ActionController {
 
 	private List<AinLeitos> listaLeitoPesq = null;
 
+	@EJB
+	private ITransferirPacienteFacade transferirPacienteFacade;
+
 	@PostConstruct
 	protected void init() {
 		begin(conversation, true);
@@ -63,6 +67,10 @@ public class AtenderTransferenciaPacienteController extends ActionController {
 	public String salvar() {
 		atenderTransferenciaPacientePaginatorController.getDataModel().reiniciarPaginator();
 
+		if (transferirPacienteFacade.validarPacienteNaoPossuiAltaAdministrativa(solicitacao.getInternacao().getSeq()) && !transferirPacienteFacade.validarTipoAltaMedicaPermitePacienteComAlta(solicitacao.getInternacao().getSeq())){
+			apresentarMsgNegocio(Severity.ERROR, "PACIENTE_POSSUI_ALTA_ADMINISTRATIVA");
+			return null;
+		}
 		try {
 			if (this.solicitacao != null && this.solicitacao.getIndSitSolicLeito() == DominioSituacaoSolicitacaoInternacao.P) {
 				this.leitosInternacaoFacade.atenderSolicitacaoTransferencia(this.solicitacao, this.leitoConcedido);

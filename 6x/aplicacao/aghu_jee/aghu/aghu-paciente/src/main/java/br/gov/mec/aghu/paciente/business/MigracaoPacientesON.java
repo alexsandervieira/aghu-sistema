@@ -188,15 +188,14 @@ public class MigracaoPacientesON extends BaseBusiness{
 			popularPacienteComDadosDoArquivo(paciente, listaCamposPaciente, nomeArquivo, numeroLinha, anularProntuarios, nomeMaeNaoInformado);
 			
 			//Trata o prontuário do paciente
-			if (paciente.getProntuario() != null && !tratarProntuario){
-				tratarProntuario(paciente, nomeArquivo, numeroLinha);		
-			}
-			try {
-				//Persiste o paciente
-				if (paciente.getProntuario() != null) {
-					persistirProntuarioSeNaoCadastrado(paciente, getRegistroColaboradorFacade().obterServidorPorUsuario(loginUsuarioLogado));
-				}					
-				persistirPaciente(paciente, nomeArquivo, numeroLinha);
+			validaTrataProntuario(nomeArquivo, tratarProntuario, numeroLinha, paciente);
+			
+			try{	
+			
+				populaAipPacienteProntuario(paciente, nomeArquivo, numeroLinha, loginUsuarioLogado);
+			
+				persistirPacienteMigracao(paciente);
+				
 				if (migrarEnderecos){
 					persistirEndereco(paciente, listaCamposPaciente, nomeArquivo, numeroLinha);
 				}
@@ -211,30 +210,62 @@ public class MigracaoPacientesON extends BaseBusiness{
 				pacienteFacade.commit();
 				pacienteFacade.sessionClear();
 				
-			}
-			catch(PersistenceException e) {
+			}catch(PersistenceException e) {
 				if (e.getCause() instanceof ConstraintViolationException || e.getCause() instanceof NonUniqueObjectException) {
 					throw new ApplicationBusinessException(
-							MigracaoPacientesONExceptionCode.PRONTUARIO_JA_INCLUIDO,
-							paciente.getProntuario(), nomeArquivo, numeroLinha);
-				} 
-				else{
+							MigracaoPacientesONExceptionCode.PRONTUARIO_JA_INCLUIDO,paciente.getProntuario(), nomeArquivo, numeroLinha);
+				}else{
 					throw new ApplicationBusinessException(MigracaoPacientesONExceptionCode.ERRO_PERSISTENCIA_MIGRACAO, nomeArquivo, numeroLinha);
 				}
-			} 
-			catch (JDBCConnectionException e){
+			}catch (JDBCConnectionException e){
 				throw new ApplicationBusinessException(MigracaoPacientesONExceptionCode.ERRO_PERSISTENCIA_MIGRACAO, nomeArquivo, numeroLinha);
-			}
-			catch (HibernateException e){
+			}catch (HibernateException e){
 				throw new ApplicationBusinessException(MigracaoPacientesONExceptionCode.ERRO_PERSISTENCIA_MIGRACAO, nomeArquivo, numeroLinha);
-			}
-			catch (Exception e) {
-				throw new ApplicationBusinessException(MigracaoPacientesONExceptionCode.ERRO_PERSISTENCIA_MIGRACAO, nomeArquivo, numeroLinha);
+			}catch (Exception e) {
+				throw new ApplicationBusinessException(MigracaoPacientesONExceptionCode.PRONTUARIO_JA_INCLUIDO,paciente.getProntuario(), nomeArquivo, numeroLinha);
 			} 
 		}	
 	}
 
-	private void persistirProntuarioSeNaoCadastrado(AipPacientes aipPaciente, RapServidores servidorLogado) {
+
+	/**
+	 * @param nomeArquivo
+	 * @param tratarProntuario
+	 * @param numeroLinha
+	 * @param paciente
+	 * @throws ApplicationBusinessException
+	 */
+	public void validaTrataProntuario(String nomeArquivo,
+			Boolean tratarProntuario, Integer numeroLinha, AipPacientes paciente)
+			throws ApplicationBusinessException {
+		if (paciente.getProntuario() != null && !tratarProntuario){
+			tratarProntuario(paciente, nomeArquivo, numeroLinha);		
+		}
+	}
+
+
+
+
+	public void populaAipPacienteProntuario(AipPacientes paciente, String nomeArquivo, Integer numeroLinha, String loginUsuarioLogado) throws ApplicationBusinessException{
+		try {
+			//Persiste o paciente
+			if (paciente.getProntuario() != null) {
+				persistirProntuarioSeNaoCadastrado(paciente, nomeArquivo, numeroLinha, getRegistroColaboradorFacade().obterServidorPorUsuario(loginUsuarioLogado));
+			}			
+	
+		}catch(PersistenceException e) {
+				if (e.getCause() instanceof ConstraintViolationException || e.getCause() instanceof NonUniqueObjectException) {
+					throw new ApplicationBusinessException(
+							MigracaoPacientesONExceptionCode.PRONTUARIO_JA_INCLUIDO,paciente.getProntuario(), nomeArquivo, numeroLinha);
+				}
+		}	
+	}
+
+
+
+
+
+	private void persistirProntuarioSeNaoCadastrado(AipPacientes aipPaciente, String nomeArquivo, Integer numeroLinha, RapServidores servidorLogado) throws ApplicationBusinessException {
 		AipPacienteProntuario aipPacienteProntuarioJaCadastrado = this.getAipPacienteProntuarioDAO().obterPorChavePrimaria(aipPaciente.getProntuario());
 		if (aipPacienteProntuarioJaCadastrado == null) {
 			AipPacienteProntuario aipPacienteProntuario = new AipPacienteProntuario();
@@ -242,6 +273,8 @@ public class MigracaoPacientesON extends BaseBusiness{
 			aipPacienteProntuario.setCriadoEm(new Date());
 			aipPacienteProntuario.setServidor(servidorLogado);
 			getAipPacienteProntuarioDAO().persistir(aipPacienteProntuario);
+		}else{
+			throw new ApplicationBusinessException(MigracaoPacientesONExceptionCode.PRONTUARIO_JA_INCLUIDO, nomeArquivo, numeroLinha);
 		}
 	}	
 	
@@ -392,8 +425,14 @@ public class MigracaoPacientesON extends BaseBusiness{
 	 * Método que persiste o paciente no banco sem passar pelas regras de negócio
 	 * do módulo de pacientes
 	 */
-	public void persistirPaciente(AipPacientes paciente, String nomeArquivo, Integer numeroLinha){
+	public void persistirPaciente(AipPacientes paciente){
 		cadastroPacienteFacade.inserirPacienteMigracao(paciente);
+
+	}
+	
+	public void persistirPacienteMigracao(AipPacientes paciente){
+		cadastroPacienteFacade.inserirPacienteMigracaoPaciente(paciente);
+
 	}
 	
 

@@ -62,6 +62,7 @@ import br.gov.mec.aghu.model.RarPrograma;
 import br.gov.mec.aghu.model.RarProgramaDuracao;
 import br.gov.mec.aghu.model.VRapServidorConselho;
 import br.gov.mec.aghu.paciente.vo.SituacaoPacienteVO;
+import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeHistoricoPrescDiagnosticosDAO;
 import br.gov.mec.aghu.prescricaomedica.vo.ConselhoProfissionalServidorVO;
 import br.gov.mec.aghu.prescricaomedica.vo.VMpmServConselhoGeralVO;
 import br.gov.mec.aghu.procedimentoterapeutico.vo.RapServidoresProcedimentoTerapeuticoVO;
@@ -195,6 +196,9 @@ public class RegistroColaboradorFacade extends BaseFacade implements IRegistroCo
 	
 	@Inject
 	private RapOcupacaoCargoDAO rapOcupacaoCargoDAO;
+	
+	@Inject
+	private EpeHistoricoPrescDiagnosticosDAO epeHistoricoPrescDiagnosticosDAO;
 
 	/**
 	 * 
@@ -432,7 +436,17 @@ public class RegistroColaboradorFacade extends BaseFacade implements IRegistroCo
 			throws ApplicationBusinessException {
 		getPessoaFisicaON().salvar(pessoaFisica);
 	}
-
+	
+	/**
+	 *Retorna o nome sem caracter especial na hora da pesquisa
+	 *
+	 * @param nome
+	 */
+	@Override
+	public String ajustarNomePesquisa(String pessoaFisica) {
+		return getPessoaFisicaON().ajustarNomePesquisa(pessoaFisica);
+	}
+	
 	/**
 	 * Retorna o primeiro servidor encontrado com os parâmetros fornecidos.
 	 * 
@@ -1648,6 +1662,18 @@ public class RegistroColaboradorFacade extends BaseFacade implements IRegistroCo
 	}
 
 	@Override
+	public Collection<RapQualificacao> obterRapQualificacoesPorServidor(
+			RapServidores servidor) {
+		return getRapQualificacaoDAO()
+				.pesquisarRapQualificacaoPorServidor(servidor);
+	}	
+	
+	@Override
+	public Boolean isProfissionalMedicoOuEnfermeiro(RapServidores rapServidor) throws ApplicationBusinessException{
+		return qualificacaoRN.isProfissionalMedicoOuEnfermeiro(rapServidor);
+	}
+	
+	@Override
 	public List<RapQualificacao> pesquisarQualificacaoConselhoProfissionalPorServidor(
 			Integer serMatricula, Short serVinCodigo) {
 		return getRapQualificacaoDAO()
@@ -2657,8 +2683,20 @@ public class RegistroColaboradorFacade extends BaseFacade implements IRegistroCo
 	@Override
 	public List<RapServidores> listarServidoresComPessoaFisicaPorEquipe(
 			String parametro, AghEquipes equipe) {
+		return listarServidoresComPessoaFisicaPorEquipe(parametro, equipe, null);
+	}
+
+	@Override
+	public List<RapServidores> listarServidoresComPessoaFisicaPorEquipe(
+			String parametro, AghEquipes equipe,
+			List<RapServidoresId> listProfissionais) {
 		return getRapServidoresDAO().obterServidoresComPessoaFisicaPorEquipe(
-				parametro, equipe);
+				parametro, equipe, listProfissionais);
+	}
+
+	@Override
+	public List<RapServidoresVO> pesquisarRapServidoresPorAtendimento(String parametro, Integer atendimentoSeq) {
+		return epeHistoricoPrescDiagnosticosDAO.listarProfissionalPorAtendimento(parametro, atendimentoSeq);
 	}
 	
 }

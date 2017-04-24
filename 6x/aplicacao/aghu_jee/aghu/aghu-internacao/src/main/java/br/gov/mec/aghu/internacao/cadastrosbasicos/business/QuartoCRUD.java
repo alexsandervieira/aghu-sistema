@@ -144,8 +144,7 @@ public class QuartoCRUD extends BaseBusiness {
 	// Nao encotrei a chamada acima em nenhum xhtml.
 	public List<AinTipoCaracteristicaLeito> pesquisarTiposCaracteristicasPorCodigoOuDescricao(Object parametro) {		
 		//return cadastrosBasicosInternacaoFacade.pesquisarTipoCaracteristicaPorCodigoOuDescricao(parametro == null ? null : parametro.toString());
-		String p = parametro == null ? null : parametro.toString();
-		return  getAinTipoCaracteristicaLeitoDAO().pesquisarTipoCaracteristicaPorCodigoOuDescricao(p);
+		return  getAinTipoCaracteristicaLeitoDAO().pesquisarTipoCaracteristicaPorCodigoOuDescricao(parametro);
 	}
 
 	/**
@@ -192,6 +191,7 @@ public class QuartoCRUD extends BaseBusiness {
 			
 			if(leitosQuarto != null && !leitosQuarto.isEmpty()){
 				persistirLeitos(quarto, leitosQuarto, servidorLogado, leitosExtrato, atualizarUnidadeFuncional);
+				atualizaUnidadeFunucionalLeitos(quarto,leitosQuarto,leitosExtrato,atualizarUnidadeFuncional);				
 			}
 			
 			quarto = getAinQuartosDAO().obterPorChavePrimaria(quarto.getNumero());
@@ -215,6 +215,33 @@ public class QuartoCRUD extends BaseBusiness {
 		}
 	}
 
+	private void atualizaUnidadeFunucionalLeitos(AinQuartos quarto,  List<AinLeitosVO> leitosQuarto,List<AinLeitos> leitosExtrato, boolean atualizarUnidadeFuncional) throws ApplicationBusinessException{
+		if(atualizarUnidadeFuncional){
+			for(AinLeitosVO leitoVO : leitosQuarto) {
+				if(leitoVO.getLeitoID() != null){
+					AinLeitos leito = ainLeitosDAO.obterPorChavePrimaria(leitoVO.getLeitoID());
+					AinLeitos leitoOriginal = ainLeitosDAO.obterOriginal(leito);
+					if(quarto != null){
+						validaLeitoMedidaPreventiva(quarto.getNumero(), leito.getTipoMovimentoLeito().getCodigo());
+					}
+					if(leito != null){
+						leito.setUnidadeFuncional(quarto.getUnidadeFuncional());
+						if(leito.isSituacao()) {
+							if(!leito.getIndSituacao().isAtivo()){
+								Short vl = getParametroFacade().buscarValorShort(AghuParametrosEnum.P_COD_MVTO_LTO_DESOCUPADO);
+								leito.setTipoMovimentoLeito(obterTipoMvtLeito(vl));
+								if(!Short.valueOf("0").equals(vl)){
+									leitosExtrato.add(leito);
+								}
+							}	
+						}
+					}
+					ainLeitosDAO.atualizar(leito);
+					posAtualizarLeito(leito, leitoOriginal);
+				}
+			}
+		}
+	}
 	private void persistirLeitos(AinQuartos quarto, List<AinLeitosVO> leitosQuarto,
 			RapServidores servidorLogado, List<AinLeitos> leitosExtrato,
 			boolean atualizarUnidadeFuncional) throws ApplicationBusinessException {
@@ -306,7 +333,7 @@ public class QuartoCRUD extends BaseBusiness {
 		AinLeitosJn AinLeitosJn = BaseJournalFactory.getBaseJournal(dominio, AinLeitosJn.class, servidorLogado.getUsuario());
 
 		AinLeitosJn.setLeitoId(leito.getLeitoID());
-		AinLeitosJn.setNomeUsuario(servidorLogado.getUsuario());
+		AinLeitosJn.setNomeUsuario(servidorLogado.getUsuario().toUpperCase());
 		AinLeitosJn.setSerMatricula(servidorLogado.getId().getMatricula());
 		AinLeitosJn.setSerVinCodigo(servidorLogado.getId().getVinCodigo());
 		AinLeitosJn.setLeito(leito.getLeito());

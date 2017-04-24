@@ -14,6 +14,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.ShortType;
 import org.hibernate.type.StringType;
@@ -172,7 +173,9 @@ public class AelValorNormalidCampoDAO extends br.gov.mec.aghu.core.persistence.d
 	 */
 	public List<AelValorNormalidCampo> pesquisarNormalidadesCampoLaudo(Integer seqCampoLaudo) {
 		
-		DetachedCriteria criteria = DetachedCriteria.forClass(AelValorNormalidCampo.class);
+		DetachedCriteria criteria = DetachedCriteria.forClass(AelValorNormalidCampo.class,"AEL");
+		
+		criteria.createAlias("AEL." + AelValorNormalidCampo.Fields.UNID_MEDIDA.toString(), "UND", JoinType.LEFT_OUTER_JOIN);
 		
 		if(seqCampoLaudo != null ){
 			criteria.add(Restrictions.eq(AelValorNormalidCampo.Fields.CAL_SEQ.toString(), seqCampoLaudo));
@@ -205,7 +208,7 @@ public class AelValorNormalidCampoDAO extends br.gov.mec.aghu.core.persistence.d
 		}
 		
 		
-		StringBuilder sb = createSQLSobreposicaoNormalidadesCampoLaudo();
+		StringBuilder sb = createSQLSobreposicaoNormalidadesCampoLaudo(valorNormalidCampo);
 		
 		
 		Object[] values = { (valorNormalidCampo.getIdadeMinima()!=null? valorNormalidCampo.getIdadeMinima() : Short.valueOf("0")),
@@ -218,7 +221,7 @@ public class AelValorNormalidCampoDAO extends br.gov.mec.aghu.core.persistence.d
 		return this.executeCriteria(criteria);
 	}
 	
-	private StringBuilder createSQLSobreposicaoNormalidadesCampoLaudo() {
+	private StringBuilder createSQLSobreposicaoNormalidadesCampoLaudo(AelValorNormalidCampo valorNormalidCampo) {
 		StringBuilder sb = new StringBuilder(100);
 		StringBuilder fieldUnidMedidaIdadeMin = new StringBuilder("this_.unid_medida_idade_min");
 		StringBuilder fieldUnidMedidaIdade = new StringBuilder("this_.unid_medida_idade");
@@ -237,28 +240,42 @@ public class AelValorNormalidCampoDAO extends br.gov.mec.aghu.core.persistence.d
 		.append(fieldUnidMedidaIdade)
 		.append(" = 'A' THEN 365 WHEN ")
 		.append(fieldUnidMedidaIdade)
-		.append(" = 'M' THEN 30 ELSE 0 END))"); 
+		.append(" = 'M' THEN 30 ELSE 0 END))");
+		
+		StringBuilder sqlDiasUnidMedidaIdadeMinObjNew = new StringBuilder(100);
+		sqlDiasUnidMedidaIdadeMinObjNew.append("(CASE WHEN '")
+		.append(valorNormalidCampo.getUnidMedidaIdadeMin())
+		.append("' = 'A' THEN 365 WHEN '")
+		.append(valorNormalidCampo.getUnidMedidaIdadeMin())
+		.append("' = 'M' THEN 30 ELSE 0 END))");
+		
+		StringBuilder sqlDiasUnidMedidaIdadeObjNew = new StringBuilder(100);
+		sqlDiasUnidMedidaIdadeObjNew.append("(CASE WHEN '")
+		.append(valorNormalidCampo.getUnidMedidaIdade())
+		.append("' = 'A' THEN 365 WHEN '")
+		.append(valorNormalidCampo.getUnidMedidaIdade())
+		.append("' = 'M' THEN 30 ELSE 0 END))"); 
 		
 		sb.append("  ((( ? * ")
-		.append(sqlDiasUnidMedidaIdadeMin)
+		.append(sqlDiasUnidMedidaIdadeMinObjNew)
 		.append(" > (")
 		.append(idadeMinima)
 		.append(" * ")
 		.append(sqlDiasUnidMedidaIdadeMin)
 		.append(" AND (? * ")
-		.append(sqlDiasUnidMedidaIdade)
+		.append(sqlDiasUnidMedidaIdadeObjNew)
 		.append(" < (")
 		.append(idadeMaxima)
 		.append(" * ")
 		.append(sqlDiasUnidMedidaIdade)
 		.append(" OR ((? * ")
-		.append(sqlDiasUnidMedidaIdadeMin)
+		.append(sqlDiasUnidMedidaIdadeMinObjNew)
 		.append(" > (")
 		.append(idadeMinima)
 		.append(" * ")
 		.append(sqlDiasUnidMedidaIdadeMin)
 		.append(" AND (? * ")
-		.append(sqlDiasUnidMedidaIdade)
+		.append(sqlDiasUnidMedidaIdadeObjNew)
 		.append(" < (")
 		.append(idadeMaxima)
 		.append(" * ")

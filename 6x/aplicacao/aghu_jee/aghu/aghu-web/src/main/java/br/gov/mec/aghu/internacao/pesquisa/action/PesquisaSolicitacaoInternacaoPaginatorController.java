@@ -15,6 +15,7 @@ import br.gov.mec.aghu.business.IAghuFacade;
 import br.gov.mec.aghu.dominio.DominioSituacaoSolicitacaoInternacao;
 import br.gov.mec.aghu.internacao.action.AtenderSolicitacaoInternacaoController;
 import br.gov.mec.aghu.internacao.action.CadastroInternacaoController;
+import br.gov.mec.aghu.internacao.action.NegativaAtendimentoSolicitacaoInternacaoController;
 import br.gov.mec.aghu.internacao.action.RelatorioSolicitacaoInternacaoController;
 import br.gov.mec.aghu.internacao.solicitacao.business.ISolicitacaoInternacaoFacade;
 import br.gov.mec.aghu.internacao.vo.ConvenioPlanoVO;
@@ -43,6 +44,7 @@ public class PesquisaSolicitacaoInternacaoPaginatorController extends ActionCont
 	private static final String REDIRECT_RELATORIO_SOLICITACAO_INTERNACAO = "internacao-relatorioSolicitacaoInternacao";
 	private static final String REDIRECT_PESQUISA_PACIENTE = "paciente-pesquisaPaciente";
 	private static final String REDIRECT_ATENDER_SOLICITACAO_INTERNACAO = "internacao-atenderSolicitacaoInternacao";
+	private static final String REDIRECT_NAO_ATENDER_SOLICITACAO_INTERNACAO = "internacao-negativaAtendendimentoSolicitacaoInternacao";
 	private static final String REDIRECT_CADASTRO_INTERNACAO = "internacao-cadastroInternacao";
 	private static final String REDIRECT_DETALHAR_SOLICITACAO_INTERNACAO = "detalhaSolicitacaoInternacao";
 	private static final String PAGE_PESQUISAR_SOLICITACAO_INTERNACAO = "pesquisarSolicitacaoInternacao";
@@ -67,6 +69,9 @@ public class PesquisaSolicitacaoInternacaoPaginatorController extends ActionCont
 	
 	@Inject 
 	private AtenderSolicitacaoInternacaoController atenderSolicitacaoInternacaoController ;
+	
+	@Inject
+	private NegativaAtendimentoSolicitacaoInternacaoController negativaAtendendimentoSolicitacaoInternacaoController;
 
 	@Inject
 	private CadastroInternacaoController cadastroInternacaoController;
@@ -151,6 +156,12 @@ public class PesquisaSolicitacaoInternacaoPaginatorController extends ActionCont
 		this.atenderSolicitacaoInternacaoController.setSeqSolicitacaoInternacao(seqSolicitacaoInternacao);
 		this.atenderSolicitacaoInternacaoController.inicio();
 		return REDIRECT_ATENDER_SOLICITACAO_INTERNACAO;
+	}
+	
+	public String naoAtenderSolicitacao(Integer seqSolicitacaoInternacao){
+		this.negativaAtendendimentoSolicitacaoInternacaoController.setSeqSolicitacaoInternacao(seqSolicitacaoInternacao);
+		this.negativaAtendendimentoSolicitacaoInternacaoController.inicio();		
+		return REDIRECT_NAO_ATENDER_SOLICITACAO_INTERNACAO; 
 	}
 	
 	public String internarPaciente(Integer codigoPaciente, Integer seqSolicitacaoInternacao){
@@ -244,45 +255,31 @@ public class PesquisaSolicitacaoInternacaoPaginatorController extends ActionCont
 	public Boolean exibirBotaoLiberar(
 			AinSolicitacoesInternacao solicitacaoInternacao) {
 		return solicitacaoInternacao != null
-				&& DominioSituacaoSolicitacaoInternacao.P
-						.equals(solicitacaoInternacao
-								.getIndSitSolicInternacao());
+				&& DominioSituacaoSolicitacaoInternacao.P.equals(solicitacaoInternacao.getIndSitSolicInternacao());
 	}
 
-	public Boolean exibirBotaoCancelar(
-			AinSolicitacoesInternacao solicitacaoInternacao) {
-		return solicitacaoInternacao != null
-				&& (DominioSituacaoSolicitacaoInternacao.P
-						.equals(solicitacaoInternacao
-								.getIndSitSolicInternacao()) || DominioSituacaoSolicitacaoInternacao.L
-						.equals(solicitacaoInternacao
-								.getIndSitSolicInternacao()));
+	public Boolean exibirBotaoCancelar(	AinSolicitacoesInternacao solicitacaoInternacao) {
+		return solicitacaoInternacao != null && (DominioSituacaoSolicitacaoInternacao.P
+						.equals(solicitacaoInternacao.getIndSitSolicInternacao()) || DominioSituacaoSolicitacaoInternacao.L
+						.equals(solicitacaoInternacao.getIndSitSolicInternacao()));
 	}
 
-	public Boolean exibirBotaoAtender(
-			AinSolicitacoesInternacao solicitacaoInternacao) {
-		return solicitacaoInternacao != null
-				&& DominioSituacaoSolicitacaoInternacao.L
-						.equals(solicitacaoInternacao
-								.getIndSitSolicInternacao());
+	public Boolean exibirBotaoAtender(AinSolicitacoesInternacao solicitacaoInternacao) {
+		return solicitacaoInternacao != null && DominioSituacaoSolicitacaoInternacao.L
+						.equals(solicitacaoInternacao .getIndSitSolicInternacao());
 	}
 
-	public Boolean exibirBotaoInternar(
-			AinSolicitacoesInternacao solicitacaoInternacao) {
-		return solicitacaoInternacao != null
-				&& DominioSituacaoSolicitacaoInternacao.A
-						.equals(solicitacaoInternacao
-								.getIndSitSolicInternacao());
+	public Boolean exibirBotaoInternar(AinSolicitacoesInternacao solicitacaoInternacao) {
+		return solicitacaoInternacao != null && DominioSituacaoSolicitacaoInternacao.A
+						.equals(solicitacaoInternacao.getIndSitSolicInternacao());
 	}
 	
-	public void obterSolicitacaoParaAlteracao(
-			AinSolicitacoesInternacao solicitacaoInternacao){
+	public void obterSolicitacaoParaAlteracao(AinSolicitacoesInternacao solicitacaoInternacao){
 		this.solicitacaoInternacaoAlteracao = solicitacaoInternacao;
 		
 	}
 	
-	public void obterSolicitacaoParaCancelamento(
-			AinSolicitacoesInternacao solicitacaoInternacao){
+	public void obterSolicitacaoParaCancelamento(AinSolicitacoesInternacao solicitacaoInternacao){
 		this.solicitacaoInternacaoAlteracao = solicitacaoInternacao;
 		
 	}

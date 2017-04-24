@@ -77,6 +77,11 @@ public class EpePrescricoesCuidadosDAO extends br.gov.mec.aghu.core.persistence.
 		return this.pesquisarCuidadosPrescricao(penId, dthrFim, listarTodas, false);
 	}
 
+	public List<EpePrescricoesCuidados> pesquisarCuidadosPrescricao(
+			EpePrescricaoEnfermagemId penId, Date dthrFim, Boolean listarTodas, Boolean excluirHierarquicos) {
+		return this.pesquisarCuidadosPrescricao(penId, dthrFim, listarTodas, excluirHierarquicos, false);
+	}
+
 	/**
 	 * Lista os cuidados prescritos através chave da prescrição
 	 * de enfermagem(pen_seq + atd_seq) onde a data de fim do cuidado seja igual a data
@@ -88,7 +93,7 @@ public class EpePrescricoesCuidadosDAO extends br.gov.mec.aghu.core.persistence.
 	 * @return
 	 */
 	public List<EpePrescricoesCuidados> pesquisarCuidadosPrescricao(
-			EpePrescricaoEnfermagemId penId, Date dthrFim, Boolean listarTodas, Boolean excluirHierarquicos) {
+			EpePrescricaoEnfermagemId penId, Date dthrFim, Boolean listarTodas, Boolean excluirHierarquicos, Boolean somenteCuidadosRotina) {
 
 		if (penId == null || dthrFim == null) {
 			throw new IllegalArgumentException("Parametro invalido!!!");
@@ -107,6 +112,10 @@ public class EpePrescricoesCuidadosDAO extends br.gov.mec.aghu.core.persistence.
 		if (excluirHierarquicos){
 			criteria.add(Restrictions.isNull(EpePrescricoesCuidados.Fields.SERVIDOR_MOVIMENTO_VALIDACAO.toString()));
 			criteria.add(Restrictions.isNull(EpePrescricoesCuidados.Fields.DTHR_VALIDA_MVTO.toString()));
+		}
+	
+		if(somenteCuidadosRotina){
+			criteria.add(Restrictions.eq(aliasCuidado + separador + EpeCuidados.Fields.IND_ROTINA.toString(), Boolean.TRUE));
 		}
 		
 		if(!listarTodas) {

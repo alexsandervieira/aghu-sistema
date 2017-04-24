@@ -6,6 +6,7 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 
 import br.gov.mec.aghu.model.AelExameResuNotificacao;
 import br.gov.mec.aghu.model.AelExameResuNotificacaoId;
@@ -18,6 +19,7 @@ public class AelExameResuNotificacaoDAO extends br.gov.mec.aghu.core.persistence
 
 	private DetachedCriteria obterCriteriaAelExameResuNotificacao(final String exnEmaExaSigla, final Integer exnEmaManSeq, final Integer exnCalSeq, final Boolean order) {
 		final DetachedCriteria criteria = DetachedCriteria.forClass(AelExameResuNotificacao.class);
+		criteria.createAlias(AelExameResuNotificacao.Fields.AEL_RESULTADO_CODIFICADO.toString(), "resultadoCodificado", JoinType.LEFT_OUTER_JOIN);
 		criteria.add(Restrictions.eq(AelExameResuNotificacao.Fields.EXN_EMA_EXA_SIGLA.toString(), exnEmaExaSigla));
 		criteria.add(Restrictions.eq(AelExameResuNotificacao.Fields.EXN_EMA_MAN_SEQ.toString(), exnEmaManSeq));
 		criteria.add(Restrictions.eq(AelExameResuNotificacao.Fields.EXN_CAL_SEQ.toString(), exnCalSeq));

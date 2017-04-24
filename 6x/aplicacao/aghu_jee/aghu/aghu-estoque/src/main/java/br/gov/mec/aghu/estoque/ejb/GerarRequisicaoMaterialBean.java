@@ -67,7 +67,6 @@ public class GerarRequisicaoMaterialBean extends BaseBusiness implements GerarRe
 
 	@Override
 	public void gravarRequisicaoMaterial(SceReqMaterial sceReqMateriais, String nomeMicrocomputador) throws BaseException {
-		
 		try {
 			this.popularRequisicaoMaterial(sceReqMateriais);
 			getEstoqueFacade().persistirRequisicaoMaterial(sceReqMateriais, nomeMicrocomputador);

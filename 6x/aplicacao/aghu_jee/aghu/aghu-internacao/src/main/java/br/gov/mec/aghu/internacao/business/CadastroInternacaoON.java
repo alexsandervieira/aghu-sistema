@@ -269,7 +269,7 @@ public class CadastroInternacaoON extends BaseBusiness {
 		DATA_HORA_ANTERIOR_DATA_HORA_INTERNACAO_ADMINISTRATIVA, ERRO_ALTERACAO_CONVENIO_PROCEDIMENTO, ERRO_ALTERAR_CONVENIO_INTERNACAO, 
 		AIN_DATA_OBRIGATORIA, ERRO_AINP_GERA_NOVA_CONTA, CONTA_CONVENIO_NAO_CADASTRADA, ERRO_CONTA_HOSPITALAR_ATIVA_INEXISTENTE, 
 		AIN_PACIENTE_SEM_ENDERECO, LABEL_OPERACAO_INVALIDA_MODULO_FATURAMENTO_INATIVO, MENSAGEM_ERRO_HIBERNATE_VALIDATION, 
-		USUARIO_NAO_SERVIDOR, AIN_00147, AIN_00146,PARAMETRO_INCONSISTENTE_PARTO_CESAREA, DATA_ALTA_MENOR_DATA_INTERNACAO_ADMINISTRATIVA
+		USUARIO_NAO_SERVIDOR, AIN_00147, AIN_00146,PARAMETRO_INCONSISTENTE_PARTO_CESAREA, DATA_ALTA_MENOR_DATA_INTERNACAO_ADMINISTRATIVA,AIN_00148
 	}
 
 	/**
@@ -355,7 +355,8 @@ public class CadastroInternacaoON extends BaseBusiness {
 			final List<AinResponsaveisPaciente> listaResponsaveis,
 			final List<AinResponsaveisPaciente> listaResponsaveisExcluidos, 
 			final String nomeMicrocomputador, final Date dataFimVinculoServidor,
-			final Boolean substituirProntuario)
+			final Boolean substituirProntuario,
+			final FatItensProcedHospitalar itemProcedHospitalar)
 			throws BaseException {
 		
 		List<AinResponsaveisPaciente> listResponsavelPacienteOld = new LinkedList<>();
@@ -422,7 +423,7 @@ public class CadastroInternacaoON extends BaseBusiness {
 				// edição
 				LOG.info("Editando internação. INT_SEQ = "	+ internacao.getSeq());
 				internacao = this.editarInternacao(internacao, cidsInternacao,
-						listaResponsaveis, sizeListaResp, nomeMicrocomputador, dataFimVinculoServidor);
+						listaResponsaveis, sizeListaResp, nomeMicrocomputador, dataFimVinculoServidor,itemProcedHospitalar);
 				this.flush();
 			}
 			
@@ -1046,12 +1047,15 @@ public class CadastroInternacaoON extends BaseBusiness {
 			final List<AinCidsInternacao> cidsInternacao,
 			final List<AinResponsaveisPaciente> listaResponsaveis,
 			final Integer sizeListaResp, 
-			final String nomeMicrocomputador, final Date dataFimVinculoServidor) throws BaseException{
+			final String nomeMicrocomputador, final Date dataFimVinculoServidor,
+			final FatItensProcedHospitalar itemProcedHospitalar) throws BaseException{
 		
 		final AinInternacao internacaoOld = this.internacaoFacade.obterInternacaoAnterior(internacao.getSeq());
+		this.setProcedimentoBanco(internacaoOld,itemProcedHospitalar);
 		RapServidores servidorLogado = getServidorLogadoFacade().obterServidorLogado();
-		internacao = this.getAinInternacaoDAO().merge(internacao);
-
+		//internacao = this.getAinInternacaoDAO().merge(internacao);
+		internacao = this.getAinInternacaoDAO().atualizar(internacao);
+		
 		/*-------Estas regras precisam ficar aqui, pois na edição devem ser testadas após o merge----*/
 		this.validarEspecialidadeGrupoEmergencia(internacao);
 		this.verificarInformarNumeroCERIH(internacao.getIphSeq(),internacao.getIphPhoSeq(), internacao.getConvenioSaudePlano().getId().getCnvCodigo(), internacao.getSeq());
@@ -1073,6 +1077,8 @@ public class CadastroInternacaoON extends BaseBusiness {
 	   		}
    	 	}
 
+		internacaoOld.setResponsaveisPaciente(listaResponsaveis == null ? new ArrayList<AinResponsaveisPaciente>() : listaResponsaveis);
+		internacaoOld.setCidsInternacao(cidsInternacao == null ? new HashSet<AinCidsInternacao>() :new HashSet<AinCidsInternacao>(cidsInternacao));
 		//CHAMADA DE TRIGGERS DE ATUALIZAÇÃO
 		this.getInternacaoFacade().atualizarInternacao(internacao, internacaoOld,  nomeMicrocomputador, servidorLogado ,dataFimVinculoServidor, false);
 		/*-----------------------------------------------------------------------*/
@@ -1080,6 +1086,14 @@ public class CadastroInternacaoON extends BaseBusiness {
 		return internacao;
 	}
 	
+	private void setProcedimentoBanco(AinInternacao internacaoOld, final FatItensProcedHospitalar itemProcedHospitalar) {
+		if(itemProcedHospitalar != null){
+			internacaoOld.setIphPhoSeq(itemProcedHospitalar.getPhoSeq());
+			internacaoOld.setIphSeq(itemProcedHospitalar.getSeq());
+		}
+		
+	}
+
 	/**
 	 * Verifica se a data de internação não se encontra maior que as datas
 	 * de previsão de alta e de saída do paciente
@@ -1087,6 +1101,12 @@ public class CadastroInternacaoON extends BaseBusiness {
 	 * @throws ApplicationBusinessException 
 	 */
 	private void verificarRegrasDataInternacao(AinInternacao internacao) throws ApplicationBusinessException {
+		if(internacao.getDthrInternacao() != null
+	    && internacao.getDthrPrimeiroEvento() != null){
+			if(!internacao.getDthrInternacao().before(internacao.getDthrPrimeiroEvento())){
+				throw new ApplicationBusinessException(CadastroInternacaoONExceptionCode.AIN_00148);
+			}
+		}
 		if (internacao.getDthrInternacao() != null
 				&& internacao.getDtSaidaPaciente() != null
 				&& internacao.getDtSaidaPaciente().before(

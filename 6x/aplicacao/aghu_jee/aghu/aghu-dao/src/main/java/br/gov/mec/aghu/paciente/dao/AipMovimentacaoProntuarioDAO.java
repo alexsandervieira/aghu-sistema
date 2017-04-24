@@ -167,8 +167,13 @@ public class AipMovimentacaoProntuarioDAO extends br.gov.mec.aghu.core.persisten
 			criteria.add(
 					Restrictions.sqlRestriction("TRUNC("+AipMovimentacaoProntuarios.Fields.DATA_MOVIMENTO.name()+") BETWEEN TO_DATE('"+DateUtil.dataToString(DateUtil.truncaData(ontem.getTime()), "dd/MM/yyyy")+"','DD/MM/YYYY') AND TO_DATE('"+DateUtil.dataToString(DateUtil.truncaData(dezDias.getTime()), "dd/MM/yyyy")+"','DD/MM/YYYY')"));
 		} else {
-			criteria.add(
-					Restrictions.sqlRestriction("DATE("+AipMovimentacaoProntuarios.Fields.DATA_MOVIMENTO.name()+")BETWEEN DATE('"+DateUtil.dataToString(DateUtil.truncaData(ontem.getTime()), "dd/MM/yyyy")+"') AND DATE('"+DateUtil.dataToString(DateUtil.truncaData(dezDias.getTime()), "dd/MM/yyyy") +"')"));
+			criteria.add(Restrictions.sqlRestriction("CAST("
+					+ AipMovimentacaoProntuarios.Fields.DATA_MOVIMENTO.name()
+					+ "  AS DATE) BETWEEN TO_DATE('"+ DateUtil.dataToString(
+							DateUtil.truncaData(ontem.getTime()), "dd/MM/yyyy")
+					+ " ','dd/MM/yyyy') AND TO_DATE('" + DateUtil.dataToString(
+							DateUtil.truncaData(dezDias.getTime()),
+							"dd/MM/yyyy") + "','dd/MM/yyyy')"));
 		}
 
 		
@@ -417,7 +422,7 @@ public class AipMovimentacaoProntuarioDAO extends br.gov.mec.aghu.core.persisten
 			criteria.add(Restrictions.eq("samis."+AghSamis.Fields.CODIGO.toString(), origemProntuariosPesquisa.getCodigo()));
 		}
 		if(unidadeSolicitantePesquisa != null && !StringUtils.isBlank(unidadeSolicitantePesquisa.getDescricao())) {
-			criteria.add(Restrictions.ilike("aipmov."+AipMovimentacaoProntuarios.Fields.LOCAL.toString(), unidadeSolicitantePesquisa.getSigla(), MatchMode.ANYWHERE));
+			criteria.add(Restrictions.ilike("aipmov."+AipMovimentacaoProntuarios.Fields.LOCAL.toString(), "/"+unidadeSolicitantePesquisa.getSigla()+"/", MatchMode.ANYWHERE));
 		}
 		if(situacao != null) {
 			criteria.add(Restrictions.eq("aipmov."+AipMovimentacaoProntuarios.Fields.SITUACAO.toString(), situacao));
@@ -495,4 +500,16 @@ public class AipMovimentacaoProntuarioDAO extends br.gov.mec.aghu.core.persisten
 		Projections.property("aipmov."+AipMovimentacaoProntuarios.Fields.SLP_CODIGO.toString()), "slpCodigo")
 		);		
 	}
+	
+	public List<AipMovimentacaoProntuarios> pesquisarMovimentacaoPontuariosPendentes() {
+		
+		DetachedCriteria criteria = DetachedCriteria.forClass(AipMovimentacaoProntuarios.class);
+		criteria.add(Restrictions.or(Restrictions.eq(AipMovimentacaoProntuarios.Fields.SITUACAO.toString(), DominioSituacaoMovimentoProntuario.Q),
+				Restrictions.eq(AipMovimentacaoProntuarios.Fields.SITUACAO.toString(), DominioSituacaoMovimentoProntuario.P)));
+		
+		criteria.addOrder(Order.desc(AipMovimentacaoProntuarios.Fields.DATA_MOVIMENTO.toString()));
+		
+		return this.executeCriteria(criteria);
+	}
+
 }

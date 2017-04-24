@@ -19,7 +19,7 @@ import br.gov.mec.aghu.core.exception.Severity;
  */
 
 
-public class TiposAltaMedicaController  extends ActionController  {
+public class TiposAltaMedicaController extends ActionController  {
 
 	/**
 	 * 

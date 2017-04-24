@@ -233,6 +233,13 @@
 			<to-view-id>/pages/prescricaomedica/relatorios/relatoriosConfirmacaoPrescricao.xhtml</to-view-id>
 		<redirect/></navigation-case>
 	</navigation-rule>
+
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>prescricaomedica-relatorioVisualizarPrescricaoMedicaRascunho</from-outcome>
+			<to-view-id>/pages/prescricaomedica/relatorios/relatorioVisualizarPrescricaoMedicaRascunho.xhtml</to-view-id>
+		<redirect/></navigation-case>
+	</navigation-rule>
 	
 	<navigation-rule>
 		<navigation-case>

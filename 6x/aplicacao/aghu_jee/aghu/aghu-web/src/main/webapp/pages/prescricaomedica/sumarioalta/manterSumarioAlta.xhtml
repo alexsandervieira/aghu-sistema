@@ -88,21 +88,21 @@
 
 				<mec:commandButton id="bt_receitas" value="#{messages.LABEL_RECEITAS}"
 							action="#{manterSumarioAltaController.chamarManterReceitas}">
-		        	<f:setPropertyActionListener target="#{manterReceitaController.atdSeq}" value="#{listaPacientesInternadosController.atdSeq}" for="command"/>
-							<f:setPropertyActionListener target="#{manterReceitaController.prontuario}" value="#{listaPacientesInternadosController.prontuario}" for="command"/>
-							<f:setPropertyActionListener target="#{manterReceitaController.responsavel}" value="#{listaPacientesInternadosController.responsavel}" for="command"/>
-							<f:setPropertyActionListener target="#{manterReceitaController.leito}" value="#{listaPacientesInternadosController.leito}" for="command"/>
-					 		<f:setPropertyActionListener target="#{manterReceitaController.nome}" value="#{listaPacientesInternadosController.nome}" for="command"/>
-					 		<f:setPropertyActionListener target="#{manterReceitaController.idade}" value="#{listaPacientesInternadosController.idade}" for="command"/>
-					 		<f:setPropertyActionListener target="#{manterReceitaController.altaSumario}" value="#{manterSumarioAltaController.altaSumario}" for="command"/>
-							<f:setPropertyActionListener target="#{manterReceitaController.voltarPara}" value="prescricaomedica-manterSumarioAlta" for="command" />
-				  	</mec:commandButton>
+					        <f:setPropertyActionListener target="#{manterReceitaController.atdSeq}" value="#{manterSumarioAltaController.altanAtdSeq}" for="command"/>
+						    <f:setPropertyActionListener target="#{manterReceitaController.prontuario}" value="#{manterSumarioAltaController.altaSumarioVO.prontuario}" for="command"/>
+						    <f:setPropertyActionListener target="#{manterReceitaController.responsavel}" value="#{manterSumarioAltaController.altaSumarioVO.descEquipeResponsavel}" for="command"/>
+						    <f:setPropertyActionListener target="#{manterReceitaController.leito}" value="#{manterSumarioAltaController.altaSumarioVO.local}"  for="command"/>
+						    <f:setPropertyActionListener target="#{manterReceitaController.nome}" value="#{manterSumarioAltaController.altaSumario.nome}" for="command"/>
+						    <f:setPropertyActionListener target="#{manterReceitaController.idade}" value="#{manterSumarioAltaController.altaSumarioVO.idadeFormatado}" for="command"/>
+						    <f:setPropertyActionListener target="#{manterReceitaController.altaSumario}" value="#{manterSumarioAltaController.altaSumario}" for="command"/>
+							<f:setPropertyActionListener target="#{manterReceitaController.voltarPara}" value="prescricaomedica-manterSumarioAlta" for="command" /> 
+				 </mec:commandButton>
 				  	
-				  	<mec:commandButton id="bt_print_buttonView" value="#{messages.LABEL_VISUALIZAR_IMPRESSAO_RELATORIO}" action="#{manterSumarioAltaController.carregarDadosConclusao}" profile="view" onclick="PF('loadDialogWG').show()"/>
+				 <mec:commandButton id="bt_print_buttonView" value="#{messages.LABEL_VISUALIZAR_IMPRESSAO_RELATORIO}" action="#{manterSumarioAltaController.carregarDadosConclusao}" profile="view" onclick="PF('loadDialogWG').show()"/>
 				  	
-				  	<mec:commandButton id="btConcluirSumarioAlta" value="#{messages.LABEL_CONCLUIR_SUMARIO}" 
+				 <mec:commandButton id="btConcluirSumarioAlta" value="#{messages.LABEL_CONCLUIR_SUMARIO}" 
 		        	action="#{manterSumarioAltaController.concluirSumario}" render="@this" process="@this"
-		          rendered="#{manterSumarioAltaController.exibirBotaoConcluir}" profile="ok" ajax="true">
+		        	rendered="#{manterSumarioAltaController.exibirBotaoConcluir}" profile="ok" ajax="true">
 		        	<f:setPropertyActionListener target="#{manterSumarioAltaConclusaoController.tipoImpressao}" value="N" for="command"/>
 		        	<f:setPropertyActionListener target="#{diagnosticosPacienteController.atendimentoSeq}"
 		          														 value="#{manterSumarioAltaController.altaSumario.id.apaAtdSeq}"

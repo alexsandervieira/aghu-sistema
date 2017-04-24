@@ -108,12 +108,12 @@ public class AelPatologistaRN extends BaseBusiness {
 	}
 	
 	public void adicionarRevogarPermissao(AelPatologista patologista, DominioSituacao situacao, String usuarioLogado) throws BaseException{
-		String userId;
+		String nomeUsuarioOuLogin;
 		
 		if(patologista.getServidor().getUsuario() != null){
-			userId =  patologista.getServidor().getUsuario();
+			nomeUsuarioOuLogin =  patologista.getServidor().getUsuario();
 		}else{
-			userId = this.aelPatologistaDAO.pesquisarUsuarioPorMatricula(patologista.getServidor().getId().getMatricula());
+			nomeUsuarioOuLogin = this.aelPatologistaDAO.pesquisarUsuarioPorMatricula(patologista.getServidor().getId().getMatricula());
 		}
 		
 		Boolean MED03 = false;
@@ -127,7 +127,7 @@ public class AelPatologistaRN extends BaseBusiness {
 		List<Perfil> perfisPatologista =  buscaPerfisPatologista(perfilMedicoExecutorExames);
 		
 		if(!perfis.isEmpty()) {
-			List<Usuario> usuarios = getCascaFacade().pesquisarUsuarios(0, 1, null, true, userId);
+			List<Usuario> usuarios = getCascaFacade().pesquisarUsuariosPatologista(0, 1, null, true, nomeUsuarioOuLogin);
 			if(!usuarios.isEmpty()) {
 				Usuario usuario = getCascaFacade().obterUsuario(usuarios.get(0).getId());
 				Set<PerfisUsuarios> perfisUsuario = usuario.getPerfisUsuario();

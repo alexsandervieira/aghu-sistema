@@ -114,8 +114,7 @@ public class GerarDiariasProntuariosSamisController extends ActionReport {
 		mapaDesarquivamento = true;
 		
 		try{
-			Boolean exibeMsgProntuarioJaMovimentado = Boolean.FALSE;
-			ambulatorioFacade.movimentarProntuariosParaDesarquivamento(this.dataDiaria, obterLoginUsuarioLogado(), exibeMsgProntuarioJaMovimentado);
+			ambulatorioFacade.movimentarProntuariosParaDesarquivamento(this.dataDiaria);
 		} catch(ApplicationBusinessException e){
 			this.apresentarExcecaoNegocio(e);
 			LOG.error(e.getMessage(),e);

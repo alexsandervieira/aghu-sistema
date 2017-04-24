@@ -3,20 +3,19 @@ package br.gov.mec.aghu.paciente.business;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.business.IAghuFacade;
-import br.gov.mec.aghu.model.AghAtendimentoJn;
-import br.gov.mec.aghu.model.AghAtendimentos;
-import br.gov.mec.aghu.model.RapServidores;
-import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 import br.gov.mec.aghu.core.business.BaseBusiness;
 import br.gov.mec.aghu.core.dominio.DominioOperacoesJournal;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.core.factory.BaseJournalFactory;
+import br.gov.mec.aghu.model.AghAtendimentoJn;
+import br.gov.mec.aghu.model.AghAtendimentos;
+import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 
 @SuppressWarnings("PMD.CyclomaticComplexity")
 @Stateless
@@ -219,22 +218,74 @@ public class AtendimentoJournalRN extends BaseBusiness {
 	 * @return AghAtendimentos
 	 */
 	public AghAtendimentos clonarAtendimento(AghAtendimentos atendimento) throws ApplicationBusinessException {
-		AghAtendimentos cloneAtendimento = new AghAtendimentos();
+        AghAtendimentos cloneAtendimento = new AghAtendimentos();
 		
-		try {
-			cloneAtendimento = (AghAtendimentos) BeanUtils.cloneBean(atendimento);
-		} catch (Exception e) {
-			logError("Exceção capturada: ", e);
-			throw new ApplicationBusinessException(AtendimentoJournalRNExceptionCode.ERRO_CLONE_OBJ_ATENDIMENTO);
-		}
-		cloneAtendimento.setPaciente(atendimento.getPaciente());
-		cloneAtendimento.setInternacao(atendimento.getInternacao());
+		cloneAtendimento.setAelSolicitacaoExames(atendimento.getAelSolicitacaoExames());
+		cloneAtendimento.setAelSolicitacaoExamesHist(atendimento.getAelSolicitacaoExamesHist());
+		cloneAtendimento.setAghAtendimentoPacientes(atendimento.getAghAtendimentoPacientes());
+		cloneAtendimento.setAltasSumario(atendimento.getAltasSumario());
+		cloneAtendimento.setAtendimentoMae(atendimento.getAtendimentoMae());
+		cloneAtendimento.setAtendimentoPacienteExterno(atendimento.getAtendimentoPacienteExterno());
+		cloneAtendimento.setAtendimentosApac(atendimento.getAtendimentosApac());
 		cloneAtendimento.setAtendimentoUrgencia(atendimento.getAtendimentoUrgencia());
-		cloneAtendimento.setServidorMovimento(atendimento.getServidorMovimento());
+		cloneAtendimento.setCidAtendimentos(atendimento.getCidAtendimentos());
+		cloneAtendimento.setCirurgias(atendimento.getCirurgias());
 		cloneAtendimento.setConsulta(atendimento.getConsulta());
+		cloneAtendimento.setConsultas(atendimento.getConsultas());
+		cloneAtendimento.setControleAtd(atendimento.getControleAtd());
+		cloneAtendimento.setControlPrevAltas(atendimento.getControlPrevAltas());
+		cloneAtendimento.setCtrlSumrAltaPendente(atendimento.getCtrlSumrAltaPendente());
+		cloneAtendimento.setDcaBolBsaCodigo(atendimento.getDcaBolBsaCodigo());
+		cloneAtendimento.setDcaBolData(atendimento.getDcaBolData());
+		cloneAtendimento.setDcaBolNumero(atendimento.getDcaBolNumero());
+		cloneAtendimento.setDthrFim(atendimento.getDthrFim());
+		cloneAtendimento.setDthrIngressoUnidade(atendimento.getDthrIngressoUnidade());
+		cloneAtendimento.setDthrInicio(atendimento.getDthrInicio());
+		cloneAtendimento.setDthrUltImprSumrPrescr(atendimento.getDthrUltImprSumrPrescr());
+		cloneAtendimento.setEspecialidade(atendimento.getEspecialidade());
 		cloneAtendimento.setGsoPacCodigo(atendimento.getGsoPacCodigo());
 		cloneAtendimento.setGsoSeqp(atendimento.getGsoSeqp());
-		cloneAtendimento.setAtendimentoMae(atendimento.getAtendimentoMae());
+		cloneAtendimento.setHospitalDia(atendimento.getHospitalDia());
+		cloneAtendimento.setIndAcessoVascular(atendimento.getIndAcessoVascular());
+		cloneAtendimento.setIndPacAtendimento(atendimento.getIndPacAtendimento());
+		cloneAtendimento.setIndPacCpa(atendimento.getIndPacCpa());
+		cloneAtendimento.setIndPacPediatrico(atendimento.getIndPacPediatrico());
+		cloneAtendimento.setIndPacPrematuro(atendimento.getIndPacPrematuro());
+		cloneAtendimento.setIndResultadoNaoConsultado(atendimento.getIndResultadoNaoConsultado());
+		cloneAtendimento.setIndSitSumarioAlta(atendimento.getIndSitSumarioAlta());
+		cloneAtendimento.setTipoLaminaLaringo(atendimento.getTipoLaminaLaringo());
+		cloneAtendimento.setIndTipoTratamento(atendimento.getIndTipoTratamento());
+		cloneAtendimento.setInternacao(atendimento.getInternacao());
+		cloneAtendimento.setIntSeq(atendimento.getIntSeq());
+		cloneAtendimento.setLeito(atendimento.getLeito());
+		cloneAtendimento.setListaMptProcedimentoInternacao(atendimento.getListaMptProcedimentoInternacao());
+		cloneAtendimento.setListaSigCalculoAtdPaciente(atendimento.getListaSigCalculoAtdPaciente());
+		cloneAtendimento.setLocalizaPacientes(atendimento.getLocalizaPacientes());
+		cloneAtendimento.setMamAltasSumarios(atendimento.getMamAltasSumarios());
+		cloneAtendimento.setMpmMotivoIngressoCti(atendimento.getMpmMotivoIngressoCti());
+		cloneAtendimento.setMpmPrescricaoMedicases(atendimento.getMpmPrescricaoMedicases());
+		cloneAtendimento.setOrigem(atendimento.getOrigem());
+		cloneAtendimento.setPacCodigo(atendimento.getPacCodigo());
+		cloneAtendimento.setPaciente(atendimento.getPaciente());
+		cloneAtendimento.setPims2(atendimento.getPims2());
+		cloneAtendimento.setPrescricaoCiclo(atendimento.getPrescricaoCiclo());
+		cloneAtendimento.setPrescricaoPacientes(atendimento.getPrescricaoPacientes());
+		cloneAtendimento.setPrescricoesEnfermagem(atendimento.getPrescricoesEnfermagem());
+		cloneAtendimento.setProfissionalEspecialidade(atendimento.getProfissionalEspecialidade());
+		cloneAtendimento.setProntuario(atendimento.getProntuario());
+		cloneAtendimento.setQuarto(atendimento.getQuarto());
+		cloneAtendimento.setRequisicoesMaterial(atendimento.getRequisicoesMaterial());
+		cloneAtendimento.setSeq(atendimento.getSeq());
+		cloneAtendimento.setServidor(atendimento.getServidor());
+		cloneAtendimento.setServidorMovimento(atendimento.getServidorMovimento());
+		cloneAtendimento.setSumariosAlta(atendimento.getSumariosAlta());
+		cloneAtendimento.setTipoLaminaLaringo(atendimento.getTipoLaminaLaringo());
+		cloneAtendimento.setTptSeq(atendimento.getTptSeq());
+		cloneAtendimento.setTratamentoTerapeutico(atendimento.getTratamentoTerapeutico());
+		cloneAtendimento.setTratamentoTerapeuticoAtdSeq(atendimento.getTratamentoTerapeuticoAtdSeq());
+		cloneAtendimento.setTrpSeq(atendimento.getTrpSeq());
+		cloneAtendimento.setUnidadeFuncional(atendimento.getUnidadeFuncional());
+		
 		return cloneAtendimento;
 	}
 

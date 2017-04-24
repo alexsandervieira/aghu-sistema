@@ -102,6 +102,7 @@ public class RelatoriosPrescricaoController extends ActionController {
 			this.relatorioPrescricaoMedicaController.setItensConfirmados(confirmacaoPrescricaoVO.getItensConfirmados());
 			this.relatorioPrescricaoMedicaController.setTipoImpressao(tipoImpressao);
 			this.relatorioPrescricaoMedicaController.setPrescricaoMedicaVO(prescricaoMedicaVO);
+			this.relatorioPrescricaoMedicaController.setPrescricaoMedicaRascunho(false);
 			if(bloqueiaGeracaoPendencia){
 				this.relatorioPrescricaoMedicaController.init();
 			}else{
@@ -112,6 +113,17 @@ public class RelatoriosPrescricaoController extends ActionController {
 			apresentarExcecaoNegocio(new ApplicationBusinessException(
 					RelatoriosPrescricaoControllerExceptionCode.PROBLEMA_GERAR_RELATORIO_PRESCRICAO_MEDICA));
 		}
+	}
+
+	public void visualizarRelatorioPrescricaoMedica() {
+		this.relatorioPrescricaoMedicaController.setDataMovimento(confirmacaoPrescricaoVO.getDataMovimento());
+		this.relatorioPrescricaoMedicaController.setServidorValido(confirmacaoPrescricaoVO.getServidorValido());
+		this.relatorioPrescricaoMedicaController.setItensConfirmados(confirmacaoPrescricaoVO.getItensConfirmados());
+		this.relatorioPrescricaoMedicaController.setPrescricaoMedicaVO(prescricaoMedicaVO);
+		this.relatorioPrescricaoMedicaController.setTipoImpressao(tipoImpressao);
+		this.relatorioPrescricaoMedicaController.setPrescricaoMedicaRascunho(true);
+		this.relatorioPrescricaoMedicaController.setVoltarPara("prescricaomedica-manterPrescricaoMedica");
+		this.relatorioPrescricaoMedicaController.init();
 	}
 
 	/**

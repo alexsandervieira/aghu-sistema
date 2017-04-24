@@ -3,6 +3,7 @@ package br.gov.mec.aghu.faturamento.business;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,7 +52,6 @@ import br.gov.mec.aghu.model.FatVlrItemProcedHospCompsId;
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
 public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness {
-
 	
 	private static final String ERRO_INESPERADO = "Erro inesperado ";
 
@@ -111,9 +111,6 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 	private static final Object STRING_0 = "Processando registros do arquivo tb_procedimento.txt";
 	private static final Object ATUALIZANDO_VALORES = "Atualizando valores.";
 
-
-
-	
 	class ArquivoVO{
 		String subGrupoId;
 		String grupoId;
@@ -144,6 +141,7 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 		controle.setPartial(0);
 		
 		controle.getLogRetorno().append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR).append(STRING_0);
+		controle.gravarLog(STRING_0 + " " + DateUtil.obterDataFormatada(new Date(), DateConstants.DATE_PATTERN_DDMMYYYY_HORA_MINUTO));
 		
 		AghArquivoProcessamento aghArquivoItensProcedimentoHospitalar = null;
 		
@@ -163,10 +161,11 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 			aghArquivoItensProcedimentoHospitalar.setDthrInicioProcessamento(new Date(inicio.getTime()));
 			
 			controle.getLogRetorno().append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR).append(STRING_1);
+			controle.gravarLog(STRING_1 + DateUtil.obterDataFormatada(new Date(), DateConstants.DATE_PATTERN_DDMMYYYY_HORA_MINUTO));
+			
 			util.atualizarArquivo(aghArquivoItensProcedimentoHospitalar, inicio, 0, 30, 0, null, controle);
 			
 			// realiza atualização dos itens de procedimento hospitalar
-	
 			final Object[] datas = getFatCompetenciaDAO().listarDataInicioEFimCompModAMB();
 			final Date dtIncio = (Date) datas[0];
 			final Date dtFim = (Date) datas[1];
@@ -178,7 +177,7 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 				controle.incrementaNrRegistrosProcessados();
 
 				final ArquivoVO vo = lerLinhaArquivo(strLine);
-
+				
 				listaItens.add(vo);
 				listaCodTabela.add(vo.codTabela);
 				
@@ -195,8 +194,9 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 						super.commitTransaction();
 
 						controle.getLogRetorno().append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR).append("ITENS PROCEDIMENTO;A;" + vo.codTabela + ";" + vo.descricao);
+						controle.gravarLog("ITENS PROCEDIMENTO;A;" + vo.codTabela + ";" + vo.descricao);
 						
-						persistirFatVlrItemProcedHospComps(controle.getLogRetorno(), phoSeq, dtIncio, vo, itemProcedHospitalar);
+						persistirFatVlrItemProcedHospComps(controle, phoSeq, dtIncio, vo, itemProcedHospitalar);
 						
 					} catch (final Exception e) {
 						super.rollbackTransaction();
@@ -210,8 +210,29 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 								  				.append( " Idade mínima: " ).append( vo.idadeMinStr )
 								  				.append( " Idade máxima: " ).append( vo.idadeMaxStr )
 								  				.append( " Sexo:" ).append( vo.sexoStr);
+						
+						controle.gravarLog("Não foi possível inserir - FAT_ITENS_PROCED_HOSPITALAR: Grupo: "
+								+ vo.grupoId + " SubGrupo: " + vo.subGrupoId + " Forma Organizacao: " + vo.formaOrgId
+								+ " Código Tabela: " + vo.codTabela + " Descricao: " + vo.descricao + " Idade mínima: "
+								+ vo.idadeMinStr + " Idade máxima: " + vo.idadeMaxStr + " Sexo:" + vo.idadeMaxStr);
+					}
+				} else if(!fatItensProcedHospitalarDAO.isProcedimentoMesmaDescricacao(vo.codTabela, removerAcentos(vo.descricao))){
+					try{
+						beginTransaction();
+						
+						FatItensProcedHospitalar itemProcedHospitalar = fatItensProcedHospitalarDAO.obterItemProcedHospitalarPorPhoseqPorCodtabela(phoSeq, vo.codTabela);
+						itemProcedHospitalar.setDescricao(removerAcentos(vo.descricao));
+						
+						final FatItensProcedHospitalar itemProcedHospClone = faturamentoFacade.clonarItemProcedimentoHospitalar(itemProcedHospitalar);
+						this.getItemProcedimentoHospitalarON().atualizarItemProcedimentoHospitalar(itemProcedHospitalar, itemProcedHospClone);
+						fatItensProcedHospitalarDAO.flush();
+						
+						super.commitTransaction();
+					}catch (final Exception e) {
+						super.rollbackTransaction();
 					}
 				}
+				
 				if (controle.getNrRegistrosProcessados() % 20 == 0) {
 					util.atualizarArquivo(aghArquivoItensProcedimentoHospitalar, inicio, new Date(), ProcessadorArquivosImportacaoSusUtil.REFRESH, 30, ProcessadorArquivosImportacaoSusUtil.MAX_TENTATIVAS, controle);
 				}
@@ -223,12 +244,12 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 										   this.getFatSubGrupoDAO().listarSubGruposPorSituacaoCount(DominioSituacao.I) + 
 										   listaItens.size());
 			
-			
 			inativarProcsNaoPresentesNoSUS(controle.getLogRetorno(), aghArquivoItensProcedimentoHospitalar, inicio, phoSeq, listaCodTabela, controle);
 			
 			inativarProcedsGruposSubgruposInativos(inicio, controle.getLogRetorno(), aghArquivoItensProcedimentoHospitalar, phoSeq, controle);
 
 			controle.getLogRetorno().append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR).append(ATUALIZANDO_VALORES);
+			controle.gravarLog(ATUALIZANDO_VALORES.toString());
 
 			for (final ArquivoVO vo : listaItens) {
 				controle.incrementaNrRegistrosProcessados();
@@ -272,11 +293,11 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 								}
 	
 								if (!DateUtil.isDatasIguais(DateUtil.truncaData(dtInicio), DateUtil.truncaData(dtIncio))) {
-									persistirFatVlrItemProcedHospCompsDtInicioDiferentes( controle.getLogRetorno(), dtIncio, dtFim, vo,
+									persistirFatVlrItemProcedHospCompsDtInicioDiferentes(controle, dtIncio, dtFim, vo,
 																						  codTab, itemProcedHsp, vlrSrvProfAmb, vlrAnest);
 	
 								} else {
-									persistirFatVlrItemProcedHospCompsDtInicioIguais(controle.getLogRetorno(), vo, itemProcedHsp, vlrSrvProfAmb, vlrAnest);
+									persistirFatVlrItemProcedHospCompsDtInicioIguais(controle, vo, itemProcedHsp, vlrSrvProfAmb, vlrAnest);
 								}
 								
 								//
@@ -323,6 +344,9 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 					  				.append((((fim.getTime() - inicio.getTime())) / 1000L))
 					  				.append( " segundos.").append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR);
 			
+			controle.gravarLog("Tabela Procedimento e Itens de Procedimento lidas e atualizadas com sucesso em "
+					+ (((fim.getTime() - inicio.getTime())) / 1000L) + " Segundos.");
+			
 			util.atualizarArquivo(aghArquivoItensProcedimentoHospitalar, new Date(), 100, 0, 0, new Date(), controle);
 			
 		} catch (final Exception e) {
@@ -344,7 +368,6 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 			}
 		}
 	}
-	
 
 	public void atualizarFinanciamentoComplexidade(final ControleProcessadorArquivosImportacaoSus controle, final List<String> listaNomeArquivos) {
 		final Date inicio = new Date();
@@ -532,7 +555,7 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 		
 		FatCaractComplexidade itemComplexidade = null;
 		if(vo.seqSusComplexidade != null){
-			itemComplexidade = fatCaractComplexidadeDAO.obterPorCodigoSus(vo.seqSusFinanciamento);
+			itemComplexidade = fatCaractComplexidadeDAO.obterPorCodigoSus(vo.seqSusComplexidade);
 		}
 		
 		//Atualização da característica de financiamento.
@@ -575,9 +598,13 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 	
 	public void logaFinanciamento(ArquivoVO vo, final ControleProcessadorArquivosImportacaoSus controle, final FatItensProcedHospitalar itemProcedHsp){
 		controle.getLogRetorno().append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
-		.append("O item de procedimento hospitalar ").append(itemProcedHsp.getId().getSeq())
+		.append("O item de Procedimento Hospitalar ").append(itemProcedHsp.getId().getSeq())
 		.append(" não foi associado à característica de financiamento ").append(vo.seqSusFinanciamento)
 		.append(" pois esta característica de financiamento não está relacionada no cadastro. ");
+		
+		controle.gravarLog("O item de procedimento hospitalar " + itemProcedHsp.getId().getSeq()
+				+ " não foi associado à característica de financiamento " + vo.seqSusFinanciamento
+				+ " pois esta característica de financiamento não está relacionada no cadastro. ");
 	}
 	
 	public void logaComplexidade(ArquivoVO vo, final ControleProcessadorArquivosImportacaoSus controle, final FatItensProcedHospitalar itemProcedHsp){
@@ -585,6 +612,10 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 		.append("O item de procedimento hospitalar ").append(itemProcedHsp.getId().getSeq())
 		.append(" não foi associado à característica de complexidade ").append(vo.seqSusComplexidade)
 		.append(" pois esta característica de complexidade não está relacionada no cadastro. ");
+		
+		controle.gravarLog("O item de procedimento hospitalar " + itemProcedHsp.getId().getSeq()
+				+ " não foi associado à característica de complexidade " + vo.seqSusComplexidade
+				+ " pois esta característica de complexidade não está relacionada no cadastro. ");
 	}
 	
 	public void persistirAtualizacaoItensProcedimentoFinanciamentoComplexidade(FatItensProcedHospitalar itemProcedHsp,FatCaractFinanciamento financiamento,FatCaractComplexidade complexidade){
@@ -638,13 +669,17 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 							super.commitTransaction();
 							
 							logRetorno.append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
-									  .append("ITENS PROCEDIMENTO; I; ").append(atualizar.getCodTabela())
+									  .append("ITENS PROCEDIMENTO;I; ").append(atualizar.getCodTabela())
 									  .append(" ; ").append(atualizar.getDescricao());
+							
+							controle.gravarLog("ITENS PROCEDIMENTO; I; " + ";" + atualizar.getDescricao());
 							
 						} catch (final Exception e) {
 							super.rollbackTransaction();
 							logRetorno.append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
 									  .append("Erro ao invativar registro " ).append( atualizar.getCodTabela());
+							
+							controle.gravarLog("Erro ao invativar registro " + atualizar.getCodTabela());
 						}
 					}
 				}
@@ -665,6 +700,7 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 		// Inativações através da tabela FAT_SUB_GRUPOS
 		logRetorno.append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
 				  .append("Inativando procedimentos com grupos ou subgrupos inativos.");
+		controle.gravarLog("Inativando procedimentos com grupos ou subgrupos inativos.");
 		
 		for (final FatSubGrupo subGrp : this.getFatSubGrupoDAO().listarSubGruposPorSituacao(DominioSituacao.I)) {
 			controle.incrementaNrRegistrosProcessados();
@@ -689,6 +725,7 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 							logRetorno.append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR).append("ITENS PROCEDIMENTO; I; " )
 									  .append( atualizar.getCodTabela() ).append( " ; " )
 									  .append(atualizar.getDescricao());
+							controle.gravarLog("ITENS PROCEDIMENTO; I; " + atualizar.getCodTabela() + " ; " + atualizar.getDescricao());
 						}
 					} catch (final Exception e) {
 						super.rollbackTransaction();
@@ -696,6 +733,7 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 						logRetorno.append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
 								  .append("Erro ao invativar procedimentos do grupo: ").append(subGrp.getId().getGrpSeq() )
 								  .append( " e subgrupo: ").append(subGrp.getId().getSubGrupo());
+						controle.gravarLog("Erro ao invativar procedimentos do grupo: " + subGrp.getId().getGrpSeq() + " e subgrupo: " + subGrp.getId().getSubGrupo());
 					}
 				}
 			}
@@ -705,7 +743,7 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 		}
 	}
 
-	private void persistirFatVlrItemProcedHospCompsDtInicioDiferentes(final StringBuilder logRetorno, final Date dtIncio, final Date dtFim,
+	private void persistirFatVlrItemProcedHospCompsDtInicioDiferentes(final ControleProcessadorArquivosImportacaoSus controle, final Date dtIncio, final Date dtFim,
 																	   final ArquivoVO vo, final Long codTab, final FatItensProcedHospitalar itemProcedHsp,
 																	   BigDecimal vlrSrvProfAmb, BigDecimal vlrAnest) {
 		try {
@@ -721,7 +759,8 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 		} catch (final Exception e) {
 			super.rollbackTransaction();
 			LOG.error(e.getMessage(), e);
-			logRetorno.append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR).append("Erro ao fechar competência");
+			controle.getLogRetorno().append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR).append("Erro ao fechar competência");
+			controle.gravarLog("Erro ao fechar competência");
 		}
 		
 		try {
@@ -747,24 +786,30 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 			fatItensProcedHospitalarDAO.flush();
 			super.commitTransaction();
 			
-			logRetorno.append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
+			controle.getLogRetorno().append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
 					  .append("VALORES NOVOS;I;" )
 					  .append(codTab).append(';')
 					  .append(vo.valorSh).append(';')
 					  .append(vo.valorProced).append(';')
 					  .append(vo.valorSp);
 			
+		    controle.gravarLog("VALORES NOVOS;I;" + ';' + vo.valorSh + ';' + vo.valorProced + ';' + vo.valorSp);
+		    
 		} catch (final Exception e) {
 			super.rollbackTransaction();
 			LOG.error(e.getMessage(), e);
-			logRetorno.append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
+			controle.getLogRetorno().append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
 					  .append("Erro ao inserir nova competência: PHI_SEQ = " ).append(itemProcedHsp.getId().getSeq())
-					  .append(" PHO_SEQ=").append(itemProcedHsp.getId().getPhoSeq() )
+					  .append(" pho_seq = ").append(itemProcedHsp.getId().getPhoSeq() )
 					  .append(" e Data inicio= ").append(dtIncio).append(" em FAT_VLR_ITEM_PROCED_HOSP_COMPS");
+			
+			controle.gravarLog("Erro ao inserir nova competência: PHI_SEQ = " + itemProcedHsp.getId().getSeq()
+					+ " PHO_SEQ=" + itemProcedHsp.getId().getPhoSeq() + " e Data inicio= " + dtIncio
+					+ " em FAT_VLR_ITEM_PROCED_HOSP_COMPS");
 		}
 	}
 
-	private void persistirFatVlrItemProcedHospCompsDtInicioIguais(final StringBuilder logRetorno,	
+	private void persistirFatVlrItemProcedHospCompsDtInicioIguais(final ControleProcessadorArquivosImportacaoSus controle,	
 																   final ArquivoVO vo, final FatItensProcedHospitalar itemProcedHsp,
 																   BigDecimal vlrSrvProfAmb, BigDecimal vlrAnest) {
 		try {
@@ -789,14 +834,18 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 		} catch (final Exception e) {
 			super.rollbackTransaction();
 			LOG.error(e.getMessage(), e);
-			logRetorno.append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
+			controle.getLogRetorno().append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
 					  .append("Erro ao atualizar, PHI_SEQ = ").append(itemProcedHsp.getId().getSeq())
 					  .append(" PHO_SEQ=").append(itemProcedHsp.getId().getPhoSeq())
 					  .append(" sem data de fim de competencia em FAT_VLR_ITEM_PROCED_HOSP_COMPS");
+			
+			controle.gravarLog("Erro ao atualizar, PHI_SEQ = " + itemProcedHsp.getId().getSeq() + " PHO_SEQ="
+					+ itemProcedHsp.getId().getPhoSeq()
+					+ " sem data de fim de competencia em FAT_VLR_ITEM_PROCED_HOSP_COMPS");
 		}
 	}
 
-	private void persistirFatVlrItemProcedHospComps(final StringBuilder logRetorno, final Short phoSeq, final Date dtIncio,
+	private void persistirFatVlrItemProcedHospComps(final ControleProcessadorArquivosImportacaoSus controle, final Short phoSeq, final Date dtIncio,
 													 final ArquivoVO vo, final FatItensProcedHospitalar itemProcedHospitalar) {
 		try {
 			super.beginTransaction();
@@ -817,20 +866,24 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 			
 			this.getValorItemProcedHospCompsRN().ligaCarga(false);	
 
-			logRetorno.append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR).append("VALORES ITENS; I; ")
+			controle.getLogRetorno().append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR).append("VALORES ITENS; I; ")
 					  .append(vo.valorShStr).append(" ; vlr_procedimento; ").append(vo.valorSpStr);
-
+			
+			controle.gravarLog("VALORES ITENS; I; " + vo.valorShStr + " ; vlr_procedimento; " + vo.valorSpStr);
+			
 		} catch (final Exception e) {
 			super.rollbackTransaction();
-			logRetorno.append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
+			controle.getLogRetorno().append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
 					  .append("Não foi possível inserir - FAT_VLR_ITEM_PROCED_HOSP_COMPS – IPH SEQ:")
 					  .append(itemProcedHospitalar.getId().getSeq() ).append('.');
+			
+			controle.gravarLog("Não foi possível inserir - FAT_VLR_ITEM_PROCED_HOSP_COMPS – IPH SEQ:"
+					+ itemProcedHospitalar.getId().getSeq() + ".");
+		
 		} finally{
 			super.commitTransaction();
 		}
 	}
-
-	
 	
 	private ArquivoVO lerLinhaArquivo(final String strLine) {
 
@@ -944,57 +997,39 @@ public class ProcessadorArquivosImportacaoSusProcHospON extends BaseBMTBusiness 
 		
 		return itemProcedHospitalar;
 	}
-
-	
-	
-	
-
+	public static String removerAcentos(String str) {
+	    return Normalizer.normalize(str, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+	}
 	protected ValorItemProcedHospCompsRN getValorItemProcedHospCompsRN() {
 		return valorItemProcedHospCompsRN;
 	}
-	
-
-	
-
 	protected ItemProcedimentoHospitalarON getItemProcedimentoHospitalarON() {
 		return itemProcedimentoHospitalarON;
 	}
-
 	protected ValorItemProcedHospCompsON getValorItemProcedHospCompsON() {
 		return valorItemProcedHospCompsON;
 	}	
-	
-	
 	protected FatCompetenciaDAO getFatCompetenciaDAO() {
 		return fatCompetenciaDAO;
 	}
-	
 	protected FatItensProcedHospitalarDAO getFatItensProcedHospitalarDAO() {
 		return fatItensProcedHospitalarDAO;
 	}	
-
 	protected FatFormaOrganizacaoDAO getFatFormaOrganizacaoDAO() {
 		return fatFormaOrganizacaoDAO;
 	}	
-
 	protected FatSubGrupoDAO getFatSubGrupoDAO() {
 		return fatSubGrupoDAO;
 	}
-	
 	protected FatVlrItemProcedHospCompsDAO getFatVlrItemProcedHospCompsDAO() {
 		return fatVlrItemProcedHospCompsDAO;
 	}	
-	
-	
-
 	protected IAghuFacade getAghuFacade() {
 		return aghuFacade;
 	}
-
 	protected IParametroFacade getParametroFacade() {
 		return parametroFacade;
 	}
-	
 	protected IFaturamentoFacade getFaturamentoFacade() {
 		return faturamentoFacade;
 	}

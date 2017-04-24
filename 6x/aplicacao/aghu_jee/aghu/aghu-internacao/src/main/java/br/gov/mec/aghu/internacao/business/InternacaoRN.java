@@ -121,6 +121,7 @@ import br.gov.mec.aghu.model.FatTipoAih;
 import br.gov.mec.aghu.model.MamLaudoAih;
 import br.gov.mec.aghu.model.MbcCirurgias;
 import br.gov.mec.aghu.model.MbcProcEspPorCirurgias;
+import br.gov.mec.aghu.model.MpmAltaSumario;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.model.RapServidoresId;
 import br.gov.mec.aghu.paciente.business.IPacienteFacade;
@@ -302,7 +303,7 @@ public class InternacaoRN extends BaseBusiness {
 		AIN_00618, AIN_00884, AIN_00360, AIN_00361, AIN_00363, AIN_00894, CONTA_ENCERRADA, AIN_00838, ERRO_ENCERRA_RONDA,
 		ERRO_NEGOCIO_ORA, AIN_00391, INDICADORES_INTERNACAO_INVALIDOS, AIP_00013, MENSAGEM_LAUDOS_NAO_CADASTRADOS_PARA_INTERNACAO, 
 		MENSAGEM_ESPECIALIDADE_NAO_CADASTRADA_NO_LAUDO_ENCONTRADO, MENSAGEM_SERVIDOR_NAO_CADASTRADO_NO_LAUDO_ENCONTRADO,
-		MENSAGEM_PACIENTE_INFORMADO_NAO_CADASTRADO;
+		MENSAGEM_PACIENTE_INFORMADO_NAO_CADASTRADO,MSG_ERRO_ALTA_ADM_SEM_SUMARIO;
 	}
 
 	public AinInternacao obterInternacaoAnterior(final Integer seqInternacao) {
@@ -592,6 +593,7 @@ public class InternacaoRN extends BaseBusiness {
 		
 		final Date dataLimite = null;
 		Date dataInternacao = null;
+		Date dataMovInternacao=internacao.getDthrUltimoEvento();
 		final Integer procedimentoHospitalarInterno = null;
 		String oldTamCodigo = null;
 		String tamCodigo = null;
@@ -618,14 +620,44 @@ public class InternacaoRN extends BaseBusiness {
 		if(internacao.getTipoAltaMedica() != null) {
 			tamCodigo = internacao.getTipoAltaMedica().getCodigo();
 		}
-		DominioTransacaoAltaPaciente transacao = this.getAtualizaInternacaoRN().defineTransacao(oldTamCodigo, tamCodigo, internacaoOld.getDthrAltaMedica(), internacao.getDthrAltaMedica(), internacaoOld.getDtSaidaPaciente(), internacao.getDtSaidaPaciente());
+		DominioTransacaoAltaPaciente transacao = this.getAtualizaInternacaoRN().defineTransacao(
+				oldTamCodigo, tamCodigo, 
+				internacaoOld, 
+				internacao	
+				);
+		/*DominioTransacaoAltaPaciente transacao = this.getAtualizaInternacaoRN().defineTransacao(
+				oldTamCodigo, tamCodigo, 
+				internacaoOld.getDthrAltaMedica(), 
+				internacao.getDthrAltaMedica(), 
+				internacaoOld.getDtSaidaPaciente(), 
+				internacao.getDtSaidaPaciente(),
+				internacaoOld.getTipoCaracterInternacao() == null ? null : internacaoOld.getTipoCaracterInternacao().getCodigo(),  
+				internacao.getTipoCaracterInternacao() == null ? null : internacao.getTipoCaracterInternacao().getCodigo(),
+				internacaoOld.getOrigemEvento() == null ? null : internacaoOld.getOrigemEvento().getSeq(),  
+				internacao.getOrigemEvento() == null ? null : internacao.getOrigemEvento().getSeq(),
+				internacaoOld.getInstituicaoHospitalar() == null ? null : internacaoOld.getInstituicaoHospitalar().getSeq(),  
+				internacao.getInstituicaoHospitalar() == null ? null : internacao.getInstituicaoHospitalar().getSeq(),
+			    internacaoOld.getMedicoExterno() == null ? null : internacaoOld.getMedicoExterno(),  
+				internacao.getMedicoExterno() == null ? null : internacao.getMedicoExterno(),
+				internacaoOld.getDthrInternacao() == null ? null : internacaoOld.getDthrInternacao(),  
+				internacao.getDthrInternacao() == null ? null : internacao.getDthrInternacao(),
+				internacaoOld.getIndDifClasse() == null ? null : internacaoOld.getIndDifClasse(),  
+				internacao.getIndDifClasse() == null ? null : internacao.getIndDifClasse(),
+				internacaoOld.getEnvProntUnidInt() == null ? null : internacaoOld.getEnvProntUnidInt(),  
+				internacao.getEnvProntUnidInt() == null ? null : internacao.getEnvProntUnidInt(),
+			    internacaoOld.getJustificativaAltDel() == null ? null : internacaoOld.getJustificativaAltDel(),  
+				internacao.getJustificativaAltDel() == null ? null : internacao.getJustificativaAltDel(),
+				internacaoOld,
+				internacao		
+				);*/
+		
 		
 		//Parametros declarados nas triggers porem nao utilizados
 		//AghParametros p1 = aghParametrosON.buscarAghParametro(AghuParametrosEnum.P_COD_TIPO_ALTA_OBITO);
 		//AghParametros p2 = aghParametrosON.buscarAghParametro(AghuParametrosEnum.P_COD_TIPO_ALTA_OBITO_MAIS_48H);
 		final AghParametros altaObitoMaior24 = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_ALTA_OBITO_MAIOR_24HS);
 		final AghParametros altaObitoMenor24 = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_ALTA_OBITO_MENOR_24HS);
-		final AghParametros transferenciaInexistente = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_TRANSFERENCIA_INEXISTENTE);
+		//final AghParametros transferenciaInexistente = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_TRANSFERENCIA_INEXISTENTE);
 		final AghParametros convenioAposAltaCnv = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_CONVENIO_APOS_ALTA_CNV);
 		final AghParametros convenioAposAltaAlt = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_CONVENIO_APOS_ALTA_ALT);
 		final AghParametros altaMedica = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_ALTA_MEDICA);
@@ -692,20 +724,27 @@ public class InternacaoRN extends BaseBusiness {
 			}
 		}
 		
-		if (internacaoUtilRN.modificados(internacaoOld.getDthrPrimeiroEvento(),
+		/*if (internacaoUtilRN.modificados(internacaoOld.getDthrPrimeiroEvento(),
 			internacao.getDthrPrimeiroEvento())||
 			internacaoUtilRN.modificados(internacaoOld.getDthrUltimoEvento(),
 			internacao.getDthrUltimoEvento())){
-				
-			final Date dtAlta = transferirPacienteFacade.getDthrAltaMedica(internacao.getSeq());
+			
+			//Com a possibilidade de transferir paciente que ja possui alta administrativa, esta ação não deve acontecer. #83180, #83264
+			/*final Date dtAlta = transferirPacienteFacade.getDthrAltaMedica(internacao.getSeq());
 			if(dtAlta != null && internacao.getDthrUltimoEvento().after(dtAlta)) {
 				internacao.setDthrUltimoEvento(dtAlta);
-			}
-		
+			}*/
+		  /*  if(internacaoOld.getDthrUltimoEvento() != null && internacaoOld.getDthrUltimoEvento().after(internacao.getDthrUltimoEvento())){
+		    	internacao.setDthrUltimoEvento(internacaoOld.getDthrUltimoEvento());
+		    }
+		    if(internacaoOld.getDthrPrimeiroEvento() != null && internacaoOld.getDthrPrimeiroEvento().after(internacao.getDthrUltimoEvento())){
+		    	internacao.setDthrPrimeiroEvento(internacao.getDthrUltimoEvento());
+		    }
+		    
 			AtualizarEventosVO atualizarEventosVO = this.getAtualizaInternacaoRN().atualizarEventos(internacao.getDthrPrimeiroEvento(), internacao.getDthrUltimoEvento());
 			internacao.setDthrPrimeiroEvento(atualizarEventosVO.getDthrPrimeiroEvento()); 
 			internacao.setDthrUltimoEvento(atualizarEventosVO.getDthrUltimoEvento());
-		}
+		}*/
 		if (!substituirProntuario && (internacaoUtilRN.modificados(oldTamCodigo,
 				tamCodigo)||
 				internacaoUtilRN.modificados(internacaoOld.getDtSaidaPaciente(),
@@ -962,17 +1001,42 @@ public class InternacaoRN extends BaseBusiness {
 				internacao.setConvenioSaude(fatConvenioSaudePlano.getConvenioSaude());				
 			}
 		}
-			
-		transacao = this.getAtualizaInternacaoRN().defineTransacao(oldTamCodigo, tamCodigo, internacaoOld.getDthrAltaMedica(), internacao.getDthrAltaMedica(), internacaoOld.getDtSaidaPaciente(), internacao.getDtSaidaPaciente());
+			transacao = this.getAtualizaInternacaoRN().defineTransacao(
+					oldTamCodigo, 
+					tamCodigo, 
+					internacaoOld, 
+					internacao);	
+		/*transacao = this.getAtualizaInternacaoRN().defineTransacao(
+				oldTamCodigo, 
+				tamCodigo, 
+				internacaoOld.getDthrAltaMedica(), 
+				internacao.getDthrAltaMedica(), 
+				internacaoOld.getDtSaidaPaciente(), 
+				internacao.getDtSaidaPaciente(),
+				internacaoOld.getTipoCaracterInternacao() == null ? null : internacaoOld.getTipoCaracterInternacao().getCodigo(),  
+				internacao.getTipoCaracterInternacao() == null ? null : internacao.getTipoCaracterInternacao().getCodigo(),
+			    internacaoOld.getOrigemEvento() == null ? null : internacaoOld.getOrigemEvento().getSeq(),  
+			    internacao.getOrigemEvento() == null ? null : internacao.getOrigemEvento().getSeq(),
+			    internacaoOld.getInstituicaoHospitalar() == null ? null : internacaoOld.getInstituicaoHospitalar().getSeq(),  
+			    internacao.getInstituicaoHospitalar() == null ? null : internacao.getInstituicaoHospitalar().getSeq(),
+				internacaoOld.getMedicoExterno() == null ? null : internacaoOld.getMedicoExterno(),  
+				internacao.getMedicoExterno() == null ? null : internacao.getMedicoExterno(),
+				internacaoOld.getDthrInternacao() == null ? null : internacaoOld.getDthrInternacao(),  
+				internacao.getDthrInternacao() == null ? null : internacao.getDthrInternacao(),
+				internacaoOld.getIndDifClasse() == null ? null : internacaoOld.getIndDifClasse(),  
+				internacao.getIndDifClasse() == null ? null : internacao.getIndDifClasse(),
+				internacaoOld.getEnvProntUnidInt() == null ? null : internacaoOld.getEnvProntUnidInt(),  
+				internacao.getEnvProntUnidInt() == null ? null : internacao.getEnvProntUnidInt(),
+			    internacaoOld.getJustificativaAltDel() == null ? null : internacaoOld.getJustificativaAltDel(),  
+			    internacao.getJustificativaAltDel() == null ? null : internacao.getJustificativaAltDel(),
+			    internacaoOld,
+			    internacao
+					);*/
 		
-		final String tipoMovimentoInternacaoDefinido = this.getAtualizaInternacaoRN().defineTipoMovimentoInternacao(internacao.getServidorProfessor(), internacaoOld.getServidorProfessor(), internacao.getLeito(), internacaoOld.getLeito(), internacao.getQuarto(), internacaoOld.getQuarto(), internacao.getUnidadesFuncionais(), internacaoOld.getUnidadesFuncionais(), internacao.getEspecialidade(), internacaoOld.getEspecialidade());
-		//Valores declarados nas triggers porem nao utilizados
-		//String tipoAltaObito = p1.getVlrTexto();
-		//String tipoAltaObitoMais48h = p2.getVlrTexto();
-		if (!tipoMovimentoInternacaoDefinido
-				.equals(transferenciaInexistente.getVlrTexto())) {
+		if(!substituirProntuario){			
 			this.getAtualizaInternacaoRN().verificarSolicitacaoInternacao(codigoPaciente, substituirProntuario);
 		}
+
 		if (internacaoUtilRN.modificados(codigoPacienteOld,
 				codigoPaciente)
 				|| internacaoUtilRN.modificados(cnvCodigoOld,
@@ -1042,7 +1106,7 @@ public class InternacaoRN extends BaseBusiness {
 			this.ainInternacaoDAO.merge(internacao);
 		}
 		
-		this.enforceUpdate(internacaoOld, internacao, nomeMicrocomputador, dataFimVinculoServidor, substituirProntuario);
+		this.enforceUpdate(internacaoOld, internacao, nomeMicrocomputador, dataFimVinculoServidor, substituirProntuario,dataMovInternacao,isEstornoInternacao);
 		
 		this.verificarIndicadoresInternacao(internacao);
 		
@@ -1113,15 +1177,12 @@ public class InternacaoRN extends BaseBusiness {
 	 */
 	public void posDelete(final AinInternacao internacao, String nomeMicrocomputador, final Date dataFimVinculoServidor) throws ApplicationBusinessException {
 		this.getAtualizaInternacaoRN().atualizaAltaObitoEstornoAlta(
-			internacao.getTipoAltaMedica(), 
-			internacao.getPaciente(), nomeMicrocomputador, dataFimVinculoServidor
-		);
+				internacao.getTipoAltaMedica(), internacao.getPaciente(),
+				nomeMicrocomputador, dataFimVinculoServidor);
 		if (internacao.getTipoAltaMedica() == null) {
-			this.getAtualizaInternacaoRN().deletaProfissionaisEspecialidades (
-				internacao.getEspecialidade(),
-				internacao.getServidorProfessor(),
-				-1
-			);
+			this.getAtualizaInternacaoRN().deletaProfissionaisEspecialidades(
+					internacao.getEspecialidade(),
+					internacao.getServidorProfessor(), -1);
 		}
 		
 	}
@@ -1206,6 +1267,8 @@ public class InternacaoRN extends BaseBusiness {
 				internacaoJn.setTipoTransacao(DominioTransacaoAltaPaciente.ALTERA_ALTA.toString());
 			} else if (transacao.equals(DominioTransacaoAltaPaciente.PROCESSA_ALTA)) {
 				internacaoJn.setTipoTransacao(DominioTransacaoAltaPaciente.PROCESSA_ALTA.toString());
+			}else if(transacao.equals(DominioTransacaoAltaPaciente.INTERNACAO_ATUALIZADA)) {
+				internacaoJn.setTipoTransacao(DominioTransacaoAltaPaciente.INTERNACAO_ATUALIZADA.getDescricao());
 			}
 		} else {
 			internacaoJn.setTipoTransacao(DominioTransacaoAltaPaciente.INTERNACAO_ATUALIZADA.getDescricao());
@@ -1586,7 +1649,7 @@ public class InternacaoRN extends BaseBusiness {
 		final AinInternacao intSaved,
 		final AinInternacao intNew, 
 		final String nomeMicrocomputador, final Date dataFimVinculoServidor,
-		final Boolean substituirProntuario
+		final Boolean substituirProntuario, final Date dataMovInternacao,final Boolean isEstornoInternacao
 	) throws BaseException {
 		RapServidores servidorLogado = getServidorLogadoFacade().obterServidorLogado();
 
@@ -1594,6 +1657,7 @@ public class InternacaoRN extends BaseBusiness {
 		final IParametroFacade parametroFacade = this.getParametroFacade();
 		final IPesquisaInternacaoFacade pesquisaInternacaoFacade = this.getPesquisaInternacaoFacade();
 		final IPrescricaoMedicaFacade prescricaoMedicaFacade = this.getPrescricaoMedicaFacade();
+		Integer codMvtoIntDefinido = null;
 		
 		Short maxDiariaUti = null;
 		if (intNew.getItemProcedimentoHospitalar() != null) {
@@ -1608,25 +1672,50 @@ public class InternacaoRN extends BaseBusiness {
 				
 		logInfo("Define transação. INT_SEQ = "+intNew.getSeq());
 		final DominioTransacaoAltaPaciente transacao = this.getAtualizaInternacaoRN().defineTransacao (
+				intSaved.getTipoAltaMedica() == null ? null : intSaved.getTipoAltaMedica().getCodigo(),  
+				intNew.getTipoAltaMedica() == null ? null : intNew.getTipoAltaMedica().getCodigo(),
+				intSaved,
+				intNew
+			);
+		/*final DominioTransacaoAltaPaciente transacao = this.getAtualizaInternacaoRN().defineTransacao (
 			intSaved.getTipoAltaMedica() == null ? null : intSaved.getTipoAltaMedica().getCodigo(),  
 			intNew.getTipoAltaMedica() == null ? null : intNew.getTipoAltaMedica().getCodigo(),
 			intSaved.getDthrAltaMedica(),
 			intNew.getDthrAltaMedica(),
 			intSaved.getDtSaidaPaciente(),
-			intNew.getDtSaidaPaciente()
-		);
+			intNew.getDtSaidaPaciente(),
+			intSaved.getTipoCaracterInternacao() == null ? null : intSaved.getTipoCaracterInternacao().getCodigo(),  
+		    intNew.getTipoCaracterInternacao() == null ? null : intNew.getTipoCaracterInternacao().getCodigo(),
+		    intSaved.getOrigemEvento() == null ? null : intSaved.getOrigemEvento().getSeq(),  
+		    intNew.getOrigemEvento() == null ? null : intNew.getOrigemEvento().getSeq(),
+		    intSaved.getInstituicaoHospitalar() == null ? null : intSaved.getInstituicaoHospitalar().getSeq(),  
+		    intNew.getInstituicaoHospitalar() == null ? null : intNew.getInstituicaoHospitalar().getSeq(),
+		    intSaved.getMedicoExterno() == null ? null : intSaved.getMedicoExterno(),  
+		    intNew.getMedicoExterno() == null ? null : intNew.getMedicoExterno(),
+		    intSaved.getDthrInternacao() == null ? null : intSaved.getDthrInternacao(),  
+		    intNew.getDthrInternacao() == null ? null : intNew.getDthrInternacao(),
+		    intSaved.getIndDifClasse() == null ? null : intSaved.getIndDifClasse(),  
+		    intNew.getIndDifClasse() == null ? null : intNew.getIndDifClasse(),
+		    intSaved.getEnvProntUnidInt() == null ? null : intSaved.getEnvProntUnidInt(),  
+		    intNew.getEnvProntUnidInt() == null ? null : intNew.getEnvProntUnidInt(),
+		    intSaved.getJustificativaAltDel() == null ? null : intSaved.getJustificativaAltDel(),  
+		    intNew.getJustificativaAltDel() == null ? null : intNew.getJustificativaAltDel(),
+		    intSaved,
+		    intNew	
+		);*/
+		if(!substituirProntuario && !isEstornoInternacao){			
+			logInfo("Define tipo movimento da internação. INT_SEQ = "+intNew.getSeq());
+			final String tipoMovInternacaoDefinido = this.getAtualizaInternacaoRN().defineTipoMovimentoInternacao (
+					intNew.getServidorProfessor(), intSaved.getServidorProfessor(),
+					intNew.getLeito(), intSaved.getLeito(),
+					intNew.getQuarto(),	intSaved.getQuarto(),
+					intNew.getUnidadesFuncionais(),	intSaved.getUnidadesFuncionais(),
+					intNew.getEspecialidade(), intSaved.getEspecialidade(),transacao
+					);
+			logInfo("Obtendo TMI. INT_SEQ = "+intNew.getSeq());
+			codMvtoIntDefinido = this.getInternacaoUtilRN().obtemTmi(tipoMovInternacaoDefinido);
+		}
 		
-		logInfo("Define tipo movimento da internação. INT_SEQ = "+intNew.getSeq());
-		final String tipoMovInternacaoDefinido = this.getAtualizaInternacaoRN().defineTipoMovimentoInternacao (
-			intNew.getServidorProfessor(), intSaved.getServidorProfessor(),
-			intNew.getLeito(), intSaved.getLeito(),
-			intNew.getQuarto(),	intSaved.getQuarto(),
-			intNew.getUnidadesFuncionais(),	intSaved.getUnidadesFuncionais(),
-			intNew.getEspecialidade(), intSaved.getEspecialidade()
-		);
-		
-		logInfo("Obtendo TMI. INT_SEQ = "+intNew.getSeq());
-		final Integer codMvtoIntDefinido = this.getInternacaoUtilRN().obtemTmi(tipoMovInternacaoDefinido);
 		
 		if (transacaoEstornaAlta(transacao)) {
 			logInfo("Verificando estorno de alta. INT_SEQ = "+intNew.getSeq());
@@ -1716,7 +1805,7 @@ public class InternacaoRN extends BaseBusiness {
 					intNew.getServidorDigita(),
 					intNew.getServidorProfessor(),
 					intNew.getDthrInternacao(),
-					intNew.getDthrUltimoEvento(),
+					dataMovInternacao,
 					intNew,
 					true
 			);
@@ -1727,7 +1816,7 @@ public class InternacaoRN extends BaseBusiness {
 					intSaved.getLeito() == null ? null : intSaved.getLeito().getLeitoID(),
 					intSaved.getSeq(),
 					intSaved.getDthrAltaMedica(),
-					intNew.getDthrUltimoEvento(),
+					dataMovInternacao,
 					transacao
 			);
 		}
@@ -1882,12 +1971,12 @@ public class InternacaoRN extends BaseBusiness {
 					intNew.getEspecialidade().getSeq(),
 					intNew.getLeito() == null ? null : intNew.getLeito().getLeitoID(),
 					intNew.getDthrAltaMedica(),
-					intNew.getDthrUltimoEvento(),
+					dataMovInternacao,
 					codMvtoIntDefinido,
 					transacao,
 					intNew.getDtSaidaPaciente()
 			);
-				
+
 			AghAtendimentos atendimento = intNew.getAtendimento();
 			if(atendimento != null) {			
 				try {
@@ -1939,10 +2028,10 @@ public class InternacaoRN extends BaseBusiness {
 			!Objects.equals(intSaved.getUnidadesFuncionais(),intNew.getUnidadesFuncionais())
 		) { */
 		if (!transacaoDeAlta(transacao)) {
-			if (!"'TRANSFERENCIA INEXISTENTE'".equals(tipoMovInternacaoDefinido)) {
+			if (!substituirProntuario && !isEstornoInternacao) {
 				/* IER52,IER46 */
 				// AINK_INT_ATU.RN_INT_REG_MOV_INT
-				this.getAtualizaInternacaoRN().registrarMovimentoInternacoes ( 
+				RegistrarMovimentoInternacoesVO vo = this.getAtualizaInternacaoRN().registrarMovimentoInternacoes ( 
 					intNew.getSeq(),
 					intNew.getServidorDigita() == null ? null : intNew.getServidorDigita().getId().getMatricula(),
 					intNew.getServidorDigita() == null ? null : intNew.getServidorDigita().getId().getVinCodigo(),
@@ -1954,11 +2043,30 @@ public class InternacaoRN extends BaseBusiness {
 					intNew.getEspecialidade() == null ? null : intNew.getEspecialidade().getSeq(),
 					intNew.getLeito() == null ? null : intNew.getLeito().getLeitoID(),
 					null, 
-					intNew.getDthrUltimoEvento(), 
+					dataMovInternacao, 
 					codMvtoIntDefinido,
 					transacao,
 					null
 				);
+				if(intNew.getSeq() != null && vo.getUltimoEvento() != null){
+					
+					AinInternacao internacaoAtual = this.ainInternacaoDAO.obterPorChavePrimaria(intNew.getSeq());
+					if(intSaved.getDthrUltimoEvento() != null){
+						internacaoAtual.setDthrUltimoEvento(intSaved.getDthrUltimoEvento());
+					}
+					if(intSaved.getDthrPrimeiroEvento() != null){
+						internacaoAtual.setDthrPrimeiroEvento(intSaved.getDthrPrimeiroEvento());
+					}
+					if(intNew.getDthrUltimoEvento() == null || internacaoAtual.getDthrUltimoEvento().before(vo.getUltimoEvento())){
+						
+						internacaoAtual.setDthrUltimoEvento(vo.getUltimoEvento());											
+					}
+					if(intNew.getDthrPrimeiroEvento() == null || internacaoAtual.getDthrPrimeiroEvento().after(vo.getUltimoEvento())){
+						
+						internacaoAtual.setDthrPrimeiroEvento(vo.getUltimoEvento());
+					}					
+					this.ainInternacaoDAO.atualizar(internacaoAtual);					
+				}
 			}
 		}	
 		
@@ -2147,7 +2255,7 @@ public class InternacaoRN extends BaseBusiness {
 					try {
 						prescricaoMedicaFacade.geraLaudoInternacao (
 							atendimento, 
-							intNew.getDthrUltimoEvento(),
+							dataMovInternacao,
 							AghuParametrosEnum.P_LAUDO_UTI,
 							intNew.getConvenioSaudePlano()
 						);
@@ -2156,7 +2264,7 @@ public class InternacaoRN extends BaseBusiness {
 						logWarn(e.getMessage());
 						//faz chamada nativa
 						getObjetosOracleDAO().executaGeraLaudoInternacao(atendimento.getSeq(), 
-																		 intNew.getDthrUltimoEvento(), 
+								                                         dataMovInternacao, 
 																		 AghuParametrosEnum.P_LAUDO_UTI.toString(), 
 																		 intNew.getConvenioSaudePlano().getId().getCnvCodigo(), 
 																		 intNew.getConvenioSaudePlano().getId().getSeq(), servidorLogado);
@@ -2166,16 +2274,7 @@ public class InternacaoRN extends BaseBusiness {
 			//TODO: Tarefa #14529 - Troca do uso do atributo mcoGestacoes para o gsoPacCodigo e gsoSeqp
 		//Passando estes atributos para o método atualizaInformacoesLeito ao invés do objeto mcogestacoes 
 		//possibilita o funcionamento tanto para o HCPA quanto aos HUs que ainda não possuem a perinatologia implantada.
-			AghAtendimentos atendimento = intNew.getAtendimento();
-			if (atendimento != null && atendimento.getGsoPacCodigo() != null && intNew.getPaciente().getCodigo().equals(atendimento.getGsoPacCodigo())) {
-				this.getAtualizaInternacaoRN().atualizaInformacoesLeito (
-					atendimento.getGsoPacCodigo(),
-					atendimento.getGsoSeqp(),
-					lqufVO.getLeito(),
-					lqufVO.getQuarto(),
-					lqufVO.getUnidadeFuncional(), nomeMicrocomputador, dataFimVinculoServidor
-				);
-			}
+			atualizaInformacaoLeito(intNew, nomeMicrocomputador, dataFimVinculoServidor, lqufVO);
 		}
 		if (!Objects.equals(intSaved.getPaciente(),intNew.getPaciente())) {
 			AghAtendimentos atendimento = intNew.getAtendimento();
@@ -2225,6 +2324,27 @@ public class InternacaoRN extends BaseBusiness {
 			);
 		}
 		
+	}
+	private void atualizaInformacaoLeito(final AinInternacao intNew,
+			final String nomeMicrocomputador,
+			final Date dataFimVinculoServidor,
+			final LeitoQuartoUnidadeFuncionalVO lqufVO)
+			throws ApplicationBusinessException {
+		AghAtendimentos atendimento = intNew.getAtendimento();
+		if (atendimento != null && atendimento.getGsoPacCodigo() != null && intNew.getPaciente().getCodigo().equals(atendimento.getGsoPacCodigo())) {
+			this.getAtualizaInternacaoRN().atualizaInformacoesLeito (
+				atendimento.getGsoPacCodigo(),
+				atendimento.getGsoSeqp(),
+				lqufVO.getLeito(),
+				lqufVO.getQuarto(),
+				lqufVO.getUnidadeFuncional(), nomeMicrocomputador, dataFimVinculoServidor
+			);
+		} else if(possuiRecemNascido(atendimento)) {
+			LOG.info("Atualizando informacoes do leito do recém nascido.");
+			this.getAtualizaInternacaoRN().atualizaInformacoesLeito(atendimento, lqufVO.getLeito(),
+					lqufVO.getQuarto(),
+					lqufVO.getUnidadeFuncional(), nomeMicrocomputador, dataFimVinculoServidor);
+		}
 	}
 	
 	/**
@@ -4218,7 +4338,7 @@ public class InternacaoRN extends BaseBusiness {
 		internacao.setPaciente(pacienteFacade.obterAipPacientesPorChavePrimaria(pacCodigo));
 		
 		this.getCadastroInternacaoON().persistirInternacao(internacao, cidsInternacao, cidsInternacaoExcluidos, listaResponsaveis, 
-				listaResponsaveisExcluidos, hostName, dataFimVinculoServidor, substituirProntuario);					
+				listaResponsaveisExcluidos, hostName, dataFimVinculoServidor, substituirProntuario,null);					
 	}
 	
 	private AinAtendimentosUrgencia obterAtendimentoUrgencia(Integer pacCodigo, Integer numeroConsulta, String hostName) throws BaseException {
@@ -4340,7 +4460,14 @@ public class InternacaoRN extends BaseBusiness {
 
 		return listaResponsaveis;		
 	}
-		
+
+	public void validarPacienteJaPossuiAlta(AghAtendimentos atendimento, Boolean permiteAltaSemSumario) throws ApplicationBusinessException {
+		MpmAltaSumario altaSumario = getPrescricaoMedicaFacade().obterAltaSumarioPorAtendimento(atendimento);
+		if (altaSumario == null && !permiteAltaSemSumario) {
+			throw new ApplicationBusinessException(InternacaoRNExceptionCode.MSG_ERRO_ALTA_ADM_SEM_SUMARIO);
+		}
+	}
+	
 	protected IAmbulatorioFacade getAmbulatorioFacade() {
 		return this.ambulatorioFacade;
 	}

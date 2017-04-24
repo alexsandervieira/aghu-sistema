@@ -20,6 +20,13 @@ import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
+import br.gov.mec.aghu.core.action.ActionController;
+import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BaseListException;
+import br.gov.mec.aghu.core.exception.Severity;
+import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dominio.DominioDeteccaoLesao;
 import br.gov.mec.aghu.dominio.DominioFormaRespiracao;
 import br.gov.mec.aghu.dominio.DominioOutrosFarmacos;
@@ -57,13 +64,6 @@ import br.gov.mec.aghu.model.AelTmpIntervaloColeta;
 import br.gov.mec.aghu.model.AelUnfExecutaExames;
 import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
-import br.gov.mec.aghu.core.action.ActionController;
-import br.gov.mec.aghu.core.commons.CoreUtil;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BaseListException;
-import br.gov.mec.aghu.core.exception.Severity;
-import br.gov.mec.aghu.core.utils.DateUtil;
 
 @SuppressWarnings({"PMD.AghuTooManyMethods","PMD.ExcessiveClassLength"})
 public class ListarExamesSendoSolicitadosController extends ActionController {
@@ -98,6 +98,8 @@ public class ListarExamesSendoSolicitadosController extends ActionController {
 	private boolean habilitouSuggestionCidsQuestionario = false;
 
     private boolean bloqueiaCalendar = false;
+    
+    private Boolean filtroPorUnidade = Boolean.FALSE;
     
     @Inject
     private ExamesSuggestionMB examesSuggestionController;
@@ -136,7 +138,8 @@ public class ListarExamesSendoSolicitadosController extends ActionController {
 
 	public void inicio() {
 		this.itemExameReferencia = null;
-		examesSuggestionController.obterExamesSuggetion("", solicitacaoExameController.getAtendimentoSeq(), solicitacaoExameController.isUsuarioSolicExameProtocoloEnfermagem(), solicitacaoExameController.isOrigemInternacao(), tipoPesquisa);
+		parametrizaFiltroPorUnidadeFuncionalValorDefault();
+		examesSuggestionController.obterExamesSuggetion("", null, solicitacaoExameController.getAtendimentoSeq(), solicitacaoExameController.isUsuarioSolicExameProtocoloEnfermagem(), solicitacaoExameController.isOrigemInternacao(), tipoPesquisa, false);
 	}
 
 	public String getAbaId() {
@@ -157,6 +160,20 @@ public class ListarExamesSendoSolicitadosController extends ActionController {
 		}
 		unidadeTrabalho = solicitacaoExameController.obterUnidadeTrabalho();
 	}
+	
+	public void parametrizaFiltroPorUnidadeFuncionalValorDefault(){
+		try{
+			AghParametros paramFiltroPorUnidadeFuncDefault = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_DEFINE_VALOR_DEFAULT_FILTRO_UNF_EXAME_SOL);
+			if (paramFiltroPorUnidadeFuncDefault.getVlrTexto().equalsIgnoreCase("S")) {
+				this.filtroPorUnidade = Boolean.TRUE;
+				}else{
+				this.filtroPorUnidade = Boolean.FALSE;
+				}
+		}catch (ApplicationBusinessException e) {
+			LOG.error(e.getMessage(), e);
+		}
+	}
+	
 
 	protected void initController() {
 		this.initRegiaoAnatomica();
@@ -905,16 +922,17 @@ public class ListarExamesSendoSolicitadosController extends ActionController {
 	/**
 	 * Metodo utilizado pela suggestionbox para pesquisa de exames.
 	 */
-	public List<ExameSuggestionVO> obterExames(String nomeExame) {
+	public List<ExameSuggestionVO>obterExames(String nomeExame) {
 		indexAbaAtiva=0;
 		List<ExameSuggestionVO> result = null;
 		if(this.getSolicitacaoExameVo() != null){
 			if(this.getSolicitacaoExameVo().getUnidadeFuncional() != null){
+				Short seqUnidadeFuncionalSol = this.getSolicitacaoExameVo().getUnidadeFuncional().getSeq();
 				Integer seqAtendimento = null;
 				if (this.getSolicitacaoExameVo() != null && this.getSolicitacaoExameVo().getAtendimento() != null && this.getSolicitacaoExameVo().getAtendimento().getSeq() != null){
 					seqAtendimento = this.getSolicitacaoExameVo().getAtendimento().getSeq();
 				}				
-				result = examesSuggestionController.obterExamesSuggetion(nomeExame, seqAtendimento, solicitacaoExameController.isUsuarioSolicExameProtocoloEnfermagem(), solicitacaoExameController.isOrigemInternacao(), tipoPesquisa);
+				result = examesSuggestionController.obterExamesSuggetion(nomeExame, seqUnidadeFuncionalSol, seqAtendimento, solicitacaoExameController.isUsuarioSolicExameProtocoloEnfermagem(), solicitacaoExameController.isOrigemInternacao(), tipoPesquisa, this.getFiltroPorUnidade());
 			}else{
 				apresentarMsgNegocio(Severity.ERROR, "MSG_UNIDADE_FUNCIONAL_NAO_INFORMADA");
 			}
@@ -1013,14 +1031,16 @@ public class ListarExamesSendoSolicitadosController extends ActionController {
 					this.getItemSolicitacaoExameVo().setRecomendacaoExameList(flagAbas.getRecomendacaoExameList());			
 					List<AelRecomendacaoExame> listaRecomendacaoExamesAlterada = solicitacaoExameFacade.verificarRecomendacaoExameQueSeraoExibidas(this.getItemSolicitacaoExameVo().getRecomendacaoExameList(),this.getItemSolicitacaoExameVo());
 					this.getItemSolicitacaoExameVo().setRecomendacaoExameList(listaRecomendacaoExamesAlterada);
-					Collections.sort(this.itemSolicitacaoExameVo.getRecomendacaoExameList(), 
-							new Comparator<AelRecomendacaoExame>() {
-						@Override
-						public int compare(AelRecomendacaoExame recomendacaoExame1, AelRecomendacaoExame recomendacaoExame2) {
-							int result = recomendacaoExame1.getResponsavel().compareTo(recomendacaoExame2.getResponsavel());
-							return result;
-						}
-					});
+					if(this.itemSolicitacaoExameVo.getRecomendacaoExameList() != null){
+						Collections.sort(this.itemSolicitacaoExameVo.getRecomendacaoExameList(), 
+								new Comparator<AelRecomendacaoExame>() {
+							@Override
+							public int compare(AelRecomendacaoExame recomendacaoExame1, AelRecomendacaoExame recomendacaoExame2) {
+								int result = recomendacaoExame1.getResponsavel().compareTo(recomendacaoExame2.getResponsavel());
+								return result;
+							}
+						});
+					}
 				}
 				if(this.getItemSolicitacaoExameVo().getMostrarAbaRegMatAnalise()) {
 					this.verificarStatusCadastroRegiaoAnatomica();
@@ -1647,6 +1667,14 @@ public class ListarExamesSendoSolicitadosController extends ActionController {
 	
 	public void setIndexAbaAtiva(Integer indexAbaAtiva) {
 		this.indexAbaAtiva = indexAbaAtiva;
+	}
+
+	public Boolean getFiltroPorUnidade() {
+		return filtroPorUnidade;
+	}
+
+	public void setFiltroPorUnidade(Boolean filtroPorUnidade) {
+		this.filtroPorUnidade = filtroPorUnidade;
 	}
 	
 	

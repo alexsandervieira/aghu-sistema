@@ -16,6 +16,7 @@ import br.gov.mec.aghu.business.IAghuFacade;
 import br.gov.mec.aghu.dominio.DominioSituacaoSolicitacaoInternacao;
 import br.gov.mec.aghu.internacao.cadastrosbasicos.business.ICadastrosBasicosInternacaoFacade;
 import br.gov.mec.aghu.internacao.leitos.business.ILeitosInternacaoFacade;
+import br.gov.mec.aghu.internacao.transferir.business.ITransferirPacienteFacade;
 import br.gov.mec.aghu.internacao.vo.RapServidoresTransPacienteVO;
 import br.gov.mec.aghu.model.AghEspecialidades;
 import br.gov.mec.aghu.model.AghParametros;
@@ -110,6 +111,9 @@ public class SolicitarTransferenciaPacienteController extends ActionController {
 	private Integer prontuario;
 	private String leitoID;
 
+	@EJB
+	private ITransferirPacienteFacade transferirPacienteFacade;
+
 	public void inicio() {
 	 
 
@@ -150,6 +154,13 @@ public class SolicitarTransferenciaPacienteController extends ActionController {
 	public String gravar() {
 		// Força a atualizar rapServidores de acordo com os valores digitados na
 		// tela para codigoResponsavel e matriculaResponsavel
+		
+		// NEGAÇÃO DA CONDIÇÃO: Tem internação E -- NÃO recebeu alta ou recebeu alta, onde o tipo de alta PERMITE permanência do paciente
+				if ( !(internacaoSeq != null && (!transferirPacienteFacade.validarPacienteNaoPossuiAltaAdministrativa(internacaoSeq) || transferirPacienteFacade.validarTipoAltaMedicaPermitePacienteComAlta(internacaoSeq))) ) {
+			apresentarMsgNegocio(Severity.ERROR, "PACIENTE_POSSUI_ALTA_ADMINISTRATIVA");
+			return null;
+		}
+		
 		buscarSolicitante();
 
 		if (this.rapServidores != null && (this.rapServidores.getId().getVinCodigo() == null || this.rapServidores.getId().getMatricula() == null)) {

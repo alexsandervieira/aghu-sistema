@@ -1,5 +1,6 @@
 package br.gov.mec.aghu.blococirurgico.dao;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -79,8 +80,9 @@ public class MbcControleEscalaCirurgicaDAO extends br.gov.mec.aghu.core.persiste
 	 * @param unidadeFunc
 	 * @return
 	 */
-	public List<MbcControleEscalaCirurgica> pesquisarEscalasCirurgicas(Integer firstResult, Integer maxResult, String orderProperty, boolean asc,  AghUnidadesFuncionais unidadeFunc) {
-		DetachedCriteria criteria = montarCriteriaLista(unidadeFunc);
+	public List<MbcControleEscalaCirurgica> pesquisarEscalasCirurgicas(Integer firstResult, Integer maxResult, String orderProperty, boolean asc,  AghUnidadesFuncionais unidadeFunc, Date dtInicio, Date dtFim) {
+		
+		DetachedCriteria criteria = montarCriteriaLista(unidadeFunc, dtInicio, dtFim);
 
 		// Ordenar por data escala
 		criteria.addOrder(Order.desc(MbcControleEscalaCirurgica.Fields.DT_ESCALA.toString()));
@@ -94,8 +96,8 @@ public class MbcControleEscalaCirurgicaDAO extends br.gov.mec.aghu.core.persiste
 	 * @param unidadeFunc, dataEscala
 	 * @return
 	 */
-	public Long pesquisarEscalasCirurgicasCount( AghUnidadesFuncionais unidadeFunc) {
-		DetachedCriteria criteria = montarCriteriaLista(unidadeFunc);
+	public Long pesquisarEscalasCirurgicasCount( AghUnidadesFuncionais unidadeFunc, Date dtInicio, Date dtFim) {
+		DetachedCriteria criteria = montarCriteriaLista(unidadeFunc, dtInicio, dtFim);
 		return executeCriteriaCount(criteria);
 	}
 
@@ -106,18 +108,41 @@ public class MbcControleEscalaCirurgicaDAO extends br.gov.mec.aghu.core.persiste
 	 * @param dataEscala
 	 * @return
 	 */
-	private DetachedCriteria montarCriteriaLista( AghUnidadesFuncionais unidadeFunc) {
+	private DetachedCriteria montarCriteriaLista( AghUnidadesFuncionais unidadeFunc, Date dtInicio, Date dtFim) {
 
 		DetachedCriteria criteria = DetachedCriteria.forClass(MbcControleEscalaCirurgica.class);
 
 		criteria.createAlias(MbcControleEscalaCirurgica.Fields.AGH_UNIDADES_FUNCIONAIS.toString(), "UND", JoinType.INNER_JOIN);
 		criteria.createAlias(MbcControleEscalaCirurgica.Fields.RAP_SERVIDORES.toString(), "RAP", JoinType.INNER_JOIN);
 		criteria.createAlias("RAP."+RapServidores.Fields.PESSOA_FISICA.toString(), "FIS", JoinType.INNER_JOIN);
-	
+		
 		if (unidadeFunc != null) {
 			criteria.add(Restrictions.eq(MbcControleEscalaCirurgica.Fields.AGH_UNIDADES_FUNCIONAIS.toString(), unidadeFunc));
 		}
-	
+		
+		final Date dtInicioFormatada = DateUtil.truncaData(dtInicio);
+		
+		if (dtInicio != null) {
+			if (dtInicioFormatada != null && dtFim == null) {
+				criteria.add(Restrictions.between(MbcControleEscalaCirurgica.Fields.DT_ESCALA.toString(), dtInicioFormatada, new Date()));
+			}
+		}
+		
+		if(dtFim != null){
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(dtFim);
+			calendar.set(Calendar.HOUR, 23);
+			calendar.set(Calendar.MINUTE, 59);
+			calendar.set(Calendar.MILLISECOND, 0);
+			final Date dtFimFormatada = calendar.getTime();
+			if (dtFimFormatada != null && dtInicioFormatada == null) {
+				criteria.add(Restrictions.le(MbcControleEscalaCirurgica.Fields.DT_ESCALA.toString(), dtFimFormatada));
+		}
+
+			if (dtInicioFormatada != null && dtFimFormatada != null) {
+				criteria.add(Restrictions.between(MbcControleEscalaCirurgica.Fields.DT_ESCALA.toString(), dtInicioFormatada, dtFimFormatada));
+			}
+		}
 		return criteria;
 	}
 	
@@ -144,7 +169,7 @@ public class MbcControleEscalaCirurgicaDAO extends br.gov.mec.aghu.core.persiste
 	}
 	
 	public List<MbcControleEscalaCirurgica> pesquisarEscalasCirurgicasPorUnf(AghUnidadesFuncionais unidadeFunc) {
-		DetachedCriteria criteria = montarCriteriaLista(unidadeFunc);
+		DetachedCriteria criteria = montarCriteriaLista(unidadeFunc, null, null);
 
 		// Ordenar por data escala
 		criteria.addOrder(Order.asc(MbcControleEscalaCirurgica.Fields.DT_ESCALA.toString()));

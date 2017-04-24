@@ -583,6 +583,7 @@ public class SceMovimentoMaterial extends BaseEntityId<SceMovimentoMaterialId> i
 		VALOR("valor"),
 		CUSTO_MEDIO_PONDERADOR_GER("custoMedioPonderadoGer"),
 		DATA_COMPETENCIA("id.dtCompetencia"),
+		DATA_COMPETENCIA_NATIVO("DT_COMPETENCIA"),
 		ALMOXARIFADO("almoxarifado"),
 		MOTIVO_MOVIMENTO("motivoMovimento"),
 		MOTIVO_MOVIMENTO_SEQ("motivoMovimento.id.tmvSeq"),

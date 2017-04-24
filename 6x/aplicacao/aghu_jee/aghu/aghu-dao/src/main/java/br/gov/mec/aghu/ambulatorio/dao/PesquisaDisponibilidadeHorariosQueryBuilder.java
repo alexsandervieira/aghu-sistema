@@ -2,6 +2,7 @@ package br.gov.mec.aghu.ambulatorio.dao;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 
@@ -21,6 +22,7 @@ import br.gov.mec.aghu.model.AacTipoAgendamento;
 import br.gov.mec.aghu.model.AghEquipes;
 import br.gov.mec.aghu.model.AghEspecialidades;
 import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.model.RapServidoresId;
 import br.gov.mec.aghu.model.VAacSiglaUnfSala;
 
 
@@ -42,13 +44,26 @@ public class PesquisaDisponibilidadeHorariosQueryBuilder extends QueryBuilder<Qu
 		// TODO Auto-generated method stub
 		
 	}
-	
+
     public Query montarPesquisaDisponibilidadeHorarios(Integer filtroSeq, Short filtroUslUnfSeq, AghEspecialidades filtroEspecialidade,
 			AghEquipes filtroEquipe, RapServidores filtroProfissional, boolean count, AacPagador filtroPagador,
 			AacTipoAgendamento filtroTipoAgendamento, AacCondicaoAtendimento filtroCondicao, Date dtConsulta, Date horaConsulta,
 			Date mesInicio, Date mesFim, DominioDiaSemana dia, VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,
-			DataInicioFimVO turno, List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS
-			, Short seqTipoAgendamentoSMS, Short seqCondPrimeiraConsulta) throws ApplicationBusinessException {
+			DataInicioFimVO turno, List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS,
+			Short seqTipoAgendamentoSMS, Short seqCondPrimeiraConsulta) throws ApplicationBusinessException {
+    	return montarPesquisaDisponibilidadeHorarios(filtroSeq, filtroUslUnfSeq, filtroEspecialidade, filtroEquipe, filtroProfissional,
+				count, filtroPagador, filtroTipoAgendamento, filtroCondicao, dtConsulta, horaConsulta, mesInicio, mesFim, dia, zona,
+				zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS, seqTipoAgendamentoSMS, seqCondPrimeiraConsulta,
+				null, null);
+    }
+    
+    public Query montarPesquisaDisponibilidadeHorarios(Integer filtroSeq, Short filtroUslUnfSeq, AghEspecialidades filtroEspecialidade,
+			AghEquipes filtroEquipe, RapServidores filtroProfissional, boolean count, AacPagador filtroPagador,
+			AacTipoAgendamento filtroTipoAgendamento, AacCondicaoAtendimento filtroCondicao, Date dtConsulta, Date horaConsulta,
+			Date mesInicio, Date mesFim, DominioDiaSemana dia, VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,
+			DataInicioFimVO turno, List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS,
+			Short seqTipoAgendamentoSMS, Short seqCondPrimeiraConsulta, Map<String, List<Integer>> mapIds,
+			List<RapServidoresId> listIdsProf) throws ApplicationBusinessException {
 
 		Short espSeq = null;
 		Integer eqpSeq = null;
@@ -56,6 +71,11 @@ public class PesquisaDisponibilidadeHorariosQueryBuilder extends QueryBuilder<Qu
 		Short preSerVinCodigo = null;
 		Date dtInicioUltGeracaoDiaSeguinte = null;
 		Date dtFimUltGeracaoDiaSeguinte = null;
+		
+		List<Integer> listIdsEspe = mapIds.get("ESP");
+		List<Integer> listIdsEqp = mapIds.get("EQP");
+		List<Integer> listIdsGrd = mapIds.get("GRD");
+		List<Integer> listIdsUnf = mapIds.get("UNF");
 
 		StringBuffer hql = new StringBuffer(150);
 		if (count) {
@@ -75,7 +95,10 @@ public class PesquisaDisponibilidadeHorariosQueryBuilder extends QueryBuilder<Qu
 				|| filtroProfissional != null || dtInicioUltGeracaoDiaSeguinte != null || dtFimUltGeracaoDiaSeguinte != null
 				|| filtroPagador != null || filtroTipoAgendamento != null || filtroCondicao != null || dtConsulta != null
 				|| horaConsulta != null || mesInicio != null || mesFim != null || dia != null || (zona != null && zona.getUnfSeq() != null)
-				|| zonaSala != null || turno != null || (listEspecialidade != null && !listEspecialidade.isEmpty())) {
+				|| zonaSala != null || turno != null || (listEspecialidade != null && !listEspecialidade.isEmpty())
+				|| (listIdsEspe != null && !listIdsEspe.isEmpty()) || (listIdsEqp != null && !listIdsEqp.isEmpty())
+				|| (listIdsGrd != null && !listIdsGrd.isEmpty()) || (listIdsUnf != null && !listIdsUnf.isEmpty())
+				|| (listIdsProf != null && !listIdsProf.isEmpty())) {
 
 			hql.append(" where ");
 
@@ -244,6 +267,37 @@ public class PesquisaDisponibilidadeHorariosQueryBuilder extends QueryBuilder<Qu
 				hql.append("to_char(ac.").append(AacConsultas.Fields.DATA_CONSULTA.toString()).append(",'HH24:MI:SS') between (:dataTurnoInicio) ")
 				.append(" and (:dataTurnoFim)");
 			}
+			//Restrições de permissão
+			if(listIdsEspe != null && !listIdsEspe.isEmpty()){
+				hql.append(" and ")
+				.append("agac.")
+				.append(AacGradeAgendamenConsultas.Fields.ESP_SEQ.toString())
+				.append(" in (:listIdsEspe) ");
+			}
+			if(listIdsEqp != null && !listIdsEqp.isEmpty()){
+				hql.append(" and ")
+				.append("agac.")
+				.append(AacGradeAgendamenConsultas.Fields.EQP_SEQ.toString())
+				.append(" in (:listIdsEqp) ");
+			}
+			if(listIdsGrd != null && !listIdsGrd.isEmpty()){
+				hql.append(" and ")
+				.append("agac.")
+				.append(AacGradeAgendamenConsultas.Fields.SEQ.toString())
+				.append(" in (:listIdsGrd) ");
+			}
+			if(listIdsUnf != null && !listIdsUnf.isEmpty()){
+				hql.append(" and ")
+				.append("sg.")
+				.append(VAacSiglaUnfSala.Fields.UNF_SEQ.toString())
+				.append(" in (:listIdsUnf) ");
+			}
+			if(listIdsProf != null && !listIdsProf.isEmpty()){
+				hql.append(" and ")
+				.append("agac.")
+				.append(AacGradeAgendamenConsultas.Fields.PROF_ESPECIALIDADE_SERVIDOR_ID.toString())
+				.append(" in (:listIdsProf) ");
+			}
 
 		}
 		//#52061 - Caso não possua permissão específica não lista Primeiras Consultas da Secretaria Municipal da Saúde
@@ -322,6 +376,23 @@ public class PesquisaDisponibilidadeHorariosQueryBuilder extends QueryBuilder<Qu
 			query.setParameter("dataTurnoInicio", dtConsulta1);
 			query.setParameter("dataTurnoFim", dtConsulta2);
 		}
+		
+		if(listIdsEspe != null && !listIdsEspe.isEmpty()){
+			query.setParameterList("listIdsEspe", listIdsEspe);
+		}
+		if(listIdsEqp != null && !listIdsEqp.isEmpty()){
+			query.setParameterList("listIdsEqp", listIdsEqp);
+		}
+		if(listIdsGrd != null && !listIdsGrd.isEmpty()){
+			query.setParameterList("listIdsGrd", listIdsGrd);
+		}
+		if(listIdsUnf != null && !listIdsUnf.isEmpty()){
+			query.setParameterList("listIdsUnf", listIdsUnf);
+		}
+		if(listIdsProf != null && !listIdsProf.isEmpty()){
+			query.setParameterList("listIdsProf", listIdsProf);
+		}
+		
 		//#52061
 		if (!visualizarPrimeirasConsultasSMS) {
 			//Short seqTipoAgendamentoSMS = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_TAG_SMS).getVlrNumerico().shortValue();

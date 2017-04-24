@@ -21,6 +21,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.Length;
 
 import br.gov.mec.aghu.core.persistence.BaseEntityCodigo;
@@ -40,6 +41,7 @@ public class AghSamis extends BaseEntityCodigo<Short> implements java.io.Seriali
 	private RapServidores servidor;
 	private Integer version;
 	private Date criadoEm;
+	private Boolean origemPadrao;
 
 	public AghSamis() {
 	}
@@ -118,7 +120,12 @@ public class AghSamis extends BaseEntityCodigo<Short> implements java.io.Seriali
 	public String getDescricaoAtivo() {
 		return isAtivo() ? "Ativo" : "Inativo";
 	}
-	
+
+	@Transient
+	public String getDescricaoOrigemPadrao() {
+		return getOrigemPadrao() ? "Sim" : "Não";
+	}
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CRIADO_EM", nullable = false, length = 7)
 	public Date getCriadoEm() {
@@ -129,10 +136,24 @@ public class AghSamis extends BaseEntityCodigo<Short> implements java.io.Seriali
 		this.criadoEm = criadoEm;
 	}
 
+	@Column(name = "ORIGEM_PADRAO", nullable = false, length = 1)
+	@Type(type="br.gov.mec.aghu.core.persistence.type.BooleanUserType")
+	public Boolean getOrigemPadrao() {
+		return origemPadrao;
+	}
+
+	public void setOrigemPadrao(Boolean origemPadrao) {
+		this.origemPadrao = origemPadrao;
+	}
+	
 	public enum Fields {
 
-		CODIGO("codigo"), DESCRICAO("descricao"), IND_ATIVO("indAtivo"), CRIADO_EM(
-				"criadoEm"), SERVIDOR("servidor");
+		CODIGO("codigo")
+		, DESCRICAO("descricao")
+		, IND_ATIVO("indAtivo")
+		, CRIADO_EM("criadoEm")
+		, SERVIDOR("servidor")
+		, ORIGEM_PADRAO("origemPadrao");
 
 		private String fields;
 

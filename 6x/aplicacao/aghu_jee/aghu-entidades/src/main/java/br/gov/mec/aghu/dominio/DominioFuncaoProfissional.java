@@ -49,7 +49,15 @@ public enum DominioFuncaoProfissional implements DominioString {
 	/**
 	 * Médico residente
 	 */
-	MRE("MRE");
+	MRE("MRE"),
+	/**
+	 * Odontólogo Professor
+	 */
+	OPF("OPF"),
+	/**
+	 * Odontólogo Residente
+	 */
+	ORE("ORE");
 
 	private String value;
 	
@@ -87,6 +95,10 @@ public enum DominioFuncaoProfissional implements DominioString {
 			return "Executor Sedação";
 		case MRE:
 			return "Médico residente";
+		case OPF:
+			return "Odontólogo Professor";
+		case ORE:
+			return "Odontólogo Residente";
 		default:
 			return "";
 		}
@@ -115,6 +127,10 @@ public enum DominioFuncaoProfissional implements DominioString {
 			return ESE;
 		}else if ("MRE".equals(value)) {
 			return MRE;
+		} else if ("OPF".equals(value)) {
+			return OPF;
+		} else if ("ORE".equals(value)) {
+			return ORE;
 		} else {
 			return null;
 		}

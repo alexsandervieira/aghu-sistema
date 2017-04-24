@@ -13,6 +13,14 @@ import org.apache.commons.logging.LogFactory;
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.business.IAghuFacade;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.utils.DateConstants;
+import br.gov.mec.aghu.core.utils.DateUtil;
+import br.gov.mec.aghu.core.utils.DateValidator;
 import br.gov.mec.aghu.dominio.DominioGrupoConvenio;
 import br.gov.mec.aghu.dominio.DominioSituacaoProcedimentoAmbulatorio;
 import br.gov.mec.aghu.exames.solicitacao.business.ISolicitacaoExameFacade;
@@ -33,14 +41,6 @@ import br.gov.mec.aghu.model.FatProcedHospInternos;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.model.RapServidoresId;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.commons.CoreUtil;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
-import br.gov.mec.aghu.core.utils.DateConstants;
-import br.gov.mec.aghu.core.utils.DateUtil;
-import br.gov.mec.aghu.core.utils.DateValidator;
 
 /**
  * ORADB: FATP_ATUALIZA_PMR_KITS_PRE
@@ -103,7 +103,7 @@ private FatExmPacPreTransDAO fatExmPacPreTransDAO;
 		;
 	}	
 	
-	protected final void atualizaPmrKitsPre(final FatCompetencia competencia, String nomeMicrocomputador, Date dataFimVinculoServidor) throws BaseException {
+	public void atualizaPmrKitsPre(final FatCompetencia competencia, String nomeMicrocomputador, Date dataFimVinculoServidor) throws BaseException {
 		final FatListaPacApacDAO fatListaPacApacDAO = getFatListaPacApacDAO();
 		final FatProcedAmbRealizadoDAO fatProcedAmbRealizadoDAO = getFatProcedAmbRealizadoDAO();
 		final FatExmPacPreTransDAO fatExmPacPreTransDAO = getFatExmPacPreTransDAO();

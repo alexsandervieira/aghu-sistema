@@ -165,6 +165,9 @@ public class ManterPrescricaoCuidadoON extends BaseBusiness {
 		//RN13
 		this.validaPrescricaoParaInclusaoCuidado(prescricaoCuidado, nomeMicrocomputador, dataFimVinculoServidor);
 		
+		Integer ordem = this.mpmPrescricaoCuidadoDAO.buscaOrdemPrescricaoCuidados(prescricaoCuidado.getPrescricaoMedica().getId(), prescricaoCuidado.getPrescricaoMedica().getDthrFim());
+		prescricaoCuidado.setOrdem(ordem);
+		
 		this.getMpmPrescricaoCuidadoDAO().persistir(prescricaoCuidado);
 		this.getMpmPrescricaoCuidadoDAO().flush();
 	}
@@ -271,7 +274,7 @@ public class ManterPrescricaoCuidadoON extends BaseBusiness {
 		prescricaoCuidadoNovo.setIndPendente(DominioIndPendenteItemPrescricao.P);
 		prescricaoCuidadoNovo.setIndItemRecTransferencia(false);
 		prescricaoCuidadoNovo.setIndItemRecomendadoAlta(false);
-		
+		prescricaoCuidadoNovo.setOrdem(prescricaoCuidadoEdicao.getOrdem());
 		//tratamento problema de lazy
 		MpmPrescricaoMedica precricao = mpmPrescricaoMedicaDAO.obterPrescricaoPorId(prescricaoCuidadoEdicao.getPrescricaoMedica().getId());
 		
@@ -299,7 +302,7 @@ public class ManterPrescricaoCuidadoON extends BaseBusiness {
 		this.getMpmPrescricaoCuidadoDAO().flush();
 	}
 	
-	private void atualizarPrescricaoCuidadoOriginal(
+	public void atualizarPrescricaoCuidadoOriginal(
 			MpmPrescricaoCuidado prescricaoCuidadoOriginal, MpmPrescricaoCuidado prescricaoCuidadoEdicao) throws ApplicationBusinessException {
 		
 		prescricaoCuidadoOriginal.setIndPendente(DominioIndPendenteItemPrescricao.A);
@@ -322,7 +325,12 @@ public class ManterPrescricaoCuidadoON extends BaseBusiness {
 		
 		this.getMpmPrescricaoCuidadoDAO().merge(prescricaoCuidadoOriginal);
 	}
-	
+
+	public void atualizarOrdemPrescricaoCuidado(MpmPrescricaoCuidado prescricaoCuidadoEdicao) throws ApplicationBusinessException {
+		
+		this.getMpmPrescricaoCuidadoDAO().merge(prescricaoCuidadoEdicao);
+	}
+
 	public void removerPrescricaoCuidado(MpmPrescricaoCuidado prescricaoCuidado) throws ApplicationBusinessException{
 		prescricaoCuidado = this.getMpmPrescricaoCuidadoDAO().merge(prescricaoCuidado);
 		if(DominioIndPendenteItemPrescricao.B.equals(prescricaoCuidado.getIndPendente()) ||

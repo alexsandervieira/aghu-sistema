@@ -9,12 +9,16 @@ import javax.inject.Inject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
+import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.ambulatorio.dao.AacConsultasDAO;
 import br.gov.mec.aghu.ambulatorio.vo.RelatorioControleFrequenciaVO;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.faturamento.business.IFaturamentoFacade;
 import br.gov.mec.aghu.model.AacConsultas;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.utils.DateUtil;
+import br.gov.mec.aghu.model.AghParametros;
 
 @Stateless
 public class RelatorioControleFrequenciaRN extends BaseBusiness{
@@ -30,6 +34,9 @@ public class RelatorioControleFrequenciaRN extends BaseBusiness{
 	
 	@EJB
 	private IFaturamentoFacade faturamentoFacade;
+	
+	@EJB
+	private IParametroFacade parametroFacade;
 	
 	private static final Log LOG = LogFactory.getLog(RelatorioControleFrequenciaRN.class);
 
@@ -82,10 +89,23 @@ public class RelatorioControleFrequenciaRN extends BaseBusiness{
 	 * 
 	 * @param Integer nroConsulta
 	 * @return String dataLocal
+	 * @throws ApplicationBusinessException 
 	 */
-	public String obterDataLocalFormula(Integer nroConsulta){
+	public String obterDataLocalFormula(Integer nroConsulta) throws ApplicationBusinessException{
 		AacConsultas aacConsultas= aacConsultasDAO.obterConsulta(nroConsulta);
-		return "Porto Alegre, ".concat(DateUtil.obterDataFormatada(aacConsultas.getDtConsulta(), "dd ' de ' MMMM ' de ' YYYY"));
+		String cidadeAssinatura = obtemCidadeAssinaturaLaudoAPACAmbulatorio();
+		return cidadeAssinatura .concat(DateUtil.obterDataFormatada(aacConsultas.getDtConsulta(), " dd ' de ' MMMM ' de ' YYYY"));
 	}
-	
+
+	/**
+	 * @return
+	 * @throws ApplicationBusinessException
+	 */
+	public String obtemCidadeAssinaturaLaudoAPACAmbulatorio()  throws ApplicationBusinessException {
+		AghParametros cidadeAssinatura = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_CIDADE_ASSINATURA_LAUDO_APAC_AMBULATORIO);
+		if (cidadeAssinatura != null && cidadeAssinatura.getVlrTexto() != null){
+			return cidadeAssinatura.getVlrTexto();
+		}
+		return "";	
+	}
 }

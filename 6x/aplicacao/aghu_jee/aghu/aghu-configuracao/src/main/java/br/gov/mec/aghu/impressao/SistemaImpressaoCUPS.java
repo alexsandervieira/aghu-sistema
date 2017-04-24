@@ -2,15 +2,10 @@ package br.gov.mec.aghu.impressao;
 
 import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
-import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.print.PrintException;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperPrint;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +25,9 @@ import br.gov.mec.aghu.model.cups.ImpComputador;
 import br.gov.mec.aghu.model.cups.ImpComputadorImpressora;
 import br.gov.mec.aghu.model.cups.ImpImpressora;
 import br.gov.mec.aghu.model.cups.ImpServidorCups;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperPrint;
 
 /**
  * Implementa o sistema de impressão baseado no servidor de impressão CUPS.
@@ -537,28 +535,25 @@ public class SistemaImpressaoCUPS implements ISistemaImpressaoCUPS {
 	@Override
 	public void imprimir(String documento, String impressora)
 			throws SistemaImpressaoException {
-		String servidor = getServidor();
 		String fila = getFila(impressora);
+		String servidor = getServidor(fila);
 
 		// executar lpr
 		try {
 			CupsUtil.envia(servidor, fila, documento);
-			LOG.warn("Impressão sem definição de Servidor CUPS sendo enviada para o primeiro Servidor CUPS encontrado na base.");
-		} catch (PrintException e) {
+	    } catch (PrintException e) {
 			throwException(e);
 		}		
 	}
 	
-	protected String getServidor() throws SistemaImpressaoException {
-		// verificar onde configurar o nome do servidor
-		List<ImpServidorCups> list = this.getCadastrosBasicosCupsFacade()
-				.pesquisarServidorCups(null);
-		if (list.isEmpty()) {
+	protected String getServidor(String fila) throws SistemaImpressaoException {
+		ImpServidorCups servidor = this.getCadastrosBasicosCupsFacade().pesquisarServidorCupsPorFila(fila);
+		if (servidor == null & servidor.getIpServidor() == null) {
 			throw new SistemaImpressaoException(
 					SistemaImpressaoExceptionCode.SERVIDOR_NAO_ENCONTRADO);
 		}
 
-		return list.get(0).getIpServidor();
+		return servidor.getIpServidor();
 	}
 	
 	/**

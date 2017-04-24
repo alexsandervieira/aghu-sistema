@@ -122,6 +122,7 @@ public class PesquisarRelatorioTicketExamesPacienteON extends BaseBusiness {
 		AelAtendimentoDiversos atendimentoDiversos = solicitacaoExames.getAtendimentoDiverso();
 		FatConvenioSaudePlano convenioSaudePlano = solicitacaoExames.getConvenioSaudePlano();
 		RapServidores servidorResponsavel = solicitacaoExames.getServidorResponsabilidade();
+		RapServidores servidorSolicitante = solicitacaoExames.getServidor();
 
 		AghCaractUnidFuncionais caractUnidFuncionais =
 		// getAghCaractUnidFuncionaisDAO().buscarCaracteristicaPorUnidadeCaracteristica(executaExames.getId().getUnfSeq().getSeq(),ConstanteAghCaractUnidFuncionais.AREA_FECHADA);
@@ -159,6 +160,8 @@ public class PesquisarRelatorioTicketExamesPacienteON extends BaseBusiness {
 		vo.setCriadoEm(sdf1.format(solicitacaoExames.getCriadoEm()));
 
 		vo.setNomeResp(getNomeResp(servidorResponsavel));
+		
+		vo.setNomeSolicitante(getNomeSolicitante(servidorSolicitante));
 
 		vo.setUnfSeq(getUnfSeq(unidadeFuncionalColeta, caractUnidFuncionais));
 
@@ -231,6 +234,9 @@ public class PesquisarRelatorioTicketExamesPacienteON extends BaseBusiness {
 		vo.setExamesAgendados("");
 
 		vo.setLocalizador(getLocalizador(solicitacaoExames));
+		
+		vo.setNroCartaoSaude(atendimento.getPaciente().getNroCartaoSaude());
+		
 		return vo;
 	}
 
@@ -263,6 +269,14 @@ public class PesquisarRelatorioTicketExamesPacienteON extends BaseBusiness {
 		if (servidorResponsavel != null) {
 			result = getRelatorioTicketExamesPacienteON().buscarNomeServ(servidorResponsavel.getId().getMatricula(),
 					servidorResponsavel.getId().getVinCodigo());
+		}
+		return result;
+	}
+	
+	private String getNomeSolicitante(RapServidores servidorSolicitante) {
+		String result = "";
+		if (servidorSolicitante != null) {
+			result = getRelatorioTicketExamesPacienteON().buscarNomeServ(servidorSolicitante.getId().getMatricula(), servidorSolicitante.getId().getVinCodigo());
 		}
 		return result;
 	}

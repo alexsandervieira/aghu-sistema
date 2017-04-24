@@ -282,7 +282,7 @@ public class AelGradeAgendaExameDAO extends br.gov.mec.aghu.core.persistence.dao
 		hql.append(AelGradeAgendaExame.Fields.HORARIOS_EXAME_DISP.toString());
 		hql.append(" as hed ");
 
-		hql.append(" inner join gae.");
+		hql.append(" left join gae.");
 		hql.append(AelGradeAgendaExame.Fields.SALAS_EXECUTORAS_EXAMES.toString());
 		hql.append(" as see ");
 
@@ -385,7 +385,7 @@ public class AelGradeAgendaExameDAO extends br.gov.mec.aghu.core.persistence.dao
 		hql.append(AelGradeAgendaExame.Fields.HORARIOS_EXAME_DISP.toString());
 		hql.append(" as hed ");
 
-		hql.append(" inner join gae.");
+		hql.append(" left join gae.");
 		hql.append(AelGradeAgendaExame.Fields.SALAS_EXECUTORAS_EXAMES.toString());
 		hql.append(" as see ");
 

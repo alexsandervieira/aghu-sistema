@@ -346,7 +346,16 @@ public class FatItensProcedHospitalarDAO extends BaseDao<FatItensProcedHospitala
 		cri.createAlias(FatItensProcedHospitalar.Fields.CLINICA.toString(), FatItensProcedHospitalar.Fields.CLINICA.toString(),JoinType.LEFT_OUTER_JOIN);
 		return (FatItensProcedHospitalar) executeCriteriaUniqueResult(cri, true);
 	}
-
+	
+	public FatItensProcedHospitalar obterItemProcedHospitalarPorPhoseqPorCodtabela(Short phoSeq,Long codTabela) {
+		DetachedCriteria cri = DetachedCriteria.forClass(FatItensProcedHospitalar.class);
+		cri.add(Restrictions.eq(FatItensProcedHospitalar.Fields.COD_TABELA.toString(),codTabela));
+		cri.add(Restrictions.eq(FatItensProcedHospitalar.Fields.PHO_SEQ.toString(), phoSeq));
+		cri.createAlias(FatItensProcedHospitalar.Fields.PROCEDIMENTO_HOSPITALAR.toString(), FatItensProcedHospitalar.Fields.PROCEDIMENTO_HOSPITALAR.toString(),JoinType.LEFT_OUTER_JOIN);
+		cri.createAlias(FatItensProcedHospitalar.Fields.CLINICA.toString(), FatItensProcedHospitalar.Fields.CLINICA.toString(),JoinType.LEFT_OUTER_JOIN);
+		return (FatItensProcedHospitalar) executeCriteriaUniqueResult(cri, true);
+	}
+	
 	/**
 	 * Monta a consulta para listar FatItensProcedHospitalar filtrando pelo
 	 * procedimento hospitalar E/OU seq do próprio Item Procedimento Hospitalar
@@ -692,6 +701,22 @@ public class FatItensProcedHospitalarDAO extends BaseDao<FatItensProcedHospitala
 		result = this.executeCriteria(criteria);
 
 		return (result == null || result.isEmpty()) ? false : true;
+	}
+	
+	/**
+	 * Metodo para verificar se o procedimento já existente, possui o mesmo nome que o do
+	 * arquivo sigtap
+	 * 
+	 * @return Boolean
+	 */
+	public Boolean isProcedimentoMesmaDescricacao(final Long codTabela,final String procedimentoDescricao) {
+		List<FatItensProcedHospitalar> result = null;
+		DetachedCriteria criteria = this.obterCriteriaConsultarItemTabela(null,
+				null, codTabela);
+
+		result = this.executeCriteria(criteria);
+
+		return (result.get(0).getDescricao() == procedimentoDescricao) ? true : false;
 	}
 
 	public List<FatItensProcedHospitalar> listarItensProcedHospPorProcedHospPorCodTabelaPorPhoSeq(

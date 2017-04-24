@@ -8,6 +8,7 @@ import br.gov.mec.aghu.constantes.TipoItemAprazamento;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.exception.BaseListException;
+import br.gov.mec.aghu.dominio.DominioSituacaoHistPrescDiagnosticos;
 import br.gov.mec.aghu.dominio.DominioTipoEmissaoSumario;
 import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
@@ -21,6 +22,7 @@ import br.gov.mec.aghu.model.EpeDiagnosticoId;
 import br.gov.mec.aghu.model.EpeFatRelDiagnostico;
 import br.gov.mec.aghu.model.EpeFatRelacionado;
 import br.gov.mec.aghu.model.EpeGrupoNecesBasica;
+import br.gov.mec.aghu.model.EpeHistoricoPrescDiagnosticos;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagem;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagemId;
 import br.gov.mec.aghu.model.EpePrescricoesCuidados;
@@ -43,11 +45,12 @@ import br.gov.mec.aghu.prescricaoenfermagem.vo.SinalSintomaVO;
 import br.gov.mec.aghu.prescricaoenfermagem.vo.SumarioPrescricaoEnfermagemVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ItemPrescricaoEnfermagemVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ListaPacientePrescricaoVO;
+import br.gov.mec.aghu.vo.RapServidoresVO;
 
 public interface IPrescricaoEnfermagemFacade extends Serializable {
 	
 	
-	void agendarGerarDadosSumarioPrescricaoEnfermagem(String cron, Date dataInicio, Date dataFim) throws ApplicationBusinessException;
+	void agendarGerarDadosSumarioPrescricaoEnfermagem(String cron, Date dataInicio, Date dataFim,String nomeProcessoQuartz) throws ApplicationBusinessException;
 
 
 	
@@ -202,7 +205,7 @@ public interface IPrescricaoEnfermagemFacade extends Serializable {
 
 	public abstract void removerPrescCuidadosDiagnosticosSelecionados(
 			List<DiagnosticoEtiologiaVO> listaDiagnosticoEtiologiaVO,
-			Integer penAtdSeq, Integer penSeq)
+			Integer penAtdSeq, Integer penSeq, Boolean exluir)
 			throws ApplicationBusinessException;
 
 	
@@ -366,4 +369,15 @@ public interface IPrescricaoEnfermagemFacade extends Serializable {
 	public abstract void validarDataPrescricao(final Date dtPrescricao, final List<EpePrescricaoEnfermagem> listaPrescricaoEnfermagem) throws ApplicationBusinessException;
 	
 	AghAtendimentos obterUltimoAtendimentoEmAndamentoPorPaciente(Integer pacCodigo, String nome) throws ApplicationBusinessException;
+
+	List<CuidadoVO> buscarCuidadosDiagnosticosPrescricaoEnfermagem(EpePrescricaoEnfermagemId prescricaoId, Boolean listarTodas);
+
+	void inserirHistoricoPrescDiagnostico(EpeHistoricoPrescDiagnosticos historicoDiagnostico);
+
+	EpeHistoricoPrescDiagnosticos obterEpeHistoricoPrescDiagnosticosPorPrescDiag(EpeFatRelDiagnostico fatRelDiagnostico,	EpePrescricaoEnfermagem prescricaoEnfermagem, Boolean indPendente);
+
+	List<EpeDiagnostico> pesquisarDiagnosticosPorAtendimento(String filtro, Integer atdSeq);
+
+	List<EpeHistoricoPrescDiagnosticos> pesquisarHistoricoDiagnostico(Integer atendimentoSeq, List<DominioSituacaoHistPrescDiagnosticos> listSituacao, EpeDiagnostico diagnostico,	RapServidoresVO profissional, Date dataInicial, Date dataFinal);
+
 }

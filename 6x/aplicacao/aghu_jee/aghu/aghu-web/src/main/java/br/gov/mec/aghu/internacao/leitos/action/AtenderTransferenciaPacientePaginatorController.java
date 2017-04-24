@@ -17,6 +17,7 @@ import br.gov.mec.aghu.internacao.cadastrosbasicos.business.ICadastrosBasicosInt
 import br.gov.mec.aghu.internacao.leitos.business.ILeitosInternacaoFacade;
 import br.gov.mec.aghu.internacao.solicitacao.business.ISolicitacaoInternacaoFacade;
 import br.gov.mec.aghu.internacao.transferir.action.TransferirPacienteController;
+import br.gov.mec.aghu.internacao.transferir.business.ITransferirPacienteFacade;
 import br.gov.mec.aghu.internacao.vo.ServidoresCRMVO;
 import br.gov.mec.aghu.internacao.vo.SolicitacaoTransferenciaPacienteVO;
 import br.gov.mec.aghu.model.AghEspecialidades;
@@ -54,6 +55,9 @@ public class AtenderTransferenciaPacientePaginatorController extends ActionContr
 	
 	@EJB
 	private ICadastrosBasicosInternacaoFacade cadastrosBasicosInternacaoFacade;
+	
+	@EJB
+	private ITransferirPacienteFacade transferirPacienteFacade;
 	
 	@Inject
 	private TransferirPacienteController transferirPacienteController;
@@ -187,17 +191,33 @@ public class AtenderTransferenciaPacientePaginatorController extends ActionContr
 		return PAGE_VERIFICAR_CARACTERISTICAS_PEDIDO_INTERNACAO;
 	}	
 	
-	public String atenderVisualizar(){
+	public String atenderVisualizar(Integer internacaoSeq){
+		if(verificarAltaAdm(internacaoSeq)){
+			return null;
+		}
 		return PAGE_ATENDER_TRANSFERENCIA_PACIENTE_CRUD;
 	}
 	
 	public String transferir(Integer internacaoSeq, String leitoID) {
+		
+		if(verificarAltaAdm(internacaoSeq)){
+			return null;
+		}
 		transferirPacienteController.setInternacaoSeq(internacaoSeq);
 		transferirPacienteController.setLeitoConcedido(leitoID);
 		transferirPacienteController.setCameFrom(ATENDER_TRANSFERENCIA_PACIENTE_LIST);
 		transferirPacienteController.setValidar(true);
 		transferirPacienteController.inicio();
 		return PAGE_TRANSFERIR_PACIENTE_CRUD;
+	}
+
+	private boolean verificarAltaAdm(Integer internacaoSeq) {
+		// Não possui alta administrativa e Tipo alta médica não permite permanência com alta
+		if (transferirPacienteFacade.validarPacienteNaoPossuiAltaAdministrativa(internacaoSeq) && !transferirPacienteFacade.validarTipoAltaMedicaPermitePacienteComAlta(internacaoSeq)){
+			apresentarMsgNegocio(Severity.ERROR, "PACIENTE_POSSUI_ALTA_ADMINISTRATIVA");
+			return true;
+		}
+		return false;
 	}	
 	
 	//GETTERS E SETTERS

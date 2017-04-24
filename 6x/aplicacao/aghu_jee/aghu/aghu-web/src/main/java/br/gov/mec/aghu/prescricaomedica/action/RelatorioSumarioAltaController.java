@@ -421,12 +421,7 @@ public class RelatorioSumarioAltaController extends ActionReport {
 			ordemTela++;
 		}
 	}
-	
-	protected void apresentarExcecaoNegocio(BaseException e) {
-		// Apenas apresenta a mensagem de erro negocial para o cliente
-		apresentarMsgNegocio(Severity.ERROR, "ERRO_GERAR_RELATORIO");
-	}
-	
+		
 	/**
 	 *  Limpa todos os parâmetros/atributos do relatório
 	 */

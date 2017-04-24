@@ -877,4 +877,8 @@ public interface ICascaFacade extends Serializable {
 	public PalavraChaveMenu obterPorChavePrimaria(PalavraChaveMenu palavra);
 
 	String getBaseUrlDocumentacao();
+
+	List<Usuario> pesquisarUsuariosPatologista(Integer firstResult,
+			Integer maxResult, String orderProperty, boolean asc,
+			String nomeOuLogin) throws ApplicationBusinessException;
 }

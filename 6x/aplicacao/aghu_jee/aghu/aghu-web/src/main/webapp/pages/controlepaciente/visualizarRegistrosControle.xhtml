@@ -43,7 +43,7 @@
               	controller="#{registrosPacienteController}" 
               	value="#{registrosPacienteController.paciente}" 
               	readonly="#{registrosPacienteController.somenteLeitura}" 
-              	descricaoLabel="nome" 
+              	descricaoLabel="nomeSocialNomeCivil" 
               	posDeleteAction="limparDadosPacienteLeito" 
               	render="leitoPanel">
               	 
@@ -51,10 +51,23 @@
                   <h:outputText value="#{item.prontuario}"/>
                 </p:column>  
                 <p:column> 
-                  <h:outputText value="#{item.nome}"/>
+					<h:outputText value="#{not empty item.nomeSocial ? item.nomeSocial : item.nome}" />
+		            	
+					<h:graphicImage 
+						title="#{messages.LABEL_NOME_CIVIL}: #{item.nome}"  
+						value="/resources/img/icons/nome-civil-paciente.png" 
+						style="border:0px; float:right;" 
+						rendered="#{not empty item.nomeSocial}" />
                 </p:column> 
               </mec:suggestionBox> 
+			  <h:graphicImage 
+				title="#{messages.LABEL_NOME_CIVIL}: #{item.nome}"  
+				value="/resources/img/icons/nome-civil-paciente.png" 
+				rendered="#{(not empty item.nomeSocial) and (registrosPacienteController.somenteLeitura)}" 
+				style="float: left; padding: 3px; margin-top: 20px; margin-right: 10px; " />
             </p:outputPanel>  
+            
+            
             <p:outputPanel id="leitoPanel" layout="inline" rendered="#{!registrosPacienteController.isFromAmbulatorio()}" > 
               <mec:suggestionBox 
               	id="suggestionLeito" 

@@ -83,10 +83,12 @@ import br.gov.mec.aghu.model.RapPessoasFisicas;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.model.RapServidoresId;
 import br.gov.mec.aghu.paciente.business.IPacienteFacade;
+import br.gov.mec.aghu.paciente.dao.AghSamisDAO;
 import br.gov.mec.aghu.paciente.dao.AipAlturaPacientesDAO;
 import br.gov.mec.aghu.paciente.dao.AipCidadesDAO;
 import br.gov.mec.aghu.paciente.dao.AipConveniosSaudePacienteDAO;
 import br.gov.mec.aghu.paciente.dao.AipEnderecosPacientesDAO;
+import br.gov.mec.aghu.paciente.dao.AipEtniaDAO;
 import br.gov.mec.aghu.paciente.dao.AipFonemaNomeSocialPacientesDAO;
 import br.gov.mec.aghu.paciente.dao.AipFonemaPacientesDAO;
 import br.gov.mec.aghu.paciente.dao.AipFonemasDAO;
@@ -96,6 +98,7 @@ import br.gov.mec.aghu.paciente.dao.AipOcupacoesDAO;
 import br.gov.mec.aghu.paciente.dao.AipPacienteProntuarioDAO;
 import br.gov.mec.aghu.paciente.dao.AipPacienteProntuarioJNDAO;
 import br.gov.mec.aghu.paciente.dao.AipPacientesDAO;
+import br.gov.mec.aghu.paciente.dao.AipPacientesDadosCnsDAO;
 import br.gov.mec.aghu.paciente.dao.AipPacientesJnDAO;
 import br.gov.mec.aghu.paciente.dao.AipPosicaoFonemasMaePacienteDAO;
 import br.gov.mec.aghu.paciente.dao.AipPosicaoFonemasNomeSocialPacientesDAO;
@@ -165,6 +168,9 @@ public class CadastroPacienteRN extends BaseBusiness {
 	
 	@Inject
 	private AipUfsDAO aipUfsDAO;
+	
+	@Inject
+	private AipEtniaDAO aipEtniaDAO;
 	
 	@EJB
 	private IInternacaoFacade internacaoFacade;
@@ -252,6 +258,11 @@ public class CadastroPacienteRN extends BaseBusiness {
 	
 	@Inject AipConveniosSaudePacienteDAO aipConveniosSaudePacienteDAO;
 	
+	@Inject
+	private AghSamisDAO aghSamisDAO;
+	
+	@Inject
+	private AipPacientesDadosCnsDAO aipPacientesDadosCnsDAO;
 	/**
 	 * 
 	 */
@@ -262,7 +273,7 @@ public class CadastroPacienteRN extends BaseBusiness {
 		AIP_00211, AIP_00212, AIP_00213, AIP_00214, AIP_00215, AIP_00217, AIP_00207, AIP_00206, AIP_00013, AIP_00120, AIP_00192, 
 		SEXO_DETERMINANTE_DIFERENTE, SEXO_OCUPACAO_DIFERENTE, ERRO_NAO_ESPERADO_VERIFICACAO_SEXO_QUARTOS, ERRO_LIBERACAO_PRONTUARIO, 
 		VIOLACAO_FK_PACIENTE, PRONTUARIO_EXISTENTE, CODIGO_EXISTENTE, ERRO_EXCLUSAO_PACIENTE, AIP_00351, PRONTUARIO_NULO, MODULO_INATIVO,
-		DDD_RESIDENCIAL_REQUIRED, TELEFONE_RESIDENCIAL_REQUIRED;
+		DDD_RESIDENCIAL_REQUIRED, TELEFONE_RESIDENCIAL_REQUIRED, UNIQUE_ORIGEM_PRONTUARIO_PADRAO;
 	}
 
 	// Salva o nome do paciente e de sua mãe fonetizados (sem acentos)
@@ -309,6 +320,12 @@ public class CadastroPacienteRN extends BaseBusiness {
 		this.getAipPacientesDAO().persistir(paciente);
 	}
 
+	public void inserirPacienteMigracaoPaciente(AipPacientes paciente){
+		this.getAipPacientesDAO().persistir(paciente);
+		this.getAipPacientesDAO().flush();
+	}
+	
+	
 	/**
 	 * Método que chama as implementações das triggers responsáveis pela
 	 * atualização de um registro da tabela AIP_PACIENTES
@@ -1873,63 +1890,23 @@ public class CadastroPacienteRN extends BaseBusiness {
 			paciente.setVolumes((Short) retornoConsulta[5]);
 			paciente.setDtIdentificacao((Date) retornoConsulta[6]);
 
-			if (retornoConsulta[7] != null && retornoConsulta[8] != null) {
-				RapServidoresId servidorCadastroId = new RapServidoresId();
-				RapServidores servidorCadastro = new RapServidores();
-				servidorCadastro.setId(servidorCadastroId);
-				servidorCadastroId.setMatricula((Integer) retornoConsulta[7]);
-				servidorCadastroId.setVinCodigo((Short) retornoConsulta[8]);
-				paciente.setRapServidoresCadastro(this
-						.getRegistroColaboradorFacade().obterServidor(
-								servidorCadastro));
-			} else {
-				paciente.setRapServidoresCadastro(null);
-			}
+			populaServidor(retornoConsulta, paciente);
 
-			if (retornoConsulta[9] != null && retornoConsulta[10] != null) {
-				RapServidoresId servidorRecadastroId = new RapServidoresId();
-				RapServidores servidorRecadastro = new RapServidores();
-				servidorRecadastro.setId(servidorRecadastroId);
-				servidorRecadastroId.setMatricula((Integer) retornoConsulta[9]);
-				servidorRecadastroId.setVinCodigo((Short) retornoConsulta[10]);
-				paciente.setRapServidoresRecadastro(this
-						.getRegistroColaboradorFacade().obterServidor(
-								servidorRecadastro));
-			} else {
-				paciente.setRapServidoresRecadastro(null);
-			}
+			populaServidorRecadastro(retornoConsulta, paciente);
 
 			ICentroCustoFacade centroCustoFacade = this.getCentroCustoFacade();
 
-			if (retornoConsulta[11] != null) {
-				paciente.setFccCentroCustosCadastro(centroCustoFacade
-						.obterCentroCustoPorChavePrimaria((Integer) retornoConsulta[11]));
-			}
+			populaCentroCustos(retornoConsulta, paciente, centroCustoFacade);
 
-			if (retornoConsulta[12] != null) {
-				paciente.setFccCentroCustosRecadastro(centroCustoFacade
-						.obterCentroCustoPorChavePrimaria((Integer) retornoConsulta[12]));
-			}
+			populaCentroCustosRecadastro(retornoConsulta, paciente, centroCustoFacade);	
 
 			paciente.setSexoBiologico((DominioSexo) retornoConsulta[13]);
 			paciente.setIndPacAgfa((DominioSimNao) retornoConsulta[14]);
 			paciente.setNomeMae((String) retornoConsulta[15]);
-			if (retornoConsulta[16] != null) {
-				paciente.setAipCidades(this.getAipCidadesDAO()
-						.obterPorChavePrimaria((Integer) retornoConsulta[16]));
-			}
-			if (retornoConsulta[17] != null) {
-				paciente.setAipNacionalidades(this.getAipNacionalidadesDAO()
-						.obterPorChavePrimaria((Integer) retornoConsulta[17]));
-			}
-			if (retornoConsulta[18] != null) {
-				paciente.setAipOcupacoes(this.getAipOcupacoesDAO()
-						.obterPorChavePrimaria((Integer) retornoConsulta[18]));
-			}
-			if (retornoConsulta[19] != null) {
-				paciente.setAipUfs(this.getAipUfsDAO().obterPorChavePrimaria(
-						(String) retornoConsulta[19]));
-			}
+			populaCidade(retornoConsulta, paciente);
+			populaNacinalidade(retornoConsulta, paciente);
+			populaOcupacoes(retornoConsulta, paciente);
+			populaUFs(retornoConsulta, paciente);
 
 			paciente.setCor((DominioCor) retornoConsulta[20]);
 			paciente.setSexo((DominioSexo) retornoConsulta[21]);
@@ -1950,9 +1927,90 @@ public class CadastroPacienteRN extends BaseBusiness {
 			paciente.setNumeroPis((Long) retornoConsulta[36]);
 			paciente.setIndPacAgfa((DominioSimNao) retornoConsulta[37]);
 			paciente.setIndGeraProntuario((DominioSimNao) retornoConsulta[38]);
+			paciente.setNomeSocial((String) retornoConsulta[39]);
+			populaEtnia(retornoConsulta, paciente);
 		}
 
 		return paciente;
+	}
+
+	private void populaEtnia(Object[] retornoConsulta, AipPacientes paciente) {
+		if (retornoConsulta[40] != null) {
+			paciente.setEtnia(this.getAipEtniaDAO().obterPorChavePrimaria(
+					(Integer) retornoConsulta[40]));
+		}
+	}
+
+	private void populaUFs(Object[] retornoConsulta, AipPacientes paciente) {
+		if (retornoConsulta[19] != null) {
+			paciente.setAipUfs(this.getAipUfsDAO().obterPorChavePrimaria(
+					(String) retornoConsulta[19]));
+		}
+	}
+
+	private void populaOcupacoes(Object[] retornoConsulta, AipPacientes paciente) {
+		if (retornoConsulta[18] != null) {
+			paciente.setAipOcupacoes(this.getAipOcupacoesDAO()
+					.obterPorChavePrimaria((Integer) retornoConsulta[18]));
+		}
+	}
+
+	private void populaNacinalidade(Object[] retornoConsulta, AipPacientes paciente) {
+		if (retornoConsulta[17] != null) {
+			paciente.setAipNacionalidades(this.getAipNacionalidadesDAO()
+					.obterPorChavePrimaria((Integer) retornoConsulta[17]));
+		}
+	}
+
+	private void populaCidade(Object[] retornoConsulta, AipPacientes paciente) {
+		if (retornoConsulta[16] != null) {
+			paciente.setAipCidades(this.getAipCidadesDAO()
+					.obterPorChavePrimaria((Integer) retornoConsulta[16]));
+		}
+	}
+
+	private void populaCentroCustosRecadastro(Object[] retornoConsulta, AipPacientes paciente, ICentroCustoFacade centroCustoFacade) {
+		if (retornoConsulta[12] != null) {
+			paciente.setFccCentroCustosRecadastro(centroCustoFacade
+					.obterCentroCustoPorChavePrimaria((Integer) retornoConsulta[12]));
+		}
+	}
+
+	private void populaCentroCustos(Object[] retornoConsulta, AipPacientes paciente, ICentroCustoFacade centroCustoFacade) {
+		if (retornoConsulta[11] != null) {
+			paciente.setFccCentroCustosCadastro(centroCustoFacade
+					.obterCentroCustoPorChavePrimaria((Integer) retornoConsulta[11]));
+		}
+	}
+
+	private void populaServidorRecadastro(Object[] retornoConsulta, AipPacientes paciente) {
+		if (retornoConsulta[9] != null && retornoConsulta[10] != null) {
+			RapServidoresId servidorRecadastroId = new RapServidoresId();
+			RapServidores servidorRecadastro = new RapServidores();
+			servidorRecadastro.setId(servidorRecadastroId);
+			servidorRecadastroId.setMatricula((Integer) retornoConsulta[9]);
+			servidorRecadastroId.setVinCodigo((Short) retornoConsulta[10]);
+			paciente.setRapServidoresRecadastro(this
+					.getRegistroColaboradorFacade().obterServidor(
+							servidorRecadastro));
+		} else {
+			paciente.setRapServidoresRecadastro(null);
+		}
+	}
+
+	private void populaServidor(Object[] retornoConsulta, AipPacientes paciente) {
+		if (retornoConsulta[7] != null && retornoConsulta[8] != null) {
+			RapServidoresId servidorCadastroId = new RapServidoresId();
+			RapServidores servidorCadastro = new RapServidores();
+			servidorCadastro.setId(servidorCadastroId);
+			servidorCadastroId.setMatricula((Integer) retornoConsulta[7]);
+			servidorCadastroId.setVinCodigo((Short) retornoConsulta[8]);
+			paciente.setRapServidoresCadastro(this
+					.getRegistroColaboradorFacade().obterServidor(
+							servidorCadastro));
+		} else {
+			paciente.setRapServidoresCadastro(null);
+		}
 	}
 
 	/**
@@ -1988,55 +2046,107 @@ public class CadastroPacienteRN extends BaseBusiness {
 				|| (pacienteAtual.getAipUfs() != null && !pacienteAtual
 						.getAipUfs().equals(pacienteAnterior.getAipUfs()))
 				|| !Objects.equals(pacienteAtual.getCor(),
-						pacienteAnterior.getCor())
-				|| !Objects.equals(pacienteAtual.getSexo(),
-						pacienteAnterior.getSexo())
-				|| !Objects.equals(pacienteAtual.getGrauInstrucao(),
-						pacienteAnterior.getGrauInstrucao())
-				|| !Objects.equals(pacienteAtual.getNomePai(),
-						pacienteAnterior.getNomePai())
-				|| !Objects.equals(pacienteAtual.getNaturalidade(),
-						pacienteAnterior.getNaturalidade())
-				|| !Objects.equals(pacienteAtual.getDddFoneResidencial(),
-						pacienteAnterior.getDddFoneResidencial())
-				|| !Objects.equals(pacienteAtual.getFoneResidencial(),
-						pacienteAnterior.getFoneResidencial())
-				|| !Objects.equals(pacienteAtual.getDddFoneRecado(),
-						pacienteAnterior.getDddFoneRecado())
-				|| !Objects.equals(pacienteAtual.getFoneRecado(),
-						pacienteAnterior.getFoneRecado())
-				|| !Objects.equals(pacienteAtual.getEstadoCivil(),
-						pacienteAnterior.getEstadoCivil())
-				|| !Objects.equals(pacienteAtual.getCpf(),
-						pacienteAnterior.getCpf())
-				|| !Objects.equals(pacienteAtual.getRg(),
-						pacienteAnterior.getRg())
-				|| !Objects.equals(pacienteAtual.getOrgaoEmisRg(),
-						pacienteAnterior.getOrgaoEmisRg())
-				|| !Objects.equals(pacienteAtual.getObservacao(),
-						pacienteAnterior.getObservacao())
-				|| !Objects.equals(pacienteAtual.getRegNascimento(),
-						pacienteAnterior.getRegNascimento())
-				|| !Objects.equals(pacienteAtual.getNroCartaoSaude(),
-						pacienteAnterior.getNroCartaoSaude())
-				|| !Objects.equals(pacienteAtual.getNumeroPis(),
-						pacienteAnterior.getNumeroPis())
-				|| !Objects.equals(pacienteAtual.getSexoBiologico(),
-						pacienteAnterior.getSexoBiologico())
-				|| !Objects.equals(pacienteAtual.getIndPacAgfa(),
-						pacienteAnterior.getIndPacAgfa())) {
-
-			return true;
-
+				pacienteAnterior.getCor())
+		        || !Objects.equals(pacienteAtual.getSexo(),
+				pacienteAnterior.getSexo())
+		        || !Objects.equals(pacienteAtual.getGrauInstrucao(),
+				pacienteAnterior.getGrauInstrucao())
+		        || !Objects.equals(pacienteAtual.getNomePai(),
+				pacienteAnterior.getNomePai())		
+		        || !Objects.equals(pacienteAtual.getDddFoneResidencial(),
+				pacienteAnterior.getDddFoneResidencial())
+		        || !Objects.equals(pacienteAtual.getFoneResidencial(),
+				pacienteAnterior.getFoneResidencial())
+		        || !Objects.equals(pacienteAtual.getDddFoneRecado(),
+				pacienteAnterior.getDddFoneRecado())
+		        || !Objects.equals(pacienteAtual.getFoneRecado(),
+				pacienteAnterior.getFoneRecado())
+		        || !Objects.equals(pacienteAtual.getEstadoCivil(),
+				pacienteAnterior.getEstadoCivil())
+		        || !Objects.equals(pacienteAtual.getCpf(),
+				pacienteAnterior.getCpf())
+		        || !Objects.equals(pacienteAtual.getRg(),
+				pacienteAnterior.getRg())
+		        || !Objects.equals(pacienteAtual.getOrgaoEmisRg(),
+				pacienteAnterior.getOrgaoEmisRg())
+		        || !Objects.equals(pacienteAtual.getObservacao(),
+				pacienteAnterior.getObservacao())
+		        || !Objects.equals(pacienteAtual.getRegNascimento(),
+				pacienteAnterior.getRegNascimento())
+		        || !Objects.equals(pacienteAtual.getNroCartaoSaude(),
+				pacienteAnterior.getNroCartaoSaude())
+		        || !Objects.equals(pacienteAtual.getNumeroPis(),
+				pacienteAnterior.getNumeroPis())
+		        || !Objects.equals(pacienteAtual.getSexoBiologico(),
+				pacienteAnterior.getSexoBiologico())
+		        || !Objects.equals(pacienteAtual.getIndPacAgfa(),
+				pacienteAnterior.getIndPacAgfa())
+		        || (pacienteAtual.getDtIdentificacao() != null && !pacienteAtual
+		        .getDtIdentificacao().equals(
+				pacienteAnterior.getDtIdentificacao()))
+		        || (pacienteAtual.getEtnia()!= null && !pacienteAtual
+		        .getEtnia().equals(
+				pacienteAnterior.getEtnia()))
+		        || (pacienteAtual.getNomeSocial() != null && !pacienteAtual
+		        .getNomeSocial().equals(
+				pacienteAnterior.getNomeSocial()))
+		        || (pacienteAtual.getNumeroCNH() != null && !pacienteAtual
+		        .getNumeroCNH().equals(
+				pacienteAnterior.getNumeroCNH()))
+		        || (pacienteAtual.getDataValidadeCNH() != null && !pacienteAtual
+		        .getDataValidadeCNH().equals(
+				pacienteAnterior.getDataValidadeCNH()))){
+					return true;
 		}
-
 		if (isEnderecosModificados(pacienteAtual)) {
 			return true;
 		}
 
+		if(isDadosCnsModificados(pacienteAtual)){
+			return true;
+		}
 		return false;
 	}
 
+	private boolean isDadosCnsModificados(AipPacientes paciente) {
+		Long quantidadeDadosCns = aipEnderecosPacientesDAO.buscaQuantidadeEnderecosPaciente(paciente);
+
+		if (quantidadeDadosCns == 0 && paciente.getAipPacientesDadosCns() != null) {
+			return true;
+		}
+
+		boolean retorno = false;
+		AipPacientesDadosCns dadosCnsBanco = getAipPacientesDadosCnsDAO().obterPacientesDadosCns(paciente.getCodigo());
+		AipPacientesDadosCns dadosCnsAtual = paciente.getAipPacientesDadosCns();
+		
+		retorno = this.isDadosCnsModificados(dadosCnsBanco, dadosCnsAtual);
+
+		return retorno;
+	}
+	public boolean isDadosCnsModificados(AipPacientesDadosCns dadosCnsBanco,
+			AipPacientesDadosCns dadosCnsAtual) {
+		boolean retorno = false;
+		if (dadosCnsBanco == null || 
+				!Objects.equals(dadosCnsAtual.getAipOrgaosEmissor(),dadosCnsBanco.getAipOrgaosEmissor()) || 
+				!Objects.equals(dadosCnsAtual.getAipUf(),dadosCnsBanco.getAipUf()) || 
+				!Objects.equals(dadosCnsAtual.getMotivoCadastro(),dadosCnsBanco.getMotivoCadastro()) || 
+				!Objects.equals(dadosCnsAtual.getDocReferencia(),dadosCnsBanco.getDocReferencia()) || 
+				!Objects.equals(dadosCnsAtual.getCartaoNacionalSaudeMae(),dadosCnsBanco.getCartaoNacionalSaudeMae()) || 
+				!Objects.equals(dadosCnsAtual.getDataEntradaBr(),dadosCnsBanco.getDataEntradaBr()) || 
+				!Objects.equals(dadosCnsAtual.getDataNaturalizacao(),dadosCnsBanco.getDataNaturalizacao()) || 
+				!Objects.equals(dadosCnsAtual.getPortariaNatural(),dadosCnsBanco.getPortariaNatural()) || 
+				!Objects.equals(dadosCnsAtual.getNomeCartorio(),dadosCnsBanco.getNomeCartorio()) || 
+				!Objects.equals(dadosCnsAtual.getLivro(),dadosCnsBanco.getLivro()) || 
+				!Objects.equals(dadosCnsAtual.getFolhas(),dadosCnsBanco.getFolhas()) || 
+				!Objects.equals(dadosCnsAtual.getTermo(),dadosCnsBanco.getTermo()) || 
+				!Objects.equals(dadosCnsAtual.getDataEmissao(),dadosCnsBanco.getDataEmissao()) || 
+				!Objects.equals(dadosCnsAtual.getDataEmissaoDocto(),dadosCnsBanco.getDataEmissaoDocto()) || 
+				!Objects.equals(dadosCnsAtual.getNumeroDn(),dadosCnsBanco.getNumeroDn()) || 
+				!Objects.equals(dadosCnsAtual.getTipoCertidao(),dadosCnsBanco.getTipoCertidao())) {
+			retorno = true;
+		}
+		return retorno;
+	}
 	private boolean isEnderecosModificados(AipPacientes paciente) {
 		Long quantidadeEnderecosPacienteBanco = aipEnderecosPacientesDAO.buscaQuantidadeEnderecosPaciente(paciente);
 
@@ -2053,7 +2163,6 @@ public class CadastroPacienteRN extends BaseBusiness {
 
 		return retorno;
 	}
-
 	public boolean isEnderecoModificado(AipEnderecosPacientes enderecoAtual,
 			AipEnderecosPacientes enderecoBanco) {
 		boolean retorno = false;
@@ -2349,12 +2458,12 @@ public class CadastroPacienteRN extends BaseBusiness {
 	private AipFonemaPacientes incluirFonemaPaciente(AipPacientes aipPaciente,
 			AipFonemas aipFonemas) {
 		AipFonemaPacientes aipFonemaPacientes = new AipFonemaPacientes();
-
+		
 		aipFonemaPacientes.setAipPaciente(aipPaciente);
 		aipFonemaPacientes.setAipFonemas(aipFonemas);
 
-		this.getAipFonemaPacientesDAO().persistir(aipFonemaPacientes);
 
+		this.getAipFonemaPacientesDAO().persistir(aipFonemaPacientes);
 		return aipFonemaPacientes;
 	}
 
@@ -2630,6 +2739,10 @@ public class CadastroPacienteRN extends BaseBusiness {
 		return aipFonemaNomeSocialPacientesDAO;
 	}
 	
+	public AghSamisDAO getAghSamisDAO() {
+		return aghSamisDAO;
+	}
+	
 	public List<AipCidades> ordenarCidades(List<AipCidades> listCidades, Integer cidadeHu, String siglaUfHu){
 		List<AipCidades> resultUfHu = new ArrayList<AipCidades>();
 		List<AipCidades> result = new ArrayList<AipCidades>();
@@ -2661,5 +2774,24 @@ public class CadastroPacienteRN extends BaseBusiness {
 		result.addAll(listCidadesAux);
 		return result;
 	}
+	
+	public void existeOrigemPadrao(Short codigo) throws ApplicationBusinessException {
+		if (this.aghSamisDAO.existeOrigemPadrão(codigo)){
+			throw new ApplicationBusinessException(CadastroPacienteRNExceptionCode.UNIQUE_ORIGEM_PRONTUARIO_PADRAO);
+		}
+	}
+	
+	protected AipPacientesDadosCnsDAO getAipPacientesDadosCnsDAO() {
+		return aipPacientesDadosCnsDAO;
+	}
+
+	protected AipEtniaDAO getAipEtniaDAO() {
+		return aipEtniaDAO;
+	}
+
+	protected void setAipEtniaDAO(AipEtniaDAO aipEtniaDAO) {
+		this.aipEtniaDAO = aipEtniaDAO;
+	}
+	
 	
 }

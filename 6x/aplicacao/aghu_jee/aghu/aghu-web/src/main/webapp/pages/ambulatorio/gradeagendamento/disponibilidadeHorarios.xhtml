@@ -41,7 +41,7 @@
 									suggestionAction="obterEspecialidade" 
 									descricaoInput="sigla"
 									descricaoLabel="nomeEspecialidade"
-									maxlength="60" width="500" 
+									maxlength="60" width="500" cache="false"
 						controller="#{disponibilidadeHorariosPaginatorController}"
 						value="#{disponibilidadeHorariosPaginatorController.especialidade}">
               <p:column> 
@@ -66,7 +66,7 @@
 						descricaoInput="seq" descricaoLabel="nome" var="item" 
 						suggestionAction="obterEquipe" width="600" id="equipe"
 						controller="#{disponibilidadeHorariosPaginatorController}"
-						render="panelProfissional"
+						render="panelProfissional" cache="false"
 						value="#{disponibilidadeHorariosPaginatorController.equipe}">
               <p:column> 
                 <f:facet name="header"> 
@@ -89,7 +89,7 @@
 						label="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_PROFISSIONAL}"
 						title="#{messages.TITLE_PESQUISAR_PACIENTES_AGENDADOS_PROFISSIONAL}"
 						descricaoInput="id.matricula" size="10" maxlength="10" width="400"
-						descricaoLabel="pessoaFisica.nome" var="item"
+						descricaoLabel="pessoaFisica.nome" var="item" cache="false"
 						suggestionAction="obterProfissionaisPorEquipe" id="profissional"
 						controller="#{disponibilidadeHorariosPaginatorController}"
 						value="#{disponibilidadeHorariosPaginatorController.profissional}">
@@ -110,6 +110,12 @@
                   <b>#{messages.LABEL_NOME}</b> 
                 </f:facet>  
                 <h:outputText value="#{item.pessoaFisica.nome}"/> 
+              </p:column> 
+              <p:column> 
+                <f:facet name="header"> 
+                  <b>#{messages.LABEL_SITUACAO}</b> 
+                </f:facet>  
+                <h:outputText value="#{item.situacaoServidorFormat}"/> 
               </p:column> 
             </mec:suggestionBox> 
             </p:outputPanel>

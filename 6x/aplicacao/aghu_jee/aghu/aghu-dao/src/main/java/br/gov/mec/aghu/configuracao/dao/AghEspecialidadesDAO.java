@@ -189,14 +189,22 @@ public class AghEspecialidadesDAO extends br.gov.mec.aghu.core.persistence.dao.B
 	}
 	
 
+	public List<AghEspecialidades> pesquisarEspecialidadesAtivasPorSigla(String parametro, List<Integer> listIdsEspe) {
+		DetachedCriteria criteria = this.montarCriteriaAtivaParaSigla(parametro, listIdsEspe);
+		return this.executeCriteria(criteria);
+	}
+
 	public List<AghEspecialidades> pesquisarEspecialidadesAtivasPorSigla(String parametro) {
-		DetachedCriteria criteria = this.montarCriteriaAtivaParaSigla(parametro);
+		return pesquisarEspecialidadesAtivasPorSigla(parametro, null);
+	}
+
+	public List<AghEspecialidades> pesquisarEspecialidadesAtivasPorNome(String parametro, List<Integer> listIdsEspe) {
+		DetachedCriteria criteria = this.montarCriteriaAtivaParaNome(parametro, listIdsEspe);
 		return this.executeCriteria(criteria);
 	}
 
 	public List<AghEspecialidades> pesquisarEspecialidadesAtivasPorNome(String parametro) {
-		DetachedCriteria criteria = this.montarCriteriaAtivaParaNome(parametro);
-		return this.executeCriteria(criteria);
+		return pesquisarEspecialidadesAtivasPorNome(parametro, null);
 	}
 
 	public List<AghEspecialidades> pesquisarEspecialidadesAtivasPorSiglaOrigemSumario(String parametro, Integer atdSeq, RapServidores servidorLogado) {
@@ -711,12 +719,17 @@ public class AghEspecialidadesDAO extends br.gov.mec.aghu.core.persistence.dao.B
 		return criteria;
 	}
 
-	
 	private DetachedCriteria montarCriteriaAtivaParaSigla(String parametro) {
+		return montarCriteriaAtivaParaSigla(parametro, null);
+	}
+	private DetachedCriteria montarCriteriaAtivaParaSigla(String parametro, List<Integer> listIdsEspe) {
 		String sigla = StringUtils.trimToNull(parametro);
 		DetachedCriteria criteria = DetachedCriteria.forClass(AghEspecialidades.class);
 		if (StringUtils.isNotEmpty(sigla)) {
 			criteria.add(Restrictions.ilike(AghEspecialidades.Fields.SIGLA.toString(), sigla, MatchMode.EXACT));
+		}
+		if(listIdsEspe != null && !listIdsEspe.isEmpty()){
+			criteria.add(Restrictions.in(AghEspecialidades.Fields.SEQ.toString(), listIdsEspe));
 		}
 		criteria.add(Restrictions.eq(AghEspecialidades.Fields.INDSITUACAO.toString(), DominioSituacao.A));
 		criteria.addOrder(Order.asc(AghEspecialidades.Fields.SIGLA.toString()));
@@ -724,10 +737,17 @@ public class AghEspecialidadesDAO extends br.gov.mec.aghu.core.persistence.dao.B
 	}
 
 	private DetachedCriteria montarCriteriaAtivaParaNome(String parametro) {
+		return montarCriteriaAtivaParaNome(parametro, null);
+	}
+	
+	private DetachedCriteria montarCriteriaAtivaParaNome(String parametro, List<Integer> listIdsEspe) {
 		String nome = StringUtils.trimToNull(parametro);
 		DetachedCriteria criteria = DetachedCriteria.forClass(AghEspecialidades.class);
 		if (StringUtils.isNotEmpty(nome)) {
 			criteria.add(Restrictions.ilike(AghEspecialidades.Fields.NOME_ESPECIALIDADE.toString(), nome, MatchMode.ANYWHERE));
+		}
+		if(listIdsEspe != null && !listIdsEspe.isEmpty()){
+			criteria.add(Restrictions.in(AghEspecialidades.Fields.SEQ.toString(), listIdsEspe));
 		}
 		criteria.add(Restrictions.eq(AghEspecialidades.Fields.INDSITUACAO.toString(), DominioSituacao.A));
 		criteria.addOrder(Order.asc(AghEspecialidades.Fields.SIGLA.toString()));

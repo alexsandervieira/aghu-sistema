@@ -174,7 +174,7 @@ public class LaudoSamis extends LaudoMascara {
 		horizontalList.newRow(); // Nova linha
 	}
 
-	public void executar() throws IOException {
+	public void executar(Boolean consideraAlinhamentoVertical) throws IOException {
 
 		Collections.sort(this.getExamesLista().getExames(),
 				new Comparator<ExameVO>() {
@@ -207,7 +207,12 @@ public class LaudoSamis extends LaudoMascara {
 			}
 			super.criarCabecalhoExame(exame);
 			super.criarMensagemResultadoNaoLiberado(exame);
-			super.processaMascaras(exame);
+			
+			if(exame.getMascaras() != null &&
+			   !exame.getMascaras().isEmpty()){
+				super.processaMascaras(exame, consideraAlinhamentoVertical);
+			}
+			
 			super.criarRecebimentoLiberacao(exame);
 			super.criarAssinaturaMedico(exame);
 			super.criarInformacoesColeta(exame);

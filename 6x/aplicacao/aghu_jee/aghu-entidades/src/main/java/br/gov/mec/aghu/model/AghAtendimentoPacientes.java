@@ -42,6 +42,8 @@ public class AghAtendimentoPacientes extends BaseEntityId<AghAtendimentoPaciente
 	private AghAtendimentoPacientesId id;
 	private RapServidores servidor;
 	private Date criadoEm;
+	private Date dtRotinaMedica;
+	private Date dtRotinaEnfermagem;
 	private String nome;
 	private Short numeroRn;
 	private Boolean indRn;
@@ -137,6 +139,26 @@ public class AghAtendimentoPacientes extends BaseEntityId<AghAtendimentoPaciente
 
 	public void setCriadoEm(Date criadoEm) {
 		this.criadoEm = criadoEm;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "DTHR_ROTINA_MEDICA", nullable = true, length = 7)
+	public Date getDtRotinaMedica() {
+		return dtRotinaMedica;
+	}
+
+	public void setDtRotinaMedica(Date dtRotinaMedica) {
+		this.dtRotinaMedica = dtRotinaMedica;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "DTHR_ROTINA_ENFERMAGEM", nullable = true, length = 7)
+	public Date getDtRotinaEnfermagem() {
+		return dtRotinaEnfermagem;
+	}
+
+	public void setDtRotinaEnfermagem(Date dtRotinaEnfermagem) {
+		this.dtRotinaEnfermagem = dtRotinaEnfermagem;
 	}
 
 	@Column(name = "NOME", length = 50)

@@ -98,7 +98,10 @@ public class ManterGradeAgendamentoON extends BaseBusiness {
 	public AacGradeAgendamenConsultas salvar(AacGradeAgendamenConsultas entity, AacGradeAgendamenConsultas oldEntity)
 			throws ApplicationBusinessException {
 		RapServidores servidorLogado = getServidorLogadoFacade().obterServidorLogado();
-		
+		// oldEntity esta desatachado
+		if (entity.getSeq()!=null) { 
+			oldEntity = aacGradeAgendamenConsultasDAO.obterOriginal(entity.getSeq());
+		}
 		if (entity.getSeq() == null) {
 			entity.setExigeProntuario(false);
 			entity.setProgramada(true);
@@ -352,6 +355,13 @@ public class ManterGradeAgendamentoON extends BaseBusiness {
 
 	protected IServidorLogadoFacade getServidorLogadoFacade() {
 		return this.servidorLogadoFacade;
+	}
+
+
+	public void verificaAgendamentosExistentesGrade(
+			AacHorarioGradeConsulta horarioGradeConsulta, AacGradeAgendamenConsultas grade, Date dataInicial, Date dataFinal) throws ApplicationBusinessException {
+		getManterGradeAgendamentoRN().verificaAgendamentosExistentesGrade(horarioGradeConsulta, grade, dataInicial, dataFinal);
+		
 	}
 	
 }

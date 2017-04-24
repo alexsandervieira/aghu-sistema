@@ -18,6 +18,7 @@ import br.gov.mec.aghu.dominio.DominioIndPendenteItemPrescricao;
 import br.gov.mec.aghu.dominio.DominioTipoEmissaoSumario;
 import br.gov.mec.aghu.dominio.DominioValorDataItemSumario;
 import br.gov.mec.aghu.model.AbsSolicitacoesHemoterapicas;
+import br.gov.mec.aghu.model.AghAtendimentoPacientes;
 import br.gov.mec.aghu.model.MpmDataItemSumario;
 import br.gov.mec.aghu.model.MpmDataItemSumarioId;
 import br.gov.mec.aghu.model.MpmItemPrescricaoSumario;
@@ -154,7 +155,7 @@ private MpmSolicitacaoConsultoriaDAO mpmSolicitacaoConsultoriaDAO;
 				}
 			}
 			
-			if(DateUtils.truncate(dataMenorReferencia, Calendar.DAY_OF_MONTH).before(DateUtils.truncate(dataFim, Calendar.DAY_OF_MONTH))) {
+			if(dataMenorReferencia.before(dataFim)) {
 				List<MpmPrescricaoMedica> listaPrescricaoMed = mpmPrescricaoMedicaDAO.listarPrescricoesMedicasComDataImpSumario(seqAtendimento, dataMenorReferencia, dataFim);
 				if(listaPrescricaoMed != null){
 					for (MpmPrescricaoMedica prescricaoMedica : listaPrescricaoMed) {
@@ -188,7 +189,12 @@ private MpmSolicitacaoConsultoriaDAO mpmSolicitacaoConsultoriaDAO;
 				}
 			}
 		}
-		
+		if(seqAtendimento != null && apaSeq != null){			
+			AghAtendimentoPacientes atendimentoPacientes = this.getAghuFacade().obterAtendimentoPaciente(seqAtendimento, apaSeq);
+			if(atendimentoPacientes != null){				
+				atendimentoPacientes.setDtRotinaMedica(new Date());
+			}
+		}
 		mpmPrescricaoMedicaDAO.flush();
 	}
 	

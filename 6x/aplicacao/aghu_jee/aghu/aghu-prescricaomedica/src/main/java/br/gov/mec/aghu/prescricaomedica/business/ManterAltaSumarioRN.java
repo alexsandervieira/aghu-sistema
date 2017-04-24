@@ -15,6 +15,14 @@ import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.ambulatorio.business.IAmbulatorioFacade;
 import br.gov.mec.aghu.business.IAghuFacade;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.dominio.DominioOperacoesJournal;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.utils.DateUtil;
+import br.gov.mec.aghu.core.utils.DateValidator;
 import br.gov.mec.aghu.dominio.DominioControleSumarioAltaPendente;
 import br.gov.mec.aghu.dominio.DominioIndConcluido;
 import br.gov.mec.aghu.dominio.DominioIndTipoAltaSumarios;
@@ -28,6 +36,7 @@ import br.gov.mec.aghu.internacao.business.IInternacaoFacade;
 import br.gov.mec.aghu.model.AghAtendimentoPacientes;
 import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
+import br.gov.mec.aghu.model.AinInternacao;
 import br.gov.mec.aghu.model.MpmAltaMotivo;
 import br.gov.mec.aghu.model.MpmAltaSumario;
 import br.gov.mec.aghu.model.MpmAltaSumarioId;
@@ -45,14 +54,6 @@ import br.gov.mec.aghu.prescricaomedica.dao.MpmSolicitacaoConsultoriaDAO;
 import br.gov.mec.aghu.prescricaomedica.vo.MpmAltaSumarioVO;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.commons.CoreUtil;
-import br.gov.mec.aghu.core.dominio.DominioOperacoesJournal;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
-import br.gov.mec.aghu.core.utils.DateUtil;
-import br.gov.mec.aghu.core.utils.DateValidator;
 
 @SuppressWarnings({"PMD.AghuTooManyMethods", "PMD.ExcessiveClassLength"})
 @Stateless
@@ -188,11 +189,15 @@ public class ManterAltaSumarioRN extends BaseBusiness {
 		MPM_02712, //
 		MPM_02712_1, //
 		MPM_02713, //
+		MPM_02730, //
+		MPM_02730_1, //
 		MPM_03009, //
 		MPM_03010, //
 		MPM_03010_1, //
 		MPM_03011, //
 		MPM_03012, //
+		MPM_03013, //
+		MPM_03013_1, //
 		MPM_03711, //
 		MPM_03735, //
 		RAP_00175, MPM_02642, MPM_00153, MPM_00355, ERRO_ALTERAR_REGISTRO_OBITO_CAUSA_ANTECEDENTE, MPM_03322;
@@ -614,9 +619,14 @@ public class ManterAltaSumarioRN extends BaseBusiness {
 		if (executaValidacao) {
 			AghAtendimentos atendimento = getAghuFacade()
 			.obterAghAtendimentoPorChavePrimaria(novoAtdSeq);
-
+			
 			ManterAltaSumarioRNExceptionCode errorCode = null;
-
+			
+			AinInternacao internacaoPaciente = internacaoFacade.obterInternacaoPorAtendimentoPacCodigo(atendimento.getPacCodigo());
+			if(internacaoPaciente != null){
+				validaDataMovimento(internacaoPaciente, novaDataAlta,errorCode, operacao, tipo);
+			}
+			
 			if (!DominioPacAtendimento.N.equals(atendimento
 					.getIndPacAtendimento())) {
 				
@@ -1284,6 +1294,24 @@ public class ManterAltaSumarioRN extends BaseBusiness {
 			altaSumario.setDthrEstorno(new Date());
 			altaSumario.setServidorEstorno(validaServidorLogado());
 			atualizarAltaSumario(altaSumario, nomeMicrocomputador);
+		}
+	}
+	
+	public void validaDataMovimento(AinInternacao internacaoPaciente, Date novaDataAlta, ManterAltaSumarioRNExceptionCode errorCode, DominioOperacoesJournal operacao, DominioIndTipoAltaSumarios tipo) throws ApplicationBusinessException{
+		//Data de alta médica não pode ser menor que a data do último evento do paciente.
+		if(internacaoPaciente.getDthrUltimoEvento() != null  && novaDataAlta.before(internacaoPaciente.getDthrUltimoEvento())){
+			if (DominioIndTipoAltaSumarios.OBT.equals(tipo)) {
+				errorCode = this.getBusinessExceptionCode(operacao,
+						ManterAltaSumarioRNExceptionCode.MPM_02730_1, // INSERT
+						ManterAltaSumarioRNExceptionCode.MPM_03013_1, // UPDATE
+						null);
+			}else{
+				errorCode = this.getBusinessExceptionCode(operacao,
+						ManterAltaSumarioRNExceptionCode.MPM_02730, // INSERT
+						ManterAltaSumarioRNExceptionCode.MPM_03013, // UPDATE
+						null);
+			}
+			errorCode.throwException();
 		}
 	}
 

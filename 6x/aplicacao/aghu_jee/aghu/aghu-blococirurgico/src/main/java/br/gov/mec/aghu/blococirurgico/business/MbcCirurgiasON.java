@@ -249,7 +249,7 @@ public class MbcCirurgiasON extends BaseBusiness {
 			retorno.setVersion(version);
 			
 			if (vo.getCirurgia().getEspecialidade() != null) {
-				AghEspecialidades especialidade = getAghuFacade().obterEspecialidade(vo.getCirurgia().getEspecialidade().getSeq());
+				AghEspecialidades especialidade = getAghuFacade().obterEspecialidadeNone(vo.getCirurgia().getEspecialidade().getSeq());
 				retorno.setEspecialidade(especialidade);
 			}
 			

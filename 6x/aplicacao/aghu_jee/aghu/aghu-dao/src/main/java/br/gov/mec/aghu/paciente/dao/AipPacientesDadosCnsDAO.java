@@ -4,6 +4,7 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
 
+import br.gov.mec.aghu.model.AipPacientes;
 import br.gov.mec.aghu.model.AipPacientesDadosCns;
 
 public class AipPacientesDadosCnsDAO extends
@@ -25,6 +26,14 @@ public class AipPacientesDadosCnsDAO extends
 		return (AipPacientesDadosCns) this
 				.executeCriteriaUniqueResult(criteria);
 
+	}
+	
+	public Long buscaQuantidadeDadosCns(AipPacientes paciente) {
+		DetachedCriteria criteriaQuantidadeDadosCns = DetachedCriteria.forClass(AipPacientesDadosCns.class);
+
+		criteriaQuantidadeDadosCns.add(Restrictions.eq(AipPacientesDadosCns.Fields.AIP_PACIENTE.toString(), paciente));
+
+		return this.executeCriteriaCount(criteriaQuantidadeDadosCns);
 	}
 
 }

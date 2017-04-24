@@ -448,7 +448,7 @@ public class ProvaCruzadaON extends BaseBusiness {
 			String nomeMicrocomputador,
 			RapServidores servidorLogado, RapServidores responsavel) throws BaseException {
 		Boolean gerouProvaCruzada = true;
-		String itemSolicitacao = null;
+		String itemSolicitacao = parametroFacade.buscarValorTexto(AghuParametrosEnum.P_SITUACAO_A_COLETAR);
 		DominioTipoColeta tipoColeta = null;
 		Boolean coletaNaoAtende = null;
 		

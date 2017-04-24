@@ -188,6 +188,7 @@ public class EtiquetasON extends BaseBusiness {
 		MPM_01237,
 		ERRO_UNIDADE_SEM_CARACT_IMPRIMIR_AMOSTRA,
 		ERRO_IMPRESSORA_ETIQUETA_NAO_ENCONTRADA,
+		MENSAGEM_NAO_PERMITE_REIMPRESSAO,
 		ERRO_IMPRIMIR_ETIQUETA_NUM_AMOSTRA;
 	}
 	
@@ -295,8 +296,8 @@ public class EtiquetasON extends BaseBusiness {
 								&& StringUtils.isNotBlank(amostraItensExames.get(0).getAelItemSolicitacaoExames().getRegiaoAnatomica().getDescricao()))
 						){
 					materialDesc = amostraItensExames.get(0).getAelItemSolicitacaoExames().getRegiaoAnatomica().getDescricao();
-				} else if (amostra.getAnticoagulante() != null){
-					materialDesc = amostra.getAnticoagulante().getDescricao();
+				} else if (amostra.getMateriaisAnalises() != null){
+					materialDesc = amostra.getMateriaisAnalises().getDescricao();
 				}
 				boolean isPatologia = false;
 				if ((unfSeqPato != null && amostra.getUnidadesFuncionais() != null 
@@ -318,17 +319,20 @@ public class EtiquetasON extends BaseBusiness {
 				qtdAmostras += this.appendZpl(impressaoInternacao, existeTipoAmostraInternacaoTodasOrigens, amostraItensExames, acumulaZplPorAmostra, pacProntuario, convenioSaude, pacNome, materialDesc, solicitacaoExame, amostra, local, isSolicitacaoNova,isPatologia);
 			
 		}
-		
-		if (nomeImpressora != null) {
-			// Envia ZPL para impressora Zebra instalada no CUPS.
-			sistemaImpressaoCups.imprimir(acumulaZplPorAmostra.toString(), nomeImpressora);
-		} else {
-			// A impressora não valida se existe uma impressora de etiqueta na unidade, se não existir ela não imprimi a etiqueta.
-			boolean gerarEtiqueta = false;
-			// Envia ZPL para impressora Zebra da unidade para a impressão (para o caso em que não foi cadastrada a impressora para o microcomputador)
-			sistemaImpressaoCups.imprimir(acumulaZplPorAmostra.toString(), unidadeTrabalho, TipoDocumentoImpressao.ETIQUETAS_BARRAS, gerarEtiqueta);
+		/* Quantidade de amostras será 0 
+		 * quando a impressão é da internação e o tipo de amostra for incompatível
+		 */
+		if (qtdAmostras != 0){
+			if (nomeImpressora != null) {
+				// Envia ZPL para impressora Zebra instalada no CUPS.
+				sistemaImpressaoCups.imprimir(acumulaZplPorAmostra.toString(), nomeImpressora);
+			} else {
+				// A impressora não valida se existe uma impressora de etiqueta na unidade, se não existir ela não imprimi a etiqueta.
+				boolean gerarEtiqueta = false;
+				// Envia ZPL para impressora Zebra da unidade para a impressão (para o caso em que não foi cadastrada a impressora para o microcomputador)
+				sistemaImpressaoCups.imprimir(acumulaZplPorAmostra.toString(), unidadeTrabalho, TipoDocumentoImpressao.ETIQUETAS_BARRAS, gerarEtiqueta);
+			}
 		}
-			
 		// Gera cópia de segurança das etiquetas
 		this.gerarCopiaSegurancaEtiquetas(acumulaZplPorAmostra, DominioNomeRelatorio.TICKET_EXAMES);
 		
@@ -967,6 +971,8 @@ public class EtiquetasON extends BaseBusiness {
 							|| DominioSituacaoAmostra.U.equals(amostra.getSituacao()) || DominioSituacaoAmostra.M.equals(amostra.getSituacao())) {
 						this.gerarEtiquetas(amostra.getSolicitacaoExame(), unidadeExecutora, nomeImpressora, null,false);
 						break;
+					}else{
+						throw new ApplicationBusinessException(EtiquetasONExceptionCode.MENSAGEM_NAO_PERMITE_REIMPRESSAO, Severity.INFO);
 					}
 				}
 			} else { // imprimir apenas uma
@@ -974,6 +980,8 @@ public class EtiquetasON extends BaseBusiness {
 				if (DominioSituacaoAmostra.G.equals(amostra.getSituacao()) || DominioSituacaoAmostra.C.equals(amostra.getSituacao())
 						|| DominioSituacaoAmostra.U.equals(amostra.getSituacao()) || DominioSituacaoAmostra.M.equals(amostra.getSituacao())) {
 					this.gerarEtiquetas(amostra.getSolicitacaoExame(), amostra.getId().getSeqp(), unidadeExecutora, nomeImpressora, null,false);
+				}else{
+					throw new ApplicationBusinessException(EtiquetasONExceptionCode.MENSAGEM_NAO_PERMITE_REIMPRESSAO, Severity.INFO);
 				}
 			}
 		} else {

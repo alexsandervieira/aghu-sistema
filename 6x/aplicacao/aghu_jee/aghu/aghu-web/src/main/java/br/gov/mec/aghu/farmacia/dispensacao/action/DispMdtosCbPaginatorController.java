@@ -262,6 +262,9 @@ public class DispMdtosCbPaginatorController extends ActionController{
 							nomePaciente, prescricaoInicio, prescricaoFim,
 							dispencacaoComMdto, prescricaoEletronica,
 							listaMdto, nomeServidorLogado);
+			
+			tickets = tickets.replaceAll("[^\\p{ASCII}]", "");
+
 			for (int i = 0; i < qtdVias; i++) {
 				sistemaImpressao.imprimir(tickets,
 						super.getEnderecoIPv4HostRemoto());

@@ -1,13 +1,24 @@
 package br.gov.mec.aghu.casca.dao;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.lucene.analysis.br.BrazilianAnalyzer;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
@@ -16,6 +27,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.Subqueries;
+import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.sql.JoinType;
 import org.hibernate.type.IntegerType;
 
@@ -23,7 +35,6 @@ import br.gov.mec.aghu.casca.model.Aplicacao;
 import br.gov.mec.aghu.casca.model.Componente;
 import br.gov.mec.aghu.casca.model.Menu;
 import br.gov.mec.aghu.casca.model.Modulo;
-import br.gov.mec.aghu.casca.model.PalavraChaveMenu;
 import br.gov.mec.aghu.casca.model.Perfil;
 import br.gov.mec.aghu.casca.model.PerfisPermissoes;
 import br.gov.mec.aghu.casca.model.PerfisUsuarios;
@@ -31,8 +42,10 @@ import br.gov.mec.aghu.casca.model.Permissao;
 import br.gov.mec.aghu.casca.model.PermissaoModulo;
 import br.gov.mec.aghu.casca.model.PermissoesComponentes;
 import br.gov.mec.aghu.casca.model.Usuario;
-import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.lucene.Fonetizador;
+import br.gov.mec.aghu.core.search.Lucene;
+import br.gov.mec.aghu.dominio.DominioSituacao;
 
 public class MenuDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<Menu> {
 
@@ -44,6 +57,10 @@ public class MenuDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<Menu> 
 	private static final String APLICACAO = "aplicacao";
 	private static final String MENU_PAI = "menuPai";
 	private static final long serialVersionUID = -1352779356469149305L;
+	
+	@Inject
+    private Lucene lucene;
+	private static final Log LOG = LogFactory.getLog(MenuDAO.class);
 
 	/**
 	 * Realiza uma query para a verificação da existencia de menu na hierarquia com mesmo nome ou mesma URL por aplicação.
@@ -237,11 +254,36 @@ public class MenuDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<Menu> 
 		return executeCriteria(menus,true);
 	}
 	
-	public List<Menu> recuperarMenusValidos(String loginUser, String nome) {
-		return recuperarMenusValidos(loginUser, nome, null);
+	public List<Menu> pesquisarMenusAtivosLucene(String strPesquisa){
+		BooleanQuery totalQuery = new BooleanQuery();
+		String campoAnalisado = Menu.Fields.NOME.toString();
+		
+		String campoFonetico = Menu.Fields.NOME_FONETICO.toString();
+		
+		Query luceneQueryBrazilian = null;
+		Query luceneQueryKeyword = null;
+		try {
+			String buscaBrazilianAnalyzer = campoAnalisado+":("+strPesquisa.trim()+"*) OR "+campoAnalisado+":("+strPesquisa.trim()+")";
+			luceneQueryBrazilian = lucene.createQuery(buscaBrazilianAnalyzer, new BrazilianAnalyzer());
+			String buscaKeywordAnalyzer = campoFonetico+":("+Fonetizador.fonetizar(strPesquisa.trim()).toLowerCase()+")";
+			luceneQueryKeyword = lucene.createQuery(buscaKeywordAnalyzer, new KeywordAnalyzer());
+			
+			TermQuery situacaoQuery = new TermQuery(new Term(Menu.Fields.ATIVO.toString(), "N" ));
+			
+			
+			totalQuery.add(luceneQueryBrazilian, Occur.SHOULD);
+			totalQuery.add(luceneQueryKeyword, Occur.SHOULD);
+			totalQuery.add(situacaoQuery, Occur.MUST_NOT);
+		} catch (ParseException e) {
+			LOG.error(e.getMessage(),e);
+		}
+		
+		FullTextQuery query = createFullTextQuery(totalQuery, Menu.class);
+		
+		return query.setMaxResults(100).getResultList();
 	}
 	
-	public List<Menu> recuperarMenusValidos(String loginUser, String nome, Set<String> conjuntoModulosAtivos) {
+	public List<Menu> recuperarMenusValidos(String loginUser, List<Integer> listaMenus, Set<String> conjuntoModulosAtivos) {
 		DetachedCriteria permissoes = DetachedCriteria.forClass(Componente.class,"comp");
 		permissoes.setProjection(Projections.property("id"));
 		permissoes.createAlias(Componente.Fields.PERMISSOES_COMPONENTES.toString(), "permComp");
@@ -273,38 +315,7 @@ public class MenuDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<Menu> 
 		menus.createAlias(Menu.Fields.PALAVRAS_CHAVE.toString(), "PCM", JoinType.LEFT_OUTER_JOIN);
 		menus.add(Restrictions.eq(Menu.Fields.ATIVO.toString(),true));
 		menus.add(Restrictions.isNotNull(Menu.Fields.URL.toString()));
-		if (StringUtils.isNotEmpty(nome)){			
-			if (nome.contains(",")){
-				String [] fonets = nome.split(",");
-				if (fonets.length>2 && fonets.length % 2 != 0){
-					int l = fonets.length;
-					String fist = fonets[0];
-					fonets = Arrays.copyOf(fonets, l+1);
-					fonets[l]=fist;
-				}
-				for (int i=0; i<fonets.length; i=i+2) {
-					menus.add(
-					Restrictions.or(
-							Restrictions.or(
-									Restrictions.ilike("PCM." + PalavraChaveMenu.Fields.PALAVRA.toString(),"%"+fonets[i].trim().replaceAll(" ", "%")+"%", MatchMode.ANYWHERE),
-									Restrictions.ilike("PCM." + PalavraChaveMenu.Fields.PALAVRA.toString(),"%"+fonets[i+1].trim().replaceAll(" ", "%")+"%", MatchMode.ANYWHERE))
-					,
-					Restrictions.or(
-							Restrictions.ilike(Menu.Fields.NOME.toString(),"%"+fonets[i].trim().replaceAll(" ", "%")+"%", MatchMode.ANYWHERE),
-							Restrictions.ilike(Menu.Fields.NOME.toString(),"%"+fonets[i+1].trim().replaceAll(" ", "%")+"%", MatchMode.ANYWHERE))
-							)
-					);						
-				}	
-			}else{
-				nome="%"+nome.trim().replaceAll(" ", "%")+"%";
-				menus.add(Restrictions.or(
-						Restrictions.ilike(Menu.Fields.NOME.toString(),nome)
-						,
-						Restrictions.ilike("PCM." + PalavraChaveMenu.Fields.PALAVRA.toString(),nome)
-						)
-				);
-			}			
-		}
+		menus.add(Restrictions.in(Menu.Fields.ID.toString(), listaMenus));
 		
 		menus.add(Subqueries.exists(permissoes));
 		menus.addOrder(Order.asc(Menu.Fields.MENU_PAI.toString()));		

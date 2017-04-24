@@ -16,6 +16,7 @@ import br.gov.mec.aghu.business.IAghuFacade;
 import br.gov.mec.aghu.dominio.DominioIndPendentePrescricoesCuidados;
 import br.gov.mec.aghu.dominio.DominioTipoEmissaoSumario;
 import br.gov.mec.aghu.dominio.DominioValorDataItemSumario;
+import br.gov.mec.aghu.model.AghAtendimentoPacientes;
 import br.gov.mec.aghu.model.EpeDataItemSumario;
 import br.gov.mec.aghu.model.EpeDataItemSumarioId;
 import br.gov.mec.aghu.model.EpeItemPrescricaoSumario;
@@ -159,7 +160,8 @@ private EpePrescricoesCuidadosDAO epePrescricoesCuidadosDAO;
 				}
 			}
 		}
-		
+		AghAtendimentoPacientes atendimentoPacientes = this.getAghuFacade().obterAtendimentoPaciente(seqAtendimento, apaSeq);
+		atendimentoPacientes.setDtRotinaEnfermagem(new Date());
 		epePrescricaoEnfermagemDAO.flush();
 	}
 	

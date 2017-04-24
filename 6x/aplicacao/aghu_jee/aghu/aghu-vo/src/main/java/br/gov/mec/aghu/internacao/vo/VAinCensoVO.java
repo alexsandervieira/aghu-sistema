@@ -43,6 +43,7 @@ public class VAinCensoVO implements BaseBean {
 	private String descConvenio;
 	private Integer seqExtrato;
 	private String estadoSaude;
+	private String observacao;
 	
 	
 	//### ATRIBUTOS QUE CONTROLAM A EXIBICAO DA TELA DE PESQUISAR CENSO DIARIO DE PACIENTES ###//
@@ -405,6 +406,14 @@ public class VAinCensoVO implements BaseBean {
 
 	public String getDescPacienteNotifGMR() {
 		return descPacienteNotifGMR;
+	}
+
+	public String getObservacao() {
+		return observacao;
+	}
+
+	public void setObservacao(String observacao) {
+		this.observacao = observacao;
 	}
 
 	public void setDescPacienteNotifGMR(String descPacienteNotifGMR) {

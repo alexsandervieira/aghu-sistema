@@ -10,7 +10,7 @@
         <aghu:panelGeral legend="#{messages.LABEL_SITUACAO_ATENDIMENTO}"> 
           <p:outputPanel id="modalAlterarRetornoConsultaPanel" layout="inline"> 
             <aghu:linha> 
-              <mec:suggestionBox label="#{messages.LABEL_SITUACAO_ATENDIMENTO}" title="#{messages.TITLE_SITUACAO_ATENDIMENTO}" descricaoInput="seq" size="20" maxlength="15" width="330" descricaoLabel="descricao" suggestionAction="obterRetornos" id="retorno" controller="#{pesquisarPacientesAgendadosController}" value="#{pesquisarPacientesAgendadosController.retorno}" render="botoesRetornoConsulta"> 
+              <mec:suggestionBox label="#{messages.LABEL_SITUACAO_ATENDIMENTO}" title="#{messages.TITLE_SITUACAO_ATENDIMENTO}" descricaoInput="seq" size="20" maxlength="15" width="330" descricaoLabel="descricao" suggestionAction="obterAacRetornos" id="retorno" controller="#{pesquisarPacientesAgendadosController}" value="#{pesquisarPacientesAgendadosController.retorno}" render="botoesRetornoConsulta"> 
                 <p:column> 
                   <f:facet name="header"> 
                     <b>#{messages.LABEL_CODIGO}</b> 

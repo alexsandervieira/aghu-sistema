@@ -416,7 +416,7 @@
 															style="width: auto;margin: 0px;">
 															<p:outputPanel rendered="#{not empty _agd.paciente}"
 																layout="inline">
-																<h:outputText value="#{_agd.paciente}" />
+																<span style="font-weight: bold;"><h:outputText value="#{_agd.pacienteUpperCase}" /></span>
 																<br clear="none" />
 															</p:outputPanel>
 															<p:outputPanel rendered="#{not empty _agd.procedimento}"

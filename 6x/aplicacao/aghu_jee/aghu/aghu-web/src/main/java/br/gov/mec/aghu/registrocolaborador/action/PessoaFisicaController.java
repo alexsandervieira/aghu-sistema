@@ -14,10 +14,16 @@ import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
+import br.gov.mec.aghu.core.action.ActionController;
+import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.model.AipBairrosCepLogradouro;
 import br.gov.mec.aghu.model.AipCidades;
 import br.gov.mec.aghu.model.AipNacionalidades;
+import br.gov.mec.aghu.model.AipOrgaosEmissores;
 import br.gov.mec.aghu.model.AipPacientes;
 import br.gov.mec.aghu.model.AipUfs;
 import br.gov.mec.aghu.model.RapPessoasFisicas;
@@ -27,11 +33,6 @@ import br.gov.mec.aghu.paciente.cadastro.business.ICadastroPacienteFacade;
 import br.gov.mec.aghu.paciente.cadastrosbasicos.business.ICadastrosBasicosPacienteFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
-import br.gov.mec.aghu.core.action.ActionController;
-import br.gov.mec.aghu.core.commons.CoreUtil;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.Severity;
 
 public class PessoaFisicaController extends ActionController {
 
@@ -62,6 +63,8 @@ public class PessoaFisicaController extends ActionController {
 	private RapPessoasFisicas rapPessoaFisica = new RapPessoasFisicas();
 
 	private AipCidades cidadeCadastrada;
+	
+	private AipCidades cidadeNaoCadastrada;
 
 	private Integer codigoPessoa;
 
@@ -70,7 +73,7 @@ public class PessoaFisicaController extends ActionController {
 	private Integer codigoNovaPessoa;
 
 	private Boolean openedLogradouroCadastrado = true;
-
+	
 	/**
 	 * Nome sugerido de uma pessoa a qual foi procurada na pesquisa de pessoas
 	 */
@@ -84,7 +87,6 @@ public class PessoaFisicaController extends ActionController {
 	private IServidorLogadoFacade servidorLogadoFacade;
 
 	public String iniciar() {
-
 		if (codigoPessoa != null) {
 			try {
 				rapPessoaFisica = registroColaboradorFacade.obterPessoaFisicaCRUD(codigoPessoa);
@@ -97,10 +99,14 @@ public class PessoaFisicaController extends ActionController {
 				if (rapPessoaFisica.getAipBairrosCepLogradouro() != null
 						&& rapPessoaFisica.getAipBairrosCepLogradouro().getCepLogradouro() != null
 						&& rapPessoaFisica.getAipBairrosCepLogradouro().getCepLogradouro().getLogradouro() != null) {
-					cidadeCadastrada = rapPessoaFisica.getAipBairrosCepLogradouro().getCepLogradouro().getLogradouro()
-							.getAipCidade();
-				}
+					cidadeCadastrada = rapPessoaFisica.getAipBairrosCepLogradouro().getCepLogradouro().getLogradouro().getAipCidade();
 
+				}
+				
+              if (rapPessoaFisica.getCep() !=null || rapPessoaFisica.getBairro() != null || rapPessoaFisica.getLogradouro() !=null) {
+            	  cidadeNaoCadastrada = rapPessoaFisica.getCddCodigoMunicipio();
+              }
+				
 			} catch (ApplicationBusinessException ex) {
 				apresentarExcecaoNegocio(ex);
 			}
@@ -109,11 +115,10 @@ public class PessoaFisicaController extends ActionController {
 				rapPessoaFisica.setNome(nomePesquisar);
 			}
 		}
-
 		return null;
-
+	
 	}
-
+	
 	public List<AipUfs> pesquisarUFs(String parametro) {
 		String valor = null;
 		if (parametro != null) {
@@ -153,7 +158,7 @@ public class PessoaFisicaController extends ActionController {
 			if (this.cidadeCadastrada != null) {
 				codigoCidade = this.cidadeCadastrada.getCodigo();
 			}
-
+			
 			try {
 				listaBairrosCepLogradouro = cadastroPacienteFacade.pesquisarCeps(cep, codigoCidade);
 			} catch (ApplicationBusinessException e) {
@@ -191,7 +196,23 @@ public class PessoaFisicaController extends ActionController {
 		this.cidadeCadastrada = null;
 
 	}
-
+	public void limparCamposPosDeleteNacionalidade(){
+		this.rapPessoaFisica.setAipCidades(null);
+	}
+	
+	public boolean obterObrigatoriedadeCamposConformeNaturalidade() throws ApplicationBusinessException {
+		AghParametros paramCodigoNacionalidade = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_COD_NAC);
+		if (rapPessoaFisica.getAipNacionalidades() != null){
+				if (rapPessoaFisica.getAipNacionalidades().getCodigo() == paramCodigoNacionalidade.getVlrNumerico().intValue()) {
+						return Boolean.TRUE;
+				}
+		}
+		return Boolean.FALSE;
+	}
+	
+	
+	
+	
 	public void setarCepSelecionado() {
 		if (rapPessoaFisica.getAipBairrosCepLogradouro() != null) {
 			cidadeCadastrada = rapPessoaFisica.getAipBairrosCepLogradouro().getCepLogradouro().getLogradouro()
@@ -211,23 +232,6 @@ public class PessoaFisicaController extends ActionController {
 		this.rapPessoaFisica = new RapPessoasFisicas();
 		this.codigoPessoa = null;
 		this.cidadeCadastrada = null;
-	}
-
-	public boolean nacionalidadeBrasileira() {
-		if (rapPessoaFisica != null && rapPessoaFisica.getAipNacionalidades() != null) {
-			Integer codigoNacionalidade = rapPessoaFisica.getAipNacionalidades().getCodigo();
-
-			AghParametros paramCodigoNacionalidade;
-			try {
-				paramCodigoNacionalidade = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_COD_NAC);
-				if (codigoNacionalidade == paramCodigoNacionalidade.getVlrNumerico().intValue()) {
-					return true;
-				}
-			} catch (BaseException e) {
-				apresentarExcecaoNegocio(e);
-			}
-		}
-		return false;
 	}
 
 /*Naturalidade*/
@@ -320,8 +324,10 @@ public class PessoaFisicaController extends ActionController {
 			pessoaFisica.setNomeUsual(null);
 		}
 
-		if (StringUtils.isBlank(pessoaFisica.getCidadeNascimento())) {
-			pessoaFisica.setCidadeNascimento(null);
+		if (this.cidadeNaoCadastrada == null) {
+			pessoaFisica.setCddCodigoMunicipio(null);
+		} else {
+			pessoaFisica.setCddCodigoMunicipio(this.cidadeNaoCadastrada);
 		}
 
 		if (StringUtils.isBlank(pessoaFisica.getEmailParticular())) {
@@ -353,6 +359,14 @@ public class PessoaFisicaController extends ActionController {
 			this.apresentarExcecaoNegocio(e);
 		}
 
+	}
+	
+	public List<AipOrgaosEmissores> pesquisarOrgaoEmissorPorCodigoDescricao(String paramPesquisa) {	
+				return this.cadastroPacienteFacade.pesquisarOrgaoEmissorPorCodigoDescricao(paramPesquisa);			
+	}
+	
+	public List<AipUfs> pesquisarPorSiglaNome(String paramPesquisa) {
+				return this.cadastrosBasicosPacienteFacade.pesquisarPorSiglaNome(paramPesquisa);
 	}
 
 	public RapPessoasFisicas getRapPessoaFisica() {
@@ -410,5 +424,14 @@ public class PessoaFisicaController extends ActionController {
 	public void setNomePesquisar(String nomePesquisar) {
 		this.nomePesquisar = nomePesquisar;
 	}
+
+	public AipCidades getCidadeNaoCadastrada() {
+		return cidadeNaoCadastrada;
+	}
+
+	public void setCidadeNaoCadastrada(AipCidades cidadeNaoCadastrada) {
+		this.cidadeNaoCadastrada = cidadeNaoCadastrada;
+	}
+
 
 }

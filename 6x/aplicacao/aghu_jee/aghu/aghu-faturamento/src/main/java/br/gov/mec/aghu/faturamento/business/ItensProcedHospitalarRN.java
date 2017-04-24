@@ -108,13 +108,13 @@ public class ItensProcedHospitalarRN extends BaseBusiness implements Serializabl
 
 		jn.setNomeUsuario(servidorLogado.getUsuario());
 		jn.setOperacao(operacao);
-		jn.setPhoSeq(iph.getProcedimentoHospitalar().getSeq());
-		jn.setSeq(iph.getId().getSeq());
+		jn.setPhoSeq(iph.getProcedimentoHospitalar() != null ? iph.getProcedimentoHospitalar().getSeq() : null);
+		jn.setSeq(iph.getId() != null ? iph.getId().getSeq() : null);
 		jn.setCodTabela(iph.getCodTabela());
 		jn.setAlteradoEm(new Date());
 		jn.setDescricao(iph.getDescricao());
-		jn.setIdadeMin(iph.getIdadeMin().byteValue());
-		jn.setIdadeMax(iph.getIdadeMax().shortValue());
+		jn.setIdadeMin(iph.getIdadeMin() != null ? iph.getIdadeMin().byteValue() : null);
+		jn.setIdadeMax(iph.getIdadeMax() != null ? iph.getIdadeMax().shortValue() : null);
 		jn.setSexo(iph.getSexo() != null ? iph.getSexo().toString() : null);
 		jn.setClcCodigo(iph.getClinica() != null ? iph.getClinica().getCodigo().byteValue() : null);
 		jn.setIndHospDia(iph.getHospDia());

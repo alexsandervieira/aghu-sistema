@@ -276,6 +276,13 @@ private PrescricaoMedicaRN prescricaoMedicaRN;
 		this.enforcePrescricaoMedicamento(prescricaoMedicamento);
 	}
 
+	public void atualizarOrdemPrescricaoMedicamento(MpmPrescricaoMdto prescricaoMedicamento) throws BaseException {
+	
+		getMpmPrescricaoMdtoDAO().merge(prescricaoMedicamento);
+		// Chamada de trigger "after statement" (enforce)
+		this.enforcePrescricaoMedicamento(prescricaoMedicamento);
+	}
+
 	public void inserirParecerItemPrescricaoMedicamento(
 			MpmItemPrescParecerMdto itemParecer) throws ApplicationBusinessException {
 		
@@ -493,9 +500,7 @@ private PrescricaoMedicaRN prescricaoMedicaRN;
 			prescricaoMdtos.setIndBombaInfusao(false);
 		}
 		
-		verificaAtendimento(prescricaoMdtos.getDthrInicio(), 
-														  prescricaoMdtos.getDthrFim(),
-														  prescricaoMdtos.getPrescricaoMedica().getId().getAtdSeq(),
+		verificaAtendimento(prescricaoMdtos.getDthrInicio(), prescricaoMdtos.getDthrFim(), prescricaoMdtos.getPrescricaoMedica().getId().getAtdSeq(),
 														  null, null, null);
 		
 		//Para inserir um registro na entidade Prescrição Medicamentos é necessário existir um registro  
@@ -541,6 +546,10 @@ private PrescricaoMedicaRN prescricaoMedicaRN;
 							.getTipoVelocAdministracao().getSeq() : null, prescricaoMdtos
 							.getGotejo());			
 		}
+			if(prescricaoMdtos.getOrdem() == null){
+				Integer ordem = this.mpmPrescricaoMdtoDAO.obterOrdemListaMedicamentosPrescritosConfirmadosPelaChavePrescricao(prescricaoMdtos.getPrescricaoMedica().getId(), prescricaoMdtos.getIndSolucao());
+				prescricaoMdtos.setOrdem(ordem);
+			}
 	}
 	
 	/**

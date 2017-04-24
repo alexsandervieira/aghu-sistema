@@ -15,10 +15,15 @@ import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.ambulatorio.dao.AacConsultasDAO;
 import br.gov.mec.aghu.ambulatorio.dao.MamAnamnesesDAO;
+import br.gov.mec.aghu.ambulatorio.dao.MamAtestadosDAO;
 import br.gov.mec.aghu.ambulatorio.dao.MamEvolucoesDAO;
 import br.gov.mec.aghu.ambulatorio.dao.MamProcedimentoDAO;
 import br.gov.mec.aghu.ambulatorio.dao.MamProcedimentoRealizadoDAO;
 import br.gov.mec.aghu.casca.business.ICascaFacade;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioCaracteristicaGrade;
 import br.gov.mec.aghu.dominio.DominioIndPendenteAmbulatorio;
 import br.gov.mec.aghu.dominio.DominioSituacao;
@@ -27,15 +32,14 @@ import br.gov.mec.aghu.model.AacConsultas;
 import br.gov.mec.aghu.model.AacGradeAgendamenConsultas;
 import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.model.MamAnamneses;
+import br.gov.mec.aghu.model.MamAtestados;
 import br.gov.mec.aghu.model.MamEvolucoes;
 import br.gov.mec.aghu.model.MamProcedimento;
 import br.gov.mec.aghu.model.MamProcedimentoRealizado;
 import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.prescricaomedica.vo.ConselhoProfissionalServidorVO;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.registrocolaborador.dao.RapServidoresDAO;
 
 @Stateless
 public class FinalizaAtendimentoON extends BaseBusiness {
@@ -87,6 +91,12 @@ public class FinalizaAtendimentoON extends BaseBusiness {
 	@Inject
 	private MamProcedimentoDAO mamProcedimentoDAO;
 	
+	@Inject
+	private RapServidoresDAO rapServidoresDAO;
+	
+	@Inject
+	private MamAtestadosDAO mamAtestadosDAO;
+	
 	/**
 	 * 
 	 */
@@ -94,7 +104,7 @@ public class FinalizaAtendimentoON extends BaseBusiness {
 
 	public enum FinalizaAtendimentoONExceptionCode implements BusinessExceptionCode {
 		CONCLUSAO_NAO_EFETUADA_1, CONCLUSAO_NAO_EFETUADA_2,
-		CONCLUSAO_NAO_EFETUADA_3, MAM_02318;
+		CONCLUSAO_NAO_EFETUADA_3, MAM_02318, MENSAGEM_NECESSARIO_CONSELHO_PROFISSIONAL;
 	}
 	
 	private static final String ANAMNESE="A", EVOLUCAO="E";
@@ -167,6 +177,14 @@ public class FinalizaAtendimentoON extends BaseBusiness {
 		if(servidorLogado!=null && servidorLogado.getId()!=null){
 			vinCodigo = servidorLogado.getId().getVinCodigo();
 			matricula = servidorLogado.getId().getMatricula();
+			
+			//valida servidorLogado se possuie conselho profissional 
+			ConselhoProfissionalServidorVO existeConselho = getRapServidoresDAO().obterConselhoProfissional(matricula, vinCodigo);
+			List<MamAtestados> listaAtestados = getMamAtestadosDao().obterAtestadoPorNumeroConsulta(consulta.getNumero());
+			
+			if( existeConselho == null && !listaAtestados.isEmpty() ){
+				throw new ApplicationBusinessException(FinalizaAtendimentoONExceptionCode.MENSAGEM_NECESSARIO_CONSELHO_PROFISSIONAL);
+			}
 		}
 		this.getFinalizarAtendimentoRN().concluirAtendimento(consulta, new Date(), vinCodigo, matricula, nomeMicrocomputador, new Date());
 	}
@@ -309,6 +327,14 @@ public class FinalizaAtendimentoON extends BaseBusiness {
 
 	protected IServidorLogadoFacade getServidorLogadoFacade() {
 		return this.servidorLogadoFacade;
+	}
+	
+	protected RapServidoresDAO getRapServidoresDAO() {
+		return rapServidoresDAO;
+	}
+	
+	protected MamAtestadosDAO getMamAtestadosDao(){
+		return mamAtestadosDAO;
 	}
 	
 }

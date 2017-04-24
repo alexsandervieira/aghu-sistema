@@ -36,7 +36,7 @@ import br.gov.mec.aghu.core.commons.CoreUtil;
 public class LaudoMascara extends AbstractLaudo {
 	
 	private static final Log LOG = LogFactory.getLog(LaudoMascara.class);
-
+	
 	/**
 	 *  Ajuste necessario no GAP quando o tamanho do componente eh reajustado para o tamanho visual do seu valor
 	 */
@@ -79,7 +79,7 @@ public class LaudoMascara extends AbstractLaudo {
 	}
 
 	@SuppressWarnings("PMD.NPathComplexity")
-	protected void processaMascaras(ExameVO exame)  {
+	protected void processaMascaras(ExameVO exame, Boolean consideraAlinhamentoVertical)  {
 
 		LOG.debug(String.format(TEMPLATE_LOG, "BEGIN", exame.getSolicitacao(),
 				exame.getItem(), exame.getSigla(), exame.getDescricao()));
@@ -96,12 +96,22 @@ public class LaudoMascara extends AbstractLaudo {
 		boolean ajustado = false;
 		MascaraVO mAnterior = null;
 		String valorSemTags = "";
+		String valorSemTagsWord = "";
+		Integer verticalGap = 0;
 		
 		for (MascaraVO m : mascaras) {
 			LOG.debug("\t BEGIN Campo");
 			if (!m.isExibeRelatorio() || m.getValor() == null) {
 				LOG.debug("\t END Campo");
 				continue;
+			}
+			
+			if(m.getLarguraObjetoVisual() == null){
+				m.setLarguraObjetoVisual((short)30);
+			}
+			
+			if(m.getAlturaObjetoVisual() == null){
+				m.setAlturaObjetoVisual((short)20);
 			}
 
 			LOG.debug("Linha=" + m.getLinha());
@@ -122,7 +132,18 @@ public class LaudoMascara extends AbstractLaudo {
 				}
 				tamanhoLinha = 0;
 				gap = 0;
-				this.getDetail().newRow();
+				
+				if(consideraAlinhamentoVertical) {
+					verticalGap = 0;
+					if(mAnterior != null) {
+						if(m.getPosicaoLinhaImpressao() - mAnterior.getPosicaoLinhaImpressao() - mAnterior.getAlturaObjetoVisual() > 0){
+							verticalGap = m.getPosicaoLinhaImpressao() - mAnterior.getPosicaoLinhaImpressao() - mAnterior.getAlturaObjetoVisual();
+						}
+					}
+					this.getDetail().newRow(verticalGap);
+				} else {
+					this.getDetail().newRow();
+				}
 			}
 
 			StyleBuilder style2 = this.montaEstiloCampo(m);
@@ -149,7 +170,7 @@ public class LaudoMascara extends AbstractLaudo {
 						+ mAnterior.getLarguraObjetoVisual() + " = " + gap);
 				// Ajusta o gap caso o componente anterior tenha sido ajustado
 				if(ajustado) {
-					gap += AJUSTE_GAP;
+					gap -= AJUSTE_GAP;
 					ajustado = false;
 				}
 			}
@@ -205,7 +226,13 @@ public class LaudoMascara extends AbstractLaudo {
 					this.getDetail().newRow();
 				}
 			}
-			this.addCell(valorSemTags, m.getLarguraObjetoVisual(), gap, style2);
+			
+			if(m.getValor() != null){
+				valorSemTagsWord = retirarTagsWord(m.getValor());
+				valorSemTagsWord = removeFonte(valorSemTagsWord);
+			}
+			
+			this.addCell(valorSemTagsWord, m.getLarguraObjetoVisual(), gap, style2);
 			tamanhoLinha += gap + m.getLarguraObjetoVisual() + ESPACO;
 			mAnterior = m;
 			LOG.debug("\t END Campo");
@@ -219,6 +246,16 @@ public class LaudoMascara extends AbstractLaudo {
 		
 		processarVlrRef(exame);
 		
+	}
+
+	private String retirarTagsWord(String texto) {
+		return texto.replaceAll("(?s)<!--.*?-->", "");
+	}
+	
+	private String removeFonte(String valorSemTagsWord) {
+		valorSemTagsWord = valorSemTagsWord.replaceAll("face=\".*\"", "");
+		valorSemTagsWord = valorSemTagsWord.replaceAll("font-family:.*?;", "");
+		return valorSemTagsWord;
 	}
 
 	private String retornaValorSemTag(String textoLivre) {
@@ -323,11 +360,11 @@ public class LaudoMascara extends AbstractLaudo {
 		return this.examesLista;
 	}
 
-	public void executar() throws FileNotFoundException, IOException{
+	public void executar(Boolean consideraAlinhamentoVertical) throws FileNotFoundException, IOException{
 
 		for (ExameVO exame : this.getExamesLista().getExames()) {
 			this.criarCabecalhoExame(exame);
-			processaMascaras(exame);
+			processaMascaras(exame, consideraAlinhamentoVertical);
 			super.criarLinha();
 		}
 	}
@@ -340,25 +377,29 @@ public class LaudoMascara extends AbstractLaudo {
 				.setFontSize(m.getTamanhoFonte() == 0 ? 10 : m.getTamanhoFonte());
 		font.setFontName("Courier New");
 		HorizontalAlignment horizontalAlignment = null;
-		switch (m.getAlinhamento()) {
-		case 'C':
-			horizontalAlignment = HorizontalAlignment.CENTER;
-			break;
-		case 'E':
+		if(m.getAlinhamento() == null){
 			horizontalAlignment = HorizontalAlignment.LEFT;
-			break;
-		case 'D':
-			horizontalAlignment = HorizontalAlignment.RIGHT;
-			break;
-		default:
-			break;
+		} else {
+			switch (m.getAlinhamento()) {
+			case 'C':
+				horizontalAlignment = HorizontalAlignment.CENTER;
+				break;
+			case 'E':
+				horizontalAlignment = HorizontalAlignment.LEFT;
+				break;
+			case 'D':
+				horizontalAlignment = HorizontalAlignment.RIGHT;
+				break;
+			default:
+				break;
+			}
 		}
 		StyleBuilder style = stl.style(font);
 
-		String[] tags = {"</html>", "</div>", "</span>", "</p>", "</body>", 
+		String[] tags = {"</html>", "</div>", "</span>", "</p>", "</body>", "</font>",
 				"</head>", "</table>", "</li>", "</a>", "</em>","</fieldset>", "<br>", "<br />", "<br/>"};
 		for (String tag : tags) {
-			if (m.getValor().contains(tag)){
+			if (m.getValor().toLowerCase().contains(tag)){
 				style.setMarkup(Markup.HTML);
 			}
 			

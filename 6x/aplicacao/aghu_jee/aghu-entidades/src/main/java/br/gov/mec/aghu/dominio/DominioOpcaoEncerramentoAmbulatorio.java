@@ -90,5 +90,35 @@ public enum DominioOpcaoEncerramentoAmbulatorio implements Dominio {
 			return "";
 		}
 	}
+
+	public static DominioOpcaoEncerramentoAmbulatorio getInstance(String valor) {
+		if ("AMB".equals(valor)) {
+			return DominioOpcaoEncerramentoAmbulatorio.AMB;
+		} else if ("APAC".equals(valor)) {
+			return DominioOpcaoEncerramentoAmbulatorio.APAC;
+		} else if ("APAF".equals(valor)) {
+			return DominioOpcaoEncerramentoAmbulatorio.APAF;
+		} else if ("APAN".equals(valor)) {
+			return DominioOpcaoEncerramentoAmbulatorio.APAN;
+		} else if ("APAP".equals(valor)) {
+			return DominioOpcaoEncerramentoAmbulatorio.APAP;
+		} else if ("APAR".equals(valor)) {
+			return DominioOpcaoEncerramentoAmbulatorio.APAR;			
+		} else if ("APAT".equals(valor)) {
+			return DominioOpcaoEncerramentoAmbulatorio.APAT;			
+		} else if ("APEX".equals(valor)) {
+			return DominioOpcaoEncerramentoAmbulatorio.APEX;			
+		} else if ("APRE".equals(valor)) {
+			return DominioOpcaoEncerramentoAmbulatorio.APRE;			
+		} else if ("SISCOLO".equals(valor)) {
+			return DominioOpcaoEncerramentoAmbulatorio.SISCOLO;			
+		} else if ("SISMAMA".equals(valor)) {
+			return DominioOpcaoEncerramentoAmbulatorio.SISMAMA;			
+		} else if ("TODOS".equals(valor)) {
+			return DominioOpcaoEncerramentoAmbulatorio.TODOS;			
+		} else {
+			return null;
+		}
+	}
 	
 }

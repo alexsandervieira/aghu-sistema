@@ -268,6 +268,7 @@ public class SolicitacaoExameController extends ActionReport {
 		verificarPermissaoUnidadeExecutora();
 		carregaParametros();
 		listarExamesSendoSolicitadosController.inicio();
+		listarExamesSendoSolicitadosLoteController.inicio();
 	
 	}
 	
@@ -739,6 +740,7 @@ public class SolicitacaoExameController extends ActionReport {
 			
 			this.concordaNormaSeguranca = Boolean.FALSE;
 			this.precisaConcordarComNormaSeguranca = Boolean.FALSE;
+			listarExamesSendoSolicitadosLoteController.setDataProgr(null);
 
 			//this.setRespostas(null);
 		} catch (BaseException e) {

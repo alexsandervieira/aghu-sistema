@@ -65,7 +65,7 @@ private IExamesFacade examesFacade;
 	
 	public enum AmostraExamesONExceptionCode implements BusinessExceptionCode {
 		MENSAGEM_ERRO_SOLICITACAO_NAO_ENCONTRADA, MENSAGEM_NENHUM_ITEM_EXAME_AMOSTRA, MENSAGEM_INFORMAR_SOLICITACAO_AO_INFORMAR_AMOSTRA, MENSAGEM_INFORMAR_SOLICITACAO_OU_PACIENTE,
-		MENSAGEM_SELECIONAR_ITENS_SITUACAO_GERADA, MENSAGEM_SELECIONAR_ITENS_SITUACAO_COLETADA;
+		MENSAGEM_SELECIONAR_ITENS_SITUACAO_GERADA, MENSAGEM_SELECIONAR_ITENS_SITUACAO_COLETADA, ERRO_AMOSTRA_ITEM_EXAME;
 	} 
 	
 	/**
@@ -156,6 +156,12 @@ private IExamesFacade examesFacade;
 					exame.setSituacao(DominioSituacaoAmostra.C);
 					getExamesFacade().atualizarAelAmostraItemExames(exame, true, true, nomeMicrocomputador);
 				}
+				// 86019
+				else if (exame.getSituacao().equals(DominioSituacaoAmostra.M)) {
+					exame.setSituacao(DominioSituacaoAmostra.C);
+					getExamesFacade().atualizarAelAmostraItemExames(exame, true, true, nomeMicrocomputador);
+					
+				}
 			}
 		} else {
 			throw new ApplicationBusinessException(AmostraExamesONExceptionCode.MENSAGEM_NENHUM_ITEM_EXAME_AMOSTRA);
@@ -228,11 +234,15 @@ private IExamesFacade examesFacade;
 		AelItemSolicitacaoExames itemSolicitacaoExame = this.getAelItemSolicitacaoExameDAO().obterItemSolicitacaoExamePorId(soeSeq, seqp);
 		List<AelItemHorarioAgendado> listaItens = this.getAelItemHorarioAgendadoDAO().obterPorItemSolicitacaoExame(itemSolicitacaoExame);
 		if(listaItens==null || listaItens.size()==0){
+			for (AelExamesAmostraVO exameVO : listaExames) {
+				exameVO.setSeqAmostra(seqp);
+			}
 			return listaExames;
 		}
 		for(AelItemHorarioAgendado itemHorarioAgendado: listaItens){
 			for(AelExamesAmostraVO exame: listaExames){
 				AelExamesAmostraVO exameAux =  new AelExamesAmostraVO();
+				exameAux.setSeqAmostra(seqp);
 				exameAux.setDescricaoUsual(exame.getDescricaoUsual());
 				exameAux.setSeqp(exame.getSeqp());
 				exameAux.setSituacao(exame.getSituacao());
@@ -257,32 +267,31 @@ private IExamesFacade examesFacade;
 		this.getExamesFacade().atualizarAelAmostraItemExames(amostraItemExame, false, true, nomeMicrocomputador);
 	}
 	
-	public void validarColetaExames(Integer amoSeqp, List<AelExamesAmostraVO> listaExamesAmostra) throws ApplicationBusinessException {
-		for(AelExamesAmostraVO exameAmostraVO: listaExamesAmostra){
-			AelAmostraItemExamesId id = new AelAmostraItemExamesId();
-			id.setAmoSeqp(amoSeqp);
-			id.setAmoSoeSeq(exameAmostraVO.getSoeSeq());
-			id.setIseSoeSeq(exameAmostraVO.getSoeSeq());
-			id.setIseSeqp(exameAmostraVO.getSeqp());
-			AelAmostraItemExames amostraItemExame = this.getAelAmostraItemExamesDAO().obterPorChavePrimaria(id);
-			if(amostraItemExame.getSituacao().equals(DominioSituacaoAmostra.C)){
-				throw new ApplicationBusinessException(AmostraExamesONExceptionCode.MENSAGEM_SELECIONAR_ITENS_SITUACAO_GERADA);
-			}
+	public void validarColetaExames(AelExamesAmostraVO exameAmostraVO) throws ApplicationBusinessException {
+		AelAmostraItemExamesId id = new AelAmostraItemExamesId();
+		id.setAmoSeqp(exameAmostraVO.getSeqAmostra().intValue());
+		id.setAmoSoeSeq(exameAmostraVO.getSoeSeq());
+		id.setIseSoeSeq(exameAmostraVO.getSoeSeq());
+		id.setIseSeqp(exameAmostraVO.getSeqp());
+		AelAmostraItemExames amostraItemExame = this.getAelAmostraItemExamesDAO().obterPorChavePrimaria(id);
+		if(amostraItemExame.getSituacao().equals(DominioSituacaoAmostra.C)){
+			throw new ApplicationBusinessException(AmostraExamesONExceptionCode.MENSAGEM_SELECIONAR_ITENS_SITUACAO_GERADA);
 		}
 	}
 	
-	public void validarVoltaExames(Integer amoSeqp, List<AelExamesAmostraVO> listaExamesAmostra) throws ApplicationBusinessException{
-		for(AelExamesAmostraVO exameAmostraVO: listaExamesAmostra){
+	public void validarVoltaExames(AelExamesAmostraVO exameAmostraVO) throws ApplicationBusinessException{
 			AelAmostraItemExamesId id = new AelAmostraItemExamesId();
-			id.setAmoSeqp(amoSeqp);
+			id.setAmoSeqp(exameAmostraVO.getSeqAmostra().intValue());
 			id.setAmoSoeSeq(exameAmostraVO.getSoeSeq());
 			id.setIseSoeSeq(exameAmostraVO.getSoeSeq());
 			id.setIseSeqp(exameAmostraVO.getSeqp());
 			AelAmostraItemExames amostraItemExame = this.getAelAmostraItemExamesDAO().obterPorChavePrimaria(id);
+			if(amostraItemExame == null) {
+				throw new ApplicationBusinessException(AmostraExamesONExceptionCode.ERRO_AMOSTRA_ITEM_EXAME);
+			}
 			if(amostraItemExame.getSituacao().equals(DominioSituacaoAmostra.G)){
 				throw new ApplicationBusinessException(AmostraExamesONExceptionCode.MENSAGEM_SELECIONAR_ITENS_SITUACAO_COLETADA);
 			}
-		}
 	}
 	
 	public void validarColetaExame(List<AelAmostraExamesVO> listaItensAmostra) throws ApplicationBusinessException {

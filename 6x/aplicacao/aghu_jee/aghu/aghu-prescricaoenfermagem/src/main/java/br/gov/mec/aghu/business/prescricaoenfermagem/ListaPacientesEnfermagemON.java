@@ -2,6 +2,7 @@ package br.gov.mec.aghu.business.prescricaoenfermagem;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -19,8 +21,14 @@ import br.gov.mec.aghu.ambulatorio.business.IAmbulatorioFacade;
 import br.gov.mec.aghu.blococirurgico.business.IBlocoCirurgicoFacade;
 import br.gov.mec.aghu.business.IAghuFacade;
 import br.gov.mec.aghu.casca.business.ICascaFacade;
+import br.gov.mec.aghu.constante.ConstanteAghCaractUnidFuncionais;
 import br.gov.mec.aghu.controlepaciente.business.IControlePacienteFacade;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dominio.DominioIndConcluido;
+import br.gov.mec.aghu.dominio.DominioIndPendenteAmbulatorio;
 import br.gov.mec.aghu.dominio.DominioOrigemAtendimento;
 import br.gov.mec.aghu.exameselaudos.business.IExamesLaudosFacade;
 import br.gov.mec.aghu.internacao.pesquisa.business.IPesquisaInternacaoFacade;
@@ -30,6 +38,7 @@ import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.model.AinLeitos;
 import br.gov.mec.aghu.model.AinQuartos;
 import br.gov.mec.aghu.model.CseCategoriaProfissional;
+import br.gov.mec.aghu.model.MpmAnamneses;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeNotificacaoDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescricaoEnfermagemDAO;
@@ -38,14 +47,13 @@ import br.gov.mec.aghu.prescricaoenfermagem.vo.PacienteEnfermagemVO;
 import br.gov.mec.aghu.prescricaoenfermagem.vo.PacienteEnfermagemVO.StatusPrescricaoEnfermagemPaciente;
 import br.gov.mec.aghu.prescricaoenfermagem.vo.PacienteEnfermagemVO.StatusSinalizadorUP;
 import br.gov.mec.aghu.prescricaomedica.business.IPrescricaoMedicaFacade;
+import br.gov.mec.aghu.prescricaomedica.dao.MpmAnamnesesDAO;
+import br.gov.mec.aghu.prescricaomedica.dao.MpmEvolucoesDAO;
 import br.gov.mec.aghu.prescricaomedica.vo.ListaPacientePrescricaoVO;
+import br.gov.mec.aghu.prescricaomedica.vo.PacienteListaProfissionalVO.StatusAnamneseEvolucao;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 import br.gov.mec.aghu.registrocolaborador.dao.VRapPessoaServidorDAO;
 import br.gov.mec.aghu.view.VListaEpePrescricaoEnfermagem;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.utils.DateUtil;
 
 @Stateless
 public class ListaPacientesEnfermagemON extends BaseBusiness {
@@ -99,6 +107,12 @@ public class ListaPacientesEnfermagemON extends BaseBusiness {
 	
 	@Inject
 	private VRapPessoaServidorDAO vRapPessoaServidorDAO;
+
+	@Inject
+	private MpmEvolucoesDAO mpmEvolucoesDAO;
+
+	@Inject
+	private MpmAnamnesesDAO mpmAnamnesesDAO;
 
 	private static final long serialVersionUID = -767802933726437762L;
 	
@@ -170,12 +184,56 @@ public class ListaPacientesEnfermagemON extends BaseBusiness {
 				}
 			}
 				
+			vo.setEnableButtonAnamneseEvolucao(this.habilitarBotaoAnamneseEvolucao(vo.getAtdSeq(), 
+					vo.getDesabilitaBotaoPrescrever()));
+			vo.setStatusAnamneseEvolucao(this.obterIconeAnamneseEvolucao(vo.getAtdSeq(), vo.isEnableButtonAnamneseEvolucao()));
 			listaPacientesEnfermagem.add(vo);
 		}
 
 		return listaPacientesEnfermagem;
 	}
 	
+	private StatusAnamneseEvolucao obterIconeAnamneseEvolucao(Integer atdSeq, boolean enableButtonAnamneseEvolucao) {
+		if(enableButtonAnamneseEvolucao) {
+			MpmAnamneses anamnese = this.mpmAnamnesesDAO.obterAnamneseAtendimento(atdSeq);
+			if(anamnese == null || (anamnese != null && anamnese.getPendente() == DominioIndPendenteAmbulatorio.R)) {
+				return StatusAnamneseEvolucao.ANAMNESE_NAO_REALIZADA;
+			}
+			if(anamnese != null && anamnese.getPendente() == DominioIndPendenteAmbulatorio.P) {
+				return StatusAnamneseEvolucao.ANAMNESE_PENDENTE;
+			}
+			if(anamnese != null && anamnese.getPendente() == DominioIndPendenteAmbulatorio.V) {
+				//Data Atual Zerada
+				Date dataReferencia = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
+				if(!this.mpmEvolucoesDAO.verificarEvolucaoRealizadaPorSituacao(anamnese.getSeq(), 
+						DominioIndPendenteAmbulatorio.R, dataReferencia, false)) {
+					return StatusAnamneseEvolucao.EVOLUCAO_DO_DIA_NAO_REALIZADA;
+				}
+				if(this.mpmEvolucoesDAO.verificarEvolucaoRealizadaPorSituacao(anamnese.getSeq(), 
+						DominioIndPendenteAmbulatorio.P, dataReferencia, true)) {
+					return StatusAnamneseEvolucao.EVOLUCAO_DO_DIA_PENDENTE;
+				}
+				if(!this.mpmEvolucoesDAO.verificarEvolucaoSeguinteRealizadaPorSituacao(anamnese.getSeq(), 
+						DominioIndPendenteAmbulatorio.V, dataReferencia)) {
+					return StatusAnamneseEvolucao.EVOLUCAO_VENCE_NO_DIA_SEGUINTE;
+				}				
+			}
+		}
+		return null;
+	}	
+	
+	private boolean habilitarBotaoAnamneseEvolucao(Integer atdSeq, boolean disableButtonPrescrever) {
+		if (atdSeq != null) {
+			AghAtendimentos atendimento = this.getAghuFacade().obterAtendimentoEmAndamento(atdSeq);
+			if(atendimento != null && !disableButtonPrescrever){
+				if(this.getAghuFacade().verificarCaracteristicaUnidadeFuncional(atendimento.getUnidadeFuncional().getSeq(), 
+						ConstanteAghCaractUnidFuncionais.ANAMNESE_EVOLUCAO_ELETRONICA)) {	
+					return true;
+				}
+			}			
+		}
+		return false;
+	}	
 	
 	private void verificaPrevAlta(PacienteEnfermagemVO vo, VListaEpePrescricaoEnfermagem view) throws ApplicationBusinessException {
 	

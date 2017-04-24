@@ -63,14 +63,7 @@ private AghEspecialidadesDAO aghEspecialidadesDAO;
 	}
 	
 	public List<AghEspecialidades> pesquisarEspecialidadesAtivas(String parametro) {
-		AghEspecialidadesDAO dao = getAghEspecialidadesDAO();
-		List<AghEspecialidades> result = dao
-				.pesquisarEspecialidadesAtivasPorSigla(parametro);
-		if(result.isEmpty()){
-			result = dao
-			.pesquisarEspecialidadesAtivasPorNome(parametro);
-		}
-		return result;
+		return pesquisarEspecialidadesAtivas(parametro, null);
 	}
 
 	public List<AghEspecialidades> pesquisarEspecialidadesAtivasOrigemSumario(String parametro, Integer atdSeq, RapServidores servidorLogado) {
@@ -98,6 +91,18 @@ private AghEspecialidadesDAO aghEspecialidadesDAO;
 	
 	public AghEspecialidadesDAO getAghEspecialidadesDAO(){
 		return aghEspecialidadesDAO;
+	}
+
+	public List<AghEspecialidades> pesquisarEspecialidadesAtivas(
+			String parametro, List<Integer> listIdsEspe) {
+		AghEspecialidadesDAO dao = getAghEspecialidadesDAO();
+		List<AghEspecialidades> result = dao
+				.pesquisarEspecialidadesAtivasPorSigla(parametro, listIdsEspe);
+		if(result.isEmpty()){
+			result = dao
+			.pesquisarEspecialidadesAtivasPorNome(parametro, listIdsEspe);
+		}
+		return result;
 	}
 
 }

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ItensPrescricaoConfirmados_cuidados" language="groovy" pageWidth="752" pageHeight="510" orientation="Landscape" columnWidth="752" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="bd7597c0-6add-4d07-950a-bb7da3b8a20a">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<parameter name="Tipo" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="aprazamento" class="java.lang.String">
+		<fieldDescription><![CDATA[aprazamento]]></fieldDescription>
+	</field>
+	<field name="class" class="java.lang.Class">
+		<fieldDescription><![CDATA[class]]></fieldDescription>
+	</field>
+	<field name="descricao" class="java.lang.String">
+		<fieldDescription><![CDATA[descricao]]></fieldDescription>
+	</field>
+	<field name="numero" class="java.lang.Integer">
+		<fieldDescription><![CDATA[numero]]></fieldDescription>
+	</field>
+	<field name="tipo" class="java.lang.String">
+		<fieldDescription><![CDATA[tipo]]></fieldDescription>
+	</field>
+	<columnHeader>
+		<band height="17">
+			<rectangle>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="552" height="17" uuid="760f32e6-1ff6-4335-a8df-982d753b3eaf"/>
+			</rectangle>
+			<textField>
+				<reportElement x="0" y="0" width="552" height="17" uuid="f05698f1-3495-4f8a-b2d5-26f0197e446c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="11" isBold="true" isItalic="true" pdfFontName="Helvetica-BoldOblique"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="552" y="0" width="200" height="17" uuid="a1bda315-9b98-4d1b-8225-660d579408fd"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="554" y="0" width="197" height="17" uuid="30832dc9-e6e1-4b5b-be04-cb9dd1680b89"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="11" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Aprazamento]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="16" splitType="Prevent">
+			<printWhenExpression><![CDATA[$F{numero}.intValue() % 2 == 0]]></printWhenExpression>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="552" y="0" width="200" height="16" uuid="931f1fa5-fc92-4768-bccc-fa143a0874b4"/>
+			</rectangle>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="32" height="16" uuid="b2b78076-eb7c-42ed-9e59-9e83d6447367"/>
+			</rectangle>
+			<textField>
+				<reportElement x="0" y="1" width="30" height="14" uuid="059119a7-d620-4072-b5b5-cdcc511aad0a"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numero} + "."]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement stretchType="RelativeToTallestObject" x="32" y="0" width="520" height="16" uuid="973151e1-91d4-4277-af5e-dae513599696"/>
+			</rectangle>
+			<textField isStretchWithOverflow="true" pattern="">
+				<reportElement x="35" y="1" width="515" height="14" uuid="56ffc173-b789-4ff7-ab68-6357d8de99bf"/>
+				<textElement markup="html">
+					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricao}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="554" y="1" width="197" height="14" uuid="7380d7ec-f61c-4dca-a959-739a6cc13982"/>
+				<textElement markup="none">
+					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{aprazamento}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="16" splitType="Prevent">
+			<printWhenExpression><![CDATA[$F{numero}.intValue() % 2 != 0]]></printWhenExpression>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="552" y="0" width="200" height="16" backcolor="#DCDCDC" uuid="1638795a-2e93-4c64-9623-d8125f2062dc"/>
+			</rectangle>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="32" height="16" backcolor="#DCDCDC" uuid="68adcd70-36b1-4d54-9414-229d6778d05b"/>
+			</rectangle>
+			<textField>
+				<reportElement x="0" y="1" width="30" height="14" uuid="355de4c0-f1fe-40fd-8cca-fb6c5fd6909a"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numero} + "."]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement stretchType="RelativeToTallestObject" x="32" y="0" width="520" height="16" backcolor="#DCDCDC" uuid="f4269c5d-6901-438c-83fb-8ca5d4bdc66f"/>
+			</rectangle>
+			<textField isStretchWithOverflow="true" pattern="">
+				<reportElement x="35" y="1" width="515" height="14" uuid="fe4d7a29-ffa8-474d-aac6-1776c0f3f7be"/>
+				<textElement markup="html">
+					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricao}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="554" y="1" width="197" height="14" uuid="d349664f-4fc9-43e9-b9bf-5beb06121c69"/>
+				<textElement markup="none">
+					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{aprazamento}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="1"/>
+	</pageFooter>
+</jasperReport>

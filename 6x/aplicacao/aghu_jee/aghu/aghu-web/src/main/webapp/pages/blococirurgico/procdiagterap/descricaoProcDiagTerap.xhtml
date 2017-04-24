@@ -16,57 +16,57 @@
         <p:outputPanel id="panelAbas" layout="inline"> 
             <p:tabView id="resultTab" dynamic="false" activeIndex="#{descricaoProcDiagTerapController.abaSelecionada}" prependId="false"> 
             <p:ajax event="tabChange" update="Relatorio,@this, :formBotoesDescricaoProcDiagTerap:btnsDescricaoProcDiagTerap" global="false" listener="#{descricaoProcDiagTerapController.onTabChange}" async="true" ignoreAutoUpdate="true"/> 
-          	<p:tab id="aba0" title="#{messages.LABEL_DESCRICAO_PROC_DIAG_TERAP_ABA_EQUIPE}">  
+          	<p:tab name="aba0" id="aba0" title="#{messages.LABEL_DESCRICAO_PROC_DIAG_TERAP_ABA_EQUIPE}">  
               <p:outputPanel id="tabs-0" layout="inline"> 
                 <div style="overflow:auto"> 
                   <ui:include src="/pages/blococirurgico/procdiagterap/descricaoProcDiagTerapAbaEquipe.xhtml"/> 
                 </div> 
               </p:outputPanel> 
             </p:tab>  
-            <p:tab id="aba1" title="#{messages.LABEL_DESCRICAO_PROC_DIAG_TERAP_ABA_INDICACAO}"> 
+            <p:tab name="aba1" id="aba1" title="#{messages.LABEL_DESCRICAO_PROC_DIAG_TERAP_ABA_INDICACAO}"> 
               <p:outputPanel id="tabs-1" layout="inline"> 
                 <div style="overflow:auto"> 
                   <ui:include src="/pages/blococirurgico/procdiagterap/descricaoProcDiagTerapAbaIndicacao.xhtml" /> 
                 </div> 
               </p:outputPanel> 
             </p:tab>  
-            <p:tab name="aba2" id="aba2" title="#{messages.LABEL_AVAL_PRE_SEDACAO}" rendered="#{descricaoProcDiagTerapController.tecnicaSedacao}"
-            	disabled="#{!(descricaoProcDiagTerapController.isShowAvalPreSedacao())}">
+            <p:tab name="aba2" id="aba2" title="#{messages.LABEL_AVAL_PRE_SEDACAO}" 
+            	disabled="#{!(descricaoProcDiagTerapController.isShowAvalPreSedacao()) or descricaoProcDiagTerapController.tecnicaSedacao}">
               <p:outputPanel id="tabs-2" layout="inline"> 
                 <div style="overflow:auto"> 
                   <ui:include src="/pages/blococirurgico/procdiagterap/descricaoProcDiagTerapAbaAvalPreSedacao.xhtml"/> 
                 </div> 
               </p:outputPanel> 
             </p:tab>  
-            <p:tab id="aba3" title="#{messages.LABEL_PROCEDIMENTO}"> 
+            <p:tab name="aba3" id="aba3" title="#{messages.LABEL_PROCEDIMENTO}"> 
               <p:outputPanel id="tabs-3" layout="inline"> 
                 <div style="overflow:auto"> 
                   <ui:include src="/pages/blococirurgico/procdiagterap/descricaoProcDiagTerapAbaProcedimento.xhtml"/> 
                 </div> 
               </p:outputPanel> 
             </p:tab>  
-            <p:tab id="aba4" title="#{messages.LABEL_DESCRICAO}"> 
+            <p:tab name="aba4" id="aba4" title="#{messages.LABEL_DESCRICAO}"> 
               <p:outputPanel id="tabs-4" layout="inline"> 
                 <div style="overflow:auto"> 
                   <ui:include src="/pages/blococirurgico/procdiagterap/descricaoProcDiagTerapAbaTecnica.xhtml"/>
                 </div> 
               </p:outputPanel> 
             </p:tab>  
-            <p:tab id="aba5" title="#{messages.LABEL_RESULTADO}"> 
+            <p:tab name="aba5" id="aba5" title="#{messages.LABEL_RESULTADO}"> 
               <p:outputPanel id="tabs-5" layout="inline"> 
                 <div style="overflow:auto"> 
                   <ui:include src="/pages/blococirurgico/procdiagterap/descricaoProcDiagTerapAbaResultado.xhtml"/> 
                 </div> 
               </p:outputPanel> 
             </p:tab>  
-            <p:tab id="aba6" title="#{messages.LABEL_NOTAS_ADICIONAIS}" disabled="#{not descricaoProcDiagTerapController.isShowNotaAdicional()}"> 
+            <p:tab name="aba6" id="aba6" title="#{messages.LABEL_NOTAS_ADICIONAIS}" disabled="#{not descricaoProcDiagTerapController.isShowNotaAdicional()}"> 
               <p:outputPanel id="tabs-6" layout="inline"> 
                 <div style="overflow:auto"> 
                   <ui:include src="/pages/blococirurgico/procdiagterap/descricaoProcDiagTerapAbaNotaAdicional.xhtml"/> 
                 </div> 
               </p:outputPanel> 
             </p:tab>  
-            <p:tab id="aba7" title="#{messages.LABEL_CONCLUIR}"> 
+            <p:tab name="aba7" id="aba7" title="#{messages.LABEL_CONCLUIR}"> 
               <p:outputPanel id="tabs-7" layout="inline"> 
                 <div style="overflow:auto"> 
                   <ui:include src="/pages/blococirurgico/procdiagterap/descricaoProcDiagTerapAbaConcluir.xhtml"/> 

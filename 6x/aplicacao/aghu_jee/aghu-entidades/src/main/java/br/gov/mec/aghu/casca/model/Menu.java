@@ -20,13 +20,21 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Min;
 
+import org.apache.lucene.analysis.br.BrazilianAnalyzer;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.Analyzer;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Index;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.Store;
 import org.hibernate.validator.constraints.Length;
 
+import br.gov.mec.aghu.core.lucene.Fonetizador;
 import br.gov.mec.aghu.core.persistence.BaseEntityId;
 
 /**
@@ -39,6 +47,7 @@ import br.gov.mec.aghu.core.persistence.BaseEntityId;
 	@UniqueConstraint(columnNames = {"ID_APLICACAO", "PARENT_ID", "ORDEM"}) })
 @SequenceGenerator(name="cscMenuSeq", sequenceName="casca.casca_menu_sq1", allocationSize = 1)
 @org.hibernate.annotations.Cache(usage =org.hibernate.annotations.CacheConcurrencyStrategy.TRANSACTIONAL)
+@Indexed
 public class Menu extends BaseEntityId<Integer>  {
 
 	private static final long serialVersionUID = 2464749189774123218L;
@@ -104,6 +113,8 @@ public class Menu extends BaseEntityId<Integer>  {
 
 	@Column(name = "NOME", nullable = false, length = 250)	
 	@Length(max = 250, message = "Nome do menu pode conter no máximo 250 caracteres")
+	@Field(index = Index.YES, store = Store.YES)
+	@Analyzer(impl=BrazilianAnalyzer.class)
 	public String getNome() {
 		return this.nome;
 	}
@@ -111,7 +122,13 @@ public class Menu extends BaseEntityId<Integer>  {
 	public void setNome(String nome) {
 		this.nome = nome;
 	}
-
+	
+	@Transient
+	@Field(index = Index.YES, store = Store.YES)
+	public String getNomeFonetico() {
+		return Fonetizador.fonetizar(nome);
+	}
+	
 	@Column(name = "CLASSE_ICONE", length = 250)
 	@Length(max = 250, message = "Classe do ícone do menu pode conter no máximo 250 caracteres")
 	public String getClasseIcone() {
@@ -214,7 +231,7 @@ public class Menu extends BaseEntityId<Integer>  {
 
 
 	public enum Fields {
-		NOME("nome"), URL("url"), ID("id"), MENU_PAI("menuPai"), ORDEM("ordem"), APLICACAO("aplicacao"), ATIVO("ativo"), MENUS("menus"), PALAVRAS_CHAVE("palavrasChave");
+		NOME("nome"), NOME_FONETICO("nomeFonetico"), URL("url"), ID("id"), MENU_PAI("menuPai"), ORDEM("ordem"), APLICACAO("aplicacao"), ATIVO("ativo"), MENUS("menus"), PALAVRAS_CHAVE("palavrasChave");
 		private String fields;
 
 		private Fields(String fields) {

@@ -716,6 +716,7 @@
 			  <aghu:acao>
 				<mec:commandButton id="btnovaConsulta" 
 				  	value="Nova Consulta"
+				  	disabled="#{not mf:hasPermission(securityController, '/ambulatorio/gradeagendamento/disponibilidadeHorarios.xhtml,render')}"
                     immediate="true"
 				  	action="#{manterSumarioAltaPosAltaController.novaConsulta}"
 				  	ajax="true" styleClass="bt_cinza" profile="ok">

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ItensPrescricaoConfirmados_dietas" language="groovy" pageWidth="788" pageHeight="541" orientation="Landscape" columnWidth="788" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="910f6d25-fb18-4e50-b9db-bff999d4c95a">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="Tipo" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="aprazamento" class="java.lang.String">
+		<fieldDescription><![CDATA[aprazamento]]></fieldDescription>
+	</field>
+	<field name="class" class="java.lang.Class">
+		<fieldDescription><![CDATA[class]]></fieldDescription>
+	</field>
+	<field name="descricao" class="java.lang.String">
+		<fieldDescription><![CDATA[descricao]]></fieldDescription>
+	</field>
+	<field name="numero" class="java.lang.Integer">
+		<fieldDescription><![CDATA[numero]]></fieldDescription>
+	</field>
+	<field name="tipo" class="java.lang.String">
+		<fieldDescription><![CDATA[tipo]]></fieldDescription>
+	</field>
+	<field name="operacao" class="java.lang.String"/>
+	<columnHeader>
+		<band height="17" splitType="Stretch">
+			<rectangle>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="600" height="17" uuid="44d477a7-e433-4941-b35c-4c158040ce31"/>
+			</rectangle>
+			<textField>
+				<reportElement x="0" y="0" width="600" height="17" uuid="f4beb4cc-8806-416c-b1ea-5af118db2ef0"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="11" isBold="true" isItalic="true" pdfFontName="Helvetica-BoldOblique"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="600" y="0" width="188" height="17" uuid="d030bdef-0def-4602-bc06-30fc8d40dc62"/>
+			</rectangle>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="16" splitType="Prevent">
+			<printWhenExpression><![CDATA[$F{numero}.intValue() % 2 == 0]]></printWhenExpression>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="16" uuid="21b1b223-4dbc-4438-a387-67616e043478"/>
+			</rectangle>
+			<rectangle>
+				<reportElement stretchType="RelativeToTallestObject" x="50" y="0" width="550" height="16" uuid="48295514-6187-476a-90d4-9572ac63f73a"/>
+			</rectangle>
+			<textField isStretchWithOverflow="true">
+				<reportElement mode="Transparent" x="53" y="1" width="548" height="14" uuid="0fa2fb26-b3f0-451a-bd7f-26b8d1e928c1"/>
+				<textElement markup="html">
+					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricao}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="1" width="48" height="14" uuid="72d5efa4-96cb-4657-a70c-be973ad1ffb9"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-BoldOblique"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{operacao}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="600" y="0" width="188" height="16" uuid="9baad48e-c4b2-4517-b80f-1fe709ca4415"/>
+			</rectangle>
+		</band>
+		<band height="16" splitType="Prevent">
+			<printWhenExpression><![CDATA[$F{numero}.intValue() % 2 != 0]]></printWhenExpression>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="16" backcolor="#DCDCDC" uuid="60a33992-5835-4838-966b-8b7519528108"/>
+			</rectangle>
+			<rectangle>
+				<reportElement stretchType="RelativeToTallestObject" x="50" y="0" width="550" height="16" backcolor="#DCDCDC" uuid="00364bff-6005-47af-9fb1-7a614807d1eb"/>
+			</rectangle>
+			<textField isStretchWithOverflow="true">
+				<reportElement mode="Transparent" x="53" y="1" width="548" height="14" uuid="5f2b622b-90a2-459f-93ac-252cf7701333"/>
+				<textElement markup="html">
+					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricao}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="1" width="48" height="14" uuid="a2d33e0f-5f44-47d5-a58d-17c5afacb3e2"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-BoldOblique"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{operacao}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="600" y="0" width="188" height="16" backcolor="#DCDCDC" uuid="34b11d71-4cac-4e80-8605-7281fe9ce8a8"/>
+			</rectangle>
+		</band>
+	</detail>
+</jasperReport>

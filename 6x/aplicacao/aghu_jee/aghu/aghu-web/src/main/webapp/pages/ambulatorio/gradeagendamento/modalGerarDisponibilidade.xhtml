@@ -40,7 +40,7 @@
           </aghu:linha>
         </p:outputPanel>  
         <aghu:acao> 
-          <mec:commandButton id="modal_gerar_bt" value="#{messages.LABEL_GERAR}" process="@this, m_grade, m_zona, m_especialidade, m_equipe, m_dtInicio, m_dtFim, m_dataGeracao" action="#{manterGradeAgendamentoController.gerarDisponibilidade}" profile="ok" ajax="true" render="modalGerarDisponibilidadePanel"/>
+          <mec:commandButton id="modal_gerar_bt" value="#{messages.LABEL_GERAR}" process="@this, m_grade, m_zona, m_especialidade, m_equipe, m_dtInicio, m_dtFim, m_dataGeracao" action="#{manterGradeAgendamentoController.validarHorariosSobrepostos}" profile="ok" ajax="true" render="modalGerarDisponibilidadePanel, panelModalConfirmarGradesSobrepostas, listHorarioGrade"/>
           <mec:commandButton id="modal_fechar_bt" value="#{messages.LABEL_FECHAR}" onclick="PF('modalGerarDisponibilidadeWG').hide();" ajax="true" process="@this" profile="cancel"/> 
         </aghu:acao> 
       </aghu:panelGeral> 

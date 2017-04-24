@@ -108,8 +108,6 @@ public class SolicitarTransferenciaPacienteON extends BaseBusiness {
 		
 		IRegistroColaboradorFacade registroColaboradorFacade = this.getRegistroColaboradorFacade();
 		
-		validarPacienteJaPossuiAlta(solicitacao.getInternacao().getAtendimento());
-	
 		RapServidoresId rapServidoresId = new RapServidoresId();
 		rapServidoresId.setMatricula(servidorLogado.getId().getMatricula());
 		rapServidoresId.setVinCodigo(servidorLogado.getId().getVinCodigo());
@@ -324,11 +322,19 @@ public class SolicitarTransferenciaPacienteON extends BaseBusiness {
 	}
 	
 	public AinInternacao obterInternacaoPorProntuario(Integer prontuario) {
-		return getAinInternacaoDAO().obterInternacaoPorProntuario(prontuario);
+		return obterInternacaoPorProntuario(prontuario, true);
+	}
+	
+	public AinInternacao obterInternacaoPorProntuario(Integer prontuario, Boolean blnPacienteInternado) {
+		return getAinInternacaoDAO().obterInternacaoPorProntuario(prontuario, blnPacienteInternado);
 	}
 
 	public AinInternacao obterInternacaoPorLeito(String leitoId) {
-		return getAinInternacaoDAO().obterInternacaoPorLeito(leitoId);
+		return obterInternacaoPorLeito(leitoId, true);
+	}
+	
+	public AinInternacao obterInternacaoPorLeito(String leitoId, Boolean blnPacienteInternado) {
+		return getAinInternacaoDAO().obterInternacaoPorLeito(leitoId, blnPacienteInternado);
 	}
 
 	public AinSolicTransfPacientes obterSolicTransfPacientePorId(Integer seq) {

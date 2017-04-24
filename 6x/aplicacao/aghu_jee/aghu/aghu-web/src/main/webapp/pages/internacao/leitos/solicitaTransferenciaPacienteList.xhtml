@@ -25,7 +25,7 @@
         <aghu:acao> 
           <mec:commandButton value="#{messages.LABEL_PESQUISAR}" id="bt_pesquisar" action="#{solicitarTransferenciaPacientePaginatorController.pesquisar}" profile="search"/>  
           <mec:commandButton value="#{messages.LABEL_LIMPAR}" id="bt_limpar" action="#{solicitarTransferenciaPacientePaginatorController.limparPesquisa}" styleClass="bt_cinza" profile="clear"/>  
-          <mec:commandButton value="#{messages.LABEL_NOVO}" id="bt_novo" action="#{solicitarTransferenciaPacientePaginatorController.iniciarInclusao}" rendered="#{(solicitarTransferenciaPacientePaginatorController.internacao != null and solicitarTransferenciaPacientePaginatorController.internacao.dthrAltaMedica == null)}" profile="add"/>  
+          <mec:commandButton value="#{messages.LABEL_NOVO}" id="bt_novo" action="#{solicitarTransferenciaPacientePaginatorController.iniciarInclusao}" rendered="#{solicitarTransferenciaPacientePaginatorController.exibirBotaoNovo}" profile="add"/>  
           <mec:commandButton value="#{messages.LABEL_CANCELAR}" id="bt_cancelar" rendered="#{solicitarTransferenciaPacientePaginatorController.cameFrom != null and solicitarTransferenciaPacientePaginatorController.cameFrom != ''}" action="#{solicitarTransferenciaPacientePaginatorController.cancelarPesquisaSolicitarTransferenciaPaciente}" profile="cancel"/> 
         </aghu:acao>  
         <p:outputPanel id="solTransfPac_lista" layout="inline"> 

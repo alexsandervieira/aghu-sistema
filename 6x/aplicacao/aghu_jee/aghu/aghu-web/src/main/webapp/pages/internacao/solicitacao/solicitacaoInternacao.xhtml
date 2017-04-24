@@ -64,10 +64,10 @@
 							id="codigoConvenio">
 							<p:ajax event="blur" bypassUpdates="false" process="@this" />
 						</mec:inputNumero>
-						<mec:field name="codigoPlano" required="false"
+						<mec:field id="codigoPlano" required="false"
 							label="#{messages.CODIGO_PLANO}"
 							title="#{messages.TITLE_LABEL_CODIGO_PLANO_INT}">
-							<p:inputText name="codigoPlanoInput" id="codigoPlanoInput"
+							<p:inputText id="codigoPlanoInput"
 								size="2" styleClass="numerico"
 								readonly="#{not empty solicitacaoInternacaoController.convenioSaudePlano}"
 								disabled="#{not empty solicitacaoInternacaoController.convenioSaudePlano}"
@@ -91,7 +91,7 @@
 								id="planoConvenio"
 								controller="#{solicitacaoInternacaoController}"
 								value="#{solicitacaoInternacaoController.convenioSaudePlano}"
-								render="codigoConvenio,codigoPlano}">
+								render="codigoConvenio,codigoPlano">
 								<p:column>#{item.convenioSaude.descricao} - #{item.descricao}</p:column>
 							</mec:suggestionBox>
 						</p:outputPanel>
@@ -147,18 +147,49 @@
 							title="#{messages.TITLE_LABEL_SITUACAO_SOL_INT}" id="situacao" />
 					</aghu:linha>
 					<aghu:linha>
-						<mec:suggestionBox label="#{messages.LABEL_SSM}"
-							title="#{messages.TITLE_LABEL_SSM_SOL_INT}"
+						<mec:suggestionBox label="#{messages.LABEL_CID}"
+							title="#{messages.LABEL_CID_INTERNACAO}"
+							suggestionAction="pesquisarCids" descricaoInput="codigo"
+							descricaoLabel="descricao" width="400" required="true"
+							onkeypress="return disableEnterKey(event);" id="sbCid"
+							controller="#{solicitacaoInternacaoController}"
+							value="#{solicitacaoInternacaoController.solicitacaoInternacao.cid}">
+							<p:column>
+								<f:facet name="header">
+									<b>#{messages.LABEL_SEQ}</b>
+								</f:facet> #{item.codigo}
+               				</p:column>
+							<p:column>
+								<f:facet name="header">
+									<b>#{messages.LABEL_DESCRICAO}</b>
+								</f:facet> #{item.descricao}
+                			</p:column>
+						</mec:suggestionBox>
+					</aghu:linha>
+					<aghu:linha>
+						<mec:suggestionBox label="#{messages.LABEL_SSM_COM_PROCEDIMENTO}"
+							title="#{messages.TITLE_LABEL_SSM_SOL_INT}" required="#{solicitacaoInternacaoController.campoProcedimentoObrigatorio}"
 							converter="#{fatVlrItemProcedHospCompsConverter}"
 							descricaoInput="fatItensProcedHospitalar.codTabela"
 							descricaoLabel="fatItensProcedHospitalar.descricao"
 							suggestionAction="pesquisarSsm" id="ssm"
+							render="tempoPrevisto, diasMaximoInternacao"
 							controller="#{solicitacaoInternacaoController}"
 							value="#{solicitacaoInternacaoController.vlrItemProcedHospComp}">
 							<p:column>#{item.fatItensProcedHospitalar.codTabela}</p:column>
 							<p:column>#{item.fatItensProcedHospitalar.descricao}</p:column>
 							<p:column>#{item.fatItensProcedHospitalar.sexo}</p:column>
 						</mec:suggestionBox>
+						<mec:field id="diasMaximoInternacao" required="false"
+							label="#{messages.LABEL_TEMPO_PREVISTO_INTERNACAO}"
+							title="#{messages.TITLE_TEMPO_PREVISTO_INTERNACAO}">
+							<p:inputText id="tempoPrevisto"
+								disabled="true"
+								value="#{solicitacaoInternacaoController.vlrItemProcedHospComp.fatItensProcedHospitalar.quantDiasFaturamento}"
+								size="4"
+								maxlength="3">
+							</p:inputText>
+						</mec:field>
 					</aghu:linha>
 					<aghu:linha>
 						<mec:inputTextArea cols="50" label="#{messages.LABEL_OBSERVACAO}"
@@ -171,7 +202,7 @@
 			</aghu:panelGeral>
 			<aghu:acao>
 				<mec:commandButton id="bt_salvar" value="#{messages.LABEL_GRAVAR}"
-					action="#{solicitacaoInternacaoController.salvar}" process="@this"
+					action="#{solicitacaoInternacaoController.salvar}" process="@this, @(#observacao),@(#dtPrevInternacao)"
 					profile="ok" ajax="true" 
 					disabled="#{mf:hasPermission(securityController, 'internacao,somenteLeitura')}"/>
 				<mec:commandButton value="#{messages.LABEL_CANCELAR}" id="cancelar"

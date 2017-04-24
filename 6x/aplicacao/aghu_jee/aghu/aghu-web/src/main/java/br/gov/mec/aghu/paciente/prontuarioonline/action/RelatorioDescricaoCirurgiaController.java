@@ -13,8 +13,6 @@ import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.transaction.SystemException;
 
-import net.sf.jasperreports.engine.JRException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,22 +21,27 @@ import org.jboss.weld.context.http.Http;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
+import com.itextpdf.text.DocumentException;
+
 import br.gov.mec.aghu.action.impressao.SistemaImpressao;
 import br.gov.mec.aghu.action.report.ActionReport;
+import br.gov.mec.aghu.blococirurgico.action.DescricaoCirurgicaController;
 import br.gov.mec.aghu.blococirurgico.business.IBlocoCirurgicoFacade;
-import br.gov.mec.aghu.dominio.DominioTipoDocumento;
-import br.gov.mec.aghu.impressao.SistemaImpressaoException;
-import br.gov.mec.aghu.model.MbcCirurgias;
-import br.gov.mec.aghu.paciente.prontuarioonline.business.IProntuarioOnlineFacade;
-import br.gov.mec.aghu.paciente.prontuarioonline.vo.AvaliacaoPreSedacaoVO;
-import br.gov.mec.aghu.paciente.prontuarioonline.vo.DescricaoCirurgiaVO;
+import br.gov.mec.aghu.blococirurgico.vo.ProfDescricaoCirurgicaVO;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.core.persistence.BaseEntity;
 import br.gov.mec.aghu.core.report.DocumentoJasper;
-
-import com.itextpdf.text.DocumentException;
+import br.gov.mec.aghu.dominio.DominioTipoDocumento;
+import br.gov.mec.aghu.impressao.SistemaImpressaoException;
+import br.gov.mec.aghu.model.MbcAvalPreSedacao;
+import br.gov.mec.aghu.model.MbcAvalPreSedacaoId;
+import br.gov.mec.aghu.model.MbcCirurgias;
+import br.gov.mec.aghu.paciente.prontuarioonline.business.IProntuarioOnlineFacade;
+import br.gov.mec.aghu.paciente.prontuarioonline.vo.AvaliacaoPreSedacaoVO;
+import br.gov.mec.aghu.paciente.prontuarioonline.vo.DescricaoCirurgiaVO;
+import net.sf.jasperreports.engine.JRException;
 
 
 
@@ -72,6 +75,9 @@ public class RelatorioDescricaoCirurgiaController extends ActionReport {
 	
 	@Inject
 	private SistemaImpressao sistemaImpressao;
+	
+	@Inject
+	private DescricaoCirurgicaController descricaoCirurgicaController;
 	
 	@EJB
 	private IBlocoCirurgicoFacade blocoCirurgicoFacade;
@@ -143,23 +149,31 @@ public class RelatorioDescricaoCirurgiaController extends ActionReport {
 		try {
 			colecao =  prontuarioOnlineFacade.pesquisarDescricaoCirurgicaPol(crgSeq, seqpMbcDescCrg, previa, contextPath);
 			
-			if(avaliacaoPreSedacaoVO != null){
-				for(DescricaoCirurgiaVO c : colecao){
-					c.setAsa(avaliacaoPreSedacaoVO.getAsa());
-					c.setAvaliacaoClinica(avaliacaoPreSedacaoVO.getAvaliacaoClinica());
-					c.setComorbidades(avaliacaoPreSedacaoVO.getComorbidades());
-					c.setDescViaAereas(avaliacaoPreSedacaoVO.getDescViaAereas());
-					c.setExameFisico(avaliacaoPreSedacaoVO.getExameFisico());
-					c.setNome(avaliacaoPreSedacaoVO.getNome());
-					c.setNroRegConselho(avaliacaoPreSedacaoVO.getNroRegConselho());
-				}
-			}	
-		return colecao;
+			MbcAvalPreSedacaoId id = new MbcAvalPreSedacaoId(crgSeq, seqpMbcDescCrg);
+			MbcAvalPreSedacao avalPreSedacao = blocoCirurgicoFacade.pesquisarMbcAvalPreSedacaoPorDdtSeq(id);
+			ProfDescricaoCirurgicaVO executorSedacao = blocoCirurgicoFacade.obterProfissionalDescricaoAnestesistaPorDescricaoCirurgica(crgSeq, seqpMbcDescCrg);
+			this.descricaoCirurgicaController.obterDadosAvalPreSedacao(avalPreSedacao, executorSedacao);
+			this.setAvaliacaoPreSedacaoVO(this.descricaoCirurgicaController.getAvaliacaoPreSedacaoVO());
+			this.populaAvaliacaoPreSedacaoRelatorio();
+			
+			return colecao;
 		
 		} catch (BaseException  e) {
 			apresentarExcecaoNegocio(e);
 		}
 		return null;
+	}
+
+	public void populaAvaliacaoPreSedacaoRelatorio() {
+		for(DescricaoCirurgiaVO c : colecao){
+			c.setAsa(avaliacaoPreSedacaoVO.getAsa());
+			c.setAvaliacaoClinica(avaliacaoPreSedacaoVO.getAvaliacaoClinica());
+			c.setComorbidades(avaliacaoPreSedacaoVO.getComorbidades());
+			c.setDescViaAereas(avaliacaoPreSedacaoVO.getDescViaAereas());
+			c.setExameFisico(avaliacaoPreSedacaoVO.getExameFisico());
+			c.setNome(avaliacaoPreSedacaoVO.getNome());
+			c.setNroRegConselho(avaliacaoPreSedacaoVO.getNroRegConselho());
+		}
 	}
 
 	/**

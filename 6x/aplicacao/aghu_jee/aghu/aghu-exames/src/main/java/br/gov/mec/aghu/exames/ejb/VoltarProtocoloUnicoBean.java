@@ -83,19 +83,19 @@ import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 @SuppressWarnings({ "PMD.AghuTooManyMethods", "PMD.CyclomaticComplexity", "PMD.ExcessiveClassLength", "PMD.PackagePrivateBaseBusiness", "PMD.AtributoEmSeamContextManager" })
 public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProtocoloUnicoBeanLocal {
 
-	private static final String COMMA_COMUNICACAO = ", comunicaÃ§Ã£o ";
+	private static final String COMMA_COMUNICACAO = ", comunicação ";
 
-	private static final String COMMA_SOLICITACAO = ", solicitaÃ§Ã£o ";
+	private static final String COMMA_SOLICITACAO = ", solicitação ";
 
 	private static final String COMMA_EXAME = ", exame ";
 
-	private static final String _DA_COMUNICACAO_ = " da comunicaÃ§Ã£o ";
+	private static final String _DA_COMUNICACAO_ = " da comunicação ";
 
-	private static final String _DA_SOLICITACAO_ = " da solicitaÃ§Ã£o ";
+	private static final String _DA_SOLICITACAO_ = " da solicitação ";
 
 	private static final String EXAME_ = "Exame ";
 
-	private static final String _NAO_EXISTE_NO_AGHU = " nÃ£o existe no AGHU.";
+	private static final String _NAO_EXISTE_NO_AGHU = " não existe no AGHU.";
 
 	private static final String _EXAME_ = " exame ";
 
@@ -312,7 +312,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 
 			// CompÃµe o complemento na mensagem de log na finalizaÃ§Ã£o. NÃ£o Ã© utilizado nas Regras
 			String msgLogErros = logarErros ? "ERROS " : "";
-			String msgLogRestricoes = logarRestricoes ? "RESTRIÃ‡Ã•ES" : "";
+			String msgLogRestricoes = logarRestricoes ? "RESTRIÇÕES" : "";
 			String msgLogErrosRestricoes = (StringUtils.isNotEmpty(msgLogErros) || StringUtils.isNotEmpty(msgLogRestricoes)) ? " COM " + msgLogErros + msgLogRestricoes : "";
 
 			// Exibe log de finalizaÃ§Ã£o
@@ -443,7 +443,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 
 				voVariaveisPacote.setPodeGravar(false);
 
-				String observacao = "AEL-03126 - ComunicaÃ§Ã£o " + pIdComunicacao + " sem amostras.";
+				String observacao = "AEL-03126 - Comunicação " + pIdComunicacao + " sem amostras.";
 
 				throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
 
@@ -601,8 +601,8 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 									voVariaveisPacote.setPodeGravar(false);
 								}
 
-								String observacao = "AEL-03117 - SolicitaÃ§Ã£o-Amostra: " + aghSolicitacao + "-" + aghAmostra + _DA_COMUNICACAO_ + idComunicacao
-								+ " - nÃ£o existem exames em execuÃ§Ã£o.";
+								String observacao = "AEL-03117 - Solicitação-Amostra: " + aghSolicitacao + "-" + aghAmostra + _DA_COMUNICACAO_ + idComunicacao
+								+ " - não existem exames em execução.";
 
 								throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
 
@@ -622,7 +622,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 						voVariaveisPacote.setPodeGravar(false);
 					}
 
-					String observacao = "AEL-03118 - SolicitaÃ§Ã£o-Amostra: " + aghSolicitacao + "-" + aghAmostra + _DA_COMUNICACAO_ + idComunicacao
+					String observacao = "AEL-03118 - Solicitação-Amostra: " + aghSolicitacao + "-" + aghAmostra + _DA_COMUNICACAO_ + idComunicacao
 					+ " - NÃ£o existe esta amostra no AGHU.";
 
 					throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
@@ -646,7 +646,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 						voVariaveisPacote.setPodeGravar(false);
 					}
 
-					String observacao = "AEL-03120 - SolicitaÃ§Ã£o-Amostra: " + aghSolicitacao + "-" + aghAmostra + _DA_COMUNICACAO_ + idComunicacao + "- chegou sem exames.";
+					String observacao = "AEL-03120 - Solicitação-Amostra: " + aghSolicitacao + "-" + aghAmostra + _DA_COMUNICACAO_ + idComunicacao + "- chegou sem exames.";
 
 					throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
 
@@ -760,7 +760,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 
 				} else if (vContadorUnidadeExec > 1) {
 
-					String observacao = "Mais de uma Unid. Executora no AHUU" + vUnidadeExecutora + _EXAME_ + exameLis + SOLICIT + pAghSolicitacao + COMUNIC
+					String observacao = "Mais de uma Unid. Executora no AGHU" + vUnidadeExecutora + _EXAME_ + exameLis + SOLICIT + pAghSolicitacao + COMUNIC
 					+ pIdComunicacao + ".";
 
 					throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
@@ -783,9 +783,9 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 				}
 
 				// Verifica servidor responsÃ¡vel pela liberaÃ§Ã£o
-				if (profissionalLiberacao == null || this.getRegistroColaboradorFacade().obterRapServidorPorVinculoMatricula(vMatricula, vVinculo) == null) {
+				if (profissionalLiberacao == null || vVinculo == null || vMatricula == null || this.getRegistroColaboradorFacade().obterRapServidorPorVinculoMatricula(vMatricula, vVinculo) == null) {
 
-					String observacao = "Prof. LiberaÃ§Ã£o " + vVinculo + "-" + vMatricula + _EXAME_ + exameLis + SOLICIT + pAghSolicitacao + COMUNIC + pIdComunicacao
+					String observacao = "Prof. Liberação " + vVinculo + "-" + vMatricula + _EXAME_ + exameLis + SOLICIT + pAghSolicitacao + COMUNIC + pIdComunicacao
 					+ _NAO_EXISTE_NO_AGHU;
 
 					throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
@@ -836,7 +836,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 
 				// Valida item de solicitaÃ§Ã£o
 				if (vAghItemSol == null) {
-					String observacao = EXAME_ + exameLis + SOLICIT + pAghSolicitacao + COMUNIC + pIdComunicacao + " tem erro em solicitaÃ§Ã£o.";
+					String observacao = EXAME_ + exameLis + SOLICIT + pAghSolicitacao + COMUNIC + pIdComunicacao + " tem erro em solicitação.";
 
 					throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
 				}
@@ -883,7 +883,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 				} else if (vSituacaoSolicitacao != null && vSituacaoSolicitacao.equals(voVariaveisPacote.getSituacaoLiberado())) {
 
 					voVariaveisPacote.setMensagemAlerta("AEL-03399 - ");
-					voVariaveisPacote.setLocalizacaoAlerta("Comunicacao " + pIdComunicacao + " enviou Exames jÃ¡ liberados no AGHU para a solicitaÃ§Ã£o - amostra " + pAghSolicitacao
+					voVariaveisPacote.setLocalizacaoAlerta("Comunicação " + pIdComunicacao + " enviou Exames já liberados no AGHU para a solicitação - amostra " + pAghSolicitacao
 							+ " - " + pAghmostra);
 
 				}
@@ -1100,7 +1100,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 					if (contadorEquipamentos == null) {
 
 						String observacao = "Equipamento " + detalhamentoMensagemErroEquipamento + " do resultado " + regResultados.getId() + COMMA_EXAME + exameLis
-						+ COMMA_SOLICITACAO + aghSolicitacao + COMMA_COMUNICACAO + idComunicacao + ", nÃ£o existe ou estÃ¡ inativo no AGHU.";
+						+ COMMA_SOLICITACAO + aghSolicitacao + COMMA_COMUNICACAO + idComunicacao + ", não existe ou estão inativo no AGHU.";
 
 						throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
 
@@ -1267,7 +1267,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 								voVariaveisPacote.getMaterialAnalise(), substr_cod_germe_lis);
 
 						String observacao = "Antibiograma" + regAntibio.getId() + ", resultado " + regAntibio.getLwsComResultado().getId() + COMMA_EXAME + p_exame_lis
-						+ detalhamentoMensagemErroCampoLaudo + ",  solicitaÃ§Ã£o " + p_agh_solicitacao + " , comunicacao" + p_id_comunicacao + " nÃ£o tem versÃ£o ativa.";
+						+ detalhamentoMensagemErroCampoLaudo + ",  solicitação " + p_agh_solicitacao + " , comunicacao" + p_id_comunicacao + " não tem versão ativa.";
 
 						throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
 					} else {
@@ -1348,8 +1348,8 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 
 				if (v_conta_ordemgerme > 1) {
 
-					String observacao = "Mais de um reg. ordemGerme no antibiograma" + regAntibio.getId() + ", resultado " + regAntibio.getLwsComResultado().getId() + COMMA_EXAME
-					+ p_exame_lis + ",  solicitaÃ§Ã£o " + p_agh_solicitacao + " , comunicacao" + p_id_comunicacao + ".";
+					String observacao = "Mais de um reg. ordem germe no antibiograma" + regAntibio.getId() + ", resultado " + regAntibio.getLwsComResultado().getId() + COMMA_EXAME
+					+ p_exame_lis + ",  solicitação " + p_agh_solicitacao + " , comunicação" + p_id_comunicacao + ".";
 
 					throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
 
@@ -1446,14 +1446,14 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 				if (isRisValido && v_conta_droga > 1) {
 
 					String observacao = "Mais de um registro droga. Antibiograma" + regAntibio.getId() + ", resultado " + regAntibio.getLwsComResultado().getId() + COMMA_EXAME
-					+ p_exame_lis + ",  solicitaÃ§Ã£o " + p_agh_solicitacao + " , comunicacao" + p_id_comunicacao + ".";
+					+ p_exame_lis + ",  solicitação " + p_agh_solicitacao + " , comunicação" + p_id_comunicacao + ".";
 
 					throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
 				}
 
 				if (isRisValido && v_conta_droga == 0) {
 
-					String observacao = "Nenhum registro droga. Exame" + p_exame_lis + _DA_SOLICITACAO_ + p_agh_solicitacao + "  da comunicacao" + p_id_comunicacao + ".";
+					String observacao = "Nenhum registro droga. Exame" + p_exame_lis + _DA_SOLICITACAO_ + p_agh_solicitacao + "  da comunicação" + p_id_comunicacao + ".";
 
 					throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
 				} else {
@@ -1624,14 +1624,14 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 				if (listaVersaoAtiva.isEmpty()) {
 
 					String observacao = EXAME_ + pExameLis + detalhamentoMensagemErroCampoLaudo + _DA_SOLICITACAO_ + pAghSolicitacao + _DA_COMUNICACAO_ + pIdComunicacao
-					+ " nÃ£o tem versÃ£o ativa.";
+					+ " não tem versão ativa.";
 
 					throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
 
 				} else if (listaVersaoAtiva.size() > 1) { // Verifica se o exame tem mais de uma versÃ£o ativa
 
 					String observacao = EXAME_ + pExameLis + detalhamentoMensagemErroCampoLaudo + _DA_SOLICITACAO_ + pAghSolicitacao + _DA_COMUNICACAO_ + pIdComunicacao
-					+ " mais de uma versÃ£o ativa ou campo laudo repetido.";
+					+ " mais de uma versão ativa ou campo laudo repetido.";
 
 					throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
 
@@ -1659,7 +1659,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 				if (!DominioLwsTipoResultado.QUANTITATIVO.equals(tipoResultado) && !DominioLwsTipoResultado.QUALITATIVO.equals(tipoResultado)) {
 
 					String observacao = "Tipo de resultado do exame " + pExameLis + _DA_SOLICITACAO_ + pAghSolicitacao + _DA_COMUNICACAO_ + pIdComunicacao
-					+ " nÃ£o Ã© 1 (Quantitativo) nem 2 (Qualitativo).";
+					+ " não á 1 (Quantitativo) nem 2 (Qualitativo).";
 
 					throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
 
@@ -1866,7 +1866,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 					 */
 					if (parametroCamposLaudo == null) {
 
-						String observacao = "NÃ£o ha registro em 'ael_parametros_campos_laudos' : Exame " + exameLis + COMMA_SOLICITACAO + aghSolicitacao + COMMA_COMUNICACAO
+						String observacao = "Não ha registro em 'ael_parametros_campos_laudos' : Exame " + exameLis + COMMA_SOLICITACAO + aghSolicitacao + COMMA_COMUNICACAO
 						+ idComunicacao + ".";
 
 						throw new VoltarProtocoloUnicoErroLocalizado(observacao, VoltarProtocoloUnicoBeanRNExceptionCode.AEL_ERRO_PROCESSAMENTO_GESTAM_ROLLBACK);
@@ -2036,7 +2036,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 			// Quando o erro Ã© VERIFICADO
 			VoltarProtocoloUnicoErroVerificado erroVerificado = (VoltarProtocoloUnicoErroVerificado) e;
 
-			String observacao = "Comunicacao " + idComunicacao;
+			String observacao = "Comunicação " + idComunicacao;
 			if (erroVerificado.getObservacao() != null) {
 				observacao = erroVerificado.getObservacao();
 			}
@@ -2050,7 +2050,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 		} else {
 
 			// ERRO GENÃ‰RICO!
-			String observacao = "ERRO GENERICO na comunicaÃ§Ã£o " + idComunicacao;
+			String observacao = "ERRO GENERICO na comunicação " + idComunicacao;
 			String observacaoErroVerificado = this.obterObservacaoErroVerificado(e);
 
 			// Retorna mensagem de ERRO GENÃ‰RICO
@@ -2073,7 +2073,7 @@ public class VoltarProtocoloUnicoBean extends BaseBusiness implements VoltarProt
 		String solicitacao = regAmostrasComunicacao.getSolicitacao();
 		String amostra = regAmostrasComunicacao.getCodigoAmostra();
 
-		String observacao = "SolicitaÃ§Ã£o-Amostra: " + solicitacao + "-" + amostra + _DA_COMUNICACAO_ + idComunicacao;
+		String observacao = "Solicitação-Amostra: " + solicitacao + "-" + amostra + _DA_COMUNICACAO_ + idComunicacao;
 		String observacaoErroVerificado = this.obterObservacaoErroVerificado(e);
 
 		return observacao + observacaoErroVerificado;

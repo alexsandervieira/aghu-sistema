@@ -19,7 +19,7 @@
               <mec:inputNumero id="codigo" label="#{messages.LABEL_CODIGO}" value="#{manterValorNormalidadeCampoController.campoLaudo.seq}" readonly="true" size="6" maxlength="5"/>  
               <p:outputPanel id="panelTooltipNome" layout="inline"> 
                 <mec:inputText id="nome" label="#{messages.LABEL_NOME_EXAMES}" value="#{manterValorNormalidadeCampoController.campoLaudo.nome}" size="25" maxlength="50" readonly="true" required="false"/>  
-                <p:tooltip  direction="bottom-right" styleClass="tooltip" layout="block">  
+                <p:tooltip  for="nome" direction="bottom-right" styleClass="tooltip" layout="block">  
                   <h:outputText value="#{manterValorNormalidadeCampoController.campoLaudo.nome}"/> 
                 </p:tooltip> 
               </p:outputPanel>  
@@ -35,15 +35,15 @@
             <aghu:linha> 
               <mec:suggestionBox required="false" id="unidadeMedida" var="unidadeMedida" itemValue="#{unidadeMedida}" label="#{messages.LABEL_UNIDADE_MEDIDA}" title="#{messages.TITLE_UNIDADE_MEDIDA_NORMALIDADE}" descricaoInput="seq" descricaoLabel="descricao" suggestionAction="pesquisarUnidadesMedida" readonly="#{not empty manterValorNormalidadeCampoController.valorNormalidCampo.id}" width="300" rendered="#{mf:hasPermission(securityController,'manterValoresNormalidadeCampo,executar')}" controller="#{manterValorNormalidadeCampoController}" value="#{manterValorNormalidadeCampoController.valorNormalidCampo.unidadeMedida}"> 
                 <p:column> 
-                  <f:facet name="header"> 
-                    <b>#{messages.LABEL_CODIGO}</b> 
-                  </f:facet> #{unidadeMedida.seq}
-                </p:column>  
-                <p:column> 
-                  <f:facet name="header"> 
-                    <b>#{messages.LABEL_DESCRICAO}</b> 
-                  </f:facet> #{unidadeMedida.descricao}
-                </p:column> 
+                <f:facet name="header"> 
+                  <h:outputText value="#{messages.LABEL_CODIGO}" style="font-weight: bold;"/> 
+                </f:facet> #{unidadeMedida.seq}
+              	</p:column>  
+               	<p:column> 
+                <f:facet name="header"> 
+                  <h:outputText value="#{messages.LABEL_DESCRICAO}" style="font-weight: bold;"/> 
+                </f:facet> #{unidadeMedida.descricao}
+              	</p:column>  
               </mec:suggestionBox>  
               <mec:inputText label="#{messages.LABEL_VALOR_MIN}" title="#{messages.TITLE_VALOR_MIN}" value="#{manterValorNormalidadeCampoController.valorNormalidCampo.valorMinimo}" size="15" maxlength="15" readonly="#{not empty manterValorNormalidadeCampoController.valorNormalidCampo.id}" required="false" rendered="#{mf:hasPermission(securityController,'manterValoresNormalidadeCampo,executar')}" id="vlrMinimo"/>  
               <mec:inputText label="#{messages.LABEL_VALOR_MAXIMO_NORMALIDADE}" title="#{messages.TITLE_VALOR_MAXIMO_NORMALIDADE}" value="#{manterValorNormalidadeCampoController.valorNormalidCampo.valorMaximo}" size="15" maxlength="15" readonly="#{not empty manterValorNormalidadeCampoController.valorNormalidCampo.id}" required="false" rendered="#{mf:hasPermission(securityController,'manterValoresNormalidadeCampo,executar')}" id="vlrMaximo"/>  
@@ -89,6 +89,7 @@
                       <h:outputText value="#{messages.LABEL_CODIGO}"/> 
                     </f:facet>  
                     <h:outputText value="#{_item.id.seqp}"/>  
+                    <ui:remove>
                     <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAceitavel(_item)}"/>  
                       <br clear="none"/>  
@@ -97,7 +98,8 @@
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAbsurdo(_item)}"/>  
                       <br clear="none"/>  
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMaxAbsurdo(_item)}"/> 
-                    </p:tooltip> 
+                    </p:tooltip>
+                    </ui:remove> 
                   </p:column>  
                   <p:column style="#{(_item.id == manterValorNormalidadeCampoController.normalidadeCampoId)?'background-color:#EEE8AA':''}"> 
                     <f:facet name="header" style="white-space:nowrap;"> 
@@ -105,7 +107,8 @@
                     </f:facet>  
                     <h:outputText value="#{_item.dthrInicial}"> 
                       <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/> 
-                    </h:outputText>  
+                    </h:outputText>
+                    <ui:remove>  
                     <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAceitavel(_item)}"/>  
                       <br clear="none"/>  
@@ -114,7 +117,8 @@
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAbsurdo(_item)}"/>  
                       <br clear="none"/>  
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMaxAbsurdo(_item)}"/> 
-                    </p:tooltip> 
+                    </p:tooltip>
+                    </ui:remove> 
                   </p:column>  
                   <p:column style="#{(_item.id == manterValorNormalidadeCampoController.normalidadeCampoId)?'background-color:#EEE8AA':''}"> 
                     <f:facet name="header" style="white-space:nowrap;"> 
@@ -122,7 +126,8 @@
                     </f:facet>  
                     <h:outputText value="#{_item.dthrFinal}"> 
                       <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/> 
-                    </h:outputText>  
+                    </h:outputText>
+                    <ui:remove>  
                     <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAceitavel(_item)}"/>  
                       <br clear="none"/>  
@@ -131,13 +136,15 @@
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAbsurdo(_item)}"/>  
                       <br clear="none"/>  
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMaxAbsurdo(_item)}"/> 
-                    </p:tooltip> 
+                    </p:tooltip>
+                    </ui:remove> 
                   </p:column>  
                   <p:column style="#{(_item.id == manterValorNormalidadeCampoController.normalidadeCampoId)?'background-color:#EEE8AA':''}"> 
                     <f:facet name="header" style="white-space:nowrap;"> 
                       <h:outputText value="#{messages.LABEL_VALOR_MIN}"/> 
                     </f:facet>  
-                    <h:outputText value="#{_item.valorMinimo}"/>  
+                    <h:outputText value="#{_item.valorMinimo}"/>
+                    <ui:remove>  
                     <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAceitavel(_item)}"/>  
                       <br clear="none"/>  
@@ -146,13 +153,15 @@
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAbsurdo(_item)}"/>  
                       <br clear="none"/>  
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMaxAbsurdo(_item)}"/> 
-                    </p:tooltip> 
+                    </p:tooltip>
+                    </ui:remove> 
                   </p:column>  
                   <p:column style="#{(_item.id == manterValorNormalidadeCampoController.normalidadeCampoId)?'background-color:#EEE8AA':''}"> 
                     <f:facet name="header" style="white-space:nowrap;"> 
                       <h:outputText value="#{messages.LABEL_VALOR_MAXIMO}"/> 
                     </f:facet>  
-                    <h:outputText value="#{_item.valorMaximo}"/>  
+                    <h:outputText value="#{_item.valorMaximo}"/>
+                    <ui:remove>  
                     <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAceitavel(_item)}"/>  
                       <br clear="none"/>  
@@ -161,13 +170,15 @@
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAbsurdo(_item)}"/>  
                       <br clear="none"/>  
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMaxAbsurdo(_item)}"/> 
-                    </p:tooltip> 
+                    </p:tooltip>
+                    </ui:remove> 
                   </p:column>  
                   <p:column style="#{(_item.id == manterValorNormalidadeCampoController.normalidadeCampoId)?'background-color:#EEE8AA':''}"> 
                     <f:facet name="header" style="white-space:nowrap;"> 
                       <h:outputText value="#{messages.LABEL_QTDE_CASAS_DEC}"/> 
                     </f:facet>  
-                    <h:outputText value="#{_item.qtdeCasasDecimais}"/>  
+                    <h:outputText value="#{_item.qtdeCasasDecimais}"/>
+                    <ui:remove>  
                     <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAceitavel(_item)}"/>  
                       <br clear="none"/>  
@@ -176,13 +187,15 @@
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAbsurdo(_item)}"/>  
                       <br clear="none"/>  
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMaxAbsurdo(_item)}"/> 
-                    </p:tooltip> 
+                    </p:tooltip>
+                    </ui:remove> 
                   </p:column>  
                   <p:column style="#{(_item.id == manterValorNormalidadeCampoController.normalidadeCampoId)?'background-color:#EEE8AA':''}"> 
                     <f:facet name="header" style="white-space:nowrap;"> 
                       <h:outputText value="#{messages.LABEL_UNID}"/> 
                     </f:facet>  
-                    <h:outputText value="#{_item.unidadeMedida.seq}"/>  
+                    <h:outputText value="#{_item.unidadeMedida.seq}"/>
+                    <ui:remove>  
                     <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAceitavel(_item)}"/>  
                       <br clear="none"/>  
@@ -191,13 +204,15 @@
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAbsurdo(_item)}"/>  
                       <br clear="none"/>  
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMaxAbsurdo(_item)}"/> 
-                    </p:tooltip> 
+                    </p:tooltip>
+                    </ui:remove> 
                   </p:column>  
                   <p:column style="#{(_item.id == manterValorNormalidadeCampoController.normalidadeCampoId)?'background-color:#EEE8AA':''}"> 
                     <f:facet name="header" style="white-space:nowrap;"> 
                       <h:outputText value="#{messages.LABEL_SEXO}"/> 
                     </f:facet>  
                     <h:outputText value="#{_item.sexo}"/>  
+                    <ui:remove>
                     <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAceitavel(_item)}"/>  
                       <br clear="none"/>  
@@ -206,13 +221,15 @@
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAbsurdo(_item)}"/>  
                       <br clear="none"/>  
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMaxAbsurdo(_item)}"/> 
-                    </p:tooltip> 
+                    </p:tooltip>
+                    </ui:remove> 
                   </p:column>  
                   <p:column style="#{(_item.id == manterValorNormalidadeCampoController.normalidadeCampoId)?'background-color:#EEE8AA':''}"> 
                     <f:facet name="header" style="white-space:nowrap;"> 
                       <h:outputText value="#{messages.LABEL_IDADE}"/> 
                     </f:facet>  
                     <h:outputText value="#{_item.idadeMinima}  #{_item.unidMedidaIdadeMin.descricao}"/>  
+                    <ui:remove>
                     <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAceitavel(_item)}"/>  
                       <br clear="none"/>  
@@ -221,13 +238,15 @@
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAbsurdo(_item)}"/>  
                       <br clear="none"/>  
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMaxAbsurdo(_item)}"/> 
-                    </p:tooltip> 
+                    </p:tooltip>
+                    </ui:remove> 
                   </p:column>  
                   <p:column style="#{(_item.id == manterValorNormalidadeCampoController.normalidadeCampoId)?'background-color:#EEE8AA':''}"> 
                     <f:facet name="header" style="white-space:nowrap;"> 
                       <h:outputText value="#{messages.LABEL_IDADE_MAX}"/> 
                     </f:facet>  
                     <h:outputText value="#{_item.idadeMaxima}  #{_item.unidMedidaIdade.descricao}"/>  
+                    <ui:remove>
                     <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAceitavel(_item)}"/>  
                       <br clear="none"/>  
@@ -236,13 +255,15 @@
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAbsurdo(_item)}"/>  
                       <br clear="none"/>  
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMaxAbsurdo(_item)}"/> 
-                    </p:tooltip> 
+                    </p:tooltip>
+                    </ui:remove> 
                   </p:column>  
                   <p:column style="#{(_item.id == manterValorNormalidadeCampoController.normalidadeCampoId)?'background-color:#EEE8AA':''}"> 
                     <f:facet name="header" style="white-space:nowrap;"> 
                       <h:outputText value="#{messages.LABEL_SITUACAO}"/> 
                     </f:facet>  
                     <h:outputText value="#{_item.situacao.descricao}"/>  
+                    <ui:remove>
                     <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAceitavel(_item)}"/>  
                       <br clear="none"/>  
@@ -251,7 +272,8 @@
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMinAbsurdo(_item)}"/>  
                       <br clear="none"/>  
                       <h:outputText value="#{manterValorNormalidadeCampoController.obterRichMaxAbsurdo(_item)}"/> 
-                    </p:tooltip> 
+                    </p:tooltip>
+                    </ui:remove> 
                   </p:column> 
                 </mec:serverDataTable> 
               </p:outputPanel> 

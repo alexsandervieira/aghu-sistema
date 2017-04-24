@@ -321,8 +321,8 @@ public class ImprimirRequisicaoMaterialController extends ActionReport {
 		params.put("tipoMovimentoComplemento", dadosReq.getTipoMovimentoComplemento());
 		params.put("nomePessoa", dadosReq.getNomePessoa());
 		params.put("numeroRamal", dadosReq.getNumeroRamal());
-		params.put("nomePaciente", dadosReq.getPaciente());
-		params.put("prontuario", dadosReq.getProntuario());
+		populaParamNomePaciente(params);
+		populaParamProntuario(params);
 		
 		ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
 		params.put("logoCorrosivo", servletContext.getRealPath("/img/corrosivo.gif"));
@@ -342,6 +342,28 @@ public class ImprimirRequisicaoMaterialController extends ActionReport {
 		/*Vias*/
 		params.put("duasVias", duasVias.toString());
 		return params;
+	}
+
+	/**
+	 * @param params
+	 */
+	public void populaParamProntuario(Map<String, Object> params) {
+		if (!StringUtils.isEmpty(dadosReq.getProntuario()) || !StringUtils.isBlank(dadosReq.getProntuario())) {
+			params.put("prontuario", dadosReq.getProntuario());
+		} else {
+			params.put("prontuario", "");
+		}
+	}
+
+	/**
+	 * @param params
+	 */
+	public void populaParamNomePaciente(Map<String, Object> params) {
+		if (!StringUtils.isEmpty(dadosReq.getPaciente()) || !StringUtils.isBlank(dadosReq.getPaciente())) {
+			params.put("nomePaciente", dadosReq.getPaciente());
+		} else {
+			params.put("nomePaciente", "");
+		}
 	}
 
 	@Override

@@ -646,7 +646,7 @@ public class AelSolicitacaoExameDAO extends br.gov.mec.aghu.core.persistence.dao
 		sqlPrincipal
 				.append("						case	when amo1_.tempo_intervalo_coleta = 0 then ");
 		sqlPrincipal
-				.append("									' '||ico8_.tipo_substancia||' '||cast(ico8_.volume_ingerido as varchar(10))||' '||ico8_.unid_medida_volume");
+				.append("									' '||coalesce(ico8_.tipo_substancia, '')||' '||(case when ico8_.volume_ingerido is not null then cast(ico8_.volume_ingerido as varchar(10)) else '' end)||' '||coalesce(ico8_.unid_medida_volume, '')");
 		sqlPrincipal.append("    							else ");
 		sqlPrincipal.append("									'' ");
 		sqlPrincipal.append("    							end ");

@@ -306,13 +306,11 @@ public class RelatorioEscalaCirurgiasAghuON extends BaseBusiness {
 		if (StringUtils.isNotBlank(vo.getDescricaoPci())) {
 			buffer.append(vo.getDescricaoPci());
 			buffer.append(quebra);
-			buffer.append(quebra);
 		}
 
 		// Lateralidade
 		if (StringUtils.isNotBlank(vo.getLadoCirurgia())) {
 			buffer.append(vo.getLadoCirurgia());
-			buffer.append(quebra);
 			buffer.append(quebra);
 		}
 
@@ -333,14 +331,12 @@ public class RelatorioEscalaCirurgiasAghuON extends BaseBusiness {
 			buffer.append("Res. Hemoterápica: ");
 			buffer.append(vo.getSangue());
 			buffer.append(quebra);
-			buffer.append(quebra);
 		}
 
 		// Téc. Anestésica
 		if (StringUtils.isNotBlank(vo.getTipoAnestesia())) {
 			buffer.append("Téc. Anestésica: ");
 			buffer.append(vo.getTipoAnestesia());
-			buffer.append(quebra);
 			buffer.append(quebra);
 		}
 

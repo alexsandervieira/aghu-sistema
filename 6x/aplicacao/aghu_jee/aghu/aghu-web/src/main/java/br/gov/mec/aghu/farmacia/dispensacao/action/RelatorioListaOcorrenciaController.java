@@ -88,10 +88,27 @@ public class RelatorioListaOcorrenciaController extends ActionReport {
 
 	@Override
 	public String recuperarArquivoRelatorio() {	
-		if(!unidPsiquiatrica){
-			return "br/gov/mec/aghu/farmacia/report/listaOcorrencia.jasper";
-		}else{
-			return "br/gov/mec/aghu/farmacia/report/listaOcorrenciaPacienteMedicamento.jasper";
+		try {
+			AghParametros aghParamRelatorioListaOcorrenciaPaisagem = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_RELATORIO_LISTA_OCORRENCIA_PAISAGEM);
+			String relatorioListaOcorrenciaPaisagem = aghParamRelatorioListaOcorrenciaPaisagem.getVlrTexto();
+			Boolean modeloPaisagem = ("S".equalsIgnoreCase(relatorioListaOcorrenciaPaisagem));
+			
+			if (!unidPsiquiatrica) {
+				if (modeloPaisagem) {
+					return "br/gov/mec/aghu/farmacia/report/listaOcorrenciaPaisagem.jasper";
+				} else {
+					return "br/gov/mec/aghu/farmacia/report/listaOcorrencia.jasper";
+				}
+			} else {
+				if (modeloPaisagem) {
+					return "br/gov/mec/aghu/farmacia/report/listaOcorrenciaPacienteMedicamentoPaisagem.jasper";
+				} else {
+					return "br/gov/mec/aghu/farmacia/report/listaOcorrenciaPacienteMedicamento.jasper";
+				}
+			}
+		} catch (ApplicationBusinessException e) {
+			apresentarExcecaoNegocio(e);
+			return "retorno";
 		}
 	}
 

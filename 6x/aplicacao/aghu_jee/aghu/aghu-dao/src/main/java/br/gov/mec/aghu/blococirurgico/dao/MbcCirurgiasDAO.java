@@ -3405,4 +3405,10 @@ public class MbcCirurgiasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		}
 		return cirurgia;
 	}
+	public MbcCirurgias obterCirurgiaPorCirurgiaVO(Integer crgSeq) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(MbcCirurgias.class, "CIR");
+		criteria.add(Restrictions.eq("CIR."+ MbcCirurgias.Fields.SEQ.toString(), crgSeq));
+		return (MbcCirurgias) executeCriteriaUniqueResult(criteria);
+	}
+
 }

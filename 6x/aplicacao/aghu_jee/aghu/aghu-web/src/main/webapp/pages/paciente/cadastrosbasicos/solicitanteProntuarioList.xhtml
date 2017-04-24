@@ -11,7 +11,7 @@
         <aghu:panelGeral legend="#{messages.TITLE_PESQUISAR_SOLICITANTES_PRONTUARIO}"> 
           <aghu:linha> 
             <mec:inputNumero maxlength="4" size="4" value="#{solicitanteProntuarioPaginatorController.seqSolicitanteProntuario}" label="#{messages.LABEL_CODIGO}" title="#{messages.TITLE_PESQUISA_CODIGO_SOLICITANTE_PRONTUARIO}" id="codigo"/>  
-            <mec:selectOneMenu enum="DominioSituacao" label="#{messages.LABEL_ATIVO}" value="#{solicitanteProntuarioPaginatorController.indSituacaoSolicitanteProntuario}" title="#{messages.TITLE_ATIVO_SOLICITANTE_PRONTUARIO}" id="ativoInativo"/>  
+            <mec:selectOneMenu enum="DominioSituacao" label="#{messages.LABEL_SITUACAO}" value="#{solicitanteProntuarioPaginatorController.indSituacaoSolicitanteProntuario}" title="#{messages.TITLE_ATIVO_SOLICITANTE_PRONTUARIO}" id="ativoInativo"/>  
             <mec:suggestionBox id="finalidadeMovimentacao" label="#{messages.LABEL_FINALIDADE_MOVIMENTACAO}" title="Selecione uma finalidade de movimentação para efetuar a pesquisa por este campo." descricaoInput="codigo" descricaoLabel="descricao" width="600" suggestionAction="pesquisarFinalidadeMovimentacaoPorDescricao" controller="#{solicitanteProntuarioPaginatorController}" value="#{solicitanteProntuarioPaginatorController.finalidadeMovimentacao}"> 
               <c:set var="_finalidadeMovimentacao" value="#{item}"/>  
               <p:column>#{item.descricao}</p:column>  
@@ -22,7 +22,7 @@
         <aghu:linha> 
           <aghu:panelGeral id="panelAbas"> 
             <p:tabView id="resultTab" dynamic="true" activeIndex="#{solicitanteProntuarioPaginatorController.abaSelecionada}" prependId="false"> 
-                  <p:ajax event="tabChange" listener="#{solicitanteProntuarioPaginatorController.onTabChange()}" update="@(#resultTab)"/> 
+               <p:ajax event="tabChange" listener="#{solicitanteProntuarioPaginatorController.onTabChange()}" update="@(#resultTab)"/> 
                <p:tab  title="#{messages.LABEL_UNIDADE_FUNCIONAL}"> 
                  <p:outputPanel id="unidFuncPanel">
                   <h:panelGrid>
@@ -34,7 +34,7 @@
                 </h:panelGrid> 
                  </p:outputPanel>
               </p:tab>  
-              <p:tab  title="#{messages.LABEL_ORIGEM_EVENTO}"> 
+              <p:tab title="#{messages.LABEL_ORIGEM_EVENTO}"> 
                 <h:panelGrid>
                 <mec:suggestionBox id="origemEvento" label="#{messages.LABEL_ORIGEM_EVENTO}" title="Selecione uma origem para o evento para efetuar a pesquisa por este campo." descricaoInput="seq" descricaoLabel="descricao" width="600" suggestionAction="pesquisarOrigemEventoPorDescricao" controller="#{solicitanteProntuarioPaginatorController}" value="#{solicitanteProntuarioPaginatorController.origemEvento}"> 
                   <c:set var="_origemEvento" value="#{item}"/>  
@@ -42,21 +42,13 @@
                   <p:column>#{item.seq}</p:column> 
                 </mec:suggestionBox>
                 </h:panelGrid> 
-              </p:tab>  
-              <p:tab  style="font-size:90%;" title="#{messages.LABEL_DESCRICAO}"> 
-                <h:panelGrid>
-                <mec:inputText maxlength="60" title="#{messages.TITLE_PESQUISA_DESCRICAO}" label="#{messages.LABEL_DESCRICAO}" value="#{solicitanteProntuarioPaginatorController.descricaoSolicitanteProntuario}" id="descricao"/> 
-                </h:panelGrid>               
-              </p:tab>              
+              </p:tab>          
             </p:tabView> 
           </aghu:panelGeral>
         </aghu:linha>  
         <aghu:panelGeral legend="#{messages.TITLE_INDICADORES}"> 
-          <aghu:linha> 
-            <mec:selectOneMenu enum="DominioSimNao" label="#{messages.LABEL_EXIGE_RESPONSAVEL}" title="#{messages.TITLE_PESQUISA_EXIGE_RESPONSAVEL}" value="#{solicitanteProntuarioPaginatorController.exigeResponsavelSolicitanteProntuario}" id="exigeResponsavel"/>  
-            <mec:selectOneMenu enum="DominioSimNao" label="#{messages.LABEL_MENSAGEM_SAMIS}" title="#{messages.TITLE_PESQUISA_MENSAGEM_SAMIS}" value="#{solicitanteProntuarioPaginatorController.mensagemSamisSolicitanteProntuario}" id="mensagemSAMIS"/>  
-            <mec:selectOneMenu enum="DominioSimNao" label="#{messages.LABEL_SEPARACAO_PREVIA}" title="#{messages.TITLE_PESQUISA_SEPARACAO_PREVIA}" value="#{solicitanteProntuarioPaginatorController.separacaoPreviaSolicitanteProntuario}" id="separacaoPrevia"/>  
-            <mec:selectOneMenu enum="DominioSimNao" label="#{messages.LABEL_RETORNO}" title="#{messages.TITLE_PESQUISA_RETORNO}" value="#{solicitanteProntuarioPaginatorController.retornoSolicitanteProntuario}" id="retorno"/>  
+          <aghu:linha>   
+            <mec:selectOneMenu enum="DominioSimNao" label="#{messages.LABEL_MENSAGEM_ARQUIVO_CLINICO}" title="#{messages.TITLE_PESQUISA_MENSAGEM_ARQUIVO_CLINICO}" value="#{solicitanteProntuarioPaginatorController.mensagemSamisSolicitanteProntuario}" id="mensagemSAMIS"/>  
             <mec:selectOneMenu enum="DominioTodosUltimo" label="#{messages.LABEL_VOLUMES_MANUSEADOS}" title="#{messages.TITLE_PESQUISA_VOLUMES}" value="#{solicitanteProntuarioPaginatorController.volumesManuseadosSolicitanteProntuario}" id="volumesManuseados"/> 
           </aghu:linha> 
         </aghu:panelGeral>  
@@ -108,31 +100,13 @@
             </f:facet>  
             <h:outputText value="#{_sp.indSituacao.descricao}"/> 
           </p:column>  
-          <p:column style="width:60px;white-space:nowrap;"> 
-            <f:facet name="header"> 
-              <h:outputText value="#{messages.LABEL_RESPONSAVEL}"/> 
-            </f:facet>  
-            <h:outputText value="#{_sp.exigeResponsavel ? 'Sim' : 'Não'}"/> 
-          </p:column>  
           <p:column style="width:85px;white-space:nowrap;"> 
             <f:facet name="header"> 
-              <h:outputText value="#{messages.LABEL_MENSAGEM_SAMIS}"/> 
+              <h:outputText value="#{messages.LABEL_MENSAGEM_ARQUIVO_CLINICO}"/> 
             </f:facet>  
             <h:outputText value="#{_sp.mensagemSamis.descricao}"/> 
-          </p:column>  
-          <p:column style="width:85px;white-space:nowrap;"> 
-            <f:facet name="header"> 
-              <h:outputText value="#{messages.LABEL_SEPARACAO_PREVIA}"/> 
-            </f:facet>  
-            <h:outputText value="#{_sp.separacaoPrevia.descricao}"/> 
-          </p:column>  
-          <p:column style="width:35px;white-space:nowrap;"> 
-            <f:facet name="header"> 
-              <h:outputText value="#{messages.LABEL_RETORNO}"/> 
-            </f:facet>  
-            <h:outputText value="#{_sp.retorno.descricao}"/> 
-          </p:column>  
-          <p:column style="width:65px;white-space:nowrap;"> 
+          </p:column>
+          <p:column style="width:65px;white-space:nowrap;">
             <f:facet name="header"> 
               <h:outputText value="#{messages.LABEL_VOLUMES}"/> 
             </f:facet>  

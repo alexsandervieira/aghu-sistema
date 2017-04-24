@@ -51,8 +51,8 @@ import br.gov.mec.aghu.prescricaomedica.business.IPrescricaoMedicaFacade;
 import br.gov.mec.aghu.prescricaomedica.constantes.EnumStatusItem;
 import br.gov.mec.aghu.prescricaomedica.constantes.EnumTipoImpressao;
 import br.gov.mec.aghu.prescricaomedica.vo.BuscaConselhoProfissionalServidorVO;
+import br.gov.mec.aghu.prescricaomedica.vo.PosolociaDosagemMedicamentoVO;
 import br.gov.mec.aghu.prescricaomedica.vo.RelatorioConfirmacaoItensPrescricaoVOPai;
-import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 import br.gov.mec.aghu.report.AghuReportGenerator;
 
@@ -81,10 +81,8 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 	
 	private Boolean contraCheque = false;
 
+	private Boolean prescricaoMedicaRascunho = false;
 
-	@EJB
-	private IRegistroColaboradorFacade registroColaboradorFacade;
-	
 	@EJB
 	protected IParametroFacade parametroFacade;
 
@@ -108,17 +106,16 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 	protected Collection recuperarColecao() throws ApplicationBusinessException {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
-		prescricao =  prescricaoMedicaFacade.obterPrescricaoComAtendimentoPaciente(prescricao.getId().getAtdSeq(),
-				prescricao.getId().getSeq());
+		prescricao =  prescricaoMedicaFacade.obterPrescricaoComAtendimentoPaciente(prescricao.getId().getAtdSeq(),prescricao.getId().getSeq());
 		
 		RelatorioConfirmacaoItensPrescricaoVOPai voPai = new RelatorioConfirmacaoItensPrescricaoVOPai();
-
+			
 		String aprazamento = null;
 
 		formatarItensPrescricaoMedica(voPai, aprazamento);
 
-		voPai.atribuirIndice();
 		voPai.ordernarListas();
+		voPai.atribuirIndice();
 
 		String validadePrescricao = "Validade: de "
 				+ sdf.format(prescricao.getDthrInicio()) + " h. a "
@@ -135,12 +132,12 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 
 		// Dados do médico que está confirmando
 		BuscaConselhoProfissionalServidorVO vo = null;
-		
-		RapServidores servidorLogado = registroColaboradorFacade.obterServidorAtivoPorUsuario(login);
-		//RapServidores servidorLogado = registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado());
-		
-		vo = prescricaoMedicaFacade.buscaConselhoProfissionalServidorVO( servidorLogado.getId().getMatricula(), 
-																		 servidorLogado.getId().getVinCodigo() );
+		if(prescricao.getServidorValida() == null && servidorValida != null){
+			prescricao.setServidorValida(servidorValida);
+		} else if (prescricao.getServidorValida() == null && servidorValida == null){
+			prescricao.setServidorValida(servidorLogadoFacade.obterServidorLogado());
+		}
+		vo = prescricaoMedicaFacade.buscaConselhoProfissionalServidorVO(prescricao.getServidorValida().getId().getMatricula(),  prescricao.getServidorValida().getId().getVinCodigo());
 
 		formataNomeMedico(voPai, vo);
 
@@ -162,6 +159,7 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 		}
 	
 		formatarLocalInternacao(voPai);
+		formatarUnidadeFuncional(voPai);
 
 		Collection<RelatorioConfirmacaoItensPrescricaoVOPai> colVOPai = new ArrayList<RelatorioConfirmacaoItensPrescricaoVOPai>();
 		colVOPai.add(voPai);
@@ -174,6 +172,14 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 		/*------------------------------------------- */
 
 		return colVOPai;
+	}
+
+	private void formatarUnidadeFuncional(
+			RelatorioConfirmacaoItensPrescricaoVOPai voPai) {
+		if(prescricao.getAtendimento().getUnidadeFuncional() != null){
+			voPai.setUnidadeFuncionalInternacao("Unidade: ".concat(prescricao.getAtendimento().getUnidadeFuncional().getAndarAlaDescricao()));
+		}
+		
 	}
 
 	private void formatarPacienteRecemNascido(
@@ -264,17 +270,20 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 		
 		if (item instanceof MpmPrescricaoDieta) {
 			MpmPrescricaoDieta dieta = (MpmPrescricaoDieta) item;
-
+			
+			List<String> listStringAprazamentoDieta = prescricaoMedicaFacade.obterAprazamentoDieta(dieta);
+			
+			String aprazamento = listStringAprazamentoDieta != null ? gerarAprazamentoString(listStringAprazamentoDieta) : "";
 			if (!impressaoTotal && statusItem.equals(EnumStatusItem.ALTERADO)) {
 				operacao = ALTERAR;
 				// Obtém a descrição de alteração
-				String descricaoAlteracao = prescricaoMedicaFacade.obterDescricaoAlteracaoDietaRelatorioItensConfirmados(dieta);
-				voPai.adicionarDietaConfirmada(descricaoAlteracao,operacao, ordem);
+				String descricaoAlteracao = prescricaoMedicaFacade.obterDescricaoAlteracaoDietaRelatorioItensConfirmados(dieta);				
+				voPai.adicionarDietaConfirmada(descricaoAlteracao,operacao, ordem, aprazamento);
 
 			} else {
 				// Obtém a descrição total
 				String descricaoFormatada = prescricaoMedicaFacade.obterDescricaoFormatadaDietaRelatorioItensConfirmados(dieta, inclusaoExclusao, impressaoTotal);
-				voPai.adicionarDietaConfirmada(descricaoFormatada,operacao, ordem);
+				voPai.adicionarDietaConfirmada(descricaoFormatada,operacao, ordem, aprazamento);
 			}
 			return true;
 		}
@@ -286,17 +295,17 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 											 EnumStatusItem statusItem, String operacao, Integer ordem, Boolean inclusaoExclusao) throws ApplicationBusinessException{
 		
 		if (item instanceof MpmPrescricaoMdto) {
-			String descricaoformatada = "";
+			List<PosolociaDosagemMedicamentoVO> listDescMedicamentos = new ArrayList<PosolociaDosagemMedicamentoVO>();
 			MpmPrescricaoMdto mpmPrescricaoMdto = (MpmPrescricaoMdto)item;
 			//Busca o objeto para carregar os dados da prescrição que serão utilizados
 			MpmPrescricaoMdto medicamentoSolucao = prescricaoMedicaFacade.obterPrescricaoMedicamento(mpmPrescricaoMdto.getId().getAtdSeq(), mpmPrescricaoMdto.getId().getSeq());
 			if (!impressaoTotal
 					&& statusItem.equals(EnumStatusItem.ALTERADO)) {
 				// Obtém a descrição de alteração
-				descricaoformatada = prescricaoMedicaFacade.obterDescricaoAlteracaoMedicamentoSolucaoRelatorioItensConfirmados(medicamentoSolucao, false);
-			} else {
+				listDescMedicamentos = prescricaoMedicaFacade.obterDescricaoAlteracaoMedicamentoSolucaoRelatorioItensConfirmados(medicamentoSolucao, false);
+			}else {
 				// Obtém a descrição total
-				descricaoformatada = prescricaoMedicaFacade
+				listDescMedicamentos = prescricaoMedicaFacade
 						.obterDescricaoFormatadaMedicamentoSolucaoRelatorioItensConfirmados(
 								medicamentoSolucao, inclusaoExclusao, impressaoTotal, false, false);
 			}
@@ -312,8 +321,8 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 													  medicamentoSolucao.getHoraInicioAdministracao(),
 													  medicamentoSolucao.getIndSeNecessario(),
 													  medicamentoSolucao.getFrequencia()));
-
-				voPai.adicionarSolucaoConfirmada(descricaoformatada, aprazamento, operacao, ordem);
+				voPai.adicionarSolucaoConfirmada(listDescMedicamentos, aprazamento, operacao, impressaoTotal ? mpmPrescricaoMdto.getOrdem() : ordem);
+				
 			} else {
 
 				aprazamento = gerarAprazamentoString( prescricaoMedicaFacade.gerarAprazamento(
@@ -325,8 +334,8 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 													  medicamentoSolucao.getHoraInicioAdministracao(),
 													  medicamentoSolucao.getIndSeNecessario(),
 													  medicamentoSolucao.getFrequencia()));
-
-				voPai.adicionarMedicamentoConfirmado(descricaoformatada, aprazamento, medicamentoSolucao.getIndAntiMicrobiano(), operacao, ordem);
+				voPai.adicionarMedicamentoConfirmado(listDescMedicamentos, aprazamento, medicamentoSolucao.getIndAntiMicrobiano(), operacao, impressaoTotal ? mpmPrescricaoMdto.getOrdem() : ordem);
+					
 			}
 			return true;
 		}
@@ -362,7 +371,7 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 			} else {
 				// Obtém a descrição formatada
 				String descricaoformatada = prescricaoMedicaFacade.obterDescricaoFormatadaCuidadoRelatorioItensConfirmados(cuidado.getId().getAtdSeq(), cuidado.getId().getSeq());
-				voPai.adicionarCuidadoConfirmado(descricaoformatada,aprazamento, operacao, ordem);
+				voPai.adicionarCuidadoConfirmado(descricaoformatada,aprazamento, operacao, cuidado.getOrdem());
 			}
 
 			return true;
@@ -385,7 +394,7 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 			} else {
 				// Obtém a descrição formatada
 				String descricaoformatada = prescricaoMedicaFacade.obterDescricaoFormatadaConsultoriaRelatorioItensConfirmados(consultoria.getId().getAtdSeq(), consultoria.getId().getSeq());
-				voPai.adicionarConsultoriaConfirmada(descricaoformatada, operacao, ordem);
+				voPai.adicionarConsultoriaConfirmada(descricaoformatada, operacao, consultoria.getOrdem());
 			}
 			return true;
 		}
@@ -410,7 +419,7 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 																								  solicitacaoHemoterapica.getId().getSeq(), 
 																								  impressaoTotal,
 																								  inclusaoExclusao);
-				voPai.adicionarHemoterapiaConfirmada(descricaoformatada,operacao, ordem);
+				voPai.adicionarHemoterapiaConfirmada(descricaoformatada,operacao, solicitacaoHemoterapica.getOrdem());
 			}
 			return true;
 		}
@@ -439,7 +448,7 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 			} else {
 				String descricaoformatada = prescricaoMedicaFacade.obterDescricaoFormatadaProcedimentoRelatorioItensConfirmados( procedimento.getId().getAtdSeq(), procedimento.getId().getSeq(), 
 																															     impressaoTotal, inclusaoExclusao);
-				voPai.adicionarProcedimentoConfirmado(descricaoformatada, operacao, ordem);
+				voPai.adicionarProcedimentoConfirmado(descricaoformatada, operacao, procedimento.getOrdem());
 			}
 			return true;
 		}
@@ -492,15 +501,47 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 	
 	@Override
 	public String recuperarArquivoRelatorio() {
+		String valorParametroRelatorioPaisagem = "N";
+		String valorParametroRelatorioInfoPacienteCabecalho = "N";
+		try {
+			valorParametroRelatorioPaisagem = parametroFacade.buscarValorTexto(AghuParametrosEnum.P_RELATORIO_PRESCRICAO_MEDICA_PAISAGEM);
+			valorParametroRelatorioInfoPacienteCabecalho = parametroFacade.buscarValorTexto(AghuParametrosEnum.P_REL_PRESC_MEDICA_INFO_PACIENTE_CABECALHO);
+		} catch (ApplicationBusinessException e) {
+			LOG.error("Erro ao tentar recuparar parâmetros",e);
+		}
+		
+		//Garantir que caso não venha "S" seja "N"
+		if(!valorParametroRelatorioPaisagem.equalsIgnoreCase("S")){
+			valorParametroRelatorioPaisagem = "N";
+		}
+		if(!valorParametroRelatorioInfoPacienteCabecalho.equalsIgnoreCase("S")){
+			valorParametroRelatorioInfoPacienteCabecalho = "N";
+		}
+		/*---------------VERIFICA SE É REIMPRESSÃO ---------------------*/
+		impressaoTotal = this.verificarReimpressao(tipoImpressao, servidorValida);
+		/*--------------------------------------------------------------*/
+
 		String caminhoConfirmados;
 		if(contraCheque) {
 			caminhoConfirmados = "br/gov/mec/aghu/prescricaomedica/report/relatorioContraChequePrescricaoMedica.jasper";
-		}
-		else {
-			caminhoConfirmados = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmados.jasper";
-		}
-		if (!impressaoTotal) {
-			caminhoConfirmados = "br/gov/mec/aghu/prescricaomedica/report/DiferencaItensPrescricaoConfirmados.jasper";
+		}else if (!impressaoTotal){
+			if(valorParametroRelatorioPaisagem.equalsIgnoreCase("S") && valorParametroRelatorioInfoPacienteCabecalho.equalsIgnoreCase("S")){
+				caminhoConfirmados = "br/gov/mec/aghu/prescricaomedica/report/DiferencaItensPrescricaoConfirmadosPaisagemInfoPacTop.jasper";
+			}else if (valorParametroRelatorioPaisagem.equalsIgnoreCase("S") && valorParametroRelatorioInfoPacienteCabecalho.equalsIgnoreCase("N")) {
+				caminhoConfirmados = "br/gov/mec/aghu/prescricaomedica/report/DiferencaItensPrescricaoConfirmadosPaisagemInfoPacBot.jasper";
+			}else if (valorParametroRelatorioPaisagem.equalsIgnoreCase("N") && valorParametroRelatorioInfoPacienteCabecalho.equalsIgnoreCase("S")){
+				caminhoConfirmados = "br/gov/mec/aghu/prescricaomedica/report/DiferencaItensPrescricaoConfirmadosInfoPacTop.jasper";
+			}else {
+				caminhoConfirmados = "br/gov/mec/aghu/prescricaomedica/report/DiferencaItensPrescricaoConfirmadosInfoPacBot.jasper";
+			}
+		}else if (valorParametroRelatorioPaisagem.equalsIgnoreCase("S") && valorParametroRelatorioInfoPacienteCabecalho.equalsIgnoreCase("S")){
+			caminhoConfirmados = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosPaisagemInfoPacTop.jasper";
+		}else if (valorParametroRelatorioPaisagem.equalsIgnoreCase("S") && valorParametroRelatorioInfoPacienteCabecalho.equalsIgnoreCase("N")) {
+			caminhoConfirmados = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosPaisagemInfoPacBot.jasper";
+		}else if (valorParametroRelatorioPaisagem.equalsIgnoreCase("N") && valorParametroRelatorioInfoPacienteCabecalho.equalsIgnoreCase("S")){
+			caminhoConfirmados = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosInfoPacTop.jasper";
+		}else {
+			caminhoConfirmados = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosInfoPacBot.jasper";
 		}
 
 		return caminhoConfirmados;
@@ -523,30 +564,67 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 	public Map<String, Object> recuperarParametros() {
 
 		Map<String, Object> params = new HashMap<String, Object>();
-		String caminhoSemAprazamento = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosSemAprazamento.jasper";
-		String caminhoComAprazamento = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosComAprazamento.jasper";
+		
+		String valorParametroRelatorioPaisagem = "N";
+		try {
+			valorParametroRelatorioPaisagem = parametroFacade.buscarValorTexto(AghuParametrosEnum.P_RELATORIO_PRESCRICAO_MEDICA_PAISAGEM);
+		} catch (ApplicationBusinessException e) {
+			LOG.error("Erro ao tentar recuparar parâmetros",e);
+		} 
+		
+		//Garantir que caso não venha "S" seja "N"
+		if(!valorParametroRelatorioPaisagem.equalsIgnoreCase("S")){
+			valorParametroRelatorioPaisagem = "N";
+		}
+
+		String caminhoSemAprazamento;
+		String caminhoComAprazamento;
+		String caminhoMedSol;
+		String caminhoMedSolSubReport;
 		String titulo;
-		if(contraCheque) {
-			titulo = "CONTRA CHEQUE";
-		}
-		else {
-			titulo = "PRESCRIÇÃO";
-		}
 
 		/*---------------VERIFICA SE É REIMPRESSÃO ---------------------*/
 		impressaoTotal = this.verificarReimpressao(tipoImpressao, servidorValida);
 		/*--------------------------------------------------------------*/
 
-		if (!impressaoTotal) {
+		if(contraCheque) {
+			titulo = "CONTRA CHEQUE";
+		} else if (!impressaoTotal){
+			titulo = "MOVIMENTAÇÕES DA PRESCRIÇÃO";
+		}else {
+			titulo = "PRESCRIÇÃO";
+		}
+
+		if (!impressaoTotal && valorParametroRelatorioPaisagem.equalsIgnoreCase("S")) {
+			caminhoSemAprazamento = "br/gov/mec/aghu/prescricaomedica/report/DiferencaItensPrescricaoConfirmadosSemAprazamentoPaisagem.jasper";
+			caminhoComAprazamento = "br/gov/mec/aghu/prescricaomedica/report/DiferencaItensPrescricaoConfirmadosComAprazamentoPaisagem.jasper";
+			caminhoMedSol = "br/gov/mec/aghu/prescricaomedica/report/DiferencaItensPrescricaoConfirmadosMedSolPaisagem.jasper";
+			caminhoMedSolSubReport = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosMedSolPaisagemSub.jasper";
+		} else if(!impressaoTotal){
 			caminhoSemAprazamento = "br/gov/mec/aghu/prescricaomedica/report/DiferencaItensPrescricaoConfirmadosSemAprazamento.jasper";
 			caminhoComAprazamento = "br/gov/mec/aghu/prescricaomedica/report/DiferencaItensPrescricaoConfirmadosComAprazamento.jasper";
-			titulo = "MOVIMENTAÇÕES DA PRESCRIÇÃO";
+			caminhoMedSol = "br/gov/mec/aghu/prescricaomedica/report/DiferencaItensPrescricaoConfirmadosMedSol.jasper";
+			caminhoMedSolSubReport = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosMedSolSub.jasper";
+		}else if(valorParametroRelatorioPaisagem.equalsIgnoreCase("S")){
+			caminhoSemAprazamento = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosSemAprazamentoPaisagem.jasper";
+			caminhoComAprazamento = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosComAprazamentoPaisagem.jasper";
+			caminhoMedSol = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosMedSolPaisagem.jasper";
+			caminhoMedSolSubReport = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosMedSolPaisagemSub.jasper";
+		}else {
+			caminhoSemAprazamento = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosSemAprazamento.jasper";
+			caminhoComAprazamento = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosComAprazamento.jasper";
+			caminhoMedSol = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosMedSol.jasper";
+			caminhoMedSolSubReport = "br/gov/mec/aghu/prescricaomedica/report/ItensPrescricaoConfirmadosMedSolSub.jasper";
 		}
+
 
 		params.put("subRelatorioSemAprazamento",Thread.currentThread().getContextClassLoader().getResourceAsStream(caminhoSemAprazamento));
 		params.put("subRelatorioComAprazamento",Thread.currentThread().getContextClassLoader().getResourceAsStream(caminhoComAprazamento));
+		params.put("subRelatorioMedSol",Thread.currentThread().getContextClassLoader().getResourceAsStream(caminhoMedSol));
+		params.put("subRelatorioMedSolSub",Thread.currentThread().getContextClassLoader().getResourceAsStream(caminhoMedSolSubReport));
 		params.put("titulo", titulo);
 		params.put("reimpressao", EnumTipoImpressao.REIMPRESSAO.equals(tipoImpressao));
+		params.put("rascunho", this.prescricaoMedicaRascunho);
 		
 		try {
 			params.put("imagemLogoHospital", recuperarCaminhoLogo());
@@ -659,7 +737,7 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 		if (tipoImpressao.equals(EnumTipoImpressao.IMPRESSAO) || tipoImpressao.equals(EnumTipoImpressao.SEM_IMPRESSAO)) {
 			retorno = prescricaoMedicaFacade.verificarPrimeiraImpressao(servidorValida);
 			
-		} else if (tipoImpressao.equals(EnumTipoImpressao.REIMPRESSAO)) {
+		} else if (tipoImpressao.equals(EnumTipoImpressao.REIMPRESSAO) || tipoImpressao.equals(EnumTipoImpressao.VISUALIZAR_RELATORIO)) {
 			retorno = true;
 		}
 		return retorno;
@@ -730,5 +808,11 @@ public class RelatorioPrescricaoMedicaReportGenerator extends AghuReportGenerato
 		this.dataMovimento = dataMovimento;
 	}
 	
-	
+	public Boolean getPrescricaoMedicaRascunho() {
+		return prescricaoMedicaRascunho;
+	}
+
+	public void setPrescricaoMedicaRascunho(Boolean prescricaoMedicaRascunho) {
+		this.prescricaoMedicaRascunho = prescricaoMedicaRascunho;
+	}	
 }

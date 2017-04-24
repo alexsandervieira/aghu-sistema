@@ -76,7 +76,7 @@ public class UsuarioON extends BaseBusiness {
 	@Inject
 	private AcessoDAO acessoDAO;
 	
-	@Inject
+	@Inject @GerenciadorUsuariosQualifier
 	private IGerenciadorUsuarios gerenciadorUsuarios;
 
 	
@@ -87,6 +87,7 @@ public class UsuarioON extends BaseBusiness {
 		CASCA_MENSAGEM_USUARIO_NAO_INFORMADO, 
 		CASCA_MENSAGEM_LOGIN_EXISTENTE, 
 		CASCA_MENSAGEM_USUARIO_NAO_ENCONTRADO, 
+		CASCA_MENSAGEM_LOGIN_POSSUI_ACESSO,
 		CASCA_MENSAGEM_PARAMETROS_NAO_INFORMADO, 
 		CASCA_MENSAGEM_USUARIO_INATIVO,
 		CASCA_MENSAGEM_USUARIO_SEM_PERFIL, CASCA_MENSAGEM_HORA_DIFERENTE,
@@ -616,9 +617,18 @@ public class UsuarioON extends BaseBusiness {
 		// cria a journal
 		UsuarioJn usuarioJn = this.criarJournal(usuario, DominioOperacoesJournal.DEL);
 		
-		acessoDAO.removerAcessos(usuario);
-		usuarioDAO.remover(usuario);
-		usuarioJnDAO.persistir(usuarioJn);
+		// verifica se o usuario tem acesso
+		Long atdAcessoUsuario = acessoDAO.pesquisarAcessosCount(usuario, null, null, null, null, null, null);
+		
+		if(atdAcessoUsuario == 0){
+			acessoDAO.removerAcessos(usuario);
+			usuarioDAO.remover(usuario);
+			usuarioJnDAO.persistir(usuarioJn);
+		}else{
+			throw new ApplicationBusinessException(UsuarioONExceptionCode.CASCA_MENSAGEM_LOGIN_POSSUI_ACESSO);
+		}
+		
+		
 	}
 	
 	/**
@@ -809,6 +819,14 @@ public class UsuarioON extends BaseBusiness {
 	
 	protected ICascaFacade getCascaFacade() {
 		return cascaFacade;
+	}
+
+	public List<Usuario> pesquisarUsuariosPatologista(Integer firstResult,
+			Integer maxResult, String orderProperty, boolean asc,
+			String nomeOuLogin) throws ApplicationBusinessException {
+		UsuarioDAO usuarioDAO = getUsuarioDAO();
+		return usuarioDAO.pesquisarUsuariosPatologia(firstResult, maxResult,
+				orderProperty, asc, nomeOuLogin);
 	}
 	
 	

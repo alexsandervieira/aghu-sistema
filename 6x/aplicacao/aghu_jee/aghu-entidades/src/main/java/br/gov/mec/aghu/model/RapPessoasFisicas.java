@@ -80,8 +80,11 @@ public class RapPessoasFisicas extends BaseEntityCodigo<Integer> implements java
 	private Integer nroLogradouro;
 	private Integer cep;
 	private String bairro;
-	private String cidadeNascimento;
+	private AipCidades cddCodigoMunicipio;
 	private String nroIdentidade;
+	private AipOrgaosEmissores orgaoEmisRg;
+	private AipUfs ufOrgao;
+	private Date dataEmissaoDocto;
 	private Integer nroCartProfissional;
 	private String serieCartProfissional;
 	private Long pisPasep;
@@ -135,6 +138,7 @@ public class RapPessoasFisicas extends BaseEntityCodigo<Integer> implements java
 			DominioEstadoCivil estadoCivil, String logradouro,
 			String complLogradouro, Integer nroLogradouro, Integer cep,
 			String bairro, String cidadeNascimento, String nroIdentidade,
+			AipOrgaosEmissores orgaoEmisRg, AipUfs ufOrgao, Date dataEmissaoDocto, 
 			Integer nroCartProfissional, String serieCartProfissional,
 			Long pisPasep, Long nroTitEleitor, Short zonaTitEleitor,
 			Short secaoTitEleitor, Short dddFoneResidencial,
@@ -165,8 +169,11 @@ public class RapPessoasFisicas extends BaseEntityCodigo<Integer> implements java
 		this.nroLogradouro = nroLogradouro;
 		this.cep = cep;
 		this.bairro = bairro;
-		this.cidadeNascimento = cidadeNascimento;
+		this.cddCodigoMunicipio = cddCodigoMunicipio;
 		this.nroIdentidade = nroIdentidade;
+		this.orgaoEmisRg = orgaoEmisRg;
+		this.ufOrgao = ufOrgao;
+		this.dataEmissaoDocto = dataEmissaoDocto;		
 		this.nroCartProfissional = nroCartProfissional;
 		this.serieCartProfissional = serieCartProfissional;
 		this.pisPasep = pisPasep;
@@ -439,19 +446,15 @@ public class RapPessoasFisicas extends BaseEntityCodigo<Integer> implements java
 		}
 
 	}
-
-	@Column(name = "CIDADE_NASCIMENTO", length = 40)
-	public String getCidadeNascimento() {
-		return this.cidadeNascimento;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "CDD_CODIGO_MUNICIPIO")
+	public AipCidades getCddCodigoMunicipio() {
+		return this.cddCodigoMunicipio;
 	}
 
-	public void setCidadeNascimento(String cidadeNascimento) {
-		if (cidadeNascimento != null) {
-			this.cidadeNascimento = cidadeNascimento.toUpperCase();
-		} else {
-			this.cidadeNascimento = null;
-		}
-
+	public void setCddCodigoMunicipio(AipCidades cddCodigoMunicipio) {
+			this.cddCodigoMunicipio = cddCodigoMunicipio;
 	}
 
 	@Column(name = "NRO_IDENTIDADE", length = 14)
@@ -461,6 +464,36 @@ public class RapPessoasFisicas extends BaseEntityCodigo<Integer> implements java
 
 	public void setNroIdentidade(String nroIdentidade) {
 		this.nroIdentidade = nroIdentidade;
+	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "ORGAO_EMISSOR_RG")
+	public AipOrgaosEmissores getOrgaoEmisRg() {
+		return orgaoEmisRg;
+	}
+
+	public void setOrgaoEmisRg(AipOrgaosEmissores orgaoEmisRg) {
+		this.orgaoEmisRg = orgaoEmisRg;
+	}
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "UF_ORGAO")
+	public AipUfs getUfOrgao() {
+		return ufOrgao;
+	}
+
+	public void setUfOrgao(AipUfs ufOrgao) {
+		this.ufOrgao = ufOrgao;
+	}
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "DT_EMISSAO_DOCUMENTO")
+	public Date getDataEmissaoDocto() {
+		return dataEmissaoDocto;
+	}
+
+	public void setDataEmissaoDocto(Date dataEmissaoDocto) {
+		this.dataEmissaoDocto = dataEmissaoDocto;
 	}
 
 	@Column(name = "NRO_CART_PROFISSIONAL", precision = 9, scale = 0)
@@ -679,7 +712,8 @@ public class RapPessoasFisicas extends BaseEntityCodigo<Integer> implements java
 		, NOME_USUAL("nomeUsual")
 		, QUALIFICACOES("qualificacoes")
 		, CPF("cpf")
-		, CDD_CODIGO("aipCidades.codigo"),
+		, CDD_CODIGO("aipCidades.codigo")
+		, CDD_CODIGO_MUNICIPIO("cddCodigoMunicipio"),
 		MATRICULAS("rapServidoreses")
 		, SEXO("sexo")
 		, SER_MATRICULA("rapServidores.id.matricula")
@@ -692,7 +726,9 @@ public class RapPessoasFisicas extends BaseEntityCodigo<Integer> implements java
 		, BAIRRO_CEP_LOGRADOURO("aipBairrosCepLogradouro")
 		,NACIONALIDADE("aipNacionalidades")
 		,UF_SIGLA("aipUfs")
-		,NR_IDENTIDADE("nroIdentidade");
+		,NR_IDENTIDADE("nroIdentidade")
+		,ORGAO_EMISSOR("orgaoEmisRg")
+		,UF_ORGAO("ufOrgao");
 
 		private String fields;
 

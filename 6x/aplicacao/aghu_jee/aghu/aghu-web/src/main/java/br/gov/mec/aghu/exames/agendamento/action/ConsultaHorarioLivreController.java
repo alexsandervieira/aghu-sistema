@@ -436,8 +436,38 @@ public class ConsultaHorarioLivreController extends ActionController {
 	}
 
 	// Retorna lista de Itens registros selecionados ou toda a lista de exames
-	// caso estes tenham amostras em comum
 	private List<ItemHorarioAgendadoVO> buscarHorariosSelecionados() {
+		
+		if(Boolean.TRUE.equals(agendaAmostraComum)){
+			return buscarHorarioSelecionado();
+		} else {
+		
+			List<ItemHorarioAgendadoVO> listaItemHorarioSelecionado = new ArrayList<ItemHorarioAgendadoVO>();
+				
+			for (ItemHorarioAgendadoVO itemHorarioAgendadoVO : listaItemHorarioAgendadoVO) {
+				for (AgendamentoExameVO examesAgendados : examesAgendamentoSelecao){
+					if(Boolean.TRUE.equals(examesAgendados.getSelecionado())){
+						if (examesAgendados.getItemExame().getId().getSoeSeq().equals(itemHorarioAgendadoVO.getSoeSeq()) && 
+								examesAgendados.getItemExame().getId().getSeqp().equals(itemHorarioAgendadoVO.getSeqp())	) 
+						{
+							AelItemSolicitacaoExames itemSolicitacaoExameOriginal = agendamentoExamesFacade
+									.obterItemSolicitacaoExameOriginal(itemHorarioAgendadoVO.getSoeSeq(),
+											itemHorarioAgendadoVO.getSeqp());
+							itemSolicitacaoExameOriginal.setOrigemTelaSolicitacao(origemSolicitacao);
+							itemHorarioAgendadoVO.setItemSolicitacaoExameOriginal(itemSolicitacaoExameOriginal);
+							listaItemHorarioSelecionado.add(itemHorarioAgendadoVO);
+						}
+					}
+						
+				}
+			}
+			return listaItemHorarioSelecionado;
+		}
+	}
+	
+	// Retorna lista de Itens registros selecionados ou toda a lista de exames
+	// caso estes tenham amostras em comum
+	private List<ItemHorarioAgendadoVO> buscarHorarioSelecionado() {
 		List<ItemHorarioAgendadoVO> listaItemHorarioSelecionado = new ArrayList<ItemHorarioAgendadoVO>();
 
 		for (ItemHorarioAgendadoVO itemHorarioAgendadoVO : listaItemHorarioAgendadoVO) {

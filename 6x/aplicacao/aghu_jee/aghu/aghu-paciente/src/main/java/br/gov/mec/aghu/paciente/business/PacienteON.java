@@ -1326,6 +1326,7 @@ public class PacienteON extends BaseBusiness {
 		Hibernate.initialize(pacienteRetorno.getAipNacionalidades());
 		Hibernate.initialize(pacienteRetorno.getAipCidades());
 		Hibernate.initialize(pacienteRetorno.getEtnia());
+		Hibernate.initialize(pacienteRetorno.getAipUfs());
 		pacienteRetorno.setEnderecos(new HashSet<>(enderecoPacienteDAO.obterEnderecosCompletosPaciente(pacienteRetorno.getCodigo())));
 		return pacienteRetorno;
 	}
@@ -1582,6 +1583,10 @@ public class PacienteON extends BaseBusiness {
 		AghAtendimentos atendimentoOld = this.aghuFacade.obterAtendimentoOriginal(atdSeq);
 		
 		this.atendimentosRN.atualizarAtendimento(atendimento, atendimentoOld, nomeMicroComputador, servidorLogado, null);
+	}
+	
+	public Integer obterProntuarioMaePorProntuarioPaciente(Integer nroProntuario) {
+		return this.aipPacientesDAO.obterProntuarioMaePorProntuarioPaciente(nroProntuario);
 	}
 	
 }

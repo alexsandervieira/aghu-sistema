@@ -390,6 +390,8 @@ public interface IRegistroColaboradorFacade extends Serializable {
 	FccCentroCustos obterCentroCusto(FccCentroCustos codigo) throws ApplicationBusinessException;
 
 	void salvar(RapServidores rapServidor) throws ApplicationBusinessException;
+	
+	public String ajustarNomePesquisa(String rapNome);
 
 	List<FccCentroCustos> pesquisarCentroCustosAtivosOrdemDescricao(
 			Object centroCusto);
@@ -1392,5 +1394,13 @@ public interface IRegistroColaboradorFacade extends Serializable {
 	Long pesquisarServidoresParaSuggestionCount(Object objPesquisa);
 
 	List<RapServidores> listarServidoresComPessoaFisicaPorEquipe(String parametro,AghEquipes equipe);
+
+	List<RapServidores> listarServidoresComPessoaFisicaPorEquipe(String parametro,AghEquipes equipe, List<RapServidoresId> listProfissionais);
+
+	Collection<RapQualificacao> obterRapQualificacoesPorServidor(RapServidores servidor);
+
+	Boolean isProfissionalMedicoOuEnfermeiro(RapServidores rapServidores) throws ApplicationBusinessException;
+	
+	List<RapServidoresVO> pesquisarRapServidoresPorAtendimento(String parametro, Integer atendimentoSeq);
 	
 }

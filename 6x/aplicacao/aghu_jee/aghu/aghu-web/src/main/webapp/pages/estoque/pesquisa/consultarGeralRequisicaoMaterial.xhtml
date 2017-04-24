@@ -112,7 +112,7 @@
                 <f:setPropertyActionListener target="#{visualizacaoItemRequisicaoMaterialController.seqRequisicaoMaterial}" value="#{_req.seq}" for="command"/>  
                 <f:setPropertyActionListener target="#{visualizacaoItemRequisicaoMaterialController.origem}" value="consultarGeralRequisicaoMaterial" for="command"/> 
               </mec:commandLink>  
-              <mec:commandLink id="link_imprimir" style="width: 16px;" title="#{messages.LABEL_IMPRIMIR_CONSULTAR_RM}" rendered="#{consultaGeralRequisicaoMaterialPaginatorController.possuiPermissaoImprimirRM}" action="#{consultaGeralRequisicaoMaterialPaginatorController.imprimirRM}" styleClass=" silk-printer silk-icon"> 
+              <mec:commandLink id="link_imprimir" style="width: 16px;" title="#{messages.LABEL_IMPRIMIR_CONSULTAR_RM}" rendered="#{consultaGeralRequisicaoMaterialPaginatorController.possuiPermissaoImprimirRM}" action="#{consultaGeralRequisicaoMaterialPaginatorController.imprimirRMRedireciona}" styleClass=" silk-printer silk-icon"> 
                 <f:setPropertyActionListener target="#{imprimirRequisicaoMaterialController.numeroRM}" value="#{_req.seq}" for="command"/>  
                 <f:setPropertyActionListener target="#{imprimirRequisicaoMaterialController.voltarPara}" value="estoque-consultarGeralRequisicaoMaterial" for="command"/> 
               </mec:commandLink> 

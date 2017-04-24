@@ -53,25 +53,47 @@
 													<f:setPropertyActionListener
 														target="mpm_esc_mdb_subst_cons" value="" for="command" />
 												</mec:commandLink>
-												<h:selectBooleanCheckbox name="marcador" id="marcador"
+												<h:selectBooleanCheckbox rendered="#{!cuidadoVO.diagnostico}" id="marcadorCuidado"
 													value="#{cuidadoVO.excluir}" title="Excluir">
 													<p:ajax event="click" 
 														update="@(#tabelaPrescricaoEnfermagem), @(#bt_excluir_selecionados), @(#panelBtns)"
 														process="@this,@(#bt_excluir_selecionados)"
-														 />
+														listener="#{manutencaoPrescricaoEnfermagemController.desmarcarDiagnostico(cuidadoVO)}"/>
+												</h:selectBooleanCheckbox>
+												<h:selectBooleanCheckbox rendered="#{cuidadoVO.diagnostico}" id="marcadorDiagnostico"
+													value="#{cuidadoVO.excluir}" title="Excluir">
+													<p:ajax event="click" 
+														update="@(#tabelaPrescricaoEnfermagem), @(#bt_excluir_selecionados), @(#panelBtns)"
+														process="@this,@(#bt_excluir_selecionados)"
+														listener="#{manutencaoPrescricaoEnfermagemController.marcarPorDiagnostico(cuidadoVO)}" />
 												</h:selectBooleanCheckbox>
 											</p:column>
-											<p:column title="#{cuidadoVO.tipoPrescricaoCuidado.titulo}"
+											<p:column rendered="#{!cuidadoVO.diagnostico}" title="#{cuidadoVO.tipoPrescricaoCuidado.titulo}"
 												style="#{manutencaoPrescricaoEnfermagemController.obterEstiloColuna(cuidadoVO)};width:18px">
-												<div
+												<div 
 													class="silk-icon #{cuidadoVO.tipoPrescricaoCuidado.sufixoIcone}"
 													style="cursor: default !important;"
 													title="#{cuidadoVO.tipoPrescricaoCuidado.titulo}" />
 											</p:column>
-											<p:column title="#{cuidadoVO.tipoPrescricaoCuidado.titulo}"
+											<p:column rendered="#{cuidadoVO.diagnostico}" title="#{messages.LABEL_DIAGNOSTICO}">
+												<div 
+													class="silk-icon icon-diagnostico_enfermagem"
+													style="cursor: default !important;"
+													title="#{messages.LABEL_DIAGNOSTICO}" />
+											</p:column>
+											<p:column rendered="#{cuidadoVO.diagnostico}" 
+												style="#{manutencaoPrescricaoEnfermagemController.obterEstiloColuna(cuidadoVO)}text-align:center;"
+												headerText="#{messages.LABEL_DESCRICAO}">
+												<h:outputText
+													style="font-weight:bold;font-size:13px;"
+													value="#{cuidadoVO.descricaoDiagnostico}"
+													escape="false" />
+											</p:column>
+											<p:column rendered="#{!cuidadoVO.diagnostico}" title="#{cuidadoVO.tipoPrescricaoCuidado.titulo}"
 												style="#{manutencaoPrescricaoEnfermagemController.obterEstiloColuna(cuidadoVO)}"
 												headerText="#{messages.LABEL_DESCRICAO}">
 												<h:outputText
+													style="padding-left:10px"
 													value="#{cuidadoVO.descricaoPrescricaoCuidadoFormatada}"
 													escape="false" />
 											</p:column>
@@ -115,11 +137,13 @@
 								</p:outputPanel>
 							</aghu:column>
 							
-							<aghu:column type="button">
+							 <aghu:column type="button"> 
+							 	<p:outputPanel id="tabelaAcao" style="width: 170px;" >
 									<mec:commandButton 
 										value="#{messages.LABEL_PRESCRICAO_ENFERMAGEM_BOTAO_POR_SINAL_E_SINTOMA}"
 										rendered="#{mf:hasPermission(securityController,'sinaisSintomasPrescricaoEnfermagem,prescrever')}"
 										action="#{manutencaoPrescricaoEnfermagemController.informarSinaisSintomas}"
+										styleClass="bt_cinza"
 										>
 										<f:setPropertyActionListener
 											target="#{sinalSintomaController.atdSeq}"
@@ -239,6 +263,30 @@
 											value="#{manutencaoPrescricaoEnfermagemController.penSeq}"
 											for="command" />
 									</mec:commandButton>
+									<mec:commandButton id="bt_consultar_diagnostico"
+										value="#{messages.LABEL_CONSULTAR_DIAGNOSTICO}"
+										rendered="#{mf:hasPermission(securityController,'elaborarPrescricaoEnfermagem,criar')}"
+										action="#{consultarHistoricoDiagnosticoController.consultaHistoricoDiagnostico}"
+										disabled="#{listaPacientesEnfermagemController.desabilitaBotaoPrescrever or (mf:hasPermission(securityController, 'paciente,somenteLeitura'))}"
+										styleClass="bt_cinza">
+										<f:setPropertyActionListener
+											target="#{consultarHistoricoDiagnosticoController.codigoPaciente}"
+											value="#{listaPacientesEnfermagemController.pacCodigo}"
+											for="command" />
+										<f:setPropertyActionListener
+											target="#{consultarHistoricoDiagnosticoController.atendimentoSeq}"
+											value="#{manutencaoPrescricaoEnfermagemController.penSeqAtendimento}"
+											for="command" />
+										<f:setPropertyActionListener
+											target="#{consultarHistoricoDiagnosticoController.prontuario}"
+											value="#{manutencaoPrescricaoEnfermagemController.prescricaoEnfermagemVO.prontuario}"
+											for="command" />	
+										<f:setPropertyActionListener
+											target="#{consultarHistoricoDiagnosticoController.cameFrom}"
+											value="prescricaoenfermagem-manterPrescricaoEnfermagem"
+											for="command" />	
+									</mec:commandButton>
+								 </p:outputPanel>
 								</aghu:column>
 				</aghu:panelGeral>
 				<aghu:acao>

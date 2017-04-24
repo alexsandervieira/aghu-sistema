@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 
 import br.gov.mec.aghu.internacao.leitos.business.ILeitosInternacaoFacade;
+import br.gov.mec.aghu.internacao.transferir.business.ITransferirPacienteFacade;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.model.AinInternacao;
 import br.gov.mec.aghu.model.AinSolicTransfPacientes;
@@ -53,6 +54,9 @@ public class SolicitarTransferenciaPacientePaginatorController extends ActionCon
 	private Integer solicitacaoSeq = null;
 	private String cameFrom = "";
 
+	@EJB
+	private ITransferirPacienteFacade transferirPacienteFacade;
+
 	
 	@PostConstruct
 	public void init() {
@@ -60,7 +64,6 @@ public class SolicitarTransferenciaPacientePaginatorController extends ActionCon
 	}	
 	
 	public void inicioPesquisa() {
-	 
 
 		if (this.prontuario != null) {
 			pesquisar();
@@ -90,18 +93,19 @@ public class SolicitarTransferenciaPacientePaginatorController extends ActionCon
 		}
 
 		if (this.prontuario != null) {
-			this.internacao = this.leitosInternacaoFacade.obterInternacaoPorProntuario(this.prontuario);
+			this.internacao = this.leitosInternacaoFacade.obterInternacaoPorProntuario(this.prontuario, false); // Pega a internação mesmo com alta
 		} else {
-			this.internacao = this.leitosInternacaoFacade.obterInternacaoPorLeito(this.leitoID);
+			this.internacao = this.leitosInternacaoFacade.obterInternacaoPorLeito(this.leitoID, false); // Pega a internação mesmo com alta
 		}
 
-		if (this.internacao != null) {
-			this.mensagem = this.getMensagem(this.internacao);
-			this.exibirBotaoNovo = false;
-		} else {
+		// Tem internação E -- NÃO recebeu alta ou recebeu alta, onde o tipo de alta PERMITE permanência do paciente
+		if ( this.internacao != null && (!transferirPacienteFacade.validarPacienteNaoPossuiAltaAdministrativa(internacao.getSeq()) || transferirPacienteFacade.validarTipoAltaMedicaPermitePacienteComAlta(internacao.getSeq())) ) {
 			this.mensagem = null;
-			this.internacao = null;
 			this.exibirBotaoNovo = true;
+		} else {
+			this.mensagem = this.getMensagem(this.internacao);
+			this.internacao = null;
+			this.exibirBotaoNovo = false;
 		}
 	}
 
@@ -128,8 +132,7 @@ public class SolicitarTransferenciaPacientePaginatorController extends ActionCon
 	public List<AinSolicTransfPacientes> recuperarListaPaginada(Integer firstResult, Integer maxResult, String orderProperty, boolean asc) {
 		List<AinSolicTransfPacientes> lista = new ArrayList<AinSolicTransfPacientes>(0);
 		try {
-			lista = this.leitosInternacaoFacade.pesquisarSolicitacaoTransferenciaLeito(firstResult, maxResult, orderProperty, asc, this.prontuario,
-					this.leitoID);
+			lista = this.leitosInternacaoFacade.pesquisarSolicitacaoTransferenciaLeito(firstResult, maxResult, orderProperty, asc, this.prontuario, this.leitoID);
 		} catch (ApplicationBusinessException e) {
 			apresentarExcecaoNegocio(e);
 		}
@@ -162,6 +165,7 @@ public class SolicitarTransferenciaPacientePaginatorController extends ActionCon
 	}
 
 	public String solicitarTransferenciaPaciente(Integer seq) {
+		
 		controller.setSolicitacaoSeq(seq);
 		controller.setProntuario(prontuario);
 		controller.setLeitoID(leitoID);
@@ -169,7 +173,14 @@ public class SolicitarTransferenciaPacientePaginatorController extends ActionCon
 		return SOLICITA_TRANSFERENCIA_PACIENTE_CRUD;
 	}
 
+	
 	public String iniciarInclusao() {
+		
+		// NEGAÇÃO DA CONDIÇÃO: Tem internação E -- NÃO recebeu alta ou recebeu alta, onde o tipo de alta PERMITE permanência do paciente
+		if ( !(this.internacao != null && (!transferirPacienteFacade.validarPacienteNaoPossuiAltaAdministrativa(internacao.getSeq()) || transferirPacienteFacade.validarTipoAltaMedicaPermitePacienteComAlta(internacao.getSeq()))) ) {
+			apresentarMsgNegocio(Severity.ERROR, "PACIENTE_POSSUI_ALTA_ADMINISTRATIVA");
+			return null;
+		}
 		controller.setInternacaoSeq(internacao.getSeq());
 		controller.setProntuario(prontuario);
 		controller.setLeitoID(leitoID);
@@ -177,7 +188,7 @@ public class SolicitarTransferenciaPacientePaginatorController extends ActionCon
 		controller.inicio();
 		return SOLICITA_TRANSFERENCIA_PACIENTE_CRUD;
 	}
-
+	
 	public Integer getProntuario() {
 		return this.prontuario;
 	}

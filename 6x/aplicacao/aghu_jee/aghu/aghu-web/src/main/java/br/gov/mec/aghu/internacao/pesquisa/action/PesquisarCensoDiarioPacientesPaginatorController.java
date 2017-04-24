@@ -554,7 +554,10 @@ public class PesquisarCensoDiarioPacientesPaginatorController extends ActionCont
 
 	private Boolean pesquisaCensoInvalida() {
 
-		if (pesquisaUnidadeFuncionalInvalida()) {
+		if(this.data.after(new Date())){
+			this.apresentarMsgNegocio(Severity.ERROR, "ERRO_DATA_FUTURA");
+			return Boolean.TRUE;
+		} else if (pesquisaUnidadeFuncionalInvalida()) {
 
 			this.apresentarMsgNegocio(Severity.ERROR, "AIN_00784");
 			return Boolean.TRUE;

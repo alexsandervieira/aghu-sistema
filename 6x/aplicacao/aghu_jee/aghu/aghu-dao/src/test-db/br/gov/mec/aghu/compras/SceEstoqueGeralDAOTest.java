@@ -72,7 +72,7 @@ public class SceEstoqueGeralDAOTest extends
 		LOG.info("testBuscaDadosPosicaoFinalEstoque");
 		List<PosicaoFinalEstoqueVO> result = doDaoUnderTests()
 				.buscaDadosPosicaoFinalEstoque(new Date(), null, "S", null, null,
-						null, null);
+						null, null, false);
 		
 		for (PosicaoFinalEstoqueVO item : result) {
 			item.getIndEstocavel();

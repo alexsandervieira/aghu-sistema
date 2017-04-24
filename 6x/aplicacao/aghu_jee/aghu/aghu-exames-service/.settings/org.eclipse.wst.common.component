@@ -2,6 +2,7 @@
     <wb-module deploy-name="aghu-exames-service">
         <wb-resource deploy-path="/" source-path="/src/main/resources" tag="defaultRootSource"/>
         <wb-resource deploy-path="/" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/" source-path="/.apt_generated"/>
         <property name="java-output-path" value="/aghu-exames-service/target/classes"/>
     </wb-module>
 </project-modules>

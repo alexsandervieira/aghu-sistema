@@ -29,7 +29,35 @@ public class AinTiposAltaMedicaDAO extends br.gov.mec.aghu.core.persistence.dao.
 		return (AinTiposAltaMedica) executeCriteriaUniqueResult(criteria);
 
 	}
-
+    public List<AinTiposAltaMedica> pesquisarTiposAltaMedicaPorMotivos(
+			String codigo, List<Short> motivosAltaMedica,
+			DominioSituacao indSituacao){
+    	DetachedCriteria criteria = obterTiposAltaMedicaPorMotivos(codigo, motivosAltaMedica, indSituacao);
+    	List<AinTiposAltaMedica> list = executeCriteria(criteria);
+    	return list;
+    }
+    private DetachedCriteria obterTiposAltaMedicaPorMotivos(
+			String codigo, List<Short> motivosAltaMedica,
+			DominioSituacao indSituacao){
+    	
+    	DetachedCriteria criteria = obterCriteriaTiposAltaMedica();
+    	
+    	if (!StringUtils.isBlank(codigo)) {
+			criteria.add(Restrictions.ilike(
+					AinTiposAltaMedica.Fields.CODIGO.toString(), codigo));
+		}
+		if (motivosAltaMedica != null && motivosAltaMedica.size() > 0) {
+			criteria.add(Restrictions.in(
+					AinTiposAltaMedica.Fields.MOTIVO_ALTA_MEDICA.toString(),
+					motivosAltaMedica));
+		}
+		if (indSituacao != null) {
+			criteria.add(Restrictions.eq(
+					AinTiposAltaMedica.Fields.IND_SITUACAO.toString(),
+					indSituacao));
+		}
+		return criteria;
+    }
 	/**
 	 * 
 	 * @param parametro
@@ -176,6 +204,7 @@ public class AinTiposAltaMedicaDAO extends br.gov.mec.aghu.core.persistence.dao.
 						AinTiposAltaMedica.Fields.CODIGO.toString(),
 						idsFiltrados));
 			}
+			criteria.add(Restrictions.eq(AinTiposAltaMedica.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
 			list = executeCriteria(criteria);
 		}
 
@@ -195,6 +224,7 @@ public class AinTiposAltaMedicaDAO extends br.gov.mec.aghu.core.persistence.dao.
 			crit.add(Restrictions.in(
 					AinTiposAltaMedica.Fields.CODIGO.toString(), idsFiltrados));
 		}
+		crit.add(Restrictions.eq(AinTiposAltaMedica.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
 		list = executeCriteria(crit);
 
 		return list;
@@ -227,6 +257,7 @@ public class AinTiposAltaMedicaDAO extends br.gov.mec.aghu.core.persistence.dao.
 						AinTiposAltaMedica.Fields.CODIGO.toString(),
 						idsIgnorados)));
 			}
+			criteria.add(Restrictions.eq(AinTiposAltaMedica.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
 			tam = (AinTiposAltaMedica) executeCriteriaUniqueResult(criteria);
 		}
 

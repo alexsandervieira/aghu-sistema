@@ -58,7 +58,7 @@
             <mec:commandLink title="#{messages.LABEL_DETALHAR}" action="#{atenderTransferenciaPacientePaginatorController.detalhar}" styleClass=" silk-table silk-icon"> 
               <f:setPropertyActionListener target="#{verificarCaracteristicasPedidoInternacaoController.solicTransfPaciente}" value="#{_solTransf.solicitacao}" for="command"/> 
             </mec:commandLink>  
-            <mec:commandLink title="#{messages.LABEL_ATENDER_VISUALIZAR}" rendered="#{_solTransf.solicitacao.indSitSolicLeito == 'P'}" action="#{atenderTransferenciaPacientePaginatorController.atenderVisualizar}" styleClass=" silk-accept silk-icon" ajax="true"> 
+            <mec:commandLink title="#{messages.LABEL_ATENDER_VISUALIZAR}" rendered="#{_solTransf.solicitacao.indSitSolicLeito == 'P'}" action="#{atenderTransferenciaPacientePaginatorController.atenderVisualizar(_solTransf.solicitacao.internacao.seq)}" styleClass=" silk-accept silk-icon" ajax="true"> 
               <f:setPropertyActionListener target="#{atenderTransferenciaPacienteController.solicitacao}" value="#{_solTransf.solicitacao}" for="command"/> 
             </mec:commandLink>  
             <mec:commandLink title="#{messages.LABEL_TRANSFERIR}" rendered="#{_solTransf.solicitacao.indSitSolicLeito == 'A'}" action="#{atenderTransferenciaPacientePaginatorController.transferir(_solTransf.solicitacao.internacao.seq, _solTransf.solicitacao.leito.leitoID)}" styleClass=" silk-arrow-switch silk-icon" ajax="true"/>  

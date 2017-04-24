@@ -485,11 +485,7 @@ public class FccCentroCustosDAO extends br.gov.mec.aghu.core.persistence.dao.Bas
 
 		criteria.add(Restrictions.eq(RapServidores.Fields.CENTRO_CUSTO_LOTACAO.toString(), centroCusto));
 
-		Criterion notNullDtFimVinculo = Restrictions.isNotNull(RapServidores.Fields.DATA_FIM_VINCULO.toString());
-
-		Criterion dtfimVinculoAntesAgora = Restrictions.gt(RapServidores.Fields.DATA_FIM_VINCULO.toString(), new Date());
-
-		criteria.add(Restrictions.or(notNullDtFimVinculo, dtfimVinculoAntesAgora));
+		criteria.add(Restrictions.eq(RapServidores.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
 
 		return this.executeCriteriaCount(criteria) > 0;
 	}

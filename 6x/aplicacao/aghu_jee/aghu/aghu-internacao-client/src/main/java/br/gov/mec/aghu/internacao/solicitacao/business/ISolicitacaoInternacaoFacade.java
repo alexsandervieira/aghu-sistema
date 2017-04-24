@@ -137,4 +137,6 @@ public interface ISolicitacaoInternacaoFacade extends Serializable {
 	AinSolicitacoesInternacao obterPrimeiraSolicitacaoPendentePorPaciente(
 			Integer codigoPaciente) throws ApplicationBusinessException;
 
+	void negarSolicitacaoInternacao(AinSolicitacoesInternacao solicitacaoInternacao) throws ApplicationBusinessException;
+
 }

@@ -509,7 +509,7 @@ public class VRapServidorConselhoDAO extends br.gov.mec.aghu.core.persistence.da
 		if(agenda) {
 			query.setParameter("listaFuncoes", Arrays.asList(DominioFuncaoProfissional.ANP, DominioFuncaoProfissional.ANC,  DominioFuncaoProfissional.ANR, 
 					DominioFuncaoProfissional.CIR,  DominioFuncaoProfissional.ENF, DominioFuncaoProfissional.INS, DominioFuncaoProfissional.MAX, 
-					DominioFuncaoProfissional.MCO, DominioFuncaoProfissional.MPF,DominioFuncaoProfissional.MRE));
+					DominioFuncaoProfissional.MCO, DominioFuncaoProfissional.MPF,DominioFuncaoProfissional.MRE,DominioFuncaoProfissional.OPF,DominioFuncaoProfissional.ORE));
 		}
 
 		List<Object[]> lista = query.getResultList();

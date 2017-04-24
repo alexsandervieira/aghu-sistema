@@ -94,6 +94,10 @@ public class MbcEquipamentoNotaSalaDAO extends br.gov.mec.aghu.core.persistence.
 		
 		List<Short> subCriteriaResultado = obterResultadoSubCriteriaEquipamentosPorUnfSeqCrgSeq(unfSeq, pciSeq, espSeq);
 		
+		if(subCriteriaResultado == null || subCriteriaResultado.isEmpty()) {
+			return new ArrayList<SubRelatorioNotasDeConsumoDaSalaEquipamentosVO>();
+		}
+		
 		criteria.add(Restrictions.eq("ENS." + MbcEquipamentoNotaSala.Fields.UNF_SEQ.toString(), unfSeq));
 		criteria.add(Restrictions.in("ENS." + MbcEquipamentoNotaSala.Fields.SEQP.toString(), subCriteriaResultado));
 		
@@ -102,7 +106,7 @@ public class MbcEquipamentoNotaSalaDAO extends br.gov.mec.aghu.core.persistence.
 				
 		criteria.setResultTransformer(Transformers.aliasToBean(SubRelatorioNotasDeConsumoDaSalaEquipamentosVO.class));
 		
-		return executeCriteria(criteria, 0, 24 - getMbcEquipamentoUtilCirgDAO().countEquipamentoUtilCirgPorCrgSeq(crgSeq).intValue(), null, false);
+		return executeCriteria(criteria, 0, 100 - getMbcEquipamentoUtilCirgDAO().countEquipamentoUtilCirgPorCrgSeq(crgSeq).intValue(), null, false);
 	}
 	
 	private List<Short> obterResultadoSubCriteriaEquipamentosPorUnfSeqCrgSeq(Short unfSeq, Integer pciSeq, Short espSeq) {
@@ -124,9 +128,9 @@ public class MbcEquipamentoNotaSalaDAO extends br.gov.mec.aghu.core.persistence.
 								Subqueries.notExists(subCriteria1)), Restrictions.and(
 										Restrictions.isNull("NOA." + MbcUnidadeNotaSala.Fields.AGH_ESPECIALIDADES_SEQ.toString()),
 										Restrictions.and(
-												Restrictions.isNull("NOA." + MbcUnidadeNotaSala.Fields.MBC_PROCEDIMENTO_CIRURGICOS_SEQ.toString()),
-												Restrictions.and(
-														Subqueries.notExists(subCriteria2), Subqueries.notExists(subCriteria3)))))));
+												Restrictions.or(Restrictions.isNull("NOA." + MbcUnidadeNotaSala.Fields.MBC_PROCEDIMENTO_CIRURGICOS_SEQ.toString()), Restrictions.and(
+														Subqueries.notExists(subCriteria2), Subqueries.notExists(subCriteria3)))
+												)))));
 		
 		return executeCriteria(criteriaPrincipal);
 	}

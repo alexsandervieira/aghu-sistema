@@ -42,12 +42,27 @@
 									style="margin-left:4px !important; margin-right:4px !important;"
 									update="botoes,info,messages"
 									mode="advanced" dragDropSupport="true"
-									allowTypes="/(\.|\/)(txt)$/"
+									allowTypes="/(\.|\/)(txt|csv)$/"
 									invalidFileMessage="#{messages.NOME_ARQUIVO_INVALIDO_TXT}"
 									process="@this"
 									/>
 								<p:growl id="messages" showDetail="true" />
 							</h:panelGroup>
+								<h:panelGroup> 
+							<aghu:linha>
+							        <p:outputPanel id="PaneltipoAgendamentoSisreg" layout="inline"> 
+		              					   <mec:selectOneRadio 
+			              					   label="Tipo de Agendamento Arquivo SISREG"
+			              					   converter="DominioTipoAgendamentoSisreg" 
+											   title="" 
+											   enum="DominioTipoAgendamentoSisreg" 
+											   value="#{importarArquivoSisregController.tipoAgendamentoSisreg}" 
+										       required="true">
+		                				 	   <p:ajax event="change" process="@this"/>  
+		             					   </mec:selectOneRadio> 
+					           		</p:outputPanel>  
+		            		</aghu:linha>
+ 						</h:panelGroup>
 						</div>
 						<div style="float: left; width: 22%" align="center">
 							<h:panelGroup id="botoes">

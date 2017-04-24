@@ -18,6 +18,7 @@ import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.business.IAghuFacade;
 import br.gov.mec.aghu.casca.business.ICascaFacade;
 import br.gov.mec.aghu.compras.business.IComprasFacade;
+import br.gov.mec.aghu.compras.dao.ScoGrupoMaterialDAO;
 import br.gov.mec.aghu.core.business.BaseBusiness;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
@@ -100,6 +101,9 @@ public class SceReqMateriaisRN extends BaseBusiness {
 
 	@Inject
 	private SceEstoqueAlmoxarifadoDAO sceEstoqueAlmoxarifadoDAO;
+	
+	@Inject
+	private ScoGrupoMaterialDAO scoGrupoMaterialDAO;
 
 	/**
 	 * 
@@ -107,7 +111,7 @@ public class SceReqMateriaisRN extends BaseBusiness {
 	private static final long serialVersionUID = 1520616142862363276L;
 
 	public enum SceReqMateriaisRNExceptionCode implements BusinessExceptionCode {
-		NUMERO_CUM_NAO_ENCONTRADA, SCE_00382, SCE_00887, SCE_00307, SCE_00308, SCE_00316, SCE_00317, SCE_00309, SCE_00311, SCE_00796, SCE_00312, SCE_00313, SCE_00314, SCE_00315, SCE_00367, RN_EFETIVADA_001, RN_EFETIVADA_002, RN_EFETIVADA_003, MENSAGEM_ALMOXARIFADO_NAO_INFORMADO, MENSAGEM_CC_REQ_NAO_INFORMADO, MENSAGEM_CC_REQ_AP_NAO_INFORMADO, SCE_ERRO_PARAMETRO, SCE_ERRO_PARAMETRO_TIPO_IMPRESSAO, MENSAGEM_RM_NAO_ENCONTRADA;
+		NUMERO_CUM_NAO_ENCONTRADA, SCE_00382, SCE_00887, SCE_00307, SCE_00308, SCE_00316, SCE_00317, SCE_00309, SCE_00311, SCE_00796, SCE_00312, SCE_00313, SCE_00314, SCE_00315, SCE_00367, RN_EFETIVADA_001, RN_EFETIVADA_002, RN_EFETIVADA_003, MENSAGEM_ALMOXARIFADO_NAO_INFORMADO, MENSAGEM_CC_REQ_NAO_INFORMADO, MENSAGEM_CC_REQ_AP_NAO_INFORMADO, SCE_ERRO_PARAMETRO, SCE_ERRO_PARAMETRO_TIPO_IMPRESSAO, MENSAGEM_RM_NAO_ENCONTRADA, TIPO_MOVIMENTACAO_NULO;
 	}
 
 	/*
@@ -136,6 +140,9 @@ public class SceReqMateriaisRN extends BaseBusiness {
 	 * @throws ApplicationBusinessException
 	 */
 	public void inserir(SceReqMaterial sceReqMateriais) throws BaseException {
+		ScoGrupoMaterial grupoMaterial = scoGrupoMaterialDAO.obterOriginal(sceReqMateriais.getGrupoMaterial());
+		sceReqMateriais.setGrupoMaterial(grupoMaterial);
+		
 		this.preInserir(sceReqMateriais);
 		this.getSceReqMateriaisDAO().persistir(sceReqMateriais);
 	}
@@ -531,7 +538,7 @@ public class SceReqMateriaisRN extends BaseBusiness {
 		final SceReqMaterial sceReqMateriaisOriginal = this.getSceReqMateriaisDAO().obterOriginal(sceReqMateriais.getSeq());
 
 		this.preAtualizar(sceReqMateriais, sceReqMateriaisOriginal, nomeMicrocomputador);
-		this.getSceReqMateriaisDAO().merge(sceReqMateriais);
+		this.getSceReqMateriaisDAO().atualizar(sceReqMateriais);
 		this.posAtualizar(sceReqMateriais, sceReqMateriaisOriginal, nomeMicrocomputador);
 
 	}
@@ -902,7 +909,12 @@ public class SceReqMateriaisRN extends BaseBusiness {
 
 			sceReqMateriais.setServidorEfetivado(servidorLogado);
 			sceReqMateriais.setDtEfetivacao(new Date());
-			getSceTipoMovimentosRN().verificarTipoMovimentoAtivo(sceReqMateriais.getTipoMovimento().getId().getSeq());
+			if(sceReqMateriais.getTipoMovimento() != null) {
+				getSceTipoMovimentosRN().verificarTipoMovimentoAtivo(sceReqMateriais.getTipoMovimento().getId().getSeq());
+			} else {
+				throw new ApplicationBusinessException(SceReqMateriaisRNExceptionCode.TIPO_MOVIMENTACAO_NULO);
+			}
+			
 
 		}
 

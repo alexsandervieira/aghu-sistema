@@ -54,7 +54,7 @@ public class MpmPrescricaoCuidado extends ItemPrescricaoMedica<MpmPrescricaoCuid
 	private Integer version;
 	private Integer pcuAtdSeqPrcrAnt;
 	private Long pcuSeqPrcrAnt;
-
+	private Integer ordem;
 	public MpmPrescricaoCuidado() {
 	}
 
@@ -226,6 +226,14 @@ public class MpmPrescricaoCuidado extends ItemPrescricaoMedica<MpmPrescricaoCuid
 			Set<MpmPrescricaoCuidado> mpmPrescricaoCuidadoses) {
 		this.mpmPrescricaoCuidadoses = mpmPrescricaoCuidadoses;
 	}
+	
+	@Column(name = "ORDEM", nullable = false)
+	public Integer getOrdem() {
+		return this.ordem;
+	}
+	public void setOrdem(Integer ordemRelatorio) {
+		this.ordem = ordemRelatorio;
+	}
 
 	public enum Fields {
 		ID("id"), PRESCRICAO_MEDICA("prescricaoMedica"), PRESCRICAO_MEDICA_ID(
@@ -237,7 +245,7 @@ public class MpmPrescricaoCuidado extends ItemPrescricaoMedica<MpmPrescricaoCuid
 				MPM_PRESCRICAO_CUIDADOS("mpmPrescricaoCuidados"),
 				MPM_PRESCRICAO_CUIDADOS_SEQ("mpmPrescricaoCuidados.id.seq"),
 				MPM_PRESCRICAO_CUIDADOS_ATD_SEQ("mpmPrescricaoCuidados.id.atdSeq"),
-				SERVIDOR_VALIDACAO("servidorValidacao"), MPM_TIPO_FREQ_APRAZAMENTO("mpmTipoFreqAprazamentos");
+				SERVIDOR_VALIDACAO("servidorValidacao"), MPM_TIPO_FREQ_APRAZAMENTO("mpmTipoFreqAprazamentos"),ORDEM("ordem");
 
 		private String fields;
 

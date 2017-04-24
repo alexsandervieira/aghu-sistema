@@ -58,6 +58,7 @@ import br.gov.mec.aghu.model.AipLogradouros;
 import br.gov.mec.aghu.model.AipNacionalidades;
 import br.gov.mec.aghu.model.AipOcupacoes;
 import br.gov.mec.aghu.model.AipOrgaosEmissores;
+import br.gov.mec.aghu.model.AipPacienteProntuario;
 import br.gov.mec.aghu.model.AipPacientes;
 import br.gov.mec.aghu.model.AipPacientesDadosCns;
 import br.gov.mec.aghu.model.AipUfs;
@@ -86,8 +87,6 @@ import br.gov.mec.aghu.vo.ParametrosTelaVO;
 @SuppressWarnings({ "PMD.AghuTooManyMethods", "PMD.ExcessiveClassLength" })
 public class CadastrarPacienteController extends ActionController {
 
-	private static final String PACIENTE = "Paciente: ";
-	private static final String HIFEM = " - ";
 	private static final String TELA_EMERGENCIA_LISTA_PACIENTES = "emergencia-listaPacientesEmergencia";
 	private static final String EXAMES_ATENDIMENTO_EXTERNO_CRUD = "exames-atendimentoExternoCRUD";
 	private static final String INTERNACAO_SOLICITACAO_INTERNACAO = "internacao-solicitacaoInternacao";
@@ -213,7 +212,7 @@ public class CadastrarPacienteController extends ActionController {
 	private Short seqUnidadeFuncional;
 	private Integer seqAtendimentoUrgencia;
 	private Long numeroMaximoProntuarioManual;
-	
+	private Date horaNascimento = new Date();
 	private String nomePaciente;
 	
 	/**
@@ -355,6 +354,7 @@ public class CadastrarPacienteController extends ActionController {
 	private Boolean corRequired;
 	private Boolean dddResidencialRequired;
 	private Boolean telefoneResidencialPaiRequired;
+	private boolean algumTelefoneRequired = false;
 	
 	final static String REDIRECT_LISTA_EMERGENCIA = "emergencia-listaPacientesEmergencia";
 	private MamUnidAtendem mamUnidAtendem;
@@ -465,6 +465,15 @@ public class CadastrarPacienteController extends ActionController {
 		
 		if(this.aipPaciente != null){
 			grupoFamiliar = ambulatorioFacade.obterProntuarioFamiliaPaciente(this.aipPaciente.getCodigo());
+		}
+		
+		if(this.aipPaciente.getProntuario() != null && this.aipPaciente.getNome().toUpperCase().contains("RN")){
+			//obter o prontuario da mae para um RN
+			try {
+				this.prontuarioMae = pacienteFacade.obterProntuarioMaePorProntuarioPaciente(this.aipPaciente.getProntuario());
+			} catch (ApplicationBusinessException e) {
+				this.apresentarMsgNegocio(Severity.ERROR,"Erro ao recuperar prontuário da mãe.Contate o administrador do sistema");
+			}
 		}
 		
 		this.limparEndereco();
@@ -993,10 +1002,40 @@ public class CadastrarPacienteController extends ActionController {
 		return consultaSelecionada != null && consultaSelecionada.getGradeSeq() != null;
 	}
 	
+	/*Verifica o valor do parametro e torna ou nao o preenchimento de algum
+	**numero de telefone obrigatorio
+	*/
+	public boolean telefoneObrigatorio(){
+		try {
+			AghParametros paramTelefonePacienteObrigatorio = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_TELEFONE_PACIENTE_OBRIGATORIO);
+			String valorParametro = paramTelefonePacienteObrigatorio.getVlrTexto().toLowerCase();
+			if (valorParametro.equalsIgnoreCase("s")){
+				return true;
+			} else {
+				return false;
+			}
+		} catch (ApplicationBusinessException e) {
+			LOG.error(e.getMessage(), e);
+			return false;
+		}
+
+	}
+
 	public boolean validaTelefone(boolean error){
 		
 		error = false;
-		
+
+	/*
+	 * Verifica se algum dos telefones está preenchido,
+	 * se não estiver, mostra mensagem para preencher algum número de telefone
+	 */
+	if (aipPaciente.getFoneResidencial() == null && aipPaciente.getFoneRecado() == null) {
+		if(telefoneObrigatorio()) {
+			this.apresentarMsgNegocio(Severity.ERROR, "ERRO_TELEFONE_OBRIGATORIO");
+			error = true;
+		}
+	}
+
 		/*checagens para validar entrada de telefones. O número do telefone e o
 		 * DDD devem sempre ser informados juntos (se houver um, o outro tb deve ser
 		 * informado.)
@@ -1015,6 +1054,7 @@ public class CadastrarPacienteController extends ActionController {
 		
 		return error;
 	}
+	
 	
 	/**
 	 * Método que encaminha o cadastro/edição do paciente
@@ -1106,15 +1146,9 @@ public class CadastrarPacienteController extends ActionController {
 		}
 
 		try {
-			LOG.info("<<<<<<<<<<<<<<<<<<INICIO GRAVAR Paciente>>>>>>>>>>>>>>>>");
-			LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
 
-			//Data de recadastro.. Referente ao chamado #41392
-			aipPaciente.setDtRecadastro(new Date());
+
 			aipPaciente = this.cadastroPacienteFacade.persistirPaciente(aipPaciente, nomeMicrocomputador);
-
-			LOG.info("<<<<<<<<<<<<<<<<<<FINAL GRAVAR Paciente>>>>>>>>>>>>>>>>");
-			LOG.info(PACIENTE + aipPaciente.getProntuario() + HIFEM + aipPaciente.getNome());
 			for (AipEnderecosPacientes enderecoPaciente : enderecosRemovidos) {
 				if (cadastroPacienteFacade.existeEnderecoPaciente(enderecoPaciente.getId())) {
 					cadastroPacienteFacade.excluirEndereco(enderecoPaciente);
@@ -1149,11 +1183,18 @@ public class CadastrarPacienteController extends ActionController {
 	private void apresentarMensagemCadastrarPaciente(final boolean isEdicao) {
 		// Não exibe mensagem de sucesso caso esteja dentro do fluxo de
 		// internação e pacientes agendados.
+		
+		AipPacienteProntuario aipPacienteProntuario = cadastroPacienteFacade.obterPacienteProntuario(aipPaciente.getProntuario());
 		if (!INTERNACAO.equalsIgnoreCase(this.goingTo) && !PAGE_PESQUISAR_PACIENTES_AGENDADOS.equalsIgnoreCase(this.goingTo)) {
 			if (isEdicao) {
 				this.apresentarMsgNegocio(Severity.INFO, "MENSAGEM_SUCESSO_EDICAO_PACIENTE");
 			} else {
 				this.apresentarMsgNegocio(Severity.INFO, "MENSAGEM_SUCESSO_CRIACAO_PACIENTE");
+				if(aipPacienteProntuario != null && aipPacienteProntuario.getSamis() != null){
+					this.apresentarMsgNegocio(Severity.INFO, "MENSAGEM_SUCESSO_ORIGEM_PADRAO", aipPacienteProntuario.getSamis().getDescricao());
+				}else if (aipPacienteProntuario == null){
+					this.apresentarMsgNegocio(Severity.INFO, "MENSAGEM_ORIGEM_PADRAO_NAO_CADASTRADA");
+				}
 			}
 		}
 	}
@@ -1407,9 +1448,11 @@ public class CadastrarPacienteController extends ActionController {
 			Set<AipEnderecosPacientes> enderecos = aipPaciente.getEnderecos();
 
 			for (AipEnderecosPacientes _endereco : enderecos) {
-				if (_endereco.getAipBairrosCepLogradouro() == null && _endereco.getAipCidade() == null && this.cadastroPacienteFacade.nomeCidadeJaExistente(_endereco.getCidade())) {
-					bAux = true;
-					break;
+				if (_endereco.getAipBairrosCepLogradouro() == null && _endereco.getAipCidade() == null && _endereco.getCidade() != null) {
+					if(this.cadastroPacienteFacade.nomeCidadeJaExistente(_endereco.getCidade())){
+						bAux = true;
+						break;
+					}
 				}
 			}
 
@@ -2030,6 +2073,9 @@ public class CadastrarPacienteController extends ActionController {
 				setExibirDadosCompRegNascimento(true);
 			}
 		}
+		
+		setHoraNascimento(aipPaciente.getDtNascimento());
+		
 		aipPaciente.setInsereProntuarioEdicao(parametroliberaProntuarioManual());
 	
 		prepararCargaPagina(aacExigeProntuario);
@@ -2091,6 +2137,7 @@ public class CadastrarPacienteController extends ActionController {
 
 		aipPaciente = new AipPacientes();
 		limparEnderecos();
+		defineHoraDefault();
 
 		aipPaciente.setNome(nome);
 
@@ -2189,6 +2236,18 @@ public class CadastrarPacienteController extends ActionController {
 		} catch (BaseException e) {
 			apresentarExcecaoNegocio(e);
 		}
+		
+		try {
+			AghParametros paramTelefonePacienteObrigatorio = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_TELEFONE_PACIENTE_OBRIGATORIO);
+			String valorParametro = paramTelefonePacienteObrigatorio.getVlrTexto().toLowerCase();
+			if (valorParametro.equalsIgnoreCase("s")){
+				setAlgumTelefoneRequired(true);
+			} else {
+				setAlgumTelefoneRequired(false);
+			}
+		} catch (ApplicationBusinessException e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 	
 	public void consultaNovosParametrosAghWeb(Integer numeroConsultaSelecionada, Integer pacienteCodigo) throws ApplicationBusinessException{
@@ -2256,6 +2315,10 @@ public class CadastrarPacienteController extends ActionController {
 		}
 	}
 
+	public void defineHoraDefault(){
+		this.setHoraNascimento(null);
+	}
+	
 	public String redirecionarAgrupamentoPacientes() {
 		return PAGE_AGRUPAMENTO_FAMILIAR;
 	}
@@ -2586,12 +2649,45 @@ public class CadastrarPacienteController extends ActionController {
 		return telefoneResidencialPaiRequired;
 	}
 
+
+	public boolean isAlgumTelefoneRequired() {
+		return algumTelefoneRequired;
+	}
+
+	public void setAlgumTelefoneRequired(boolean algumTelefoneRequired) {
+		this.algumTelefoneRequired = algumTelefoneRequired;
+	}
+	
 	public void setGerarProntuario(Boolean gerarProntuario) {
 		this.gerarProntuario = gerarProntuario;
 	}
 
 	public Boolean getGerarProntuario() {
 		return gerarProntuario;
+	}
+
+	public Date getHoraNascimento() {
+		return horaNascimento;
+	}
+
+	public void setHoraNascimento(Date horaNascimento) {
+		if(horaNascimento != null){
+
+			Calendar calendarioOrigemHora = Calendar.getInstance();
+			calendarioOrigemHora.setTime(horaNascimento);
+
+			Calendar calendarioDestinoDataNascimento = Calendar.getInstance();
+			calendarioDestinoDataNascimento.setTime(aipPaciente.getDtNascimento());
+
+			calendarioDestinoDataNascimento.set(Calendar.HOUR_OF_DAY, calendarioOrigemHora.get(Calendar.HOUR_OF_DAY));
+			calendarioDestinoDataNascimento.set(Calendar.MINUTE, calendarioOrigemHora.get(Calendar.MINUTE));
+			calendarioDestinoDataNascimento.set(Calendar.SECOND, 0);
+			calendarioDestinoDataNascimento.set(Calendar.MILLISECOND, 0);	
+
+			this.aipPaciente.setDtNascimento(calendarioDestinoDataNascimento.getTime());
+
+		}
+		this.horaNascimento = horaNascimento;
 	}
 
 }

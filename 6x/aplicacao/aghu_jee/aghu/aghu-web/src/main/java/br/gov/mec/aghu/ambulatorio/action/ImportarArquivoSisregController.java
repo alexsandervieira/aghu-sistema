@@ -23,12 +23,13 @@ import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 
 import br.gov.mec.aghu.ambulatorio.business.IAmbulatorioFacade;
-import br.gov.mec.aghu.model.AacConsultasSisreg;
-import br.gov.mec.aghu.vo.FileVO;
 import br.gov.mec.aghu.core.action.ActionController;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.core.exception.Severity;
+import br.gov.mec.aghu.dominio.DominioTipoAgendamentoSisreg;
+import br.gov.mec.aghu.model.AacConsultasSisreg;
+import br.gov.mec.aghu.vo.FileVO;
 
 
 
@@ -69,6 +70,8 @@ public class ImportarArquivoSisregController extends ActionController {
 	private Integer arquivosSendoProcessados;
 	private Integer totalProcessado;
 	private Integer totalConsultas;
+	private DominioTipoAgendamentoSisreg tipoAgendamentoSisreg;
+
 
 	private static final String NOME_LOG_EXPORTACAO = "Log_SISREG";
 	private static final String NEWLINE = System.getProperty("line.separator");
@@ -89,10 +92,11 @@ public class ImportarArquivoSisregController extends ActionController {
 		logImportacao = new StringBuilder(getMensagem(ImportarArquivoSisregControllerExceptionCode.TITLE_IMPORTAR_ARQUIVO_SISREG));
 		autoUpload = false;
 		useFlash = false;
+		this.tipoAgendamentoSisreg = null;
+
 	
 	}
 	
-
 	public int getSize() {
 		if (getFiles().size() > 0) {
 			return getFiles().size();
@@ -262,7 +266,7 @@ public class ImportarArquivoSisregController extends ActionController {
 			LOG.error("Exceção capturada:", e1);
 		}
 		this.logImportacao.delete(0, logImportacao.length());
-		logImportacao.append(this.ambulatorioFacade.marcarConsultas(consultasSisreg, totalConsultas, nomeMicrocomputador));
+		logImportacao.append(this.ambulatorioFacade.marcarConsultas(consultasSisreg, totalConsultas, nomeMicrocomputador, tipoAgendamentoSisreg));
 		habilitaMarcarConsultas = false;
 		habilitaExportarLog = true;
 	}
@@ -402,5 +406,14 @@ public class ImportarArquivoSisregController extends ActionController {
 	public void setTotalLinhas(Integer totalLinhas) {
 		this.totalConsultas = totalLinhas;
 	}
+	
+	public DominioTipoAgendamentoSisreg getTipoAgendamentoSisreg() {
+		return tipoAgendamentoSisreg;
+	}
+
+	public void setTipoAgendamentoSisreg(DominioTipoAgendamentoSisreg tipoAgendamentoSisreg) {
+		this.tipoAgendamentoSisreg = tipoAgendamentoSisreg;
+	}
+
 	
 }

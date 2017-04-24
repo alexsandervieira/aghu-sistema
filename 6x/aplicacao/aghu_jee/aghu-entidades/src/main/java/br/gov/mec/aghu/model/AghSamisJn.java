@@ -24,7 +24,7 @@ import br.gov.mec.aghu.dominio.DominioSituacao;
 
 
 @Entity
-@SequenceGenerator(name = "aghSamisJnSq", sequenceName = "AGH.AGH_SAMIS_JN_SQ1")
+@SequenceGenerator(name = "aghSamisJnSq", sequenceName = "AGH.AGH_SAMIS_JN_SQ1", allocationSize = 1)
 @Table(name = "AGH_SAMIS_JN", schema = "AGH")
 public class AghSamisJn extends BaseEntityCodigo<Short> implements java.io.Serializable {
 

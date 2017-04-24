@@ -111,14 +111,11 @@ private MpmTipoModoUsoProcedimentoDAO mpmTipoModoUsoProcedimentoDAO;
 			throws ApplicationBusinessException {
 
 		this.verificarTipoModoUsoProcedimento(modoUsoPrescProced
-				.getTipoModUsoProcedimento().getId().getSeqp(),
-				modoUsoPrescProced.getTipoModUsoProcedimento().getId()
+				.getTipoModUsoProcedimento().getId().getSeqp(),	modoUsoPrescProced.getTipoModUsoProcedimento().getId()
 						.getPedSeq(), modoUsoPrescProced.getQuantidade());
-
-		this.verificarAlteracao(modoUsoPrescProced.getPrescricaoProcedimento()
-				.getId().getAtdSeq(), modoUsoPrescProced
+		this.verificarAlteracao(modoUsoPrescProced.getPrescricaoProcedimento().getId().getAtdSeq(), modoUsoPrescProced
 				.getPrescricaoProcedimento().getId().getSeq());
-
+		
 	}
 
 	/**

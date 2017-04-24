@@ -162,7 +162,12 @@ private EpeSubgrupoNecesBasicaDAO epeSubgrupoNecesBasicaDAO;
 	public void persistirDiagnostico(EpeDiagnostico diagnostico) throws ApplicationBusinessException {
 		getDiagnosticoCRUD().persistirDiagnostico(diagnostico);
 	}
-	
+
+	@Override
+	public EpeDiagnostico obterDiagnosticoPorId(EpeDiagnosticoId diagnosticoId) {
+		return getEpeDiagnosticoDAO().obterPorChavePrimaria(diagnosticoId);
+	}
+
 	@Override
 	public void excluirDiagnostico(EpeDiagnosticoId diagnosticoId) throws ApplicationBusinessException {
 		getDiagnosticoCRUD().excluirDiagnostico(diagnosticoId);
@@ -479,4 +484,11 @@ private EpeSubgrupoNecesBasicaDAO epeSubgrupoNecesBasicaDAO;
 	public Long pesquisarEtiologiasNaoRelacionadasCount(String filtro, Short dgnSnbGnbSeq, Short dgnSnbSequencia, Short dgnSequencia) {
 		return getEpeFatRelacionadoDAO().pesquisarEtiologiasNaoRelacionadasCount(filtro, dgnSnbGnbSeq, dgnSnbSequencia, dgnSequencia);
 	}
+	
+	@Override
+	public EpeFatRelDiagnostico obterEpeFatRelDiagnosticoPorId(EpeFatRelDiagnosticoId id) {
+		Enum[] fetch = { EpeFatRelDiagnostico.Fields.DIAGNOSTICO, EpeFatRelDiagnostico.Fields.FAT_RELACIONADO};
+		return getEpeFatRelDiagnosticoDAO().obterPorChavePrimaria(id, fetch);
+	}
+
 }

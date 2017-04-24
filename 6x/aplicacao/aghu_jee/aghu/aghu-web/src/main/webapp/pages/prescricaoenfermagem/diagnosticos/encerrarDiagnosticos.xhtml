@@ -30,14 +30,20 @@
 					<p:outputPanel layout="block"
 						style="width:100%; max-height:400px; overflow-y: auto;">
 						<mec:serverDataTable id="tableDiagnosticosEtiologias"
-							list="#{encerramentoDiagnosticoController.listaDiagnosticoEtiologiaVO}"
-							scrollable="true">
+							list="#{encerramentoDiagnosticoController.listaDiagnosticoEtiologiaVO}">
 							<c:set var="_diagnosticoEtiologiaVO" value="#{item}" />
 							<p:column width="10%" style="text-align:center;">
 								<f:facet name="header">
-									<h:outputText value="#{messages.LABEL_SELECIONE_DIAGNOSTICO}" />
+									<h:selectBooleanCheckbox
+										title="#{messages.LABEL_SELECIONAR_TODOS}" id="checkall"
+										value="#{encerramentoDiagnosticoController.allChecked}">
+										<p:ajax event="click" 
+											update="@this @(:checkbox) @(#bt_encerrar_diagnostico), @(#panelBtns)" 
+											process="@this , @(#bt_encerrar_diagnostico)"
+											listener="#{encerramentoDiagnosticoController.checkAll}" />
+									</h:selectBooleanCheckbox>
 								</f:facet>
-								<h:selectBooleanCheckbox name="checkboxDiagnostico"
+								<h:selectBooleanCheckbox id="checkboxDiagnostico"
 									value="#{_diagnosticoEtiologiaVO.selecionado}">
 									<p:ajax event="change" 
 										update="@(#bt_encerrar_diagnostico), @(#panelBtns)" process="@this,@(#bt_encerrar_diagnostico)"
@@ -64,10 +70,17 @@
 			</aghu:panelGeral>
 			<aghu:acao>
 				<p:outputPanel id="panelBtns">
+					<mec:commandButton id="bt_excluir_diagnostico"
+						disabled="#{not encerramentoDiagnosticoController.existeDiagnosticoSelecionado}"
+						value="#{messages.LABEL_EXCLUIR_DIAGNOSTICO}"
+						onclick="PF('modalConfirmacaoExclusaoWG').show();;" ajax="true"
+						rendered="#{encerramentoDiagnosticoController.cameFrom eq 'prescricaoenfermagem-manterPrescricaoEnfermagem'}"
+						styleClass="bt_cinza" />
 					<mec:commandButton id="bt_encerrar_diagnostico"
 						disabled="#{not encerramentoDiagnosticoController.existeDiagnosticoSelecionado}"
 						value="#{messages.LABEL_ENCERRAR_DIAGNOSTICO}"
 						onclick="PF('modalConfirmacaoExclusaoWG').show();;" ajax="true"
+						rendered="#{encerramentoDiagnosticoController.cameFrom eq 'elaboracaoPrescricaoEnfermagem'}"
 						styleClass="bt_cinza" />
 					<mec:commandButton id="bt_continuar"
 						value="#{messages.LABEL_CONTINUAR}"

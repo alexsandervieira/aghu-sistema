@@ -64,7 +64,7 @@ public class SenhaController extends ActionController {
 
 	private boolean redirecionar;
 	
-	private boolean exibirSenhaAtual = true;
+	//private boolean exibirSenhaAtual = true;
 
 	
 	public void processarParametro() {
@@ -74,12 +74,16 @@ public class SenhaController extends ActionController {
 	}
 	
 	@PostConstruct
-	public void iniciar(){
+	public void iniciar() {
 		this.begin(conversation);
-		String senhaTemporaria = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("tkn");
-		if (senhaTemporaria != null){
-			this.exibirSenhaAtual = false;
-		}
+		
+		// Exibir a senha atual é regra para a troca de senha por token sem exigir a senha atual do usario
+		// normalmente usado no tela de enviarSenha.xhtml acessada pelo botão "Esqueci a senha" na tela de login.
+		// Este botão não esta funcional atualmente e nao vamos manter esta funcionalidade nas proximas versões.
+//		String senhaTemporaria = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("tkn");
+//		if (senhaTemporaria != null){
+//			this.exibirSenhaAtual = false;
+//		}
 	}
 
 	
@@ -104,18 +108,13 @@ public class SenhaController extends ActionController {
 
 			login = this.obterLoginUsuarioLogado();
 
-			if (!exibirSenhaAtual || this.validarSenhaAtual()) {
-				if (this.novaSenha != null
-						&& this.novaSenha.equals(this.confirmarSenha)) {
-					if (!exibirSenhaAtual || !this.getSenhaAtual().equals(this.getNovaSenha())) {
-						if (exibirSenhaAtual){
-							this.cascaFacade.alterarSenha(login, this.senhaAtual, this.novaSenha);
-						}else{
-							this.cascaFacade.alterarSenhaSemValidacarSenhaAtual(login, this.novaSenha);
-						}					
-						apresentarMsgNegocio(SenhaControllerMsgEnum.CASCA_MENSAGEM_SENHA_ALTERADA
-								.name());
-
+			if (this.validarSenhaAtual()) {
+				if (this.novaSenha != null && this.novaSenha.equals(this.confirmarSenha)) {
+					if (!this.getSenhaAtual().equals(this.getNovaSenha())) {
+						
+						this.cascaFacade.alterarSenhaSemValidacarSenhaAtual(login, this.novaSenha);
+						apresentarMsgNegocio(SenhaControllerMsgEnum.CASCA_MENSAGEM_SENHA_ALTERADA.name());
+						
 					} else {
 						apresentarMsgNegocio(
 								Severity.WARN,
@@ -303,12 +302,12 @@ public class SenhaController extends ActionController {
 		return possivelAlterarSenhaAghu;
 	}
 
-	public boolean isExibirSenhaAtual() {
-		return exibirSenhaAtual;
-	}
-
-	public void setExibirSenhaAtual(boolean exibirSenhaAtual) {
-		this.exibirSenhaAtual = exibirSenhaAtual;
-	}
+//	public boolean isExibirSenhaAtual() {
+//		return exibirSenhaAtual;
+//	}
+//
+//	public void setExibirSenhaAtual(boolean exibirSenhaAtual) {
+//		this.exibirSenhaAtual = exibirSenhaAtual;
+//	}
 
 }

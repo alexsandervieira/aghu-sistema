@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="relatorioRegistroControlePaciente" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="69" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="1d993dac-3dcc-474b-8039-0c84fc773ab1">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="265"/>
+	<property name="ireport.y" value="0"/>
 	<property name="net.sf.jasperreports.governor.max.pages.enabled" value="true"/>
 	<property name="net.sf.jasperreports.governor.max.pages" value="600"/>
 	<style name="bordas laterais" fill="Solid">
@@ -84,6 +84,7 @@
 	<field name="valor" class="java.lang.String">
 		<fieldDescription><![CDATA[valor]]></fieldDescription>
 	</field>
+	<field name="valorTexto" class="java.lang.String"/>
 	<background>
 		<band height="31" splitType="Stretch">
 			<printWhenExpression><![CDATA[]]></printWhenExpression>
@@ -176,7 +177,7 @@
 		</band>
 	</pageHeader>
 	<pageFooter>
-		<band height="106">
+		<band height="105">
 			<rectangle radius="10">
 				<reportElement mode="Opaque" x="0" y="5" width="228" height="81" uuid="5c9cea9c-22c0-4ac4-ac29-b7ef876801ec"/>
 				<graphicElement>
@@ -272,7 +273,7 @@
 						<bucketExpression><![CDATA[$F{dataHora}]]></bucketExpression>
 					</bucket>
 					<crosstabRowHeader>
-						<cellContents backcolor="#C3CFD9" mode="Opaque">
+						<cellContents backcolor="#FFFFFF" mode="Opaque">
 							<box>
 								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 							</box>
@@ -294,7 +295,7 @@
 						<bucketExpression><![CDATA[$F{anotacoes}]]></bucketExpression>
 					</bucket>
 					<crosstabRowHeader>
-						<cellContents backcolor="#C3CFD9" mode="Opaque">
+						<cellContents backcolor="#FFFFFF" mode="Opaque">
 							<box>
 								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 							</box>
@@ -313,7 +314,7 @@
 						<bucketExpression><![CDATA[$F{profissionais}]]></bucketExpression>
 					</bucket>
 					<crosstabRowHeader>
-						<cellContents backcolor="#C3CFD9" mode="Opaque">
+						<cellContents backcolor="#FFFFFF" mode="Opaque">
 							<box>
 								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 							</box>
@@ -327,17 +328,17 @@
 						<cellContents/>
 					</crosstabTotalRowHeader>
 				</rowGroup>
-				<columnGroup name="siglaUnidade" height="23" totalPosition="End">
+				<columnGroup name="siglaUnidade" height="19" totalPosition="End">
 					<bucket class="java.lang.String">
 						<bucketExpression><![CDATA[$F{siglaUnidade}]]></bucketExpression>
 					</bucket>
 					<crosstabColumnHeader>
-						<cellContents backcolor="#C3CFD9" mode="Opaque">
+						<cellContents backcolor="#FFFFFF" mode="Opaque">
 							<box>
 								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 							</box>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement style="Crosstab Data Text" stretchType="RelativeToTallestObject" x="0" y="3" width="30" height="20" uuid="b62da0be-bb10-4f41-9c90-04207be70c7f"/>
+								<reportElement style="Crosstab Data Text" stretchType="RelativeToTallestObject" x="0" y="0" width="30" height="18" uuid="b62da0be-bb10-4f41-9c90-04207be70c7f"/>
 								<textElement>
 									<font size="7"/>
 								</textElement>
@@ -346,21 +347,21 @@
 						</cellContents>
 					</crosstabColumnHeader>
 					<crosstabTotalColumnHeader>
-						<cellContents backcolor="#C3CFD9" mode="Opaque">
+						<cellContents backcolor="#FFFFFF" mode="Opaque">
 							<box>
 								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 							</box>
 							<frame>
-								<reportElement x="0" y="0" width="440" height="23" uuid="f1aacc9f-c351-4514-b5f9-39605b795262"/>
+								<reportElement x="0" y="0" width="440" height="18" uuid="f1aacc9f-c351-4514-b5f9-39605b795262"/>
 								<staticText>
-									<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="161" height="20" forecolor="#000000" uuid="cefd8f57-e649-4cdf-b332-ee8d20fd918a"/>
+									<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="294" height="18" forecolor="#000000" uuid="cefd8f57-e649-4cdf-b332-ee8d20fd918a"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
 										<font size="8"/>
 									</textElement>
 									<text><![CDATA[Anotações]]></text>
 								</staticText>
 								<staticText>
-									<reportElement stretchType="RelativeToTallestObject" x="190" y="1" width="161" height="19" forecolor="#000000" uuid="3eeff029-a9f4-4b8e-8d16-4e1b035b6b4b"/>
+									<reportElement stretchType="RelativeToTallestObject" x="294" y="0" width="146" height="18" forecolor="#000000" uuid="3eeff029-a9f4-4b8e-8d16-4e1b035b6b4b"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
 										<font size="8"/>
 									</textElement>
@@ -373,7 +374,10 @@
 				<measure name="valorMeasure" class="java.lang.String">
 					<measureExpression><![CDATA[$F{valor}]]></measureExpression>
 				</measure>
-				<crosstabCell width="31" height="15">
+				<measure name="valorTexto" class="java.lang.String">
+					<measureExpression><![CDATA[$F{valorTexto}]]></measureExpression>
+				</measure>
+				<crosstabCell width="31" height="17">
 					<cellContents>
 						<box>
 							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
@@ -385,7 +389,7 @@
 							<textElement>
 								<font size="9" isBold="true" isItalic="true" pdfFontName="Helvetica-Bold"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{valorMeasure}.substring( 1 )]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{valorTexto} != null ? $V{valorMeasure}.substring(1) + " " + $V{valorTexto} : $V{valorMeasure}.substring(1)]]></textFieldExpression>
 						</textField>
 						<textField isStretchWithOverflow="true" pattern="###0.00;###0.00-" isBlankWhenNull="true">
 							<reportElement style="Crosstab Data Text" stretchType="RelativeToTallestObject" mode="Opaque" x="0" y="5" width="30" height="10" uuid="5858c0f7-b6b3-4633-95a4-3b7df5d85a7d">
@@ -394,12 +398,12 @@
 							<textElement>
 								<font size="8"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{valorMeasure}.substring( 1)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{valorTexto} != null ? $V{valorMeasure}.substring(1) + " " + $V{valorTexto} : $V{valorMeasure}.substring(1)]]></textFieldExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>
 				<crosstabCell height="25" rowTotalGroup="dataHora">
-					<cellContents backcolor="#737A80" mode="Opaque">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
 						<box>
 							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 						</box>
@@ -409,30 +413,31 @@
 						</textField>
 					</cellContents>
 				</crosstabCell>
-				<crosstabCell width="440" height="15" columnTotalGroup="siglaUnidade">
-					<cellContents backcolor="#C3CFD9" mode="Opaque">
+				<crosstabCell width="440" height="17" columnTotalGroup="siglaUnidade">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
 						<box>
 							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 						</box>
 						<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-							<reportElement style="bordas laterais" stretchType="RelativeToTallestObject" x="0" y="0" width="190" height="15" forecolor="#000000" uuid="4f7bd746-ce26-404b-9b68-2c55b18ad94e"/>
-							<textElement>
+							<reportElement style="bordas laterais" stretchType="RelativeToTallestObject" x="0" y="0" width="294" height="17" forecolor="#000000" uuid="4f7bd746-ce26-404b-9b68-2c55b18ad94e"/>
+							<textElement verticalAlignment="Middle">
 								<font size="8"/>
+								<paragraph leftIndent="3"/>
 							</textElement>
 							<textFieldExpression><![CDATA[$V{anotacoes}]]></textFieldExpression>
 						</textField>
 						<textField isStretchWithOverflow="true">
-							<reportElement style="bordas laterais" stretchType="RelativeToTallestObject" x="191" y="0" width="249" height="15" uuid="e76a039b-2d20-40bf-851b-1be374e2c7be"/>
-							<textElement>
+							<reportElement style="bordas laterais" stretchType="RelativeToTallestObject" x="294" y="0" width="146" height="17" uuid="e76a039b-2d20-40bf-851b-1be374e2c7be"/>
+							<textElement verticalAlignment="Middle">
 								<font size="8"/>
-								<paragraph lineSpacing="Single"/>
+								<paragraph lineSpacing="Single" leftIndent="3"/>
 							</textElement>
 							<textFieldExpression><![CDATA[$V{profissionais}]]></textFieldExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>
 				<crosstabCell rowTotalGroup="dataHora" columnTotalGroup="siglaUnidade">
-					<cellContents backcolor="#737A80" mode="Opaque">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
 						<box>
 							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 						</box>
@@ -443,7 +448,7 @@
 					</cellContents>
 				</crosstabCell>
 				<crosstabCell height="25" rowTotalGroup="anotacoes">
-					<cellContents backcolor="#E6F3FF" mode="Opaque">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
 						<box>
 							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 						</box>
@@ -454,7 +459,7 @@
 					</cellContents>
 				</crosstabCell>
 				<crosstabCell rowTotalGroup="anotacoes" columnTotalGroup="siglaUnidade">
-					<cellContents backcolor="#737A80" mode="Opaque">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
 						<box>
 							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 						</box>

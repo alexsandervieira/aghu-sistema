@@ -2,7 +2,9 @@ package br.gov.mec.aghu.ambulatorio.dao;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.New;
@@ -59,6 +61,7 @@ import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.model.AipPacientes;
 import br.gov.mec.aghu.model.MamTrgEncInterno;
 import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.model.RapServidoresId;
 import br.gov.mec.aghu.model.VAacSiglaUnfSala;
 import br.gov.mec.aghu.model.VRapPessoaServidor;
 import br.gov.mec.aghu.procedimentoterapeutico.vo.AgendamentoAmbulatorioVO;
@@ -104,18 +107,22 @@ public class AacGradeAgendamenConsultasDAO extends br.gov.mec.aghu.core.persiste
 			AghEquipes filtroEquipe, RapServidores filtroProfissional, boolean count, AacPagador filtroPagador,
 			AacTipoAgendamento filtroTipoAgendamento, AacCondicaoAtendimento filtroCondicao, Date dtConsulta, Date horaConsulta,
 			Date mesInicio, Date mesFim, DominioDiaSemana dia, VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,
-			DataInicioFimVO turno, List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS) throws ApplicationBusinessException {
+			DataInicioFimVO turno, List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS, List<Integer> listIdsEspe, List<Integer> listIdsEqp, List<Integer> listIdsUnf, List<Integer> listIdsGrd, List<RapServidoresId> listIdsProf) throws ApplicationBusinessException {
     	
     	Short seqTipoAgendamentoSMS = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_TAG_SMS).getVlrNumerico().shortValue();
 		Short seqCondPrimeiraConsulta = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_CAA_CONSULTA).getVlrNumerico().shortValue();
 		
+		Map<String, List<Integer>> mapIds = new HashMap<String,List<Integer>>();
+		mapIds.put("ESP", listIdsEspe);
+		mapIds.put("EQP", listIdsEqp);
+		mapIds.put("GRD", listIdsGrd);
+		mapIds.put("UNF", listIdsUnf);
+
 		PesquisaDisponibilidadeHorariosQueryBuilder builder =  obterOriginalQueryBuilderPesquisaDisponibilidade.get();
-		
-		return builder.montarPesquisaDisponibilidadeHorarios(filtroSeq, filtroUslUnfSeq, filtroEspecialidade
-    					, filtroEquipe, filtroProfissional, count, filtroPagador
-    					, filtroTipoAgendamento, filtroCondicao, dtConsulta, horaConsulta
-    					, mesInicio, mesFim, dia, zona, zonaSala
-    					, turno, listEspecialidade, visualizarPrimeirasConsultasSMS, seqTipoAgendamentoSMS, seqCondPrimeiraConsulta);
+		return builder.montarPesquisaDisponibilidadeHorarios(filtroSeq, filtroUslUnfSeq, filtroEspecialidade, filtroEquipe, filtroProfissional,
+						count, filtroPagador, filtroTipoAgendamento, filtroCondicao, dtConsulta, horaConsulta, mesInicio, mesFim, dia, zona,
+						zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS, seqTipoAgendamentoSMS, seqCondPrimeiraConsulta,
+						mapIds, listIdsProf);
     }
     
 	@SuppressWarnings("PMD.NPathComplexity")
@@ -588,16 +595,25 @@ public class AacGradeAgendamenConsultasDAO extends br.gov.mec.aghu.core.persiste
 
 		return query;
     }
-
     public List<AacGradeAgendamenConsultas> listarDisponibilidadeHorarios(Integer filtroSeq, Short filtroUslUnfSeq,
 			AghEspecialidades filtroEspecialidade, AghEquipes filtroEquipe, RapServidores filtroProfissional, AacPagador filtroPagador,
 			AacTipoAgendamento filtroTipoAgendamento, AacCondicaoAtendimento filtroCondicao, Date dtConsulta, Date horaConsulta,
 			Date mesInicio, Date mesFim, DominioDiaSemana dia, VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala, DataInicioFimVO turno,
 			List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS) throws ApplicationBusinessException {
+    	return listarDisponibilidadeHorarios(filtroSeq, filtroUslUnfSeq, filtroEspecialidade,
+        		filtroEquipe, filtroProfissional, filtroPagador, filtroTipoAgendamento, filtroCondicao, dtConsulta, horaConsulta,
+        		mesInicio, mesFim, dia, null, null, null, null, visualizarPrimeirasConsultasSMS, null, null, null, null,null);
+ 
+    }
+    public List<AacGradeAgendamenConsultas> listarDisponibilidadeHorarios(Integer filtroSeq, Short filtroUslUnfSeq,
+			AghEspecialidades filtroEspecialidade, AghEquipes filtroEquipe, RapServidores filtroProfissional, AacPagador filtroPagador,
+			AacTipoAgendamento filtroTipoAgendamento, AacCondicaoAtendimento filtroCondicao, Date dtConsulta, Date horaConsulta,
+			Date mesInicio, Date mesFim, DominioDiaSemana dia, VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala, DataInicioFimVO turno,
+			List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS, List<Integer> listIdsEspe, List<Integer> listIdsEqp, List<Integer> listIdsUnf, List<Integer> listIdsGrd, List<RapServidoresId> listIdsProf) throws ApplicationBusinessException {
 
 		Query query = montarPesquisaDisponibilidadeHorarios(filtroSeq, filtroUslUnfSeq, filtroEspecialidade, filtroEquipe,
 			filtroProfissional, false, filtroPagador, filtroTipoAgendamento, filtroCondicao, dtConsulta, horaConsulta, mesInicio,
-			mesFim, dia, zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS);
+			mesFim, dia, zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS, listIdsEspe, listIdsEqp, listIdsUnf, listIdsGrd, listIdsProf);
 		
 		List<AacGradeAgendamenConsultas> lista = query.list();
 
@@ -613,16 +629,28 @@ public class AacGradeAgendamenConsultasDAO extends br.gov.mec.aghu.core.persiste
         		filtroEquipe, filtroProfissional, filtroPagador, filtroTipoAgendamento, filtroCondicao, dtConsulta, horaConsulta,
         		mesInicio, mesFim, dia, null, null, null, null, visualizarPrimeirasConsultasSMS);
     }
-    
+
     public Long listarDisponibilidadeHorariosCount(Integer filtroSeq, Short filtroUslUnfSeq, AghEspecialidades filtroEspecialidade,
 			AghEquipes filtroEquipe, RapServidores filtroProfissional, AacPagador pagador, AacTipoAgendamento tipoAgendamento,
 			AacCondicaoAtendimento condicaoAtendimento, Date dtConsulta, Date horaConsulta, Date mesInicio, Date mesFim,
 			DominioDiaSemana dia, Boolean disponibilidade, VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,	DataInicioFimVO turno,
 			List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS) throws ApplicationBusinessException {
+    	return listarDisponibilidadeHorariosCount(filtroSeq, filtroUslUnfSeq, filtroEspecialidade, filtroEquipe, filtroProfissional,
+    			pagador, tipoAgendamento, condicaoAtendimento, dtConsulta, horaConsulta, mesInicio, mesFim, dia, disponibilidade,
+    			zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS, null, null, null, null, null);
+    }
+    
+    public Long listarDisponibilidadeHorariosCount(Integer filtroSeq, Short filtroUslUnfSeq, AghEspecialidades filtroEspecialidade,
+			AghEquipes filtroEquipe, RapServidores filtroProfissional, AacPagador pagador, AacTipoAgendamento tipoAgendamento,
+			AacCondicaoAtendimento condicaoAtendimento, Date dtConsulta, Date horaConsulta, Date mesInicio, Date mesFim,
+			DominioDiaSemana dia, Boolean disponibilidade, VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,	DataInicioFimVO turno,
+			List<AghEspecialidades> listEspecialidade, Boolean visualizarPrimeirasConsultasSMS,
+			List<Integer> listIdsEspe, List<Integer> listIdsEqp, List<Integer> listIdsUnf, List<Integer> listIdsGrd, List<RapServidoresId> listIdsProf) throws ApplicationBusinessException {
 
 		Query query = montarPesquisaDisponibilidadeHorarios(filtroSeq, filtroUslUnfSeq, filtroEspecialidade, filtroEquipe,
 			filtroProfissional, true, pagador, tipoAgendamento, condicaoAtendimento, dtConsulta, horaConsulta, mesInicio,
-			mesFim, dia, zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS);
+			mesFim, dia, zona, zonaSala, turno, listEspecialidade, visualizarPrimeirasConsultasSMS, listIdsEspe, listIdsEqp,
+			listIdsUnf, listIdsGrd, listIdsProf);
 
 		return (Long) query.uniqueResult();
     }

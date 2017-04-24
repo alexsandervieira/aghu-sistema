@@ -570,7 +570,12 @@ public class EstoqueFacade extends BaseFacade implements IEstoqueFacade {
 	public List<SceAlmoxarifado> obterAlmoxarifadoPorSeqDescricao(String param) {
 		return getSceAlmoxarifadoDAO().obterAlmoxarifadoPorSeqDescricao(param);
 	}
-
+	
+	@Override
+	public List<SceAlmoxarifado> obterAlmoxarifadoPorSeqDescricao(String param,SceAlmoxarifado almox) {
+		return getSceAlmoxarifadoDAO().obterAlmoxarifadoPorSeqDescricao(param,(almox == null) ? null : (almox.getSeq() == null) ? null : almox.getSeq());
+	}
+	
 	@Override
 	public SceEstoqueAlmoxarifado obterEstoqueAlmoxarifadoEstocavelPorMaterialAlmoxarifadoFornecedor(Short seqAlmoxarifadoOrigem,
 			Integer codigoMaterial, Integer fornecedor) {
@@ -822,11 +827,6 @@ public class EstoqueFacade extends BaseFacade implements IEstoqueFacade {
 	}
 
 	@Override
-	public List<SceEstoqueAlmoxarifado> pesquisarEstoqueAlmoxarifadoPorPacote(Integer codigoGrupo, ScePacoteMateriaisId pacote) {
-		return getSceReqMateriaisRN().pesquisarEstoqueAlmoxarifadoPorPacote(codigoGrupo, pacote);
-	}
-
-	@Override
 	public void preencheConsumoMedioItemRequisicao(SceItemRms itemRms, Integer codigoCCAplicacao) throws ApplicationBusinessException {
 		getSceItemRmsRN().preencheConsumoMedioItemRequisicao(itemRms, codigoCCAplicacao);
 	}
@@ -955,9 +955,9 @@ public class EstoqueFacade extends BaseFacade implements IEstoqueFacade {
 	 */
 	@Override
 	public List<PosicaoFinalEstoqueVO> buscaDadosPosicaoFinalEstoque(Date dtCompetencia, Integer codigoGrupo, String estocavel,
-			String orderBy, Integer fornecedor, String siglaTipoUsoMdto, Short almoxSeq) throws BaseException {
+			String orderBy, Integer fornecedor, String siglaTipoUsoMdto, Short almoxSeq, boolean mostrarSoAtivos) throws BaseException {
 		return getSceEstoqueGeralDAO().buscaDadosPosicaoFinalEstoque(dtCompetencia, codigoGrupo, estocavel, orderBy, fornecedor,
-				siglaTipoUsoMdto, almoxSeq);
+				siglaTipoUsoMdto, almoxSeq, mostrarSoAtivos);
 	}
 
 	/*
@@ -4243,9 +4243,9 @@ public class EstoqueFacade extends BaseFacade implements IEstoqueFacade {
 	}
 
 	@Override
-	public void validarInsercaoPacoteRequisicaoMaterial(SceReqMaterial reqMaterial, List<SceEstoqueAlmoxarifado> lstItemToAdd,
-			Boolean isAlmoxarife) throws ApplicationBusinessException {
-		getManterPacoteMateriaisON().validarInsercaoPacoteRequisicaoMaterial(reqMaterial, lstItemToAdd, isAlmoxarife);
+	public void validarInsercaoPacoteRequisicaoMaterial(SceReqMaterial reqMaterial, Integer codigoGrupoMaterial,
+			Boolean isAlmoxarife, String nomeMicrocomputador) throws ApplicationBusinessException {
+		getManterPacoteMateriaisON().validarInsercaoPacoteRequisicaoMaterial(reqMaterial, codigoGrupoMaterial, isAlmoxarife, nomeMicrocomputador);
 	}
 
 	@Override

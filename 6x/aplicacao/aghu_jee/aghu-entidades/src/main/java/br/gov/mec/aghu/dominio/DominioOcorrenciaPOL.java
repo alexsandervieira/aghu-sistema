@@ -13,6 +13,7 @@ public enum DominioOcorrenciaPOL implements Dominio{
 	LIBERADO_LISTA_ESPERA(5),
 	LIBERADO_LISTA_CANCELADOS(6),
 	LIBERADO_VIP(7),
+	LIBERADO_FLUXOGRAMA(8),
 	BLOQUEADO_VIP(51),
 	BLOQUEADO_SEM_ATENDIMENTO(52),
 	BLOQUEADO_SEM_PERFIL(53),
@@ -46,6 +47,7 @@ public enum DominioOcorrenciaPOL implements Dominio{
 		mapDescricao.put(5, "Acesso liberado para paciente da lista de espera do portal de agendamento de cirurgias");
 		mapDescricao.put(6, "Acesso liberado para paciente da lista de cancelados do portal de agendamento de cirurgias");
 		mapDescricao.put(7, "Acesso liberado para paciente VIP");
+		mapDescricao.put(8, "Acesso liberado para ver Fluxograma do paciente");
 		mapDescricao.put(51, "Acesso bloqueado porque o paciente é VIP");
 		mapDescricao.put(52, "Acesso bloqueado porque o paciente não tem atendimento");
 		mapDescricao.put(53, "Acesso bloqueado porque o usuário não tem perfil");

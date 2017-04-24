@@ -39,7 +39,7 @@
 
 				<c:set var="item" value="#{item}" />
 				
-			<p:column  style="width:9%;" sortBy="#{item.reaberto}" sortable="true"> 
+			<p:column  style="width:9%;" sortBy="#{item.reaberto}" sortable="true" rendered="#{mf:hasPermission(securityController,'atenderConsulta,atender')}"> 
             <f:facet name="header"> 
               <h:outputText value="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_REABRIR}"/> 
             </f:facet>  
@@ -93,7 +93,16 @@
 						<h:outputText value="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_PENDENTES_PACIENTE}" />
 					</f:facet>
 
-					<h:outputText id="focus" value="#{pesquisarPacientesAgendadosController.formatarValorTamanhoLimite(item.nome, 25)}" />
+					<h:outputText 
+						id="focus" 
+						value="#{pesquisarPacientesAgendadosController.formatarValorTamanhoLimite(not empty item.nomeSocial ? item.nomeSocial : item.nome, 25)}" />
+					
+					<h:graphicImage 
+						title="#{messages.LABEL_NOME_CIVIL}: #{item.nome}"  
+						value="/resources/img/icons/nome-civil-paciente.png" 
+						style="border:0px; float:right;" 
+						rendered="#{not empty item.nomeSocial}" />
+					
 
 					<p:tooltip id="toolTipFade" for="focus" styleClass="tooltip" layout="block" >
 						<ui:fragment rendered="#{item.nome ne null and item.nome.length() gt 25}">

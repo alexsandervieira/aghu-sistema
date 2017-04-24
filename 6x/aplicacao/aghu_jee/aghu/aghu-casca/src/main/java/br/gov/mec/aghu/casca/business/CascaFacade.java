@@ -1272,4 +1272,12 @@ public class CascaFacade extends BaseFacade implements ICascaFacade {
 	public String getBaseUrlDocumentacao() {
 		return acessoON.getBaseUrlDocumentacao();
 	}
+	
+	@Override
+	public List<Usuario> pesquisarUsuariosPatologista(Integer firstResult,
+			Integer maxResult, String orderProperty, boolean asc,
+			String nomeOuLogin) throws ApplicationBusinessException {
+		return getUsuarioON().pesquisarUsuariosPatologista(firstResult, maxResult,
+				orderProperty, asc, nomeOuLogin);		
+	}
 }

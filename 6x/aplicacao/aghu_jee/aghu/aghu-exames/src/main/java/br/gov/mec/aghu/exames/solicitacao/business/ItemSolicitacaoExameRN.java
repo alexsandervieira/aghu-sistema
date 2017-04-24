@@ -1695,9 +1695,7 @@ public class ItemSolicitacaoExameRN extends BaseBusiness {
 //	}
 	
 	private AelItemSolicitacaoExames atualizar(AelItemSolicitacaoExames item, AelItemSolicitacaoExames itemSolicitacaoExameOriginal, Boolean atualizarItemAmostra, boolean flush, String nomeMicrocomputador, final Date dataFimVinculoServidor,RapServidores servidorLogado) throws BaseException {
-		if (itemSolicitacaoExameOriginal == null) {
-			itemSolicitacaoExameOriginal = this.getAelItemSolicitacaoExameDAO().obterOriginal(item.getId());
-		}
+		itemSolicitacaoExameOriginal = this.getAelItemSolicitacaoExameDAO().obterOriginal(item.getId());
 		
 		this.preAtualizar(itemSolicitacaoExameOriginal, item);
 
@@ -2230,6 +2228,10 @@ public class ItemSolicitacaoExameRN extends BaseBusiness {
 			} else {
 				unidadeTempoAposLiberado = aelUnfExecutaExames.getUnidTempoAposLib();
 				tempoAposLiberado = aelUnfExecutaExames.getTempoAposLiberacao();
+			}
+			
+			if( tempoAposLiberado < 1 ){
+				throw new ApplicationBusinessException(ItemSolicitacaoExameRNExceptionCode.AEL_01987);
 			}
 
 			// hora - DominioUnidTempo.H

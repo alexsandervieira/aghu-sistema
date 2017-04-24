@@ -77,6 +77,10 @@ public interface ITransferirPacienteFacade extends Serializable {
 
 	AinLeitos pesquisarApenasLeitoConcedido(Object strPesq, Integer intSeq);
 
+	public boolean validarPacienteNaoPossuiAltaAdministrativa(Integer prontuario);
+
+	public boolean validarTipoAltaMedicaPermitePacienteComAlta(Integer internacaoSeq);
+
 	
 
 

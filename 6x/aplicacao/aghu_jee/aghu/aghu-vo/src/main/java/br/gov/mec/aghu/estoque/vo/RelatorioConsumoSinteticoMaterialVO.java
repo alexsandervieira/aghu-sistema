@@ -23,6 +23,7 @@ public class RelatorioConsumoSinteticoMaterialVO implements  Comparable<Relatori
 		NOME_MATERIAL("nomeMaterial"),
 		CODIGO_MATERIAL("codigoMaterial"),
 		UNIDADE_MEDIDA("unidadeMedida"),
+		UNIDADE_MEDIDA_CODIGO("unidadeMedidaCodigo"),
 		QUANTIDADE("quantidade"),
 		CUSTO_MEDIO_PONDERADO("custoMedioPonderado"),
 		VALOR("valor");
@@ -38,7 +39,7 @@ public class RelatorioConsumoSinteticoMaterialVO implements  Comparable<Relatori
 			return this.fields;
 		}
 	}
-
+	
 	@Override
 	public int compareTo(RelatorioConsumoSinteticoMaterialVO other) {
 		// Compara código do centro de custo
@@ -126,11 +127,11 @@ public class RelatorioConsumoSinteticoMaterialVO implements  Comparable<Relatori
 	}
 	
 	
-	public String getunidadeMedidaCodigo() {
+	public String getUnidadeMedidaCodigo() {
 		return unidadeMedidaCodigo;
 	}
 	
-	public void setunidadeMedidaCodigoo(String unidadeMedidaCodigo) {
+	public void setUnidadeMedidaCodigo(String unidadeMedidaCodigo) {
 		this.unidadeMedidaCodigo = unidadeMedidaCodigo;
 	}
 	

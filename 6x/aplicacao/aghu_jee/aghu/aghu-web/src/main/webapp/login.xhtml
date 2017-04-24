@@ -42,7 +42,12 @@
 
 		<p:growl id="growl" autoUpdate="true" sticky="true" />
 		<p:focus />
-
+		
+		<p:dialog id="form_processing" header="Processando" widgetVar="waitDialogWG" minHeight="150" closable="false" resizable="false">
+	    	<div style="margin:2px 6px 10px;color:gray">Aguarde...</div>
+	       	<p:graphicImage library="img" name="/components/ajaxloadingbar.gif" style="float:left;"/>
+		</p:dialog>	
+			
 		<header class="container">
 			<div class="row">
 				<div id="topo-logo" class="col-md-6">
@@ -73,6 +78,19 @@
 								class="icon-trophy2"></span><br />Sobre o sistema</a></li>
 					</ul>
 				</div>
+				<div class="mensagem-Principal">
+					<p:outputPanel
+						rendered="#{not empty messages.MENSAGEM_PRINCIPAL_TELA_LOGIN}">
+						<div class="row">
+							<div class="col-md-7">
+								<em> <small>
+										<h3 style="color: #d2322d">#{messages.MENSAGEM_PRINCIPAL_TELA_LOGIN}</h3>
+								</small>
+								</em>
+							</div>
+						</div>
+					</p:outputPanel>
+				</div>
 
 			</div>
 		</header>
@@ -84,7 +102,17 @@
 					<div class="tab-content">
 						<div class="tab-pane fade in active" id="informes">
 							<ui:insert>
-    							<ui:include src="/portalRss.xhtml" />
+							
+							<h:form prependId="false" id="formPortalRss">
+								<p:outputPanel id="panelPortalRss" ajaxRendered="true" layout="inline">
+									<h:inputHidden value="#{portalRSSController.quantBuscaNoticiasEftuadas}" id="hiddenId" />
+      								<p:poll id="poll" interval="10" stop="#{portalRSSController.hasPararCarregamentoNoticiasPortalRss()}"
+      									update="@(#panelPortalRss)" listener="#{portalRSSController.carregarNoticiasPortalRss}"
+      									onstart="PF('waitDialogWG').show();" oncomplete="PF('waitDialogWG').hide();"/> 
+    								<ui:include src="/portalRss.xhtml" />
+    							</p:outputPanel>
+    						</h:form>
+							
 							</ui:insert>
 						</div>
 

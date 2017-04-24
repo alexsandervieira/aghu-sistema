@@ -13,6 +13,7 @@ import br.gov.mec.aghu.core.action.ActionController;
 import br.gov.mec.aghu.core.action.ActionPaginator;
 import br.gov.mec.aghu.core.etc.DynamicDataModel;
 import br.gov.mec.aghu.core.etc.Paginator;
+import br.gov.mec.aghu.core.exception.Severity;
 
 public class TransferirPacientePaginatorController extends ActionController implements ActionPaginator {
 
@@ -60,6 +61,11 @@ public class TransferirPacientePaginatorController extends ActionController impl
 	}
 
 	public String transferirPacienteCRUD(Integer internacaoSeq) {
+		
+		if (transferirPacienteFacade.validarPacienteNaoPossuiAltaAdministrativa(internacaoSeq) && !transferirPacienteFacade.validarTipoAltaMedicaPermitePacienteComAlta(internacaoSeq)){
+			apresentarMsgNegocio(Severity.ERROR, "PACIENTE_POSSUI_ALTA_ADMINISTRATIVA");
+			return null;
+		}
 		transferirPacienteController.setInternacaoSeq(internacaoSeq);
 		transferirPacienteController.setCameFrom(TRANSFERIR_PACIENTE_LIST);
 		transferirPacienteController.inicio();

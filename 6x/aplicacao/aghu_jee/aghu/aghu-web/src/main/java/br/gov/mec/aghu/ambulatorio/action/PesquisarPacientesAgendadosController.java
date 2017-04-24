@@ -1087,7 +1087,6 @@ public class PesquisarPacientesAgendadosController extends ActionReport implemen
 		}
 		return aacConsulta;
 	}	
-	
 
 // [ATENDER]
 	
@@ -1099,31 +1098,41 @@ public class PesquisarPacientesAgendadosController extends ActionReport implemen
 		consultaSelecionada=consultaVO;
 		boolean redirecionarPaginaAtenderPacientes = true;
 		boolean reabrir=false;
+		boolean faltou = false;
 		MamSituacaoAtendimentos situacao = ambulatorioFacade.obterSituacaoAtendimentos(consultaVO.getControleSituacaoAtendimentoSeq());
 		
+		faltou = verificaSituacoesAtendimento(faltou);
+		
 		try{
-			if ((selectedTab.equals(TAB_2) && !situacao.getAguardando()) || (selectedTab.equals(TAB_3) &&
-						(situacao.getAguardando() || situacao.getAtendConcluido()))
-				|| (selectedTab.equals(TAB_4) && !situacao.getAtendConcluido())) {
-				apresentarMsgNegocio(Severity.WARN, "MSG_CONSULTA_ATUALIZADA_TERMINAL");				
-				consultaVO.setAtender(!consultaVO.getAtender());
-				return;
-			} else if (!situacao.getAtendConcluido() && !situacao.getAtendPend() && !situacao.getPacAtend()){
-				ambulatorioFacade.atualizarDataInicioAtendimento(consultaVO.getNumero(), new Date(), nomeMicrocomputador);
-			}else{
-				reabrir=true;
-			}
-			
-			ambulatorioFacade.validaRegrasAtendimento(consultaVOToAacConsulta(consultaVO), false, true, nomeMicrocomputador);
-			if (consultaVO.getControleSituacao()!=null ) {
-				defineSituacaoAtendimentoEmAtendimento(consultaVOToAacConsulta(consultaVO));
-				if (!DominioSituacaoControle.U.equals(consultaVO.getControleSituacao())){
-					ambulatorioFacade.atualizaControleAguardandoLivre(consultaVO.getNumero(), new Date(), nomeMicrocomputador);
+			if (!faltou) {
+				if ((selectedTab.equals(TAB_2) && !situacao.getAguardando()) ||
+					(selectedTab.equals(TAB_4) && !situacao.getAtendConcluido())) {
+					apresentarMsgNegocio(Severity.WARN, "MSG_CONSULTA_ATUALIZADA_TERMINAL");				
+					consultaVO.setAtender(!consultaVO.getAtender());
+					return;
+				} else if (!situacao.getAtendConcluido() && !situacao.getAtendPend() && !situacao.getPacAtend()){
+					ambulatorioFacade.atualizarDataInicioAtendimento(consultaVO.getNumero(), new Date(), nomeMicrocomputador);
+				}else if(selectedTab.equals(TAB_3) &&
+						(situacao.getAguardando() || situacao.getAtendConcluido())){
+					reabrir=true;
 				}else{
-					ambulatorioFacade.atualizaControleAguardandoUso(consultaVO.getNumero(), new Date());
+					reabrir=true;
 				}
-			}	
-			consultaSelecionada=consultaVO;
+				
+				ambulatorioFacade.validaRegrasAtendimento(consultaVOToAacConsulta(consultaVO), false, true, nomeMicrocomputador);
+				if (consultaVO.getControleSituacao()!=null ) {
+					defineSituacaoAtendimentoEmAtendimento(consultaVOToAacConsulta(consultaVO));
+					if (!DominioSituacaoControle.U.equals(consultaVO.getControleSituacao())){
+						ambulatorioFacade.atualizaControleAguardandoLivre(consultaVO.getNumero(), new Date(), nomeMicrocomputador);
+					}else{
+						ambulatorioFacade.atualizaControleAguardandoUso(consultaVO.getNumero(), new Date());
+					}
+				}	
+				consultaSelecionada=consultaVO;
+			} else {
+				redirecionarPaginaAtenderPacientes = false;
+				apresentarMsgNegocio(Severity.ERROR, "SITUACAO_ATENDIMENTO_PACIENTE_PROFISSIONAL_FALTOU");
+			}
 		}catch(BaseException e){
 			if (!reabrir){
 				consultaVO.setAtender(!consultaVO.getAtender());
@@ -1136,7 +1145,7 @@ public class PesquisarPacientesAgendadosController extends ActionReport implemen
 				consultaVO.setAtender(!consultaVO.getAtender());
 			}
 			redirecionarPaginaAtenderPacientes = false;
-			apresentarMsgNegocio(Severity.ERROR, "ERRO_ATENDER");
+				apresentarMsgNegocio(Severity.ERROR, "ERRO_ATENDER");
 		}
 		
 		if(redirecionarPaginaAtenderPacientes){
@@ -1145,7 +1154,25 @@ public class PesquisarPacientesAgendadosController extends ActionReport implemen
 			this.atenderPacientesAgendadosController.setSelectedTab(0);
 			this.redirecionarPaginaPorAjax("/pages/ambulatorio/pacientesagendados/atenderPacientesAgendados.xhtml");
 		}
-	}	
+	}
+
+	private boolean verificaSituacoesAtendimento(boolean faltou) {
+		if (consultaSelecionada != null) {
+			if (verificarSituacaoAtendimento(consultaSelecionada)) {
+				consultaSelecionadaRetorno = consultaSelecionada;
+				faltou = true;
+			} else if (consultaSelecionadaRetorno == null || consultaSelecionadaRetorno.getRetornoSeq() == null){
+				faltou = false;
+			}
+		}
+		
+		return faltou;
+	}
+	
+	private boolean verificarSituacaoAtendimento(ConsultaAmbulatorioVO consultaSelecionada) {
+		return consultaSelecionada.getRetornoSeq().equals(DominioSituacaoAtendimento.PROFISSIONAL_FALTOU.getCodigo()) ||
+				consultaSelecionada.getRetornoSeq().equals(DominioSituacaoAtendimento.PACIENTE_FALTOU.getCodigo());
+	}
 	
 	private void defineSituacaoAtendimentoEmAtendimento(AacConsultas consulta) throws BaseException {
 		AacRetornos retornoEmAtendimento = this.getAmbulatorioFacade().obterRetorno(DominioSituacaoAtendimento.EM_ATENDIMENTO.getCodigo());
@@ -1153,10 +1180,6 @@ public class PesquisarPacientesAgendadosController extends ActionReport implemen
 		consulta.setRetSeq(DominioSituacaoAtendimento.EM_ATENDIMENTO.getCodigo());
 		ambulatorioFacade.atualizarConsultaRetorno(consulta);
 		
-	}
-	
-	private RapServidores recuperarServidorLogado() throws ApplicationBusinessException {
-		return registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado(), new Date());
 	}
 	
 	public void prepararReabrirPendenteEmtatendimento(PesquisarConsultasPendentesVO consultaPendenteVO){
@@ -1702,15 +1725,16 @@ public class PesquisarPacientesAgendadosController extends ActionReport implemen
 		return "";
 	}
 	
-	public void gerarMovimentacaoProntuario(AacConsultas consulta){
-		try{
-			RapServidores servidorLogado = recuperarServidorLogado();
-			Boolean exibeMsgProntuarioJaMovimentado = Boolean.TRUE;
-			this.ambulatorioFacade.gerarMovimentacaoProntuario(consulta, servidorLogado, exibeMsgProntuarioJaMovimentado);	
-			apresentarMsgNegocio(Severity.INFO, "SOLICITACAO_MOVIMENTACAO_PRONTUARIO_SUCESSO");
-		} catch(BaseException exception){
-			this.apresentarExcecaoNegocio(exception);
-			LOG.error("Exceção capturada: ", exception);
+	public void gerarMovimentacaoProntuario(){
+		if(consultaSelecionada != null){
+			try{
+				AacConsultas consulta = ambulatorioFacade.obterAacConsultasJoinGradeEEspecialidade(this.consultaSelecionada.getNumero());
+				this.pacienteFacade.gerarSolicitacaoProntuarioConsultas(consulta, true);	
+				apresentarMsgNegocio(Severity.INFO, "SOLICITACAO_MOVIMENTACAO_PRONTUARIO_SUCESSO");
+			} catch(BaseException exception){
+				this.apresentarExcecaoNegocio(exception);
+				LOG.error("Exceção capturada: ", exception);
+			}
 		}
 	}
 	
@@ -1749,6 +1773,15 @@ public class PesquisarPacientesAgendadosController extends ActionReport implemen
 	public List<AacRetornos> obterRetornos(String parametro) {
 		return ambulatorioFacade.getListaRetornos((String) parametro);
 	}
+	public List<AacRetornos> obterAacRetornos(String parametro) {
+		try {
+			return ambulatorioFacade.getListaAacRetornos((String) parametro,this.getAmbulatorioFacade().obterRetorno(consultaSelecionadaRetorno.getRetornoSeq()));
+		} catch (ApplicationBusinessException e) {
+			apresentarExcecaoNegocio(e);
+		}
+		return null;
+	}
+
 
 	
 	public void carregarAtributosModalRetornoConsulta() {
@@ -1766,7 +1799,11 @@ public class PesquisarPacientesAgendadosController extends ActionReport implemen
 		try{
 
 			if(consultaSelecionadaRetorno.getRetornoSeq() != null && !retornoAntigo.getSeq().equals(retorno.getSeq())){
-				
+				//NAO PODE ALTERAR SITUACAO DE ATENDIMENTOS FINALIZADOS
+				if(retornoAntigo.getSeq().equals(DominioSituacaoAtendimento.PACIENTE_ATENDIDO.getCodigo())){
+					apresentarMsgNegocio(Severity.ERROR, "Não é possível alterar situação de atendimento do PACIENTE ATENDIDO");
+		    		return;
+				}
 				if(retorno.getSeq().equals(DominioSituacaoAtendimento.PACIENTE_AGENDADO.getCodigo())){
 					
 				    //PACIENTE AGENDADO
@@ -1835,8 +1872,10 @@ public class PesquisarPacientesAgendadosController extends ActionReport implemen
 					marcarFaltaPaciente(consultaSelecionadaRetorno,retorno.getSeq());
 					
 			    }else{
-			    	apresentarMsgNegocio(Severity.ERROR, "SITUACAO_ATENDIMENTO_NAO_ESPERADA");
-		    		return;
+			    	//PERMITIR A TROCA DAS DEMAIS SITUACOES DE ATENDIMENTO
+			    	consultaSelecionadaRetorno = setRetornoConsultaAmbulatorioVo(consultaSelecionadaRetorno, retorno.getSeq());
+			    	//apresentarMsgNegocio(Severity.ERROR, "SITUACAO_ATENDIMENTO_NAO_ESPERADA");
+			    	//return;
 			    }
 				
 				AacRetornos retornoPacienteNovo = getAmbulatorioFacade().obterRetorno(consultaSelecionadaRetorno.getRetornoSeq());

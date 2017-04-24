@@ -24,7 +24,7 @@
             <mec:selectOneMenu enum="DominioSituacao" id="ativoInativo" label="#{messages.LABEL_SITUACAO}" title="#{messages.TITLE_IND_SITUACAO_ESPECIALIDADE}" value="#{especialidadeController.especialidade.indSituacao}" required="true"/> 
           </aghu:linha>  
           <aghu:linha> 
-            <mec:suggestionBox id="linkModalEspGenericaPesq" title="#{messages.TITLE_ESPEC_GENERICA}" label="#{messages.LABEL_ESPEC_GENERICA}" descricaoInput="seq" descricaoLabel="nomeEspecialidade" suggestionAction="pesquisaEspGenerica" converter="#{aghEspecialidadesIdConverter}" required="#{not mf:hasPermission(securityController,'especialidade,naoObrigatorio')}" controller="#{especialidadeController}" value="#{especialidadeController.especialidade.especialidade}"> 
+            <mec:suggestionBox id="linkModalEspGenericaPesq" title="#{messages.TITLE_ESPEC_GENERICA}" label="#{messages.LABEL_ESPEC_GENERICA}" descricaoInput="seq" descricaoLabel="nomeEspecialidade" suggestionAction="pesquisaEspGenerica" converter="#{aghEspecialidadesIdConverter}" controller="#{especialidadeController}" value="#{especialidadeController.especialidade.especialidade}"> 
               <p:column>#{item.seq}</p:column>  
               <p:column>#{item.nomeEspecialidade}</p:column> 
             </mec:suggestionBox> 

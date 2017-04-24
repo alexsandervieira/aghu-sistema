@@ -4,7 +4,7 @@ import br.gov.mec.aghu.core.dominio.Dominio;
 
 public enum DominioGerarRelatoriosExcel implements Dominio {
 
-	ESCC("ES – Entradas de Serviços/Materiais por Centro de Custo"),
+	ESCC("ES – Entradas de Serviços/Materiais por Centro de Atividade"),
 	ESMP("ES – Entradas de Serviços/Materiais no Período"),
 	ESSL("SL – Entradas/Saídas Sem Licitação"),
 	MDAF("MD - Entrega de Materiais com Marca Divergente da AF"),

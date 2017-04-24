@@ -357,8 +357,6 @@ private SceEstoqueAlmoxarifadoDAO sceEstoqueAlmoxarifadoDAO;
 	 * @param listaEstoqueAlmoxarifadosClassificados
 	 */
 	private void inserirNiveisClassificacaoInformados(SceTransferencia transferencia, final Short seqAlmoxarifadoOrigem, List<SceEstoqueAlmoxarifado> listaEstoqueAlmoxarifadosClassificados) throws BaseException{
-		
-		
 		/*
 		 * Atenção reutilizar este trecho no code review
 		 */
@@ -399,10 +397,13 @@ private SceEstoqueAlmoxarifadoDAO sceEstoqueAlmoxarifadoDAO;
 				
 				itemTransferencia.setTransferencia(transferencia);
 				
+				SceItemTransferencia itemTransferenciaAux = new SceItemTransferencia();
 				
-				if (getSceItemTransferenciaDAO().obterItemTransferencia(itemTransferencia) == null) {
+				itemTransferenciaAux = getSceItemTransferenciaDAO().obterItemTransferencia(itemTransferencia);
+				
+				if ( itemTransferenciaAux == null) {
 					// Insere um item de transferência
-					this.getSceItemTransferenciaRN().inserir(itemTransferencia);
+					this.getSceItemTransferenciaRN().inserir(itemTransferencia, itemTransferenciaAux);
 				}
 				
 				
@@ -431,7 +432,6 @@ private SceEstoqueAlmoxarifadoDAO sceEstoqueAlmoxarifadoDAO;
 			}
 			
 		}
-		
 	}
 	
 	/**

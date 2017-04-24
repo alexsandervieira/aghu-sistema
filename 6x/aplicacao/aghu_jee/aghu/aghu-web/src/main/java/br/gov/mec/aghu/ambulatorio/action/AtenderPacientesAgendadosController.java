@@ -402,6 +402,7 @@ public class AtenderPacientesAgendadosController extends ActionReport {
 
 		this.verificaUsuarioElaboraAnamnese();
 		this.verificaUsuarioElaboraEvolucao();
+		this.buscaParametroAtivaDesativaSolicitacaoExames();
 		tipoCorrente = null;
 		iniciaAnamnese();
 		iniciaEvolucao();
@@ -410,7 +411,7 @@ public class AtenderPacientesAgendadosController extends ActionReport {
 		this.motivoPendencia = DominioMotivoPendencia.POS;
 		
 		this.procedimentoCidAtestado = null;
-		this.lista = ambulatorioFacade.listarTodos();
+		this.lista = ambulatorioFacade.buscarTodosAtestados();
 
 		this.carregarParametros();
 		this.dtInicio =DateUtil.adicionaDias(new Date(),-365);
@@ -445,6 +446,18 @@ public class AtenderPacientesAgendadosController extends ActionReport {
 		}
 		
 	}
+	
+	public boolean buscaParametroAtivaDesativaSolicitacaoExames() throws ApplicationBusinessException{
+		
+		AghParametros ativaDesativaSolicitacao = this.parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_ATIVA_DESATIVA_SOLICITACAO_EXAMES);
+		if (ativaDesativaSolicitacao != null) {
+			if (ativaDesativaSolicitacao.getVlrTexto().equalsIgnoreCase("S")){ 
+			return Boolean.TRUE;
+			}
+		}
+		return Boolean.FALSE;
+	}
+	
 
 	private void obterDescricaoConsultaAtual() {
 		try {
@@ -1180,7 +1193,7 @@ public class AtenderPacientesAgendadosController extends ActionReport {
 			this.opcaoSelecionadaTipoAtestado = true;
 		} else if (this.opcaoTipoAtestado.getDescricao().equals("Atestado de Comparecimento")) {
 			this.opcaoSelecionadaAtestado = false;
-			this.opcaoSelecionadaTipoAtestado = true;
+			this.opcaoSelecionadaTipoAtestado = false;
 		} else {
 			if (this.opcaoTipoAtestado.getDescricao().equals("Atestado Médico")) {
 				this.opcaoSelecionadaAtestado = false;
@@ -1623,7 +1636,11 @@ public class AtenderPacientesAgendadosController extends ActionReport {
 			limparValoresReceituarioCuidadoController();
 			return  this.carregarModal();
 		} catch (BaseException exception) {
-			apresentarExcecaoNegocio(exception);
+			if(exception.getMessage().equals("MAM_AEL_00728")){
+				this.apresentarMsgNegocio(Severity.ERROR,"Voce não tem permissão para alterar exame nesta situação.");
+			}else{
+				apresentarExcecaoNegocio(exception);
+			}
 			LOG.error(EXCECAO_CAPTURADA, exception);
 			return null;
 		} catch (GenericJDBCException e) {
@@ -1821,7 +1838,10 @@ public class AtenderPacientesAgendadosController extends ActionReport {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("dataAtual", new Date());
 		try {
-			params.put("caminhoLogo", recuperarCaminhoLogo());
+			params.put("footerNomeHospital", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_RAZAO_SOCIAL).getVlrTexto());
+			params.put("footerEnderecoHospitalLinha1", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_END_COMPLETO_LINHA1).getVlrTexto());
+			params.put("footerEnderecoHospitalLinha2", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_END_COMPLETO_LINHA2).getVlrTexto());
+			params.put("footerCaminhoLogo", parametroFacade.recuperarCaminhoLogo2Relativo());
 		} catch (BaseException e) {
 			LOG.error("Erro ao tentar recuparar logotipo para o relatório", e);
 		}

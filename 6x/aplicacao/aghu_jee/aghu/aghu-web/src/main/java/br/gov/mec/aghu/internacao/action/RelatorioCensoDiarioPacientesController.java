@@ -2,6 +2,7 @@ package br.gov.mec.aghu.internacao.action;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,9 +12,17 @@ import java.util.Map;
 import javax.ejb.EJB;
 import javax.inject.Inject;
 
-import net.sf.jasperreports.engine.JRException;
+import com.itextpdf.text.DocumentException;
+
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import br.gov.mec.aghu.action.impressao.SistemaImpressao;
 import br.gov.mec.aghu.action.report.ActionReport;
+import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
+import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.core.report.DocumentoJasper;
@@ -22,14 +31,16 @@ import br.gov.mec.aghu.impressao.SistemaImpressaoException;
 import br.gov.mec.aghu.internacao.cadastrosbasicos.business.ICadastrosBasicosInternacaoFacade;
 import br.gov.mec.aghu.internacao.pesquisa.business.IPesquisaInternacaoFacade;
 import br.gov.mec.aghu.internacao.vo.VAinCensoVO;
+import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
-
-import com.itextpdf.text.DocumentException;
+import net.sf.jasperreports.engine.JRException;
 
 
 public class RelatorioCensoDiarioPacientesController extends ActionReport {
 
         private static final long serialVersionUID = 4021910363640095385L;      
+
+    	private static final Log LOG = LogFactory.getLog(RelatorioCensoDiarioPacientesController.class);
 
         private Short unidadeFuncionalSeq;
         private Date    data;
@@ -48,7 +59,8 @@ public class RelatorioCensoDiarioPacientesController extends ActionReport {
         @Inject
         private SistemaImpressao sistemaImpressao;
         
-		
+    	@EJB
+    	private IParametroFacade parametroFacade;
         
         @Override
         public String recuperarArquivoRelatorio() {
@@ -57,33 +69,58 @@ public class RelatorioCensoDiarioPacientesController extends ActionReport {
 
 	public Map<String, Object> recuperarParametros() {
 
-    		Map<String, Object> params = new HashMap<String, Object>();	
+		Map<String, Object> params = new HashMap<String, Object>();	
+	
+		try {
+			recuperarListaCensoDiario();
+		} catch (ApplicationBusinessException e) {
+			this.apresentarMsgNegocio(Severity.ERROR, "ERRO_GERAR_RELATORIO");
+		}		  		
+
+		params.put("nomeHospital", cadastrosBasicosInternacaoFacade.recuperarNomeInstituicaoLocal());
+		Integer tamanhoLista = voCensoDiario.size();
+		params.put("tamanhoLista", tamanhoLista.toString());   				
+		params.put("existeObservacao", verificaExistenciaObservacao());   				
+
+		if(unidadeFuncionalPai != null && unidadeFuncionalSeq == null){
+
+			params.put("nomeUnidadeFuncional", "");
+			params.put("nomeUnidadeFuncionalPai", unidadeFuncional.getDescricao());
+
+		} else {
+			params.put("nomeUnidadeFuncional", unidadeFuncional.getDescricao());
+			params.put("nomeUnidadeFuncionalPai", unidadeFuncional.getUnfSeq() == null ? "" : unidadeFuncional.getUnfSeq().getDescricao());
+		}
+    		if(this.data != null){
+    	        	SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+    	        	String format = dateFormat.format(this.data);
+    	        	params.put("dataRef",format);
+    	    }else{
+    	        	params.put("dataRef", "");
+    	    }
+		params.put("status", status.toString());
+
+		return params;
+
+    }
+
+	private Object verificaExistenciaObservacao() {
+		AghParametros aghParametrosBanco = null;
+		try {
+			aghParametrosBanco = this.parametroFacade.buscarAghParametro(AghuParametrosEnum.P_CENSO_DIARIO_EXIBE_OBSERVACAO);
+		} catch (ApplicationBusinessException e) {
+			LOG.error("Exceção capturada:", e);
+		}
+		if (aghParametrosBanco != null && aghParametrosBanco.getVlrTexto().equalsIgnoreCase("S")) {
+			for (VAinCensoVO vAinCensoVO : voCensoDiario) {
+				if(StringUtils.isNotBlank(vAinCensoVO.getObservacao())){
+					return true;
+				}
+			}
+		}
 		
-    		try {
-				recuperarListaCensoDiario();
-			} catch (ApplicationBusinessException e) {
-				this.apresentarMsgNegocio(Severity.ERROR, "ERRO_GERAR_RELATORIO");
-			}		  		
-
-    		params.put("nomeHospital", cadastrosBasicosInternacaoFacade.recuperarNomeInstituicaoLocal());
-    		Integer tamanhoLista = voCensoDiario.size();
-    		params.put("tamanhoLista", tamanhoLista.toString());   				
-
-    		if(unidadeFuncionalPai != null && unidadeFuncionalSeq == null){
-
-    			params.put("nomeUnidadeFuncional", "");
-    			params.put("nomeUnidadeFuncionalPai", unidadeFuncional.getDescricao());
-
-    		} else {
-    			params.put("nomeUnidadeFuncional", unidadeFuncional.getDescricao());
-    			params.put("nomeUnidadeFuncionalPai", unidadeFuncional.getUnfSeq() == null ? "" : unidadeFuncional.getUnfSeq().getDescricao());
-    		}
-
-    		params.put("status", status.toString());
-
-    		return params;
-
-    	}
+		return false;
+	}
 
 	private void recuperarListaCensoDiario() throws ApplicationBusinessException {
 

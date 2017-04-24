@@ -365,7 +365,7 @@
 					</mec:serverDataTable>
 				</aghu:column>
 				<aghu:column type="button">
-					<p:outputPanel id="tabelaAcao" layout="inline">
+					<p:outputPanel id="tabelaAcao" layout="inline" style="width: 170px;">
 						<mec:commandButton id="bt_prescrever"
 							value="#{messages.LABEL_PRESCREVER}"
 							rendered="#{mf:hasPermission(securityController,'elaborarPrescricaoEnfermagem,criar')}"
@@ -380,11 +380,13 @@
 								target="#{elaboracaoPrescricaoEnfermagemController.voltarPara}"
 								value="listaPacientesEnfermagem" for="command" />
 						</mec:commandButton>
-						<mec:commandButton id="bt_evolucao"
-							value="#{messages.LABEL_EVOLUCAO}"
-							onclick="evolucao('#{listaPacientesEnfermagemController.urlBaseWebForms}', '#{listaPacientesEnfermagemController.bancoAghWeb}', '#{listaPacientesEnfermagemController.atdSeq}', '#{listaPacientesEnfermagemController.obterTokenUsuarioLogado()}'); return false;"
-							disabled="#{listaPacientesEnfermagemController.desabilitaBotaoEvolucao == true                      or listaPacientesEnfermagemController.integracaoAGHUAGHWEB == false                      or not mf:hasPermission(securityController,'evolucaoPacientePrescricaoEnfermagem,manter')}"
-							styleClass="bt_cinza" />
+		               <mec:commandButton id="bt_anamnese_evolucao" value="#{messages.LABEL_ANAMNESE_EVOLUCAO}"
+		              	action="#{listaPacientesEnfermagemController.redirecionarListarAnamneseEvolucoes}"
+		              	disabled="#{!listaPacientesEnfermagemController.enableButtonAnamneseEvolucao}"
+		              	rendered="#{mf:hasPermission(securityController, 'visualizarAnamneseEvolucao,visualizar') and false}">
+		                 <f:setPropertyActionListener target="#{listarAnamneseEvolucaoController.atdSeq}" value="#{listaPacientesEnfermagemController.atdSeq}" for="command"/>  
+		       			 <f:setPropertyActionListener target="#{listarAnamneseEvolucaoController.paginaChamadora}" value="prescricaoenfermagem-listaPacientesEnfermagem" for="command"/>
+		              </mec:commandButton>
 						<mec:commandButton id="bt_controles"
 							value="#{messages.LABEL_CONTROLES}"
 							action="#{listaPacientesEnfermagemController.vaiParaRegistroControle}"
@@ -556,6 +558,25 @@
 								target="#{impressaoPulseiraController.atdSeq}"
 								value="#{listaPacientesEnfermagemController.atdSeq}"
 								for="command" />
+						</mec:commandButton>
+						
+						<mec:commandButton id="bt_consultar_diagnostico"
+							value="#{messages.LABEL_CONSULTAR_DIAGNOSTICO}"
+							rendered="#{mf:hasPermission(securityController,'elaborarPrescricaoEnfermagem,criar')}"
+							action="#{consultarHistoricoDiagnosticoController.consultaHistoricoDiagnostico}"
+							disabled="#{listaPacientesEnfermagemController.desabilitaBotaoPrescrever or (mf:hasPermission(securityController, 'paciente,somenteLeitura'))}"
+							styleClass="bt_cinza">
+							<f:setPropertyActionListener
+								target="#{consultarHistoricoDiagnosticoController.codigoPaciente}"
+								value="#{listaPacientesEnfermagemController.pacCodigo}"
+								for="command" />
+							<f:setPropertyActionListener
+								target="#{consultarHistoricoDiagnosticoController.atendimentoSeq}"
+								value="#{listaPacientesEnfermagemController.atdSeq}"
+								for="command" />
+							<f:setPropertyActionListener
+								target="#{consultarHistoricoDiagnosticoController.cameFrom}"
+								value="listaPacientesEnfermagem" for="command" />	
 						</mec:commandButton>
 					</p:outputPanel>
 				</aghu:column>

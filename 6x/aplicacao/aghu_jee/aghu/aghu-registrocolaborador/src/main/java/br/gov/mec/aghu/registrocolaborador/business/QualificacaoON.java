@@ -10,6 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseRuntimeException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.dominio.DominioSituacaoQualificacao;
 import br.gov.mec.aghu.dominio.DominioTipoQualificacao;
@@ -22,10 +26,6 @@ import br.gov.mec.aghu.model.RapTipoAtuacao;
 import br.gov.mec.aghu.model.RapTipoQualificacao;
 import br.gov.mec.aghu.registrocolaborador.cadastrosbasicos.business.ICadastrosBasicosFacade;
 import br.gov.mec.aghu.registrocolaborador.dao.RapPessoasFisicasDAO;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseRuntimeException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 /**
  * 
@@ -36,24 +36,26 @@ import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 @Stateless
 public class QualificacaoON extends BaseBusiness {
 
+	private static final Log LOG = LogFactory.getLog(QualificacaoON.class);
 
-@EJB
-private QualificacaoRN qualificacaoRN;
+	@Override
+	@Deprecated
+	protected Log getLogger() {
+	return LOG;
+	}
 
-private static final Log LOG = LogFactory.getLog(QualificacaoON.class);
+	@EJB
+	private QualificacaoRN qualificacaoRN;
 
-@Override
-@Deprecated
-protected Log getLogger() {
-return LOG;
-}
+	@EJB
+	private ICadastrosBasicosFacade cadastrosBasicosFacade;
+	
+	@Inject
+	private RapPessoasFisicasDAO rapPessoasFisicasDAO;
+	
 
 
-@EJB
-private ICadastrosBasicosFacade cadastrosBasicosFacade;
-
-@Inject
-private RapPessoasFisicasDAO rapPessoasFisicasDAO;
+	
 	/**
 	 * 
 	 */
@@ -93,7 +95,7 @@ private RapPessoasFisicasDAO rapPessoasFisicasDAO;
 	public RapQualificacao obterQualificacao(RapQualificacoesId id, Enum[] fetchArgsInnerJoin, Enum[] fetchArgsLeftJoin) {
 		return getQualificacaoRN().obterQualificacao(id, fetchArgsInnerJoin, fetchArgsLeftJoin);
 	}
-
+	
 	/**
 	 * Inclui graduação do servidor.
 	 * 

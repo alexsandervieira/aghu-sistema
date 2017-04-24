@@ -498,12 +498,12 @@ public class BlocoCirurgicoCadastroApoioFacade extends BaseFacade implements IBl
 		return getMbcProcPorEquipeDAO().pesquisarProcedimentosUsadosEquipe(firstResult, maxResult, orderProperty, asc, elemento);
 	}
 	@Override
-	public List<MbcControleEscalaCirurgica> pesquisarEscalasCirurgicas(Integer firstResult, Integer maxResult, String orderProperty, boolean asc, AghUnidadesFuncionais unidadeFunc) {
-		return getMbcControleEscalaCirurgicaDAO().pesquisarEscalasCirurgicas(firstResult, maxResult, orderProperty, asc, unidadeFunc);
+	public List<MbcControleEscalaCirurgica> pesquisarEscalasCirurgicas(Integer firstResult, Integer maxResult, String orderProperty, boolean asc, AghUnidadesFuncionais unidadeFunc, Date dtInicio, Date dtFim) {
+		return getMbcControleEscalaCirurgicaDAO().pesquisarEscalasCirurgicas(firstResult, maxResult, orderProperty, asc, unidadeFunc, dtInicio, dtFim);
 	}
 	@Override
 	public Long pesquisarEscalasCirurgicasCount(AghUnidadesFuncionais unidadeFunc) {
-		return getMbcControleEscalaCirurgicaDAO().pesquisarEscalasCirurgicasCount(unidadeFunc);
+		return getMbcControleEscalaCirurgicaDAO().pesquisarEscalasCirurgicasCount(unidadeFunc, null, null);
 	}
 	private MbcControleEscalaCirurgicaDAO getMbcControleEscalaCirurgicaDAO() {
 		return mbcControleEscalaCirurgicaDAO;

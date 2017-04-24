@@ -81,6 +81,10 @@ public class PesquisaFoneticaPaciente {
 			Calendar dataFimMes = Calendar.getInstance();
 			dataFimMes.setTime(this.dataNascimento);
 			dataFimMes.set(Calendar.DAY_OF_MONTH, dataFimMes.getActualMaximum(Calendar.DAY_OF_MONTH));
+			dataFimMes.set(Calendar.HOUR, 24);
+			dataFimMes.set(Calendar.MINUTE,60);
+			dataFimMes.set(Calendar.SECOND,60);
+			dataFimMes.set(Calendar.MILLISECOND,1000);
 			return dataFimMes.getTime();
 		}
 		return null;

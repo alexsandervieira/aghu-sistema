@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:fn="http://xmlns.jcp.org/jsp/jstl/functions" xmlns:mec="http://xmlns.jcp.org/jsf/composite/components" xmlns:p="http://primefaces.org/ui" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:aghu="http://xmlns.jcp.org/jsf/component" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:c="http://xmlns.jcp.org/jsp/jstl/core" xmlns:mf="http://www.mec.gov.br/taglib">  
+  <ui:composition template="/WEB-INF/templates/form_template.xhtml"> 
+    <ui:define name="head"> 
+      <title>Manter Permissão ao Profissional :: AGHU - MEC</title> 
+    </ui:define>  
+    <ui:define name="metadata"> 
+      <f:metadata> 
+        <f:viewAction action="#{manterPermissoesAgendamentoConsultaController.iniciar}"/> 
+      </f:metadata> 
+    </ui:define>  
+    <ui:define name="body"> 
+      <mec:pageConfig controller="#{manterPermissoesAgendamentoConsultaController}" ignoreEnter="true"/>  
+      <h:form prependId="false" id="formPesquisa"> 
+        <aghu:panelGeral id="panelServidorPermissao" legend="#{messages.LABEL_MANTER_PERMISSOES_AGENDAMENTO_CONSULTA}"> 
+          <aghu:linha> 
+              <mec:suggestionBox render="panelGeralPermissao" readonly="#{manterPermissoesAgendamentoConsultaController.emEdicao}" required="true" id="servidor" posSelectionAction="ativarMensagemConfirmacaoVoltar" styleClassField="frm_obrigatorio" label="#{messages.LABEL_SERVIDOR}" title="#{messages.TITLE_PESQUISA_MATRICULA}" descricaoInput="id.matricula" size="10" maxlength="45" width="500" descricaoLabel="pessoaFisica.nome" suggestionAction="buscarServidor" controller="#{manterPermissoesAgendamentoConsultaController}" value="#{manterPermissoesAgendamentoConsultaController.permissaoAgendamentoConsultas.servidor}"> 
+                <p:column> 
+                  <f:facet name="header"> 
+                    <h:outputText value="#{messages.LABEL_VINCULO}"/> 
+                  </f:facet>  
+                  <h:outputText value="#{item.id.vinCodigo}"/> 
+                </p:column>  
+                <p:column> 
+                  <f:facet name="header"> 
+                    <h:outputText value="#{messages.LABEL_MATRICULA}"/> 
+                  </f:facet>  
+                  <h:outputText value="#{item.id.matricula}"/> 
+                </p:column>  
+                <p:column> 
+                  <f:facet name="header"> 
+                    <h:outputText value="#{messages.LABEL_NOME}"/> 
+                  </f:facet>  
+                  <h:outputText value="#{item.pessoaFisica.nome}"/> 
+                </p:column> 
+              </mec:suggestionBox> 
+          </aghu:linha>  
+        </aghu:panelGeral>
+
+		<p:outputPanel id="panelGeralPermissao" layout="inline">
+	        <aghu:panelGeral legend="#{messages.LABEL_ESPECIALIDADE}"> 
+				<aghu:linha>
+					<mec:suggestionBox id="suggestionEspecialidade" var="row" itemValue="#{row}"
+						label="#{messages.LABEL_ESPECIALIDADE_AGENDA}"
+						title="#{messages.TITLE_ESPECIALIDADE_PERMISSAO_AGENDAMENTO_CONSULTA}"
+						suggestionAction="obterEspecialidade"
+						descricaoInput="sigla"
+						descricaoLabel="nomeEspecialidade"
+						size="60" maxlength="60"	width="500"
+						cache="false"
+						controller="#{manterPermissoesAgendamentoConsultaController}"
+						value="#{manterPermissoesAgendamentoConsultaController.especialidade}">
+						<p:column>
+							<f:facet name="header">
+								<b>#{messages.LABEL_SIGLA}</b>
+							</f:facet> #{row.sigla}
+			            </p:column>
+						<p:column>
+							<f:facet name="header">
+								<b>#{messages.LABEL_ESPECIALIDADE_AGENDA}</b>
+							</f:facet> #{row.nomeEspecialidade}
+			            </p:column>
+					</mec:suggestionBox>
+					<div style="padding:22px 0px 0px 0px">
+		            	<mec:commandButton ajax="true" process="@this, suggestionEspecialidade, servidor" value="#{messages.LABEL_ADICIONAR}" id="bt_adicionar_especialidade" action="#{manterPermissoesAgendamentoConsultaController.adicionarEspecialidade}" profile="add" render="tabelaPesmissoesEspecialidade, suggestionEspecialidade, servidor, panelGeralPermissao"/>
+		            </div>  
+				</aghu:linha>
+				<aghu:linha>
+			        <mec:serverDataTable list="#{manterPermissoesAgendamentoConsultaController.listPermissoesEspecialidade}" title="#{messages.TITLE_PESQUISA_PERMISSOES_AGENDAMENTO_CONSULTA}" id="tabelaPesmissoesEspecialidade" controller="#{manterPermissoesAgendamentoConsultaController}"> 
+			          <c:set var="_permissoes" value="#{item}"/>  
+			          <p:column headerText="Ações" styleClass="first-column auto-adjust" exportable="false" width="40"> 
+			            <mec:commandLink ajax="true" id="tabelaPermissoesEspecialidade_link_remover" profile="delete" title="excluir" action="#{manterPermissoesAgendamentoConsultaController.removerPermissaoEspecialidade}" render="panelGeralPermissao"> 
+			              <f:setPropertyActionListener for="command" target="#{manterPermissoesAgendamentoConsultaController.parametroSelecionado}" value="#{_permissoes}"/> 
+			            </mec:commandLink> 
+			          </p:column>  
+			          <p:column width="80"> 
+			            <f:facet name="header"> 
+			              <h:outputText value="#{messages.LABEL_SIGLA}"/> 
+			            </f:facet> 
+			            <h:outputText value="#{_permissoes.especialidade.sigla}"/>  
+			          </p:column>  
+			          <p:column> 
+			            <h:outputText value="#{_permissoes.especialidade.nomeEspecialidade}"/>  
+			            <f:facet name="header"> 
+			              <h:outputText value="#{messages.LABEL_ESPECIALIDADE_AGENDA}"/> 
+			            </f:facet> 
+			          </p:column>  
+			        </mec:serverDataTable> 
+				
+				</aghu:linha>
+	        </aghu:panelGeral>
+	
+			<aghu:panelGeral id="panelEquipe" legend="#{messages.LABEL_EQUIPE}">
+				<aghu:linha>
+					<mec:suggestionBox
+						label="#{messages.LABEL_EQUIPE}"
+						title="#{messages.TITLE_EQUIPE_PERMISSAO_AGENDAMENTO_CONSULTA}"
+						descricaoInput="seq" descricaoLabel="nome" var="item"
+						suggestionAction="obterEquipe" width="600" id="suggestionEquipe"
+						controller="#{manterPermissoesAgendamentoConsultaController}"
+						size="60" maxlength="60"
+						cache="false"
+						value="#{manterPermissoesAgendamentoConsultaController.equipe}">
+						<p:column>
+							<f:facet name="header">
+								<b>#{messages.LABEL_EQUIPE}</b>
+							</f:facet>
+							<h:outputText value="#{item.seq}" />
+						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<b>#{messages.LABEL_NOME}</b>
+							</f:facet>
+							<h:outputText value="#{item.nome}" />
+						</p:column>
+					</mec:suggestionBox>
+					<div style="padding:22px 0px 0px 0px">
+			            <mec:commandButton ajax="true" process="@this, suggestionEquipe, servidor" render="tabelaPesmissoesEquipe, suggestionEquipe, servidor" value="#{messages.LABEL_ADICIONAR}" id="bt_adicionar_equipe" action="#{manterPermissoesAgendamentoConsultaController.adicionarEquipe}" profile="add"/>
+			        </div>  
+				</aghu:linha>
+				<aghu:linha>
+			        <mec:serverDataTable list="#{manterPermissoesAgendamentoConsultaController.listPermissoesEquipe}" title="#{messages.TITLE_PESQUISA_PERMISSOES_AGENDAMENTO_CONSULTA}" id="tabelaPesmissoesEquipe" controller="#{manterPermissoesAgendamentoConsultaController}"> 
+			          <c:set var="_permissoes" value="#{item}"/>  
+			          <p:column headerText="Ações" styleClass="first-column auto-adjust" exportable="false" width="40"> 
+			            <mec:commandLink ajax="true" id="tabelaPermissoesEquipe_link_remover" profile="delete" title="excluir" action="#{manterPermissoesAgendamentoConsultaController.removerPermissaoEquipe}" render="panelGeralPermissao"> 
+			              <f:setPropertyActionListener for="command" target="#{manterPermissoesAgendamentoConsultaController.parametroSelecionado}" value="#{_permissoes}"/> 
+			            </mec:commandLink> 
+			          </p:column>  
+			          <p:column width="80"> 
+			            <f:facet name="header"> 
+			              <h:outputText value="#{messages.LABEL_EQUIPE}"/> 
+			            </f:facet> 
+			            <h:outputText value="#{_permissoes.equipe.seq}"/>  
+			          </p:column>  
+			          <p:column> 
+			            <h:outputText value="#{_permissoes.equipe.nome}"/>  
+			            <f:facet name="header"> 
+			              <h:outputText value="#{messages.LABEL_NOME}"/> 
+			            </f:facet> 
+			          </p:column>  
+			        </mec:serverDataTable> 
+				</aghu:linha>
+			</aghu:panelGeral>
+	
+			<aghu:panelGeral id="panelGrade" legend="#{messages.LABEL_GRADE}">
+				<aghu:linha>
+					<mec:inputNumero readonly="false"
+						label="#{messages.LABEL_GRADE}"
+						title="#{messages.TITLE_SEQ_GRADE_PERMISSAO_AGENDAMENTO_CONSULTA}" size="6"
+						maxlength="6"
+						value="#{manterPermissoesAgendamentoConsultaController.seqGrade}" id="seqGrade" />
+					<div style="padding:22px 0px 0px 0px">
+			            <mec:commandButton ajax="true" process="@this, seqGrade, servidor" render="tabelaPesmissoesGrade, seqGrade, servidor" value="#{messages.LABEL_ADICIONAR}" id="bt_adicionar_grade" action="#{manterPermissoesAgendamentoConsultaController.adicionarGrade}" profile="add"/>
+			        </div>  
+				</aghu:linha>
+				<aghu:linha>
+			        <mec:serverDataTable list="#{manterPermissoesAgendamentoConsultaController.listPermissoesGrade}" title="#{messages.TITLE_PESQUISA_PERMISSOES_AGENDAMENTO_CONSULTA}" id="tabelaPesmissoesGrade" controller="#{manterPermissoesAgendamentoConsultaController}"> 
+			          <c:set var="_permissoes" value="#{item}"/>  
+			          <p:column headerText="Ações" styleClass="first-column auto-adjust" exportable="false" width="40"> 
+			            <mec:commandLink ajax="true" id="tabelaPermissoesGrade_link_remover" profile="delete" title="excluir" action="#{manterPermissoesAgendamentoConsultaController.removerPermissaoGrade}" render="panelGeralPermissao"> 
+			              <f:setPropertyActionListener for="command" target="#{manterPermissoesAgendamentoConsultaController.parametroSelecionado}" value="#{_permissoes}"/> 
+			            </mec:commandLink> 
+			          </p:column>  
+			          <p:column> 
+			            <f:facet name="header"> 
+			              <h:outputText value="#{messages.LABEL_GRADE}"/> 
+			            </f:facet> 
+			            <h:outputText value="#{_permissoes.grade.seq}"/>  
+			          </p:column>  
+			        </mec:serverDataTable> 
+				</aghu:linha>
+			</aghu:panelGeral>
+	
+			<aghu:panelGeral id="panelZona" legend="#{messages.LABEL_UNIDADE_FUNCIONAL}">
+		        <aghu:linha>
+		            <mec:suggestionBox var="zona" itemValue="#{zona}"
+		            	required="false"
+		            	label="#{messages.LABEL_UNIDADE_FUNCIONAL}"
+		            	title="#{messages.TITLE_UNIDADE_FUNCIONAL}"
+		            	suggestionAction="obterZona"
+		            	width="400"
+		            	size="60" maxlength="60"
+		            	descricaoInput="sigla"
+		            	descricaoLabel="descricao"
+		            	id="suggestionZona"
+		            	cache="false"
+		            	controller="#{manterPermissoesAgendamentoConsultaController}"
+		            	value="#{manterPermissoesAgendamentoConsultaController.zona}"> 
+		              <p:column> 
+		                <f:facet name="header"> 
+		                  <b>#{messages.LABEL_UNIDADE_FUNCIONAL}</b> 
+		                </f:facet> #{zona.sigla}
+		              </p:column>  
+		              <p:column> 
+		                <f:facet name="header"> 
+		                  <b>#{messages.LABEL_DESCRICAO}</b> 
+		                </f:facet> #{zona.descricao}
+		              </p:column> 
+		            </mec:suggestionBox>  
+					<div style="padding:22px 0px 0px 0px">
+			            <mec:commandButton ajax="true" process="@this, suggestionZona, servidor" render="tabelaPesmissoesZona, suggestionZona, servidor" value="#{messages.LABEL_ADICIONAR}" id="bt_adicionar_zona" action="#{manterPermissoesAgendamentoConsultaController.adicionarZona}" profile="add"/>  
+			        </div>
+		        </aghu:linha>  
+				<aghu:linha>
+			        <mec:serverDataTable list="#{manterPermissoesAgendamentoConsultaController.listPermissoesZona}" title="#{messages.TITLE_PESQUISA_PERMISSOES_AGENDAMENTO_CONSULTA}" id="tabelaPesmissoesZona" controller="#{manterPermissoesAgendamentoConsultaController}"> 
+			          <c:set var="_permissoes" value="#{item}"/>  
+			          <p:column headerText="Ações" styleClass="first-column auto-adjust" exportable="false" width="40"> 
+			            <mec:commandLink ajax="true" id="tabelaPermissoesZona_link_remover" profile="delete" title="excluir" action="#{manterPermissoesAgendamentoConsultaController.removerPermissaoZona}" render="panelGeralPermissao"> 
+			              <f:setPropertyActionListener for="command" target="#{manterPermissoesAgendamentoConsultaController.parametroSelecionado}" value="#{_permissoes}"/> 
+			            </mec:commandLink> 
+			          </p:column>  
+			          <p:column width="120"> 
+			            <f:facet name="header"> 
+			              <h:outputText value="#{messages.LABEL_UNIDADE_FUNCIONAL}"/> 
+			            </f:facet> 
+			            <h:outputText value="#{_permissoes.unidadeFuncional.seq}"/>  
+			          </p:column>  
+			          <p:column> 
+			            <f:facet name="header"> 
+			              <h:outputText value="#{messages.LABEL_DESCRICAO}"/> 
+			            </f:facet> 
+			            <h:outputText value="#{_permissoes.unidadeFuncional.descricao}"/>  
+			          </p:column>  
+			        </mec:serverDataTable> 
+				</aghu:linha>
+			</aghu:panelGeral>
+	
+			<aghu:panelGeral id="panelProfissional" legend="#{messages.LABEL_PROFISSIONAL}">
+				<aghu:linha>
+					<mec:suggestionBox
+						label="#{messages.LABEL_PROFISSIONAL}"
+						title="#{messages.TITLE_PROFISSIONAL_PERMISSAO_AGENDAMENTO_CONSULTA}"
+						descricaoInput="id.matricula" size="60" maxlength="60" width="400"
+						descricaoLabel="pessoaFisica.nome" var="item"
+						cache="false"
+						suggestionAction="obterProfissionaisPorEquipe" id="suggestionProfissional"
+						controller="#{manterPermissoesAgendamentoConsultaController}"
+						value="#{manterPermissoesAgendamentoConsultaController.profissional}">
+						<p:column>
+							<f:facet name="header">
+								<b>#{messages.LABEL_VINCULO}</b>
+							</f:facet>
+							<h:outputText value="#{item.id.vinCodigo}" />
+						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<b>#{messages.LABEL_MATRICULA}</b>
+							</f:facet>
+							<h:outputText value="#{item.id.matricula}" />
+						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<b>#{messages.LABEL_NOME}</b>
+							</f:facet>
+							<h:outputText value="#{item.pessoaFisica.nome}" />
+						</p:column>
+					</mec:suggestionBox>
+					<div style="padding:22px 0px 0px 0px">
+		            	<mec:commandButton ajax="true" process="@this, suggestionProfissional, servidor" render="tabelaPesmissoesProfissional, suggestionProfissional, servidor" value="#{messages.LABEL_ADICIONAR}" id="bt_adicionar_profissional" action="#{manterPermissoesAgendamentoConsultaController.adicionarProfissional}" profile="add"/>
+		            </div>  
+				</aghu:linha>
+				<aghu:linha>
+			        <mec:serverDataTable list="#{manterPermissoesAgendamentoConsultaController.listPermissoesProfissional}" title="#{messages.TITLE_PESQUISA_PERMISSOES_AGENDAMENTO_CONSULTA}" id="tabelaPesmissoesProfissional" controller="#{manterPermissoesAgendamentoConsultaController}"> 
+			          <c:set var="_permissoes" value="#{item}"/>  
+			          <p:column headerText="Ações" styleClass="first-column auto-adjust" exportable="false" width="40"> 
+			            <mec:commandLink ajax="true" id="tabelaPermissoesProfissional_link_remover" profile="delete" title="excluir" action="#{manterPermissoesAgendamentoConsultaController.removerPermissaoProfissional}" render="panelGeralPermissao"> 
+			              <f:setPropertyActionListener for="command" target="#{manterPermissoesAgendamentoConsultaController.parametroSelecionado}" value="#{_permissoes}"/> 
+			            </mec:commandLink> 
+			          </p:column>  
+			          <p:column width="60"> 
+			            <f:facet name="header"> 
+			              <h:outputText value="#{messages.LABEL_VINCULO}"/> 
+			            </f:facet> 
+			            <h:outputText value="#{_permissoes.profissional.id.vinCodigo}"/>  
+			          </p:column>  
+			          <p:column width="80"> 
+			            <f:facet name="header"> 
+			              <h:outputText value="#{messages.LABEL_MATRICULA}"/> 
+			            </f:facet> 
+			            <h:outputText value="#{_permissoes.profissional.id.matricula}"/>  
+			          </p:column>  
+			          <p:column> 
+			            <f:facet name="header"> 
+			              <h:outputText value="#{messages.LABEL_NOME}"/> 
+			            </f:facet> 
+			            <h:outputText value="#{_permissoes.profissional.pessoaFisica.nome}"/>  
+			          </p:column>  
+			        </mec:serverDataTable> 
+				</aghu:linha>
+			</aghu:panelGeral>
+		</p:outputPanel>
+		<aghu:linha> 
+          <aghu:acao> 
+            <mec:commandButton ajax="true" value="#{messages.LABEL_GRAVAR}" action="#{manterPermissoesAgendamentoConsultaController.confirmar}" profile="ok" render="tabelaPesmissoesEspecialidade, tabelaPesmissoesEquipe, tabelaPesmissoesGrade, tabelaPesmissoesZona, tabelaPesmissoesProfissional"/> 
+            <mec:commandButton immediate="true" ajax="true" value="#{messages.LABEL_VOLTAR}" action="#{manterPermissoesAgendamentoConsultaController.verificaPendenciasVoltar}" profile="back" render="panelModalPendencias"/> 
+          </aghu:acao> 
+        </aghu:linha> 
+
+        <p:outputPanel id="panelModalPendencias" layout="inline"> 
+          <p:dialog id="modalConfirmacaoPendencia" width="400" height="150" modal="true" resizable="false" 
+                    widgetVar="modalConfirmacaoPendenciaWG" 
+        			visible="#{manterPermissoesAgendamentoConsultaController.confirmaVoltar}" >
+		<f:facet name="header"> 
+		 	<h:panelGroup> 
+				<h:outputText value="#{messages.TITLE_PENDENCIAS_CONFIGURAR_LISTA}"/>
+		 	</h:panelGroup>
+		</f:facet> #{messages.MENSAGEM_ALTERACOES_PENDENTES} 
+		<br clear="none"/>  
+		<br clear="none"/>  
+		<br clear="none"/>  
+		<h:panelGroup>
+			<mec:commandButton id="bt_sim" value="#{messages.LABEL_SIM}" action="#{manterPermissoesAgendamentoConsultaController.cancelar}" profile="ok" ajax="true"/>  
+			<mec:commandButton id="bt_nao" value="#{messages.LABEL_NAO}" onclick="PF('modalConfirmacaoPendenciaWG').hide();" profile="cancel" ajax="true"/> 
+		</h:panelGroup>
+          </p:dialog> 
+        </p:outputPanel> 
+
+      </h:form> 
+    </ui:define> 
+  </ui:composition> 
+</html>

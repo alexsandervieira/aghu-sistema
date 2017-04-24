@@ -97,18 +97,37 @@ public class MpmPrescricaoProcedimentoDAO extends
 				.append(MpmPrescricaoProcedimento.Fields.DTHR_FIM.toString())
 				.append(" = :dthrFim ");
 		}
-
+		sql.append(" ORDER BY proc.ordem ");
 		Query query = createQuery(sql.toString());
 		query.setParameter("idPme", id);
 		if(!listarTodas) {
 			query.setParameter("dthrFim", dthrFimPrescricao);
 		}
-
 		List<MpmPrescricaoProcedimento> list = query.getResultList();
 
 		return list;
 	}
+		
+	public Integer buscaOrdemPrescricaoProcedimentos(MpmPrescricaoMedicaId id, Date dthrFim) {
+		
+		List<MpmPrescricaoProcedimento> list;
+		
+		DetachedCriteria criteria = DetachedCriteria.forClass(MpmPrescricaoProcedimento.class);
+		criteria.add(Restrictions.eq(MpmPrescricaoProcedimento.Fields.PRESCRICAO_MEDICA.toString(), id));
+		criteria.add(Restrictions.or(Restrictions.isNull(MpmPrescricaoProcedimento.Fields.DTHR_FIM.toString()),
+				Restrictions.eq(MpmPrescricaoProcedimento.Fields.DTHR_FIM.toString(),dthrFim)));
 
+		
+		criteria.addOrder(Order.desc(MpmPrescricaoProcedimento.Fields.ORDEM.toString()));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		
+		list = super.executeCriteria(criteria);
+
+		Integer ordem = list != null && !list.isEmpty() ? list.get(0).getOrdem() != null && list.get(0).getOrdem() > 0 ? list.get(0).getOrdem()  +1 : list.size() +1 : 1;
+		return ordem;
+	}
+
+	
 	/**
 	 * Pesquisa os procedimentos de uma prescrição considerando datas de início
 	 * e fim

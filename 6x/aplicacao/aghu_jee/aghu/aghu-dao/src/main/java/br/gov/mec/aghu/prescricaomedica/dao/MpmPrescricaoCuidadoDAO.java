@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
@@ -49,25 +50,37 @@ public class MpmPrescricaoCuidadoDAO extends br.gov.mec.aghu.core.persistence.da
 		if (pmeId == null || dthrFim == null) {
 			throw new IllegalArgumentException("Parametro invalido!!!");
 		}
-		DetachedCriteria criteria = DetachedCriteria
-				.forClass(MpmPrescricaoCuidado.class);
+		DetachedCriteria criteria = DetachedCriteria.forClass(MpmPrescricaoCuidado.class);
 
 		criteria.setFetchMode(MpmPrescricaoCuidado.Fields.MPM_TIPO_FREQ_APRAZAMENTO.toString(), FetchMode.JOIN);
 		criteria.setFetchMode(MpmPrescricaoCuidado.Fields.CDU.toString(), FetchMode.JOIN);
-		criteria.add(Restrictions.eq(
-				MpmPrescricaoCuidado.Fields.PRESCRICAO_MEDICA_ID.toString(),
+		criteria.add(Restrictions.eq(MpmPrescricaoCuidado.Fields.PRESCRICAO_MEDICA_ID.toString(),
 				pmeId));
 
 		if(!listarTodas) {
-			criteria.add(Restrictions.or(Restrictions
-					.isNull(MpmPrescricaoCuidado.Fields.DTHR_FIM.toString()),
-					Restrictions.eq(
-							MpmPrescricaoCuidado.Fields.DTHR_FIM.toString(),
-							dthrFim)));
+			criteria.add(Restrictions.or(Restrictions.isNull(MpmPrescricaoCuidado.Fields.DTHR_FIM.toString()),
+					Restrictions.eq(MpmPrescricaoCuidado.Fields.DTHR_FIM.toString(),dthrFim)));
 		}
+		criteria.addOrder(Order.asc(MpmPrescricaoCuidado.Fields.ORDEM.toString()));
 		return executeCriteria(criteria);
 	}
+	
+	public Integer buscaOrdemPrescricaoCuidados(MpmPrescricaoMedicaId pmeId, Date dthrFim) {
+		
+		DetachedCriteria criteria = DetachedCriteria.forClass(MpmPrescricaoCuidado.class);
 
+		criteria.add(Restrictions.eq(MpmPrescricaoCuidado.Fields.PRESCRICAO_MEDICA_ID.toString(),pmeId));
+		criteria.add(Restrictions.or(Restrictions.isNull(MpmPrescricaoCuidado.Fields.DTHR_FIM.toString()),
+				Restrictions.eq(MpmPrescricaoCuidado.Fields.DTHR_FIM.toString(),dthrFim)));
+		
+		criteria.addOrder(Order.desc(MpmPrescricaoCuidado.Fields.ORDEM.toString()));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		
+		List<MpmPrescricaoCuidado> list = super.executeCriteria(criteria);//list.get(3).getMpmCuidadoUsuais().getDescricao()
+		
+		Integer ordem = list != null && !list.isEmpty() ? list.get(0).getOrdem() != null && list.get(0).getOrdem() > 0 ? list.get(0).getOrdem()  +1 : list.size() +1 : 1;
+		return ordem;
+	}
 	/**
 	 * Método que pesquisa a lista de cuidados da prescrição mais recente
 	 * 

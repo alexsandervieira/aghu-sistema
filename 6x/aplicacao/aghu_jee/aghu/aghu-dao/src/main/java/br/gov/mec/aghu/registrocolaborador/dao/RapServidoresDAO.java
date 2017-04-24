@@ -4687,12 +4687,18 @@ public class RapServidoresDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 		}
 		return criteria;
 	}
-	
+
 	public List<RapServidores> obterServidoresComPessoaFisicaPorEquipe(String param,AghEquipes equipe) {
+		return obterServidoresComPessoaFisicaPorEquipe(param, equipe, null);
+	}
+	public List<RapServidores> obterServidoresComPessoaFisicaPorEquipe(String param,AghEquipes equipe, List<RapServidoresId> listProfissionais) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(RapServidores.class, "servidor");
 		
 		criteria.createAlias("servidor."+RapServidores.Fields.PESSOA_FISICA.toString(), "pessoaFisica");
 
+		if(listProfissionais != null && !listProfissionais.isEmpty()){
+			criteria.add(Restrictions.in("servidor." +RapServidores.Fields.ID.toString(),listProfissionais));
+		}
 		if(equipe != null){
 			criteria.createAlias("servidor."+RapServidores.Fields.EQUIPES.toString(), "equipes" , JoinType.LEFT_OUTER_JOIN);
 			criteria.add(Restrictions.eq("equipes."+AghEquipes.Fields.SEQ.toString(),equipe.getSeq()));

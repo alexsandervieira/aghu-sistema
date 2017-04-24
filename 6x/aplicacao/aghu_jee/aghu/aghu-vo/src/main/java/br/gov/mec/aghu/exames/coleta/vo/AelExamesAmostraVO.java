@@ -26,6 +26,7 @@ public class AelExamesAmostraVO implements Serializable {
 	private DominioSituacaoAmostra situacao;
 	private Date dthrAgenda;
 	private Boolean selecionado;
+	private Short seqAmostra;
 
 	public Integer getSoeSeq() {
 		return soeSeq;
@@ -92,6 +93,14 @@ public class AelExamesAmostraVO implements Serializable {
 
 	public void setSelecionado(Boolean selecionado) {
 		this.selecionado = selecionado;
+	}
+	
+	public Short getSeqAmostra() {
+		return seqAmostra;
+	}
+
+	public void setSeqAmostra(Short seqAmostra) {
+		this.seqAmostra = seqAmostra;
 	}
 
 	public AelExamesAmostraVO() {

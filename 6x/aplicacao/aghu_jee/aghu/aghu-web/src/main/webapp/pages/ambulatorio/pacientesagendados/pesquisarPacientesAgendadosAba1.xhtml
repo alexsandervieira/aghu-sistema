@@ -77,7 +77,19 @@
             <f:facet name="header"> 
               <h:outputText value="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_PACIENTE}"/> 
             </f:facet>  
-            <h:outputText style="#{(item.pacienteNroCartaoSaude == null)?'font-weight:bold':''}" id="colunaPaciente" value="#{item.pacienteNome}" title="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_VER_DETALHES}"/>  
+            
+            <h:outputText 
+            	style="#{(item.pacienteNroCartaoSaude == null)?'font-weight:bold':''}" 
+            	id="colunaPaciente" 
+            	value="#{not empty item.nomeSocial ? item.nomeSocial : item.pacienteNome}" 
+            	title="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_VER_DETALHES}"/>
+            	
+			<h:graphicImage 
+				title="#{messages.LABEL_NOME_CIVIL}: #{item.pacienteNome}"  
+				value="/resources/img/icons/nome-civil-paciente.png" 
+				style="border:0px; float:right;" 
+				rendered="#{not empty item.nomeSocial}" />            
+            
             <p:tooltip for="colunaPaciente" id="ttpColunaPaciente" styleClass="tooltip">
               #{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_GRADE}: #{item.gradeSeq} 
               <br clear="none"/> #{messages.LABEL_MANTER_GRADE_AGENDAMENTO_EQUIPE}: #{item.gradeEquipeNome} 
@@ -413,7 +425,8 @@
 			  <mec:commandLink
 	           	rendered="#{mf:hasPermission(securityController,'imprimeRelatorioAgendasAmbulatorio,imprimirRelatorioAgendas')}" 
 	           	styleClass="silk-icon silk-solicitar-prontuario" title="#{messages.TITLE_PESQUISAR_PACIENTES_AGENDADOS_SOLICITAR_SAMIS}"
-	           	action="#{pesquisarPacientesAgendadosController.gerarMovimentacaoProntuario(item)}" ajax="true">
+	           	action="#{pesquisarPacientesAgendadosController.gerarMovimentacaoProntuario()}" process="@this" ajax="true">
+				<f:setPropertyActionListener value="#{item}" target="#{pesquisarPacientesAgendadosController.consultaSelecionada}" for="command"/>
 	           </mec:commandLink>
        	  </p:column>
           

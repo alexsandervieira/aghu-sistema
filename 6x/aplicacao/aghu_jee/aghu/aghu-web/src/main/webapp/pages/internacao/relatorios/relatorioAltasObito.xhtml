@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:fn="http://xmlns.jcp.org/jsp/jstl/functions" xmlns:mec="http://xmlns.jcp.org/jsf/composite/components" xmlns:p="http://primefaces.org/ui" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:aghu="http://xmlns.jcp.org/jsf/component" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:c="http://xmlns.jcp.org/jsp/jstl/core" xmlns:mf="http://www.mec.gov.br/taglib">  
+  <ui:composition template="/WEB-INF/templates/form_template.xhtml"> 
+    <ui:define name="head"> 
+      <title>Gerar Relatório de Altas por Óbito :: AGHU - MEC</title> 
+    </ui:define>  
+    <ui:define name="body"> 
+      <mec:pageConfig controller="#{relatorioAltasObitoController}"/>  
+      <h:form prependId="false" id="Relatorio"> 
+        <aghu:panelGeral legend="#{messages.LABEL_RELATORIO_ALTAS_OBITO}"> 
+          <aghu:linha>
+			<mec:inputTextData label="#{messages.LABEL_DATA_INICIAL}"
+				title="#{messages.TITLE_DATA_INICIAL}"
+				value="#{relatorioAltasObitoController.dataInicial}"
+				required="true" id="dataInicial" tipo="data" />
+		  </aghu:linha> 
+          <aghu:linha>
+			<mec:inputTextData label="#{messages.LABEL_DATA_FINAL}"
+				title="#{messages.TITLE_DATA_FINAL}"
+				value="#{relatorioAltasObitoController.dataFinal}"
+				id="dataFinal" tipo="data" />
+		  </aghu:linha> 
+        </aghu:panelGeral>  
+        <aghu:acao> 
+          <mec:commandButton value="#{messages.LABEL_PESQUISAR}" id="bt_pesquisar" action="#{relatorioAltasObitoController.pesquisar}" profile="search"/>  
+          <mec:commandButton value="#{messages.LABEL_LIMPAR}" immediate="true" id="bt_limpar" action="#{relatorioAltasObitoController.limpar}" styleClass="bt_cinza" profile="clear"/>  
+          <mec:commandButton id="bt_print_buttonView" value="#{messages.LABEL_VISUALIZAR_IMPRESSAO_RELATORIO}" action="#{relatorioAltasObitoController.visualizarRelatorio}" profile="view" onclick="PF('loadDialogWG').show()"/>  
+          <mec:commandButton id="bt_print_buttonPrint" value="#{messages.LABEL_IMPRIMIR}" action="#{relatorioAltasObitoController.imprimirRelatorio}" profile="print" onclick="PF('loadDialogWG').show()"/> 
+		  <p:commandButton id="bt_gerarArquivo"
+				value="#{messages.LABEL_GERAR_ARQUIVO}"
+				actionListener="#{relatorioAltasObitoController.gerarArquivo}"
+				ajax="false"
+				onclick="PrimeFaces.monitorDownload(function(){PF('loadDialogWG').show();}, function(){PF('loadDialogWG').hide();});"
+				styleClass="bt_cinza button-acao"	
+				icon="icon-download-csv">
+				<p:fileDownload value="#{relatorioAltasObitoController.streamedContent}" />
+		  </p:commandButton>
+        </aghu:acao> 
+        <mec:serverDataTable id="tabelaResult" dataModel="dataModel" controller="#{relatorioAltasObitoController}"> 
+          <c:set var="_item" value="#{item}"/>  
+          <p:column width="70px;" sortBy="#{_item.prontuario}"> 
+            <f:facet name="header"> 
+              <h:outputText value="#{messages.LABEL_PRONTUARIO}"/> 
+            </f:facet> 
+            <h:outputText value="#{_item.prontuario}" />  
+          </p:column>  
+          <p:column width="60px;" sortBy="#{_item.obito}"> 
+            <f:facet name="header"> 
+              <h:outputText value="#{messages.LABEL_OBITO}"/> 
+            </f:facet> 
+            <h:outputText value="#{_item.obito}" />  
+          </p:column>  
+          <p:column sortBy="#{_item.nomePaciente}"> 
+            <f:facet name="header"> 
+              <h:outputText value="#{messages.LABEL_NOME}"/> 
+            </f:facet> 
+            <h:outputText value="#{_item.nomePaciente}"/>  
+          </p:column> 
+          <p:column width="115px;" sortBy="#{_item.dataNascimento}"> 
+            <f:facet name="header"> 
+              <h:outputText value="#{messages.LABEL_DATA_NASCIMENTO}"/>
+            </f:facet> 
+            <h:outputText value="#{_item.dataNascimento}">
+            	<f:convertDateTime pattern="dd/MM/yy"/>
+            </h:outputText>  
+          </p:column> 
+          <p:column width="80px;" sortBy="#{_item.siglaEspecialidade}"> 
+            <f:facet name="header"> 
+              <h:outputText value="#{messages.LABEL_ESPECIALIDADE}"/> 
+            </f:facet> 
+            <h:outputText value="#{_item.siglaEspecialidade}" />  
+          </p:column>  
+          <p:column width="75px;" sortBy="#{_item.dataAlta}"> 
+            <f:facet name="header"> 
+              <h:outputText value="#{messages.LABEL_DATA_ALTA}"/>
+            </f:facet> 
+            <h:outputText value="#{_item.dataAlta}">  
+            	<f:convertDateTime pattern="dd/MM/yy"/>
+            </h:outputText>  
+          </p:column> 
+        </mec:serverDataTable> 
+      </h:form> 
+    </ui:define> 
+  </ui:composition> 
+</html>

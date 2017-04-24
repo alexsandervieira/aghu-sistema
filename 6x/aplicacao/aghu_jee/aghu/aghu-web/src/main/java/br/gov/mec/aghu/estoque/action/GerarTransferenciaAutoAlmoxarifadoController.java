@@ -410,8 +410,11 @@ public class GerarTransferenciaAutoAlmoxarifadoController extends ActionControll
 	/**
 	 * Obtem lista para sugestion box de almoxarifado de "ORIGEM E DESTINO"
 	 */
-	public List<SceAlmoxarifado> obterAlmoxarifado(String param){
-		return this.estoqueFacade.obterAlmoxarifadoPorSeqDescricao(param);
+	public List<SceAlmoxarifado> obterAlmoxarifadoDestino(String param){
+		return this.estoqueFacade.obterAlmoxarifadoPorSeqDescricao(param,transferenciaAutomaticaVO.getAlmoxarifadoOrigem());
+	}
+    public List<SceAlmoxarifado> obterAlmoxarifadoOrigem(String param){
+    	return this.estoqueFacade.obterAlmoxarifadoPorSeqDescricao(param,transferenciaAutomaticaVO.getAlmoxarifadoDestino());
 	}
 	
 	/**

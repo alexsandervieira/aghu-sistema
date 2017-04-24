@@ -551,8 +551,11 @@ public class EfetivarTransfMateriaisEventualController extends ActionController 
 	 * @param param
 	 * @return
 	 */
-	public List<SceAlmoxarifado> obterAlmoxarifado(String param){
-		return this.estoqueFacade.obterAlmoxarifadoPorSeqDescricao(param);
+	public List<SceAlmoxarifado> obterAlmoxarifadoDestino(String param){
+		return this.estoqueFacade.obterAlmoxarifadoPorSeqDescricao(param,almoxarifadoOrigem);
+	}
+    public List<SceAlmoxarifado> obterAlmoxarifadoOrigem(String param){
+    	return this.estoqueFacade.obterAlmoxarifadoPorSeqDescricao(param,almoxarifadoDestino);
 	}
 
 	public String getGeradoEm() {

@@ -4,12 +4,20 @@ package br.gov.mec.aghu.exames.business;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
+import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioTipoImpressaoLaudo;
+import br.gov.mec.aghu.exames.laudos.ExameVO;
 import br.gov.mec.aghu.exames.laudos.ExamesListaVO;
 import br.gov.mec.aghu.exames.laudos.ILaudoReport;
 import br.gov.mec.aghu.exames.laudos.LaudoExterno;
@@ -17,10 +25,6 @@ import br.gov.mec.aghu.exames.laudos.LaudoSamis;
 import br.gov.mec.aghu.exames.laudos.LaudoVisualizacao;
 import br.gov.mec.aghu.exames.laudos.ResultadoLaudoVO;
 import br.gov.mec.aghu.model.IAelItemSolicitacaoExamesId;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 @Stateless
 public class LaudosExamesON extends BaseBusiness {
@@ -30,6 +34,9 @@ public class LaudosExamesON extends BaseBusiness {
 	private static final Log LOG = LogFactory.getLog(LaudosExamesON.class);
 	
 	private String caminhoLogo;
+	
+	@EJB
+	private IParametroFacade parametroFacade;
 	
 	private enum LaudosExamesONExceptionCode implements BusinessExceptionCode {
 		 ERRO_AO_GERAR_PDF_LAUDO;
@@ -74,13 +81,22 @@ public class LaudosExamesON extends BaseBusiness {
 					laudo = new LaudoSamis();
 				}
 			}
+			String consideraAlinhamentoVertical = "N"; //Valor default
+			try {
+				consideraAlinhamentoVertical = this.parametroFacade.buscarValorTexto(AghuParametrosEnum.P_CONSIDERA_ALINHAMENTO_VERTICAL_MASCARA_EXAMES);
+			} catch (ApplicationBusinessException e) {
+				LOG.error(e.getMessage(), e);
+			}
 			// gera os laudos
 			laudo.setCaminhoLogo(this.getCaminhoLogo());
 			laudo.setExamesLista(dadosLaudo);
-			laudo.executar();
-			baos = new ByteArrayOutputStream();
-			laudo.toPdf(baos);
-			//laudo.toJrXml(new FileOutputStream("/home/toni/report.jrxml"));
+			laudo.executar("S".equals(consideraAlinhamentoVertical));
+			for (ExameVO vo : dadosLaudo.getExames()) {
+				if(vo.getMascaras() != null && !vo.getMascaras().isEmpty()){
+					baos = new ByteArrayOutputStream();
+					laudo.toPdf(baos);
+				}
+			}
 		} catch (Exception e) {
 			LOG.error("Erro na geração de laudo.", e);
 			throw new ApplicationBusinessException(LaudosExamesONExceptionCode.ERRO_AO_GERAR_PDF_LAUDO, e);

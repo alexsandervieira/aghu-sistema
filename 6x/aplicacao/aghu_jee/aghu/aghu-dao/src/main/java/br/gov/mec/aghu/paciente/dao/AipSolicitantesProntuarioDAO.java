@@ -35,6 +35,22 @@ public class AipSolicitantesProntuarioDAO extends br.gov.mec.aghu.core.persisten
 		
 		return executeCriteria(criteria);
 	}
+	
+	public AipSolicitantesProntuario pesquisarSolicitantesProntuarioPorOrigemEventos(Short origemEventosSeq) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(AipSolicitantesProntuario.class);
+		criteria.add(Restrictions.eq(AipSolicitantesProntuario.Fields.ORIGEM_EVENTOS_SEQ.toString(), origemEventosSeq));
+		criteria.add(Restrictions.eq(AipSolicitantesProntuario.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
+		List<AipSolicitantesProntuario> lista = executeCriteria(criteria);
+		return lista != null && !lista.isEmpty() ? lista.get(0) : null;
+	}
+
+	public AipSolicitantesProntuario pesquisarSolicitanteProntuarioPorUnidadeFuncional(Short unfSeq) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(AipSolicitantesProntuario.class);
+		criteria.add(Restrictions.eq(AipSolicitantesProntuario.Fields.UNIDADES_FUNCIONAIS_SEQ.toString(), unfSeq));
+		criteria.add(Restrictions.eq(AipSolicitantesProntuario.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
+		List<AipSolicitantesProntuario> lista = executeCriteria(criteria);
+		return lista != null && !lista.isEmpty() ? lista.get(0) : null;
+	}
 
 	/**
 	 * @dbtables AipSolicitantesProntuario select

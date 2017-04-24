@@ -340,14 +340,14 @@ private AelInformacaoMdtoColetaDAO aelInformacaoMdtoColetaDAO;
 	}
 	
 	@Override
-	public void validarColetaExames(Integer amoSeqp, List<AelExamesAmostraVO> listaExamesAmostra) throws ApplicationBusinessException{
-		this.getAmostraExamesON().validarColetaExames(amoSeqp, listaExamesAmostra);
+	public void validarColetaExames(AelExamesAmostraVO exameAmostraVO) throws ApplicationBusinessException{
+		this.getAmostraExamesON().validarColetaExames(exameAmostraVO);
 	}
 	
 	@Override
 	@BypassInactiveModule
-	public void validarVoltaExames(Integer amoSeqp, List<AelExamesAmostraVO> listaExamesAmostra) throws ApplicationBusinessException{
-		this.getAmostraExamesON().validarVoltaExames(amoSeqp, listaExamesAmostra);
+	public void validarVoltaExames(AelExamesAmostraVO exameAmostraVO) throws ApplicationBusinessException{
+		this.getAmostraExamesON().validarVoltaExames(exameAmostraVO);
 	}
 	
 	@Override

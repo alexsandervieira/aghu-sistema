@@ -233,6 +233,7 @@ public class ManterSumarioAltaController extends ActionController  {
 	private boolean primeiraVezExecutouSumarioAlta = true;
 	
 	private boolean gravouEvo;
+	private boolean indUsuarioSemRegistro = Boolean.FALSE;
 	
 	@PostConstruct
 	public void init() {
@@ -242,7 +243,7 @@ public class ManterSumarioAltaController extends ActionController  {
 	 * 	Inicializa variaveis da controller.
 	 * @throws BaseException 
 	 */
-	private void initController() throws BaseException {
+	private void initController(){
 		this.setMostrarSeguimentoAtendimento(false);
 		this.retornoRecomendacoesAlta = false;
 		this.retornoTelaReceitas = false;
@@ -269,6 +270,7 @@ public class ManterSumarioAltaController extends ActionController  {
 	public String inicio() {
 	 
 		try {
+			this.indUsuarioSemRegistro = Boolean.FALSE;
 			Boolean executaBuscaMedicamentosPosAlta = primeiraVezExecutouSumarioAlta || retornoTelaReceitas;
 			
 			this.altanApaSeq = this.prescricaoMedicaFacade
@@ -283,6 +285,7 @@ public class ManterSumarioAltaController extends ActionController  {
 					!prescricaoMedicaFacade.verificarServidorMedico(
 							servidorLogado.getId().getMatricula(),
 							servidorLogado.getId().getVinCodigo())){
+				this.indUsuarioSemRegistro = Boolean.TRUE;
 				
 				this.apresentarExcecaoNegocio(new ApplicationBusinessException(
 						ManterSumarioAltaControllerExceptionCode.USUARIO_SEM_REGISTRO,
@@ -328,9 +331,6 @@ public class ManterSumarioAltaController extends ActionController  {
 				this.prescricaoMedicaFacade.gerarAltaConsultoria(altaSumario);
 				
 			}
-			this.initController();
-			this.altaSumarioVO = null;
-			this.renderTela();
 			
 			if(executaBuscaMedicamentosPosAlta){
 				this.sumarioAltaPosAltaController.setAtdSeq(altanAtdSeq);
@@ -338,7 +338,13 @@ public class ManterSumarioAltaController extends ActionController  {
 			}
 		} catch (BaseException e) {
 			this.apresentarExcecaoNegocio(e);
-		}	
+		}finally {
+			if(!this.indUsuarioSemRegistro){
+				this.initController();
+				this.altaSumarioVO = null;
+				this.renderTela();			
+			}
+		}
 		return null;
 	
 	}
@@ -375,7 +381,7 @@ public class ManterSumarioAltaController extends ActionController  {
 	public String concluirSumario() throws JRException, SystemException, IOException {
 		String returnValue = null;
 		try {
-			manterSumarioAltaConclusao.renderConclusao(this.altaSumario, this.altanListaOrigem, this.voltarPara, false);
+			manterSumarioAltaConclusao.renderConclusao(this.altaSumario, this.altanListaOrigem, this.voltarPara, true);
 			returnValue = manterSumarioAltaConclusao.concluirSumarioAlta();
 			if (returnValue != null ) {
 				apresentarMsgNegocio("SUCESSO_CONCLUIR_SUMARIO_ALTA");

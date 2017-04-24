@@ -233,8 +233,11 @@ public interface ILeitosInternacaoFacade extends Serializable {
 	public List<AghUnidadesFuncionais> pesquisarUnidadeFuncional(Object parametro);
 
 	public AinInternacao obterInternacaoPorProntuario(Integer prontuario);
+	
+	public AinInternacao obterInternacaoPorProntuario(Integer prontuario, Boolean blnPacienteInternado);
 
 	public AinInternacao obterInternacaoPorLeito(String leitoId);
+	public AinInternacao obterInternacaoPorLeito(String leitoId, Boolean blnPacienteInternado);
 
 	public String mensagemSolicTransPaciente(Integer internacao);
 

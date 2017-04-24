@@ -132,7 +132,8 @@ public class AinCaracteristicaLeito extends BaseEntityId<AinCaracteristicaLeitoI
 		TIPO_CARACTERISTICA("tipoCaracteristicaLeito"),	
 		IND_CARACTERISTICA_PRINCIPAL("indCaracteristicaPrincipal"),
 		LEITO("leito"),
-		LTO_LTO_ID("leito.leitoID");
+		LTO_LTO_ID("leito.leitoID"),
+		ID("id");
 
 		private String fields;
 

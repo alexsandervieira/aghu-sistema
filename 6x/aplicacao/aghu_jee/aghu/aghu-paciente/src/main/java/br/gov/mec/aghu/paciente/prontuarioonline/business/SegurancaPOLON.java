@@ -142,7 +142,7 @@ public class SegurancaPOLON extends BaseBMTBusiness {
 		List<AipPacientes> pacAcessoLiberado = new ArrayList<AipPacientes>();
 		
 		BaseListException listaExcept = new BaseListException();
-		validarAcessoPemissaoAcessoLivre(paciente, pacAcessoLiberado, parametros, listaExcept, nomeMicrocomputador, processoConsultaPOL);
+		validarAcessoProntuarioOnline(paciente, pacAcessoLiberado, parametros, listaExcept, nomeMicrocomputador, processoConsultaPOL);
 		if (listaExcept.hasException()){
 			throw listaExcept;
 		}
@@ -208,6 +208,24 @@ public class SegurancaPOLON extends BaseBMTBusiness {
 		else{
 			//item 3
 			verificarPacienteEspecial(paciente,listaExcept,pacAcessoLiberado,parametros, nomeMicrocomputador, paramConsultaPOL);
+		}
+	}
+	
+	private void validarAcessoProntuarioOnline(AipPacientes paciente, List<AipPacientes> pacAcessoLiberado, Map<ParametrosPOLEnum, Object> parametros, BaseListException listaExcept, String nomeMicrocomputador, Short paramConsultaPOL) throws ApplicationBusinessException{
+		Boolean acessoLivrePOL = (Boolean) parametros.get(ParametrosPOLEnum.ACESSO_PRONTUARIO_ONLINE);
+		if (acessoLivrePOL) {
+			if(paciente.isVip()){
+				//Loga acesso liberado a paciente vip
+				gravarLog(paciente, DominioOcorrenciaPOL.LIBERADO_VIP, nomeMicrocomputador);
+			} else{
+				//loga acesso liberado a paciente
+				gravarLog(paciente, DominioOcorrenciaPOL.LIBERADO, nomeMicrocomputador);
+			}
+			pacAcessoLiberado.add(paciente);
+		}
+		else{
+			//item 3
+			validarAcessoPemissaoAcessoLivre(paciente, pacAcessoLiberado, parametros, listaExcept, nomeMicrocomputador, paramConsultaPOL);
 		}
 	}
 
@@ -291,11 +309,30 @@ public class SegurancaPOLON extends BaseBMTBusiness {
 			}
 		}
 		else{
-			//item 7
-			validarAcessoMonitorProjPesqPOL(paciente,listaExcept,pacAcessoLiberado, parametros, nomeMicrocomputador, vRetornoAtendimento, paramConsultaPOL);
+			validarVerFluxograma(paciente, listaExcept, pacAcessoLiberado, parametros, nomeMicrocomputador, vRetornoAtendimento, paramConsultaPOL);
 		}
 	}
 	
+	private void validarVerFluxograma(AipPacientes paciente, BaseListException listaExcept, List<AipPacientes> pacAcessoLiberado,
+			Map<ParametrosPOLEnum, Object> parametros, String nomeMicrocomputador, Boolean vRetornoAtendimento,
+			Short paramConsultaPOL) throws ApplicationBusinessException{
+		Boolean acessoVerFluxograma = (Boolean) parametros.get(ParametrosPOLEnum.ACESSO_VER_FLUXOGRAMA);
+		
+		if(acessoVerFluxograma){
+			if(paciente.isVip()){
+				gravarLog(paciente, DominioOcorrenciaPOL.BLOQUEADO_VIP, nomeMicrocomputador);
+				incluirExcessao(paciente, listaExcept);
+			} else {
+				gravarLog(paciente, DominioOcorrenciaPOL.LIBERADO_FLUXOGRAMA, nomeMicrocomputador);
+				pacAcessoLiberado.add(paciente);
+			}
+		}else{
+			//item 7
+			validarAcessoMonitorProjPesqPOL(paciente,listaExcept,pacAcessoLiberado, parametros, nomeMicrocomputador, vRetornoAtendimento, paramConsultaPOL);
+		}
+		
+	}
+
 	/**
 	 * Item 7
 	 * @param paciente

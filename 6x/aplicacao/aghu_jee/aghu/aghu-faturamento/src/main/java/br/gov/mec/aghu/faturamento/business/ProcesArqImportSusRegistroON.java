@@ -66,7 +66,7 @@ public class ProcesArqImportSusRegistroON  extends BaseBMTBusiness {
 	public Map<String, FatTabRegistroVO> carregaRegistro( final String sgFaturamento, 
 															   final ControleProcessadorArquivosImportacaoSus controle) throws ApplicationBusinessException{
 
-		final AghArquivoProcessamento aghArquivoRegistro = aberturaRegistroOK(sgFaturamento);
+		AghArquivoProcessamento aghArquivoRegistro = aberturaRegistroOK(sgFaturamento);
 		
 		Map<String, FatTabRegistroVO> tabRegistro = null;
 		
@@ -76,7 +76,7 @@ public class ProcesArqImportSusRegistroON  extends BaseBMTBusiness {
 				controle.gravarLog("Iniciando carga de tabela de Registro em " + DateUtil.obterDataFormatada(new Date(), DateConstants.DATE_PATTERN_DDMMYYYY_HORA_MINUTO));
 				controle.getLogRetorno().append(ControleProcessadorArquivosImportacaoSus.LINE_SEPARATOR)
 		   			.append("Iniciando carga de tabela de Registro em " + DateUtil.obterDataFormatada(new Date(), DateConstants.DATE_PATTERN_DDMMYYYY_HORA_MINUTO));
-				util.atualizarArquivo(aghArquivoRegistro, controle.getInicio(), 0, null, 0, null, controle);
+				aghArquivoRegistro = util.atualizarArquivo(aghArquivoRegistro, controle.getInicio(), 0, null, 0, null, controle);
 				
 				// Carrega em tab de memoria tabela Registro
 				tabRegistro =  obterCursorRegistro(controle);
@@ -126,14 +126,9 @@ public class ProcesArqImportSusRegistroON  extends BaseBMTBusiness {
 						break;
 					
 				case ALTERA: 
-					    alteraRegistro(fatTabRegistro, true);
-						controle.gravarLog("Inativados 1 Registro Codigo:"+fatTabRegistro.getCodigo()+" por alteração.");
-						break;
-					
-				case NAO_PROCESSADO: 
-					    alteraRegistro(fatTabRegistro, false);
-						controle.gravarLog("Inativados 1 Registro Codigo:"+fatTabRegistro.getCodigo());
-						break; 
+				case NAO_PROCESSADO:
+					    alteraRegistro(fatTabRegistro);
+					    break;
 			}
 			
 			controle.incrementaNrRegistrosProcessados();
@@ -146,17 +141,14 @@ public class ProcesArqImportSusRegistroON  extends BaseBMTBusiness {
 	}
 
 	/** Forms: altera_servico inativa_servico */
-	private void alteraRegistro(final FatTabRegistroVO fatTabRegistro, final boolean incluirRegistro) throws ApplicationBusinessException {
+	private void alteraRegistro(final FatTabRegistroVO fatTabRegistro) throws ApplicationBusinessException {
 		
 		super.beginTransaction();
-		final FatRegistro registro = fatRegistrosDAO.obterPorChavePrimaria(fatTabRegistro.getCodigo());
-		registro.setIndSituacao(DominioSituacao.I);
+		FatRegistro registro = fatRegistrosDAO.obterPorChavePrimaria(fatTabRegistro.getCodigo());
+		registro.setDescricao(fatTabRegistro.getDescricao());
+		registro.setIndSituacao(DominioSituacao.A);
 		fatRegistrosRN.persistirFatRegistros(registro);
 		super.commitTransaction();
-		
-		if(incluirRegistro){
-			incluiRegistro(fatTabRegistro);
-		}
 	}
 	
 	/** Forms: inclui_servico  */

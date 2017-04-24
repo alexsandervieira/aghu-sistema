@@ -26,8 +26,19 @@
           </aghu:linha>  
           <aghu:linha> 
             <mec:inputTextData value="#{pessoaFisicaController.rapPessoaFisica.dtNascimento}" required="true" label="#{messages.LABEL_DATA_NASCIMENTO}" title="#{messages.LABEL_DATA_NASCIMENTO}" id="dataNascimento" tipo="data"/>  
-            
-            <!-- naturalidade -->	
+              
+            <mec:suggestionBox label="#{messages.LABEL_NACIONALIDADE}" title="#{messages.LABEL_NACIONALIDADE}" 
+            required="true" descricaoInput="codigo" descricaoLabel="descricao" 
+            suggestionAction="pesquisarNacionalidades" id="suggestionNacionalidade" 
+            controller="#{pessoaFisicaController}" 
+            posDeleteAction="limparCamposPosDeleteNacionalidade"
+            value="#{pessoaFisicaController.rapPessoaFisica.aipNacionalidades}"
+            render="cpf, panelRgCpf, orgao, ufRgPessoa, naturalidade,naturalidade_uf"> 
+              <p:column><h:outputText value="#{item.sigla}"/></p:column>  
+              <p:column><h:outputText value="#{item.descricao}"/></p:column> 
+            </mec:suggestionBox>
+
+             <!-- naturalidade -->	
 	    			
    			<p:outputPanel id="naturalidadePanel">
 				<mec:suggestionBox id="naturalidade"
@@ -38,7 +49,10 @@
 					descricaoInput="codigo"
 					suggestionAction="pesquisarCidadePorCodigoNome"
 					controller="#{pessoaFisicaController}"
-					value="#{pessoaFisicaController.rapPessoaFisica.aipCidades}">
+					value="#{pessoaFisicaController.rapPessoaFisica.aipCidades}"
+					required="#{pessoaFisicaController.obterObrigatoriedadeCamposConformeNaturalidade()}"
+					readonly="#{!pessoaFisicaController.obterObrigatoriedadeCamposConformeNaturalidade()}">
+
 					<p:column>
 						<h:outputText value="#{item.nome}"/>
 					</p:column>
@@ -48,7 +62,7 @@
 				</mec:suggestionBox>
 			</p:outputPanel>
 			<p:outputPanel id="region_uf">
-				<mec:inputText readonly="true" id="naturalidade_uf"
+				<mec:inputText readonly="true" id="v"
 					label="#{messages.LABEL_UF}"
 					style="text-transform:uppercase"
 					size="3"
@@ -56,12 +70,9 @@
 				</mec:inputText>
 			</p:outputPanel>
 			
-			<!-- naturalidade -->
-            
-            <mec:suggestionBox label="#{messages.LABEL_NACIONALIDADE}" title="#{messages.LABEL_NACIONALIDADE}" required="true" descricaoInput="codigo" descricaoLabel="descricao" suggestionAction="pesquisarNacionalidades" id="suggestionNacionalidade" controller="#{pessoaFisicaController}" value="#{pessoaFisicaController.rapPessoaFisica.aipNacionalidades}"> 
-              <p:column><h:outputText value="#{item.sigla}"/></p:column>  
-              <p:column><h:outputText value="#{item.descricao}"/></p:column> 
-            </mec:suggestionBox> 
+			<!-- naturalidade --> 
+
+
           </aghu:linha>  
           <aghu:linha> 
             <mec:selectOneMenu value="#{pessoaFisicaController.rapPessoaFisica.grauInstrucao}" label="#{messages.LABEL_GRAU_INSTRUCAO}" enum="DominioGrauInstrucaoRap" title="#{messages.LABEL_GRAU_INSTRUCAO}" id="grauInstrucao"/>  
@@ -72,11 +83,44 @@
         <aghu:panelGeral legend="#{messages.LEGENDA_DOCUMENTOS_PESSOAS}"> 
           <aghu:linha> 
             <p:outputPanel id="panelRgCpf" layout="inline"> 
-              <mec:inputText label="#{messages.LABEL_RG}" size="14" maxlength="14" required="#{pessoaFisicaController.nacionalidadeBrasileira()}" value="#{pessoaFisicaController.rapPessoaFisica.nroIdentidade}" title="#{messages.LABEL_RG}" id="rg"/>  
-              <mec:inputTextCPF label="#{messages.LABEL_CPF}" title="#{messages.LABEL_CPF}" value="#{pessoaFisicaController.rapPessoaFisica.cpf}" required="#{pessoaFisicaController.nacionalidadeBrasileira()}" converter="#{javax.faces.String}" style="text-transform:uppercase" ajaxValidation="true" id="cpf"/> 
+              <mec:inputText label="#{messages.LABEL_RG}" size="14" 
+              maxlength="14" required="#{pessoaFisicaController.obterObrigatoriedadeCamposConformeNaturalidade()}" 
+              value="#{pessoaFisicaController.rapPessoaFisica.nroIdentidade}" 
+              title="#{messages.LABEL_RG}" id="rg"/>  
+              
+              <mec:suggestionBox id="orgao" 
+              		required="#{pessoaFisicaController.obterObrigatoriedadeCamposConformeNaturalidade()}" 
+             		label="#{messages.LABEL_ORGAO_EMISSOR}" 
+             		title="#{messages.TITLE_CODIGO_ORGAO_EMISSOR_PESSOA}" 
+             		descricaoInput="codigo" size="7" 
+             		descricaoLabel="descricao" 
+             		suggestionAction="pesquisarOrgaoEmissorPorCodigoDescricao" 
+              		controller="#{pessoaFisicaController}" 
+              		value="#{pessoaFisicaController.rapPessoaFisica.orgaoEmisRg}"> 
+                	<p:column>#{item.codigo} - #{item.descricao}</p:column> 
+              </mec:suggestionBox> 
+
+              <mec:suggestionBox id="ufRgPessoa" label="#{messages.LABEL_UF}"
+              		required="#{pessoaFisicaController.obterObrigatoriedadeCamposConformeNaturalidade()}" 
+             	 	title="#{messages.TITLE_UNIDADE_FEDERACAO_REGISTRO_PESSOA}" 
+              		descricaoInput="sigla" size="7" descricaoLabel="nome" suggestionAction="pesquisarPorSiglaNome" 
+              		controller="#{pessoaFisicaController}" value="#{pessoaFisicaController.rapPessoaFisica.ufOrgao}"> 
+                	<p:column>#{item.sigla} - #{item.nome}</p:column> 
+              </mec:suggestionBox>  
+              <mec:inputTextData id="dataEmissaoDocumento" label="#{messages.LABEL_DATA_EMISSAO_DOCUMENTO}" 
+              	title="#{messages.TITLE_DATA_EMISSAO_DOCUMENTO_PACIENTE}" size="10" maxlength="10" 
+              	value="#{pessoaFisicaController.rapPessoaFisica.dataEmissaoDocto}" tipo="data"/>
             </p:outputPanel>  
-            <mec:inputNumero label="#{messages.LABEL_PIS}" size="15" maxlength="12" value="#{pessoaFisicaController.rapPessoaFisica.pisPasep}" title="#{messages.LABEL_PIS}" id="pis"/>  
-            <mec:suggestionBox label="#{messages.LABEL_COD_PAC_PRONTUARIO}" title="#{messages.LABEL_COD_PAC_PRONTUARIO}" converter="#{aipPacientesConverter}" descricaoInput="codigo" size="10" maxlength="8" descricaoLabel="prontuario" suggestionAction="pesquisarPacientes" styleClass="suggestion_input" width="500" id="suggestionCodigoPaciente" controller="#{pessoaFisicaController}" value="#{pessoaFisicaController.rapPessoaFisica.aipPacientes}"> 
+         	 </aghu:linha>  
+         	 <aghu:linha> 
+         	 <mec:inputTextCPF label="#{messages.LABEL_CPF}" title="#{messages.LABEL_CPF}" 
+         	 value="#{pessoaFisicaController.rapPessoaFisica.cpf}" 
+         	 required="#{pessoaFisicaController.obterObrigatoriedadeCamposConformeNaturalidade()}" 
+         	 converter="#{javax.faces.String}" style="text-transform:uppercase" 
+         	 ajaxValidation="true" id="cpf"/> 
+
+         	  <mec:inputNumero label="#{messages.LABEL_PIS}" size="15" maxlength="12" value="#{pessoaFisicaController.rapPessoaFisica.pisPasep}" title="#{messages.LABEL_PIS}" id="pis"/>  
+          	  <mec:suggestionBox label="#{messages.LABEL_COD_PAC_PRONTUARIO}" title="#{messages.LABEL_COD_PAC_PRONTUARIO}" converter="#{aipPacientesConverter}" descricaoInput="codigo" size="10" maxlength="8" descricaoLabel="prontuario" suggestionAction="pesquisarPacientes" styleClass="suggestion_input" width="500" id="suggestionCodigoPaciente" controller="#{pessoaFisicaController}" value="#{pessoaFisicaController.rapPessoaFisica.aipPacientes}"> 
               <p:column> 
                 <f:facet name="header"> 
                   <b>#{messages.LABEL_COD_PAC}</b> 
@@ -92,9 +136,7 @@
                   <b>#{messages.LABEL_PRONTUARIO_PAC}</b> 
                 </f:facet> #{item.prontuario}
               </p:column> 
-            </mec:suggestionBox> 
-          </aghu:linha>  
-          <aghu:linha> 
+           	 </mec:suggestionBox> 
             <mec:inputNumero label="#{messages.LABEL_CTPS}" size="9" maxlength="9" value="#{pessoaFisicaController.rapPessoaFisica.nroCartProfissional}" title="#{messages.LABEL_CTPS}" id="ctps"/>  
             <mec:inputText label="#{messages.LABEL_SERIE}" size="5" styleClass="numerico" maxlength="5" value="#{pessoaFisicaController.rapPessoaFisica.serieCartProfissional}" title="#{messages.LABEL_SERIE}" id="serie"/>  
             <mec:inputNumero label="#{messages.LABEL_TITULO_ELEITOR}" size="12" maxlength="12" value="#{pessoaFisicaController.rapPessoaFisica.nroTitEleitor}" title="#{messages.LABEL_TITULO_ELEITOR}" id="tituloEleitor"/>  
@@ -233,12 +275,12 @@
 					suggestionAction="pesquisarCidades"
 					id="suggestionCidadeNaoCadastrada"
 					controller="#{pessoaFisicaController}"
-					value="#{pessoaFisicaController.rapPessoaFisica.aipCidades}"
+					value="#{pessoaFisicaController.cidadeNaoCadastrada}"
 					render="ufNaoCadastrada">
                   <p:column>#{item.nome}</p:column>  
                   <p:column>#{item.aipUf.sigla}</p:column> 
                 </mec:suggestionBox>  
-                <mec:inputText value="#{pessoaFisicaController.rapPessoaFisica.aipCidades.aipUf.sigla}" label="#{messages.LABEL_UF}" maxlength="2" size="3" readonly="true" title="#{messages.LABEL_UF}" id="ufNaoCadastrada"/> 
+                <mec:inputText value="#{pessoaFisicaController.cidadeNaoCadastrada.aipUf.sigla}" label="#{messages.LABEL_UF}" maxlength="2" size="3" readonly="true" title="#{messages.LABEL_UF}" id="ufNaoCadastrada"/> 
               </aghu:linha> 
             </p:outputPanel> 
           </p:tab> 

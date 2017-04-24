@@ -395,6 +395,12 @@ public class LeitosInternacaoFacade extends BaseFacade implements ILeitosInterna
 	public AinInternacao obterInternacaoPorProntuario(Integer prontuario) {
 		return getSolicitarTransferenciaPacienteON().obterInternacaoPorProntuario(prontuario);
 	}
+	
+	@Override
+	@Secure("#{s:hasPermission('internacao','pesquisar')}")
+	public AinInternacao obterInternacaoPorProntuario(Integer prontuario, Boolean blnPacienteInternado) {
+		return getSolicitarTransferenciaPacienteON().obterInternacaoPorProntuario(prontuario, blnPacienteInternado);
+	}
 
 	@Override
 	@Secure("#{s:hasPermission('internacao','pesquisar')}")
@@ -402,6 +408,13 @@ public class LeitosInternacaoFacade extends BaseFacade implements ILeitosInterna
 		return getSolicitarTransferenciaPacienteON().obterInternacaoPorLeito(leitoId);
 	}
 
+	@Override
+	@Secure("#{s:hasPermission('internacao','pesquisar')}")
+	public AinInternacao obterInternacaoPorLeito(String leitoId, Boolean blnPacienteInternado) {
+		return getSolicitarTransferenciaPacienteON().obterInternacaoPorLeito(leitoId, blnPacienteInternado);
+	}
+	
+	
 	@Override
 	@Secure("#{s:hasPermission('solicitacaoTransferenciaPaciente','pesquisar')}")
 	public String mensagemSolicTransPaciente(Integer internacao) {

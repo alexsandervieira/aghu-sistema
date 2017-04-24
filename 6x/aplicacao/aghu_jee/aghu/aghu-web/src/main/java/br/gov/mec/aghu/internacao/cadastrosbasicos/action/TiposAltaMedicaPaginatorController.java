@@ -7,16 +7,14 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.inject.Inject;
 
-import br.gov.mec.aghu.internacao.cadastrosbasicos.business.ICadastrosBasicosInternacaoFacade;
-import br.gov.mec.aghu.model.AinAcomodacoes;
-import br.gov.mec.aghu.model.AinTiposAltaMedica;
-import br.gov.mec.aghu.model.MpmMotivoAltaMedica;
 import br.gov.mec.aghu.core.action.ActionController;
 import br.gov.mec.aghu.core.action.ActionPaginator;
 import br.gov.mec.aghu.core.etc.DynamicDataModel;
 import br.gov.mec.aghu.core.etc.Paginator;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.Severity;
+import br.gov.mec.aghu.internacao.cadastrosbasicos.business.ICadastrosBasicosInternacaoFacade;
+import br.gov.mec.aghu.model.AinAcomodacoes;
+import br.gov.mec.aghu.model.AinTiposAltaMedica;
+import br.gov.mec.aghu.model.MpmMotivoAltaMedica;
 
 /**
  * Classe responsável por controlar as ações da listagem de Tipos de Alta Medica.
@@ -45,7 +43,6 @@ public class TiposAltaMedicaPaginatorController extends ActionController impleme
 	
 	@Inject
 	private TiposAltaMedicaController tipoAltaMedicaController;
-
 	
 	@PostConstruct
 	public void init() {
@@ -73,31 +70,31 @@ public class TiposAltaMedicaPaginatorController extends ActionController impleme
 		return PAGE_CADASTRAR_TIPO_ALTA_MEDICA;
 	}
 	
-	public String iniciarInclusao() {
-		tipoAltaMedicaController.setUpdate(false);
-		return PAGE_CADASTRAR_TIPO_ALTA_MEDICA;
-	}
+//	public String iniciarInclusao() {
+//		tipoAltaMedicaController.setUpdate(false);
+//		return PAGE_CADASTRAR_TIPO_ALTA_MEDICA;
+//	}
 
 	/**
 	 * Método que realiza a ação do botão excluir na tela de Pesquisa de
 	 * Tipos Alta Médica.
 	 */
-	public void excluir() {
-		try {
-			if (tipoAltaMedicaSelecionada != null) {
-				this.cadastrosBasicosInternacaoFacade.removerTipoAltaMedica(tipoAltaMedicaSelecionada.getCodigo());
-				apresentarMsgNegocio(Severity.INFO,
-						"MENSAGEM_SUCESSO_REMOCAO_TIPOALTAMEDICA",
-						tipoAltaMedicaSelecionada.getDescricao());
-			} else {
-				apresentarMsgNegocio(Severity.INFO,
-						"MENSAGEM_ERRO_REMOCAO_TIPOALTAMEDICA");
-			}
-			this.setTipoAltaMedicaSelecionada(null);
-		} catch (ApplicationBusinessException e) {
-			apresentarExcecaoNegocio(e);
-		}
-	}
+//	public void excluir() {
+//		try {
+//			if (tipoAltaMedicaSelecionada != null) {
+//				this.cadastrosBasicosInternacaoFacade.removerTipoAltaMedica(tipoAltaMedicaSelecionada.getCodigo());
+//				apresentarMsgNegocio(Severity.INFO,
+//						"MENSAGEM_SUCESSO_REMOCAO_TIPOALTAMEDICA",
+//						tipoAltaMedicaSelecionada.getDescricao());
+//			} else {
+//				apresentarMsgNegocio(Severity.INFO,
+//						"MENSAGEM_ERRO_REMOCAO_TIPOALTAMEDICA");
+//			}
+//			this.setTipoAltaMedicaSelecionada(null);
+//		} catch (ApplicationBusinessException e) {
+//			apresentarExcecaoNegocio(e);
+//		}
+//	}
 	
 	
 	

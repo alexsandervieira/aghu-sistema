@@ -3,6 +3,14 @@ package br.gov.mec.aghu.aghparametros.util;
 
 
 public enum AghuParametrosEnum {
+
+	P_LIST_COD_RETORNO_NAO_ATENDE,//Lista de código de retorno de consulta que não pode ser visualizar para usuários que não atendem consultas
+	P_COD_MVTO_ATUALIZACAO_INTERNACAO, //Define o códido da movimentação de internação para caso seja uma edição das informações de internação
+	P_COD_MVTO_ESTORNO_ALTA_INTERNACAO, //Define o códido da movimentação de internação para caso de estorno de alta administrativa internação
+	P_COD_ATESTADO_MEDICO, // Define o código da atestado médico em MamTipoAtestado
+    P_PROCEDIMENTO_SSM_OBRIG,//Parametro seta procedimento ssm obrigatório na solicitação de internação
+	P_AGHU_TELEFONE_PACIENTE_OBRIGATORIO,//Parâmetro torna o preenchimento de ao menos um telefone ao cadastrar paciente
+	P_AGHU_DIFERENCA_DIAS_ATRAS_GERA_DADOS_SUMARIO_ALTA,//Diferença entre a data de inicio e fim ao gerar sumário de alta
 	P_AGHU_NOME_ARQUIVO_PROCEDIMENTO_REGISTRO, // Identifica o parametro para o arquivo da sigtap referente a relação entre o procedimento e registro
 	P_AGHU_NOME_ARQUIVO_REGISTRO, // Identifica o parametro para o arquivo da sigtap referente ao instrumento de registro
 	P_AGHU_NOME_ARQUIVO_FINANCIAMENTO, // Identifica o parametro para o arquivo da sigtap referente ao financiamento
@@ -10,6 +18,8 @@ public enum AghuParametrosEnum {
 	P_AGHU_INFO_COMPL_AUDITOR_SUS,	// DESCREVE A DESCRIÇÃO DA INFORMAÇÃO COMPLEMENTAR DE AUDITOR SUS. SE REFERE AO CAMPO "DESCRICAO" DA TABELA RAP_TIPO_INFORMACOES
 	ANO_CORRENTE, // ANO CORRENTE UPS_PLANEJAMENTOSADO COMO COMPLEMENTO DO NÚMERO DO DOCUMENTO DA LICITAÇÃO E DO EDITAL
 	P_RELATORIO_PRESCRICAO_ENFERMAGEM_PAISAGEM,//Imprimi o relatorio de prescricao de enfermagem em formato Paisagem
+	P_RELATORIO_CONTROLE_PACIENTE_PAISAGEM,//Imprimi o relatorio controles paciente em formato Paisagem
+	P_RELATORIO_LISTA_OCORRENCIA_PAISAGEM,//Imprimi o relatorio lista ocorrencia em formato Paisagem
 	P_AGHU_DEVE_APARECER_BOTAO_NOVO_MATERIAL,// Indica se o botão de Novo Material deve aparecer na tela de farmacia
 	P_CATEG_PROF_FIS, // IDENTIFICA A CATEGORIA PROFISSIONAL ASSISTENTE SOCIAL, PSICÓLOGOS, BIÓLOGOS, FONOAUDIÓLOGOS, FISIOTERAPEUTAS
 	P_ANAMNESE_ITEMTIPO_FIS, // Valor da TinSeq para cadastro de anamnese - Assistente Social, Psicólogos, Fisioterapeutas, Fonoaudiólogas, etc
@@ -39,7 +49,8 @@ public enum AghuParametrosEnum {
 	, P_AGHU_LIBERA_CADASTRO_ENDERECO //Parametro responsavel por exibir o checkbox que permite o cadastro de endereco livremente.
 	, P_AGHU_PREENCHIMENTO_REGISTRO_DE_NASCIMENTO_NAO_OBRIGATORIO // Ao cadastrar o Regisro de Nascimento não irá obrigar o preenchimento dos campos nome cartório, livro, folhas e termo.
 	, P_AGHU_PESQUISA_NATURALIDADE_EM_ORDEM_ALFABETICA //Ao pesquisar naturalidade o sistema nao ira pesquisar com Lucene, em todo texto. Ira fazer uma pesquisar por ordem alfabetica
-	, P_PORTAL_NUMERO_DE_NOTICIAS_TELA_LOGIN // Parametro que diz o número de notícias que devem ser mostradas na tela de login./
+	, P_AGHU_PORTALRSS_NUMERO_DE_NOTICIAS_TELA_LOGIN // Parametro que diz o número de notícias que devem ser mostradas na tela de login./
+	, P_AGHU_PORTALRSS_HOSTNAME // Parametro que diz o nome do máquina onde esta hospedado o portal RSS de noticias do AGHU.
 	, P_FLUXO_BOTAO_CANCELAR_AMBULATORIO_ASSISTENCIAL //Parametro do Botao Cancelar, serve para bloquear o fluxo de atendimento caso o profissional clique no botao cancelar. o Parametro tem que estar com S para bloquear o fluxo.
 	, P_AGHU_FILTRO_ALMOXARIFADO_RM // Parametro responsavel por ativar o filtro de busca de material por almoxarifado na requisição de materiais S or N.
 	, P_IMPRIMIR_PULSEIRA_MODELO_ADULTO // Parametro responsavel para utilizar a impressora para impressão da pulseira de pacientes adulto
@@ -1116,7 +1127,7 @@ public enum AghuParametrosEnum {
 	, P_AGHU_PERMITE_REUSO_PRONTUARIO //Indica se é permitida a reutilização de um número de prontuário que pertenceu a um paciente liberado.
 	, P_AGHU_VALIDA_MOVIMENTO_FORA_COMPETENCIA //Indica se é possível realizar um movimento fora da data de competencia (dt_geracao [mes/ano] <> dt_competencia [mes/ano])
     , P_AGHU_EMAIL_FECHAMENTO_ESTOQUE //Email de notificação de sucesso ou erro na execução da rotina de fechamento de estoque.
-	, P_AGHU_VALIDA_ARQUIVO_SUS //Indica se deve ser validado o arquivo sus contra a data de competencia do faturamento.
+	, P_AGHU_VALIDA_ARQUIVO_SUS_SIGTAP //Indica se deve ser validado o arquivo sus contra a data de competencia do faturamento.
 	, P_AP_CONGELACAO
 	, P_TIPO_ITEM_EVOLUCAO // CÓDIGO CORRESPONDENTE AO TIPO DE ITEM CONDUTA DA TABELA MAM_TIPO_ITEM_EVOLUCOES.
 	, P_AGHU_INTEGRACAO_AGH_ORACLE_WEBFORMS // TIPO BOOLEANO ('S' E 'N'), INDICA SE HÁ INTEGRAÇÃO ENTRE O AGHU E O WEB FORMS
@@ -1245,7 +1256,8 @@ public enum AghuParametrosEnum {
 	,P_INFORMA_COD_CENTRAL_CHEGADA //Informar o Codigo da Central de Autorizacao na listagem dos pacientes do modulo ambulatorio 
 	,P_AGHU_LISTA_CLINICAS_REALIZADO // Lista de codigos da clinica do procedimento realizado utilizada no Faturamento de Internacao. Referente ao campo CODIGO da tabela AGH_CLINICAS.
 	,P_AGHU_COD_TABELA_MODULO_TRANSFUSIONAL // Valor que representa o Código da Tabela do SUS para o Módulo Transfusional.
-	, P_IMPRIMI_NR_LOCAL_E_REMOTA // Indicador de impressão de nota de recebimento em impressora remota para unidade definida em P_UNIDADE_ALMOX
+	,P_IMPRIMI_NR_LOCAL_E_REMOTA // Indicador de impressão de nota de recebimento em impressora remota para unidade definida em P_UNIDADE_ALMOX
+	,P_IMPRIMI_RM_LOCAL_E_REMOTA // Indicador de impressão ao gerar uma nota de requisicao de material
 	,P_RANGE_INICIO_PERC_OXIGENIO // Valor mínimo para o intervalo do percentual de oxigênio - Melhoria em Produção #31435
 	,P_RANGE_FIM_PERC_OXIGENIO // Valor máximo para o intervalo do percentual de oxigênio - Melhoria em Produção #31435
 	,P_AGHU_LOGOTIPO_LAUDO_EXAMES //Caminho do logotipo que será cadastrado na implantação
@@ -1721,10 +1733,27 @@ public enum AghuParametrosEnum {
 	,P_AGHU_LOGO_SUS
 	,P_CENSO_LEITO_UNICO // Novo tipo de censo que unifica os movimentos e mostra apenas um leito além disso verifica leitos com movimento fora da janela
 	,P_VERIFICA_ENDERECO_PACIENTE_MARCACAO_CONSULTA //Parametro para verificar o endereço do paciente no ato da marcação de consultas
+	,P_CENSO_DIARIO_EXIBE_OBSERVACAO //Parametro para verificar se deve exibir a coluna observação da impressão do censo diario
 	, PME_LISTA_PACIENTES_USAR_VIEW
 	, PME_LISTA_PACIENTES_USAR_BUSCA_OTIMIZADA
+	, P_RELATORIO_PRESCRICAO_MEDICA_PAISAGEM
+	, P_REL_PRESC_MEDICA_INFO_PACIENTE_CABECALHO
+	, P_INFORMACAO_SERVIDOR_CADASTRO_TICKET_AMBULATORIO // Parametro responsavel por definir a apresentacao de saida do dados do Servidor que Marcou a Consulta no Ticket do Paciente Ambulatorio. Valor texto deve ser informado: "0" - Apenas primeiro nome (Padrao); "1" - Nome Completo; "2" - Login do Usuario no Sistema. 
+	, P_SOMENTE_MATERIAL_ATIVO
+	, P_PERFIL_ARQUIVO_CLINICO
+	, P_AGHU_SEQ_SISREG_ESTADUAL //  Parametro deve possuir a Seq da Forma de agendamento da grade Sisreg Estadual. Usado para identificar o processo de importacao (valor numerico).
+	, P_AGHU_SEQ_SISREG_MUNICIPAL // Parametro deve possuir a Seq da Forma de agendamento da grade Sisreg Municipal. Usado para identificar o processo de importacao (valor numerico).
+	, P_AGHU_SEQ_SISREG_CONDICAO_ATENDIMENTO_PRIMEIRA_CONSULTA //  Parametro deve possuir a Seq da Condicao de agendamento primeira consulta da grade Sisreg. Usado para identificar o processo de importacao (valor numerico).
+	, P_AGHU_SEQ_SISREG_CONDICAO_ATENDIMENTO_RETORNO //  Parametro deve possuir a Seq da Condicao de agendamento retorno da grade Sisreg. Usado para identificar o processo de importacao (valor numerico).
+	, P_AGHU_SEQ_SISREG_CONDICAO_ATENDIMENTO_RESERVA_TECNICA //  Parametro deve possuir a Seq da Condicao de agendamento reserva tecnica da grade Sisreg. Usado para identificar o processo de importacao (valor numerico).
+	, P_AGHU_ATIVA_DESATIVA_SOLICITACAO_EXAMES //Parametro responsavel por habilitar e desabilitar o botao solicitar exames nas telas de prescricao medica, e ambulatorio (atendimento). (Valor Texto = S para habilitar o botao ou 'N' para desabilitar). Usuario tambem deve possuir permissao de Solicitar e listar exames para habilitar o botao de solicitacao nas respectivas telas.
+	, P_FILTRO_VISUALIZA_CODICOES_CONSULTA // Parametro responsavel por filtrar a pesquisa do usuario na marcação de consulta e disponibilizacao de horario (ambulatorio) caso o mesmo nao possua a permissao de VisualizarPrimeirasConsultasSMS. Deve ser informado o valor numerico da SEQ DO TIPO DE CODICAO DE AGENDAMENTO Valor padrao "4" (Reconsulta) Perfil padrao ADM02.07
+	, P_TIPO_APRAZAMENTO_CAMPO_OBSERVACAO_OBRIGATORIO // Parametro feito para o hospital HESC
+	, P_CONSIDERA_ALINHAMENTO_VERTICAL_MASCARA_EXAMES
+	, P_AGHU_DEFINE_VALOR_DEFAULT_FILTRO_UNF_EXAME_SOL // Filtro responsavel por definir se a opção de Filtro por Unidade Funcional iniciará habilitada ou nao no carregamento da te de Solicitação de Exames. ValorTexto = "N" (desabilitado)(padrao)  ou "S" (Habilitado)
+	, P_AGHU_CIDADE_ASSINATURA_LAUDO_APAC_AMBULATORIO //Para por definir a cidade da assinatura do laudo APAC Ambulatorio.
 	;
-	
+
 	
 	// Parametros que contem caracteres especiais:
 	@Override

@@ -1,7 +1,6 @@
 package br.gov.mec.aghu.exames.vo;
 
-
-
+import java.math.BigInteger;
 
 public class TicketExamesPacienteVO implements Comparable<TicketExamesPacienteVO>{
 
@@ -12,6 +11,7 @@ public class TicketExamesPacienteVO implements Comparable<TicketExamesPacienteVO
 	private String origem;
 	private String criadoEm;
 	private String nomeResp;
+	private String nomeSolicitante;
 	private String informacoesClinicas;
 	private String prontuario;
 	private String nome;
@@ -33,6 +33,7 @@ public class TicketExamesPacienteVO implements Comparable<TicketExamesPacienteVO
 	private String unfSeqComparece;
 	private String projeto;
 	private String unidSolic;
+	private BigInteger nroCartaoSaude;
 	
 	private String recomendacoes;
 	
@@ -123,6 +124,12 @@ public class TicketExamesPacienteVO implements Comparable<TicketExamesPacienteVO
 	}
 	public void setNomeResp(String nomeResp) {
 		this.nomeResp = nomeResp;
+	}
+	public String getNomeSolicitante() {
+		return nomeSolicitante;
+	}
+	public void setNomeSolicitante(String nomeSolicitante) {
+		this.nomeSolicitante = nomeSolicitante;
 	}
 	public String getInformacoesClinicas() {
 		return informacoesClinicas;
@@ -313,5 +320,13 @@ public class TicketExamesPacienteVO implements Comparable<TicketExamesPacienteVO
 
 	public void setMaiorTempoJejum(String maiorTempoJejum) {
 		this.maiorTempoJejum = maiorTempoJejum;
+	}
+	
+	public BigInteger getNroCartaoSaude() {
+		return nroCartaoSaude;
+	}
+
+	public void setNroCartaoSaude(BigInteger nroCartaoSaude) {
+		this.nroCartaoSaude = nroCartaoSaude;
 	}
 }

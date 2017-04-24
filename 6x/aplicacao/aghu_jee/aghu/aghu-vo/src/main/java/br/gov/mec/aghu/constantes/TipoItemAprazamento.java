@@ -8,5 +8,5 @@ package br.gov.mec.aghu.constantes;
  *
  */
 public enum TipoItemAprazamento {
-	CUIDADO, MEDICAMENTO, SOLUCAO;
+	CUIDADO, MEDICAMENTO, SOLUCAO, DIETA;
 }

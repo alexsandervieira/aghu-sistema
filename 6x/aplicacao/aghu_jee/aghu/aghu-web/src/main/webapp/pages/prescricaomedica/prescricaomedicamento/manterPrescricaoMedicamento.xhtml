@@ -302,15 +302,18 @@
                          </mec:inputDecimal>
                   </p:outputPanel>  
                   <p:outputPanel id="panelUnidade" layout="inline">
-                  	<mec:selectOneMenu label="#{messages.LABEL_UNIDADE}"
-	                 	 required="true"  
-	                 	 title="#{messages.TITLE_UNIDADE_DOSE}"	
-	                 	 value="#{manterPrescricaoMedicamentoController.unidadeDosagem}" 
-	                 	 id="unidade"> 
-	                <f:converter converterId="vMpmDosagemConverter" for="inputId"/>
-	                <f:selectItems var="item" itemLabel="#{item.siglaUnidadeMedidaMedica}" value="#{manterPrescricaoMedicamentoController.buscarDosagens()}"/>
-	                 	<p:ajax event="change" process="@this" listener="#{manterPrescricaoMedicamentoController.changeField}" global="false"  async="true" ignoreAutoUpdate="true"/>
-	   	            </mec:selectOneMenu> 
+                  	<mec:suggestionBox width="40" label="#{messages.LABEL_UNIDADE}"
+                  		title="#{messages.TITLE_UNIDADE_DOSE}"
+                  		descricaoLabel="seqUnidade"
+                  		descricaoInput="seqUnidade" 
+	                 	suggestionAction="buscarDosagens"
+                  		required="true"
+						id="unidade"
+	                 	controller="#{manterPrescricaoMedicamentoController}"
+                  		value="#{manterPrescricaoMedicamentoController.unidadeDosagem}"
+                  		posSelectionAction="changeField">
+                  		<p:column>#{item.seqUnidade} </p:column>
+                  	</mec:suggestionBox>
         	      </p:outputPanel>
         	      <p:outputPanel id="panelVia" layout="inline"> 
                     <mec:suggestionBox id="via"
@@ -407,7 +410,7 @@
                     				posDeleteAction="changeField" 
                     				controller="#{manterPrescricaoMedicamentoController}" 
                     				value="#{manterPrescricaoMedicamentoController.tipoAprazamento}" 
-                    				render="panelDose, panelFrequencia"> 
+                    				render="panelDose, panelFrequencia, panelObservacao"> 
 	                      	<p:column>#{manterPrescricaoMedicamentoController.buscaDescricaoTipoFrequenciaAprazamento(item)}</p:column>  
 	                      	<p:column>#{item.sigla}</p:column> 
                     </mec:suggestionBox> 
@@ -537,7 +540,7 @@
                     <mec:inputTextArea label="#{messages.LABEL_OBSERVACAO_MED}" 
                     		id="observacao" 
                     		rows="2" cols="75" 
-                    		required="#{manterPrescricaoMedicamentoController.exigeObservacao or manterPrescricaoMedicamentoController.indSeNecessario}}" 
+                    		required="#{manterPrescricaoMedicamentoController.exigeObservacao or manterPrescricaoMedicamentoController.indSeNecessario or manterPrescricaoMedicamentoController.tipoAprazamentoQuandoNecessario()}" 
                     		value="#{manterPrescricaoMedicamentoController.observacao}" 
                     		title="#{messages.TITLE_OBSERVACAO_MED}" 
                     		maxlength="240"> 
@@ -760,7 +763,7 @@
           	<aghu:panelGeral id="ffdl_mdaol_leitos"> 
               <aghu:linha> 
                 <p:outputPanel id="panelInputComplemento" layout="inline"> 
-                  <mec:inputText size="65" maxlength="120" label="#{messages.LABEL_COMPLEMENTO}" title="#{messages.TITLE_COMPLEMENTO}" value="#{manterPrescricaoMedicamentoController.complemento}" id="inputComplemento"> 
+                  <mec:inputText size="65" maxlength="120" label="#{messages.LABEL_COMPLEMENTO}" title="#{messages.TITLE_COMPLEMENTO}" value="#{manterPrescricaoMedicamentoController.complemento}" id="inputComplemento" removerCaratersEspeciais="false"> 
                     <p:ajax event="change" process="@this" listener="#{manterPrescricaoMedicamentoController.changeField}" global="false"  async="true" ignoreAutoUpdate="true"/> 
                   </mec:inputText> 
                 </p:outputPanel> 

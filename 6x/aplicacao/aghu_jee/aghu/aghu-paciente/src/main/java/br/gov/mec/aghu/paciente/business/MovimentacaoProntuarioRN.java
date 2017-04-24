@@ -6,11 +6,13 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -18,19 +20,26 @@ import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.ambulatorio.business.IAmbulatorioFacade;
 import br.gov.mec.aghu.business.IAghuFacade;
+import br.gov.mec.aghu.casca.business.ICascaFacade;
+import br.gov.mec.aghu.casca.business.ICentralPendenciaFacade;
+import br.gov.mec.aghu.casca.vo.PendenciaVO;
 import br.gov.mec.aghu.core.business.BaseBusiness;
 import br.gov.mec.aghu.core.commons.CoreUtil;
 import br.gov.mec.aghu.core.dominio.DominioOperacoesJournal;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dominio.DominioSituacaoMovimentoProntuario;
 import br.gov.mec.aghu.dominio.DominioTipoEnvioProntuario;
+import br.gov.mec.aghu.dominio.DominioTipoSolicitacaoProntuario;
 import br.gov.mec.aghu.dominio.DominioTodosUltimo;
 import br.gov.mec.aghu.model.AacConsultas;
 import br.gov.mec.aghu.model.AghParametros;
+import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.model.AipMovimentacaoProntuarios;
 import br.gov.mec.aghu.model.AipPacienteProntuario;
 import br.gov.mec.aghu.model.AipPacientes;
+import br.gov.mec.aghu.model.AipSolicitantesProntuario;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.paciente.dao.AipMovimentacaoProntuarioDAO;
 import br.gov.mec.aghu.paciente.dao.AipPacienteProntuarioDAO;
@@ -49,6 +58,12 @@ import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 @Stateless
 public class MovimentacaoProntuarioRN extends BaseBusiness {
 
+	private static final String SOLICITAÇÃO_DO_PRONTUARIO = "Solicitação do Prontuário: ";
+
+	private enum MovimentacaoProntuarioRNExceptionCode implements BusinessExceptionCode {
+		MSG_WARNING_SOLICITANTE_INEXISTENTE_ORIGEM_INTERNACAO;
+	}
+	
 	@EJB
 	private MovimentacaoProntuarioJournalON movimentacaoProntuarioJournalON;
 	
@@ -63,6 +78,8 @@ public class MovimentacaoProntuarioRN extends BaseBusiness {
 	@EJB
 	private IServidorLogadoFacade servidorLogadoFacade;
 	
+	@EJB
+	private ICentralPendenciaFacade centralPendenciaFacade;
 	
 	@EJB
 	private IAmbulatorioFacade ambulatorioFacade;
@@ -78,29 +95,68 @@ public class MovimentacaoProntuarioRN extends BaseBusiness {
 	
 	@EJB
 	private IAghuFacade aghuFacade;
-	
+
+	@EJB
+	private ICascaFacade cascaFacade;
+
 	@Inject
 	private AipSolicitantesProntuarioDAO aipSolicitantesProntuarioDAO;
 
 	@Inject
 	private AipPacienteProntuarioDAO aipPacienteProntuarioDAO;
-
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 2757389830538138867L;
-
 	/**
 	 * ORADB Procedure AIPP_GERA_MVOL_EVENT
+	 * @param localAtual 
+	 * @param aghUnidadesFuncionais 
+	 * @param i 
 	 * @param pConNumero
 	 * @throws ApplicationBusinessException WW
 	 *  
 	 */	
+
+	public void gerarMovimentacaoGeral(AipPacientes paciente, AipSolicitantesProntuario solicitante, Date dtMovimento, String strLocal, DominioSituacaoMovimentoProntuario situacao, String localAtual, AghUnidadesFuncionais aghUnidadesFuncionais, DominioTipoSolicitacaoProntuario tipoSolicitacao) throws ApplicationBusinessException {
+		Short inicio = 0;
+		Short fim = 0;
+		if (solicitante != null) {
+			if (solicitante.getVolumesManuseados().equals(DominioTodosUltimo.T)) {
+				if (paciente != null && paciente.getVolumes() != null) {
+					fim = paciente.getVolumes();
+				}
+			} else {
+				if (paciente != null && paciente.getVolumes() != null) {
+					inicio = paciente.getVolumes();
+					fim = paciente.getVolumes();
+				}
+			}
+			
+			for (short x = inicio; x <= fim; x++) { 
+				AipMovimentacaoProntuarios movProntuario = new AipMovimentacaoProntuarios();
+				movProntuario.setVolumes(x);
+				movProntuario.setTipoEnvio(DominioTodosUltimo.T.toString().equals(solicitante.getVolumesManuseados().toString()) ? DominioTipoEnvioProntuario.T : DominioTipoEnvioProntuario.U);
+				movProntuario.setSituacao(situacao);
+				movProntuario.setDataMovimento(dtMovimento);
+				movProntuario.setDataRetirada(dtMovimento);
+				movProntuario.setPaciente(paciente);
+				movProntuario.setSolicitante(solicitante);
+				movProntuario.setLocal(strLocal);
+				movProntuario.setUnidadeSolicitante(aghUnidadesFuncionais);
+				movProntuario.setIndTipoSolicitacao(tipoSolicitacao);
+				verificarSePossuiOrigemCadastrada(paciente, movProntuario);
+				if(StringUtils.isNotBlank(localAtual)){
+					movProntuario.setLocalAtual(localAtual);
+				}
+				this.persistirAipMovimentacaoProntuario(movProntuario, null);
+			}
+		}
+	}
 	public void aippGeraMvolEvent(Integer pConNumero) throws ApplicationBusinessException {
 		List<AacConsultas> listaConsultas = getAmbulatorioFacade().executarCursorConsulta(pConNumero);
 		if (!listaConsultas.isEmpty()) {
 			AacConsultas consulta = listaConsultas.get(0); //ver se pode retornar uma lista
-
 			AghParametros parametroLimitePront = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_LIMIT_PRONT_VIRTUAL);
 			
 			/*	-- função retorna "S" para as consultas da zona 17 ou para pacientes identificados
@@ -149,7 +205,7 @@ public class MovimentacaoProntuarioRN extends BaseBusiness {
 						} else {
 							movProntuario.setLocal(solicitanteVO.getZonaSala()+" "+pConNumero);
 						}
-						verificarSePossuiOrigemCadastrada(consulta, movProntuario);
+						verificarSePossuiOrigemCadastrada(consulta.getPaciente(), movProntuario);
 						this.persistirAipMovimentacaoProntuario(movProntuario, null);
 					}
 				}
@@ -157,9 +213,9 @@ public class MovimentacaoProntuarioRN extends BaseBusiness {
 		}
 	}
 	
-	private void verificarSePossuiOrigemCadastrada(AacConsultas consulta,
+	private void verificarSePossuiOrigemCadastrada(AipPacientes paciente,
 			AipMovimentacaoProntuarios movProntuario) {
-     	AipPacienteProntuario aipPacienteProntuario = getAipPacienteProntuarioDAO().obterPorChavePrimaria(consulta.getPaciente().getProntuario());
+     	AipPacienteProntuario aipPacienteProntuario = getAipPacienteProntuarioDAO().obterPorChavePrimaria(paciente.getProntuario());
 		if(aipPacienteProntuario != null && aipPacienteProntuario.getSamis() != null){
 			movProntuario.setSamisOrigem(aipPacienteProntuario.getSamis());
 			movProntuario.setLocalAtual(aipPacienteProntuario.getSamis().getDescricao());
@@ -514,5 +570,69 @@ public class MovimentacaoProntuarioRN extends BaseBusiness {
 	protected IServidorLogadoFacade getServidorLogadoFacade() {
 		return this.servidorLogadoFacade;
 	}
+	
+	public void gerarPendenciasSolicitacaoArquivoClinico() {
+		RapServidores servidorLogado = servidorLogadoFacade.obterServidorLogado();
+		boolean isPerfilArquivoClinico = false;
+		String usuario = servidorLogado != null ? servidorLogado.getUsuario() : null;
+
+		removerPendencias();
 		
+		String perfilArquivoClinico;
+		try {
+			perfilArquivoClinico = this.parametroFacade.buscarAghParametro(AghuParametrosEnum.P_PERFIL_ARQUIVO_CLINICO).getVlrTexto();
+		} catch (ApplicationBusinessException e) {
+			LOG.error(null,e);
+			return;
+		}
+
+		Set<String> set = cascaFacade.obterNomePerfisPorUsuario(usuario);
+
+		for (String perfilUsuario : set) {
+			if (perfilUsuario.equalsIgnoreCase(perfilArquivoClinico)) {
+				isPerfilArquivoClinico = true;
+			}
+		}
+		
+		if (isPerfilArquivoClinico){
+			List<AipMovimentacaoProntuarios> listaMovimentosRetirados = getAipMovimentacaoProntuarioDAO().
+					pesquisarMovimentacaoPontuariosPendentes();
+			
+			if (!listaMovimentosRetirados.isEmpty()){
+				for (AipMovimentacaoProntuarios movimentacao: listaMovimentosRetirados){
+					if(movimentacao.getSolicitante() != null && movimentacao.getSolicitante().isMensagemSamisCheckBox()){
+						StringBuilder mensagem = new StringBuilder(55);
+						mensagem.append(SOLICITAÇÃO_DO_PRONTUARIO)
+						.append(movimentacao.getPaciente().getProntuarioFormatado())
+						.append(" para desarquivamento, Solicitante: ")
+						.append(movimentacao.getLocal())
+						.append(", Data: ")
+						.append(DateUtil.obterDataFormatada(movimentacao.getDataMovimento(), "dd/MM/yyyy HH:mm"));
+						try {
+							centralPendenciaFacade.adicionarPendenciaAcao(mensagem.toString(),
+									"/paciente/prontuario/movimentaProntuario.xhtml?pacCodigo=" + movimentacao.getPaciente().getCodigo(), "Solicitações de Prontuário",
+									servidorLogado, false);
+						} catch (ApplicationBusinessException e) {
+							logError(e);
+						}
+					}
+				}
+			}
+		}
+		
+	}
+
+	private void removerPendencias() {
+		try {
+			String pendencia = SOLICITAÇÃO_DO_PRONTUARIO;
+			for (PendenciaVO pendenciaVO : centralPendenciaFacade.getListaPendencias()) {
+				if (pendenciaVO.getMensagem().startsWith(pendencia)) {
+					centralPendenciaFacade.excluirPendencia(pendenciaVO.getSeqCaixaPostal());
+				}
+			}
+		} catch (ApplicationBusinessException e) {
+			LOG.error(null, e);
+		}
+	}
+
 }

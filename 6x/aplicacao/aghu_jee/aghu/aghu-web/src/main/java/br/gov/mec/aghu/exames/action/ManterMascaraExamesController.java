@@ -198,13 +198,13 @@ public class ManterMascaraExamesController extends ActionController {
 		if (parametros.containsKey(componentId)) {
 			parametroSelect = parametros.get(componentId);
 			if(parametroSelect.getId() != null) {
-				if(Boolean.TRUE.equals(converterCss)) {
-					converterParametrosEmCss(parametroSelect);
-				} else {
-					if(StringUtils.isNotBlank(parametroSelect.getTextoLivre())) {
-						parametroSelect.setTextoLivre(Jsoup.parse(parametroSelect.getTextoLivre()).text());
-					}				
-				}
+//				if(Boolean.TRUE.equals(converterCss)) {
+////					converterParametrosEmCss(parametroSelect);
+//				} else {
+//					if(StringUtils.isNotBlank(parametroSelect.getTextoLivre())) {
+////						parametroSelect.setTextoLivre(Jsoup.parse(parametroSelect.getTextoLivre()).text());
+//					}				
+//				}
 				// Ao editar uma fórmula, o parâmetro está perdendo os valores abaixo
 				if (parametroSelect.getAlturaObjetoVisual() == null && parametroSelect.getLarguraObjetoVisual() == null) {
 					this.cadastrosApoioExamesFacade.recarregaValoresPerdidos(parametroSelect);
@@ -325,35 +325,35 @@ public class ManterMascaraExamesController extends ActionController {
 		frameCache = "";
 	}
 
-	private void converterParametrosEmCss(AelParametroCamposLaudo param) {
-		final String BEGIN_STYLE = "<SPAN STYLE='";
-		final String CLOSE_STYLE = "'>";
-		final String END = "</SPAN>";
-		StringBuffer tag = new StringBuffer(500); 
-
-		if(StringUtils.isNotBlank(param.getTextoLivre())) {
-			param.setTextoLivre(Jsoup.parse(param.getTextoLivre()).text());
-			
-			tag.append(BEGIN_STYLE);
-			if(param.getNegrito() != null && param.getNegrito()) {
-				tag.append("font-weight: bold;");
-			}
-			if(param.getSublinhado() != null && param.getSublinhado()) {
-				tag.append("text-decoration: underline;");
-			}
-			if(param.getRiscado() != null && param.getRiscado()) {
-				tag.append("text-decoration: line-through;");
-			}
-			if(param.getItalico() != null && param.getItalico()) {
-				tag.append("font-style: italic;");
-			}
-			tag.append("font-family: " + param.getFonte() + "; font-size:" + param.getTamanhoFonte() + ";");
-			tag.append(CLOSE_STYLE);
-			tag.append(param.getTextoLivre());
-			tag.append(END);
-			param.setTextoLivre("<DIV STYLE='text-align:"+param.getAlinhamento().getDescricao()+";'>" + tag.toString() + "</DIV>");
-		}
-	}
+//	private void converterParametrosEmCss(AelParametroCamposLaudo param) {
+//		final String BEGIN_STYLE = "<SPAN STYLE='";
+//		final String CLOSE_STYLE = "'>";
+//		final String END = "</SPAN>";
+//		StringBuffer tag = new StringBuffer(500); 
+//
+//		if(StringUtils.isNotBlank(param.getTextoLivre())) {
+//			param.setTextoLivre(Jsoup.parse(param.getTextoLivre()).text());
+//			
+//			tag.append(BEGIN_STYLE);
+//			if(param.getNegrito() != null && param.getNegrito()) {
+//				tag.append("font-weight: bold;");
+//			}
+//			if(param.getSublinhado() != null && param.getSublinhado()) {
+//				tag.append("text-decoration: underline;");
+//			}
+//			if(param.getRiscado() != null && param.getRiscado()) {
+//				tag.append("text-decoration: line-through;");
+//			}
+//			if(param.getItalico() != null && param.getItalico()) {
+//				tag.append("font-style: italic;");
+//			}
+//			tag.append("font-family: " + param.getFonte() + "; font-size:" + param.getTamanhoFonte() + ";");
+//			tag.append(CLOSE_STYLE);
+//			tag.append(param.getTextoLivre());
+//			tag.append(END);
+//			param.setTextoLivre("<DIV STYLE='text-align:"+param.getAlinhamento().getDescricao()+";'>" + tag.toString() + "</DIV>");
+//		}
+//	}
 	
 	// --[EXCLUI OBJETOS DE PARAMETRO]
 	public void excluirParametro() {
@@ -407,9 +407,9 @@ public class ManterMascaraExamesController extends ActionController {
 	public void gravar() {
 		persistirParametroSelecionado();
 		this.apresentarMsgNegocio(Severity.INFO, "MSG_CAMPO_MASCARA_EXAME_SALVO");
-		if(StringUtils.isNotBlank(parametroSelect.getTextoLivre())) {
-			converterParametrosEmCss(parametroSelect);
-		}
+//		if(StringUtils.isNotBlank(parametroSelect.getTextoLivre())) {
+//			converterParametrosEmCss(parametroSelect);
+//		}
 		if (this.isEditorRenderizado()) {
 			RequestContext.getCurrentInstance().execute("PF('editorWG').focus();");
 		}

@@ -4,7 +4,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -22,6 +24,8 @@ import br.gov.mec.aghu.core.business.seguranca.Secure;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.exception.BaseListException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.dominio.DominioSituacaoHistPrescDiagnosticos;
 import br.gov.mec.aghu.dominio.DominioTipoEmissaoSumario;
 import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
@@ -35,6 +39,7 @@ import br.gov.mec.aghu.model.EpeDiagnosticoId;
 import br.gov.mec.aghu.model.EpeFatRelDiagnostico;
 import br.gov.mec.aghu.model.EpeFatRelacionado;
 import br.gov.mec.aghu.model.EpeGrupoNecesBasica;
+import br.gov.mec.aghu.model.EpeHistoricoPrescDiagnosticos;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagem;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagemId;
 import br.gov.mec.aghu.model.EpePrescricoesCuidados;
@@ -52,6 +57,7 @@ import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeDiagnosticoDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeFatRelDiagnosticoDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeFatRelacionadoDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeGrupoNecesBasicaDAO;
+import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeHistoricoPrescDiagnosticosDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeNotificacaoDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescCuidDiagnosticoDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescricaoEnfermagemDAO;
@@ -72,6 +78,7 @@ import br.gov.mec.aghu.prescricaoenfermagem.vo.SinalSintomaVO;
 import br.gov.mec.aghu.prescricaoenfermagem.vo.SumarioPrescricaoEnfermagemVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ItemPrescricaoEnfermagemVO;
 import br.gov.mec.aghu.prescricaomedica.vo.ListaPacientePrescricaoVO;
+import br.gov.mec.aghu.vo.RapServidoresVO;
 
 /**
  * Porta de entrada do módulo de prescrição de enfermagem.
@@ -187,15 +194,22 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	@Inject
 	private EpeDataItemSumarioDAO epeDataItemSumarioDAO;
 
+	@Inject
+	private EpeHistoricoPrescDiagnosticosDAO epeHistoricoPrescDiagnosticosDAO;
+	
+	@Resource
+	protected SessionContext ctx;
+	
 	private static final long serialVersionUID = 1448628938011873332L;
-
+	
+	public enum PrescricaoEnfermagemFacadeExceptionCode implements BusinessExceptionCode {
+		ERRO_AO_GERAR_DADOS_SUMARIO_PRESCRICAO_ENFERMAGEM
+		;
+	}
 	@Override
 	@BypassInactiveModule
-	public List<PacienteEnfermagemVO> listarPacientes(
-			final RapServidores servidor) throws BaseException {
-
-		return this.getListaPacientesEnfermagemON().pesquisarListaPacientes(
-				servidor);
+	public List<PacienteEnfermagemVO> listarPacientes(final RapServidores servidor) throws BaseException {
+		return this.getListaPacientesEnfermagemON().pesquisarListaPacientes(servidor);
 	}
 	
 	/* (non-Javadoc)
@@ -266,8 +280,7 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	@BypassInactiveModule
 	public AghAtendimentos obterUnicoAtendimentoAtualPorProntuario(Integer prontuario) {
 		AghAtendimentos atendimento = null;
-		List<AghAtendimentos> listaAtendimentos = getElaboracaoPrescricaoEnfermagemON()
-				.obterAtendimentoAtualPorProntuario(prontuario);
+		List<AghAtendimentos> listaAtendimentos = getElaboracaoPrescricaoEnfermagemON().obterAtendimentoAtualPorProntuario(prontuario);
 		if (listaAtendimentos != null && !listaAtendimentos.isEmpty()) {
 			atendimento = listaAtendimentos.get(0);
 		}
@@ -287,8 +300,7 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	 */
 	@Override
 	public List<EpePrescricaoEnfermagem> pesquisarPrescricaoEnfermagemNaoEncerradaPorAtendimento(Integer atdSeq, Date dataAtual) {
-		return this.getElaboracaoPrescricaoEnfermagemON()
-				.pesquisarPrescricaoEnfermagemNaoEncerradaPorAtendimento(atdSeq, dataAtual);
+		return this.getElaboracaoPrescricaoEnfermagemON().pesquisarPrescricaoEnfermagemNaoEncerradaPorAtendimento(atdSeq, dataAtual);
 	}
 	
 	/* (non-Javadoc)
@@ -318,9 +330,7 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	 * @see br.gov.mec.aghu.prescricaoenfermagem.business.IPrescricaoEnfermagemFacade#verificarCriarPrescricao(br.gov.mec.aghu.model.AghAtendimentos)
 	 */
 	@Override
-	public void verificarCriarPrescricao(
-			final AghAtendimentos atendimento
-		) throws ApplicationBusinessException {
+	public void verificarCriarPrescricao(final AghAtendimentos atendimento) throws ApplicationBusinessException {
 		this.getElaboracaoPrescricaoEnfermagemON().verificarCriarPrescricao(atendimento);
 	}
 	
@@ -328,8 +338,7 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	 * @see br.gov.mec.aghu.prescricaoenfermagem.business.IPrescricaoEnfermagemFacade#criarPrescricao(br.gov.mec.aghu.model.AghAtendimentos, java.util.Date)
 	 */
 	@Override
-	public EpePrescricaoEnfermagem criarPrescricao(
-			final AghAtendimentos atendimento, Date dataReferencia) throws BaseException {
+	public EpePrescricaoEnfermagem criarPrescricao(final AghAtendimentos atendimento, Date dataReferencia) throws BaseException {
 		return getElaboracaoPrescricaoEnfermagemON().criarPrescricao(atendimento, dataReferencia);
 	}
 	
@@ -338,11 +347,9 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	 */
 	@Override
 	@BypassInactiveModule
-	public PrescricaoEnfermagemVO buscarDadosCabecalhoPrescricaoEnfermagemVO(
-			EpePrescricaoEnfermagemId prescricaoEnfermagemId)
+	public PrescricaoEnfermagemVO buscarDadosCabecalhoPrescricaoEnfermagemVO(EpePrescricaoEnfermagemId prescricaoEnfermagemId)
 			throws ApplicationBusinessException {
-		return this.getManutencaoPrescricaoEnfermagemON()
-				.buscarDadosCabecalhoPrescricaoEnfermagemVO(prescricaoEnfermagemId);
+		return this.getManutencaoPrescricaoEnfermagemON().buscarDadosCabecalhoPrescricaoEnfermagemVO(prescricaoEnfermagemId);
 	}
 	
 	/* (non-Javadoc)
@@ -350,11 +357,9 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	 */
 	@Override
 	@BypassInactiveModule
-	public PrescricaoEnfermagemVO buscarDadosCabecalhoPrescricaoEnfermagemUtilizadoPrescricaoMedicaVO(
-			EpePrescricaoEnfermagemId prescricaoEnfermagemId)
+	public PrescricaoEnfermagemVO buscarDadosCabecalhoPrescricaoEnfermagemUtilizadoPrescricaoMedicaVO(EpePrescricaoEnfermagemId prescricaoEnfermagemId)
 			throws ApplicationBusinessException {
-		return this.getManutencaoPrescricaoEnfermagemON()
-				.buscarDadosCabecalhoPrescricaoEnfermagemUtilizadoPrescricaoMedicaVO(prescricaoEnfermagemId);
+		return this.getManutencaoPrescricaoEnfermagemON().buscarDadosCabecalhoPrescricaoEnfermagemUtilizadoPrescricaoMedicaVO(prescricaoEnfermagemId);
 	}
 	
 	/* (non-Javadoc)
@@ -364,7 +369,6 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	public EpePrescricaoEnfermagem obterPrescricaoEnfermagemPorId(EpePrescricaoEnfermagemId prescricaoEnfermagemId){
 		return this.getEpePrescricaoEnfermagemDAO().obterPorChavePrimaria(prescricaoEnfermagemId);
 	}
-	
 	
 	/* (non-Javadoc)
 	 * @see br.gov.mec.aghu.prescricaoenfermagem.business.IPrescricaoEnfermagemFacade#popularDadosCabecalhoPrescricaoEnfermagemVO(br.gov.mec.aghu.model.EpePrescricaoEnfermagem)
@@ -386,7 +390,7 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 		return this.getManutencaoPrescricaoEnfermagemON()
 			.buscarCuidadosPrescricaoEnfermagem(prescricaoEnfermagemId, listarTodas);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see br.gov.mec.aghu.prescricaoenfermagem.business.IPrescricaoEnfermagemFacade#removerCuidadosSelecionados(java.util.List)
 	 */
@@ -511,15 +515,10 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	 * @see br.gov.mec.aghu.prescricaoenfermagem.business.IPrescricaoEnfermagemFacade#gerarAprazamentoPrescricaoEnfermagem(br.gov.mec.aghu.model.EpePrescricaoEnfermagem, java.util.Date, java.util.Date, br.gov.mec.aghu.model.MpmTipoFrequenciaAprazamento, br.gov.mec.aghu.prescricaomedica.constantes.TipoItemAprazamento, java.util.Date, java.lang.Boolean, java.lang.Short)
 	 */
 	@Override
-	public List<String> gerarAprazamentoPrescricaoEnfermagem(EpePrescricaoEnfermagem prescricaoEnfermagem,
-			Date dthrInicioItem, Date dthrFimItem,
-			MpmTipoFrequenciaAprazamento tipoFrequenciaAprazamento,
-			TipoItemAprazamento tipoItem, Date dtHrInicioTratamento,
-			Boolean indNecessario, Short frequencia) {
-		
-		return this.getAprazamentoPrescricaoEnfermagemRN().gerarAprazamentoPrescricaoEnfermagem(prescricaoEnfermagem,
-				dthrInicioItem, dthrFimItem, tipoFrequenciaAprazamento,
-				tipoItem, dtHrInicioTratamento, indNecessario, frequencia);
+	public List<String> gerarAprazamentoPrescricaoEnfermagem(EpePrescricaoEnfermagem prescricaoEnfermagem,	Date dthrInicioItem, Date dthrFimItem,
+			MpmTipoFrequenciaAprazamento tipoFrequenciaAprazamento,	TipoItemAprazamento tipoItem, Date dtHrInicioTratamento, Boolean indNecessario, Short frequencia) {
+			return this.getAprazamentoPrescricaoEnfermagemRN().gerarAprazamentoPrescricaoEnfermagem(prescricaoEnfermagem, dthrInicioItem, dthrFimItem,
+					tipoFrequenciaAprazamento,	tipoItem, dtHrInicioTratamento, indNecessario, frequencia);
 	}
 	
 	/* (non-Javadoc)
@@ -584,8 +583,7 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	@Override
 	public List<DiagnosticoEtiologiaVO> listarPrescCuidDiagnosticoPorAtdSeqDataInicioDataFim(Integer atdSeq, 
 			Date dthrInicio, Date dthrFim, Date dthrMovimento) {
-		return getEpePrescCuidDiagnosticoDAO()
-				.listarPrescCuidDiagnosticoPorAtdSeqDataInicioDataFim(atdSeq, dthrInicio, dthrFim, dthrMovimento);
+		return getEpePrescCuidDiagnosticoDAO().listarPrescCuidDiagnosticoPorAtdSeqDataInicioDataFim(atdSeq, dthrInicio, dthrFim, dthrMovimento);
 	}
 	
 	/* (non-Javadoc)
@@ -593,9 +591,8 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	 */
 	@Override
 	public void removerPrescCuidadosDiagnosticosSelecionados(List<DiagnosticoEtiologiaVO> listaDiagnosticoEtiologiaVO, 
-			Integer penAtdSeq, Integer penSeq) throws ApplicationBusinessException {
-		getEncerramentoDiagnosticoON().removerPrescCuidadosDiagnosticosSelecionados(
-				listaDiagnosticoEtiologiaVO, penAtdSeq, penSeq);
+			Integer penAtdSeq, Integer penSeq, Boolean exluir) throws ApplicationBusinessException {
+		getEncerramentoDiagnosticoON().removerPrescCuidadosDiagnosticosSelecionados(listaDiagnosticoEtiologiaVO, penAtdSeq, penSeq, exluir);
 	}
 
 	/* (non-Javadoc)
@@ -604,10 +601,8 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	@Override
 	@BypassInactiveModule
 	public List<ItemPrescricaoEnfermagemVO> buscarItensPrescricaoEnfermagem(
-			EpePrescricaoEnfermagemId prescricaoId, Boolean listarTodos)
-			throws ApplicationBusinessException {
-		return this.getSelecaoPrescricaoEnfermagemON().buscarItensPrescricaoEnfermagem(
-				prescricaoId, listarTodos);
+			EpePrescricaoEnfermagemId prescricaoId, Boolean listarTodos) throws ApplicationBusinessException {
+		return this.getSelecaoPrescricaoEnfermagemON().buscarItensPrescricaoEnfermagem(prescricaoId, listarTodos);
 	}
 	
 	@Override
@@ -632,10 +627,9 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	 */
 	@Override
 	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-	public void agendarGerarDadosSumarioPrescricaoEnfermagem(String cron, Date dataInicio, Date dataFim) throws ApplicationBusinessException {
-		getManterSumarioSchedulerRN().gerarDadosSumarioPrescricaoEnfermagem(cron, dataInicio, dataFim);
+	public void agendarGerarDadosSumarioPrescricaoEnfermagem(String cron, Date dataInicio, Date dataFim,String nomeProcessoQuartz) throws ApplicationBusinessException {
+		getManterSumarioSchedulerRN().gerarDadosSumarioPrescricaoEnfermagem(cron, dataInicio, dataFim,nomeProcessoQuartz);
 	}
-	
 
 	/* (non-Javadoc)
 	 * @see br.gov.mec.aghu.prescricaoenfermagem.business.IPrescricaoEnfermagemFacade#geraDadosSumarioPrescricaoEnfermagem(java.lang.Integer, br.gov.mec.aghu.dominio.DominioTipoEmissaoSumario)
@@ -644,10 +638,18 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@TransactionTimeout(value=3, unit=TimeUnit.HOURS)
 	public void geraDadosSumarioPrescricaoEnfermagem(Integer seqAtendimento, DominioTipoEmissaoSumario tipoEmissao) throws ApplicationBusinessException {
-		this.getManterSumarioEnfermagemRN().geraDadosSumarioPrescricaoEnfermagem(seqAtendimento, tipoEmissao);
+		try {
+			this.getManterSumarioEnfermagemRN().geraDadosSumarioPrescricaoEnfermagem(seqAtendimento, tipoEmissao);
+		} catch (ApplicationBusinessException e) {
+			ctx.setRollbackOnly();
+			throw e;
+		} catch (Exception e) {
+			ctx.setRollbackOnly();
+			ApplicationBusinessException ex = new ApplicationBusinessException(PrescricaoEnfermagemFacadeExceptionCode.ERRO_AO_GERAR_DADOS_SUMARIO_PRESCRICAO_ENFERMAGEM);
+			ex.initCause(e);
+			throw ex;
+		}
 	}
-	
-
 	
 	protected SelecaoPrescricaoEnfermagemON getSelecaoPrescricaoEnfermagemON(){
 		return selecaoPrescricaoEnfermagemON;
@@ -656,7 +658,6 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	protected ManterSumarioSchedulerRN getManterSumarioSchedulerRN(){
 		return manterSumarioSchedulerRN;
 	}
-	
 	
 	private ListaPacientesEnfermagemON getListaPacientesEnfermagemON() {
 		return listaPacientesEnfermagemON;
@@ -846,7 +847,6 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 		Enum[] fetchArgsLeftJoin = {EpeCuidados.Fields.TIPO_FREQUENCIA_APRAZAMENTO};
 		return epeCuidadosDAO.obterPorChavePrimaria(seq, null, fetchArgsLeftJoin);
 	}
-	
 
 	@Override
 	public List<EpeCuidadoUnf> obterEpeCuidadoUnfPorEpeCuidadoSeq(Short seqEpeCuidado) {
@@ -894,8 +894,7 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 
 	public List<DiagnosticoCuidadoVO> pesquisarDiagnosticosLista(Short snbGnbSeq, Short snbSequencia, Short dgnSequencia, Short freSeq, Integer firstResult,
 			Integer maxResult, String orderProperty, boolean asc) {
-		return this.getEpeFatRelDiagnosticoDAO().pesquisarDiagnosticos(snbGnbSeq, snbSequencia, dgnSequencia, freSeq, firstResult, maxResult, orderProperty,
-				asc);
+		return this.getEpeFatRelDiagnosticoDAO().pesquisarDiagnosticos(snbGnbSeq, snbSequencia, dgnSequencia, freSeq, firstResult, maxResult, orderProperty, asc);
 	}
 
 	public Long pesquisarDiagnosticosListaCount(Short snbGnbSeq, Short snbSequencia, Short dgnSequencia, Short freSeq) {
@@ -910,8 +909,7 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 
 	public Long pesquisarCuidadosAtivosPorSeqOuDescricaoNaoAtribuidosDiagnosticosCount(String parametro, Short dgnSnbGnbSeq, Short dgnSnbSequencia,
 			Short dgnSequencia, Short freSeq) {
-		return this.getEpeCuidadosDAO().pesquisarCuidadosAtivosPorSeqOuDescricaoNaoAtribuidosDiagnosticosCount(parametro, dgnSnbGnbSeq, dgnSnbSequencia,
-				dgnSequencia, freSeq); 
+		return this.getEpeCuidadosDAO().pesquisarCuidadosAtivosPorSeqOuDescricaoNaoAtribuidosDiagnosticosCount(parametro, dgnSnbGnbSeq, dgnSnbSequencia, dgnSequencia, freSeq); 
 	}
 	
 	protected EpeCuidadoDiagnosticoDAO getEpeCuidadoDiagnosticoDAO() {
@@ -924,8 +922,7 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	
 	public List<EpeCuidadoDiagnostico> pesquisarCuidadosDiagnosticos(Short dgnSnbGnbSeq, Short dgnSnbSequencia, Short dgnSequencia, Short freSeq,
 			Integer firstResult, Integer maxResult, String orderProperty, boolean asc) {
-		return getEpeCuidadoDiagnosticoDAO().pesquisarCuidadosDiagnosticos(dgnSnbGnbSeq, dgnSnbSequencia, dgnSequencia, freSeq, firstResult, maxResult,
-				orderProperty, asc);
+		return getEpeCuidadoDiagnosticoDAO().pesquisarCuidadosDiagnosticos(dgnSnbGnbSeq, dgnSnbSequencia, dgnSequencia, freSeq, firstResult, maxResult, orderProperty, asc);
 	}
 
 	public Long pesquisarCuidadosDiagnosticosCount(Short dgnSnbGnbSeq, Short dgnSnbSequencia, Short dgnSequencia, Short freSeq) {
@@ -944,7 +941,6 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	@Override
 	public String gravar(EpeCuidados epeCuidado, Short seqEpeCuidado) throws ApplicationBusinessException {
 		return getManterCuidadosON().gravar(epeCuidado, seqEpeCuidado);
-		
 	}
 	
 	public List<EpeCuidados> pesquisarCuidadosAtivosPorMatCodigoOuDescricaoNaoAtribuidosMedicamentos(String parametro, Integer medMatCodigo) {
@@ -968,8 +964,7 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	}
 
 	@Override
-	public String excluirEpeCuidados(Short seq) throws ApplicationBusinessException, BaseListException,
-			ApplicationBusinessException {
+	public String excluirEpeCuidados(Short seq) throws ApplicationBusinessException, BaseListException, ApplicationBusinessException {
 		return manterCuidadosON.excluirEpeCuidados(seq);
 	}
 	
@@ -1011,11 +1006,9 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	@Override
 	public List<EpeCuidados> pesquisarCuidadosdeRotinasAtivos(Short unidadeF) {
 		return this.getEpeCuidadosDAO().pesquisarCuidadosdeRotinasAtivos(unidadeF, 
-														this.getEpeCuidadoUnfDAO().pesquisarTodos(),
-														this.getEpeCuidadoUnfDAO().pesquisarEpeCuidadoUnfPorUnf(unidadeF));
+		this.getEpeCuidadoUnfDAO().pesquisarTodos(), this.getEpeCuidadoUnfDAO().pesquisarEpeCuidadoUnfPorUnf(unidadeF));
 	}
-	
-	
+
 	@Override
 	public List<ListaPacientePrescricaoVO> retornarListaImpressaoPrescricaoEnfermagem(List<PacienteEnfermagemVO> listaPacientesEnfermagem){
 		return this.getListaPacientesEnfermagemON().retornarListaImpressaoPrescricaoEnfermagem(listaPacientesEnfermagem);
@@ -1034,6 +1027,33 @@ public class PrescricaoEnfermagemFacade extends BaseFacade implements IPrescrica
 	
 	private VisualizarAnamneseEvolucoesRN getVisualizarAnamneseEvolucoesRN(){
 		return visualizarAnamneseEvolucoesRN;
+	}
+
+	@Override
+	@BypassInactiveModule
+	public List<CuidadoVO> buscarCuidadosDiagnosticosPrescricaoEnfermagem(EpePrescricaoEnfermagemId prescricaoId, Boolean listarTodas) {
+		return this.getManutencaoPrescricaoEnfermagemON().buscarCuidadosDiagnosticosPrescricaoEnfermagem(prescricaoId, listarTodas);
+	}
+
+	@Override
+	public void inserirHistoricoPrescDiagnostico(EpeHistoricoPrescDiagnosticos historicoDiagnostico) {
+		getManutencaoPrescricaoCuidadoON().inserirHistoricoPrescDiagnostico(historicoDiagnostico);
+	}
+
+	@Override
+	public EpeHistoricoPrescDiagnosticos obterEpeHistoricoPrescDiagnosticosPorPrescDiag(
+			EpeFatRelDiagnostico fatRelDiagnostico,	EpePrescricaoEnfermagem prescricaoEnfermagem, Boolean indPendente){
+		return epeHistoricoPrescDiagnosticosDAO.obterEpeHistoricoPrescDiagnosticosPorPrescDiag(fatRelDiagnostico, prescricaoEnfermagem, indPendente);
+	}
+
+	@Override
+	public List<EpeDiagnostico> pesquisarDiagnosticosPorAtendimento(String filtro, Integer atdSeq) {
+		return epeHistoricoPrescDiagnosticosDAO.listarDiagnosticosPorAtendimento(filtro, atdSeq);
+	}
+
+	@Override
+	public List<EpeHistoricoPrescDiagnosticos> pesquisarHistoricoDiagnostico(Integer atdSeq, List<DominioSituacaoHistPrescDiagnosticos> listSituacao, EpeDiagnostico diagnostico, RapServidoresVO profissional, Date dataInicial, Date dataFinal) {
+		return epeHistoricoPrescDiagnosticosDAO.listarEpeHistoricoPrescDiagnosticosPorAtendimento(atdSeq, listSituacao, diagnostico, profissional, dataInicial, dataFinal);
 	}
 
 }

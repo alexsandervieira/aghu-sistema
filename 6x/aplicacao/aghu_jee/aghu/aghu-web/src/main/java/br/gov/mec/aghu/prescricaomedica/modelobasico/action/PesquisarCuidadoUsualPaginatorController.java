@@ -84,25 +84,14 @@ public class PesquisarCuidadoUsualPaginatorController extends ActionController i
 
 	@Override
 	public Long recuperarCount() {
-		AghUnidadesFuncionais unidadeFuncionalPesquisaCuidadoUsual = null;
-		if (this.unidadeFuncionalPesquisaCuidadoUsual != null) {
-			unidadeFuncionalPesquisaCuidadoUsual = this.aghuFacade.obterAghUnidadesFuncionaisPorChavePrimaria(this.unidadeFuncionalPesquisaCuidadoUsual.getSeq(),
-					AghUnidadesFuncionais.Fields.ALA);
-		}
 		return this.modeloBasicoFacade.pesquisarCuidadoUsualCount(codigoPesquisaCuidadoUsual, descricaoPesquisaCuidadoUsual, situacaoPesquisaCuidadoUsual,
-				unidadeFuncionalPesquisaCuidadoUsual);
-
+				this.unidadeFuncionalPesquisaCuidadoUsual);
 	}
 
 	@Override
 	public List<MpmCuidadoUsual> recuperarListaPaginada(Integer firstResult, Integer maxResult, String orderProperty, boolean asc) {
-		AghUnidadesFuncionais unidadeFuncionalPesquisaCuidadoUsual = null;
-		if (this.unidadeFuncionalPesquisaCuidadoUsual != null) {
-			unidadeFuncionalPesquisaCuidadoUsual = this.aghuFacade.obterAghUnidadesFuncionaisPorChavePrimaria(this.unidadeFuncionalPesquisaCuidadoUsual.getSeq(),
-					AghUnidadesFuncionais.Fields.ALA);
-		}
 		List<MpmCuidadoUsual> result = this.modeloBasicoFacade.pesquisarCuidadoUsual(firstResult, maxResult, orderProperty, asc, codigoPesquisaCuidadoUsual,
-				descricaoPesquisaCuidadoUsual, situacaoPesquisaCuidadoUsual, unidadeFuncionalPesquisaCuidadoUsual);
+				descricaoPesquisaCuidadoUsual, situacaoPesquisaCuidadoUsual, this.unidadeFuncionalPesquisaCuidadoUsual);
 		if (result == null) {
 			result = new ArrayList<MpmCuidadoUsual>();
 		}

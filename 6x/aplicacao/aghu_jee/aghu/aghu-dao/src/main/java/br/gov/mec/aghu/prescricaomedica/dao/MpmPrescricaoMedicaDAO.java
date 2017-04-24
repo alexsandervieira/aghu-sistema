@@ -298,6 +298,18 @@ public class MpmPrescricaoMedicaDAO extends br.gov.mec.aghu.core.persistence.dao
 		return this.executeCriteria(criteria);
 	}
 
+	public List<ItemPrescricaoMedica> listarItensPrescricaoMedica(MpmPrescricaoMedica prescricao) {
+
+		DetachedCriteria criteria = obterCriteriaItensPrescricao(prescricao);
+		
+		//criteria.add(Restrictions.eq(MpmPrescricaoDieta.Fields.IND_PENDENTE.toString(), DominioIndPendenteItemPrescricao.N));
+
+		criteria.add(Restrictions.or(Restrictions.isNull(MpmPrescricaoDieta.Fields.DTHR_FIM.toString()),
+				Restrictions.eq(MpmPrescricaoDieta.Fields.DTHR_FIM.toString(), prescricao.getDthrFim())));
+
+		return this.executeCriteria(criteria);
+	}
+
 	/**
 	 * Metodo para listar prescricoes medicas para gerar sumario, com data imp nao nula, 
 	 * filtrando pelo atendimendo e datas de inicio e fim da prescricao medica.
@@ -843,6 +855,8 @@ public class MpmPrescricaoMedicaDAO extends br.gov.mec.aghu.core.persistence.dao
 		criteria.createAlias("atd."+AghAtendimentos.Fields.ESPECIALIDADE.toString(), "esp", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias("atd."+AghAtendimentos.Fields.QUARTO.toString(), "quarto", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias("esp."+AghEspecialidades.Fields.CLINICA.toString(), "cli", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("atd."+AghAtendimentos.Fields.SERVIDOR.toString(), "ser", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("ser."+RapServidores.Fields.PESSOA_FISICA.toString(), "pes", JoinType.LEFT_OUTER_JOIN);
 		criteria.add(Restrictions.eq(MpmPrescricaoMedica.Fields.IDATDSEQ.toString(), atdSeq));
 		criteria.add(Restrictions.eq(MpmPrescricaoMedica.Fields.SEQ.toString(), seq));
 		return (MpmPrescricaoMedica) executeCriteriaUniqueResult(criteria);

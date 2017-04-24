@@ -499,6 +499,7 @@ public class MbcProcEspPorCirurgiasDAO extends br.gov.mec.aghu.core.persistence.
 						DescricaoLateralidadeProcCirurgicoVO.Fields.LADO_CIRURGIA.toString()));
 		
 		criteria.add(Restrictions.eq(MbcProcEspPorCirurgias.Fields.ID_CRG_SEQ.toString(), crgSeq));
+		
 		criteria.add(Restrictions.eq("pci." + MbcProcedimentoCirurgicos.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
 		criteria.addOrder(Order.desc(MbcProcEspPorCirurgias.Fields.IND_PRINCIPAL.toString()));
 		
@@ -507,7 +508,7 @@ public class MbcProcEspPorCirurgiasDAO extends br.gov.mec.aghu.core.persistence.
 		
 		criteria.setResultTransformer(Transformers.aliasToBean(DescricaoLateralidadeProcCirurgicoVO.class));
 				
-		return executeCriteria(criteria, 0, 3, null, false);
+		return executeCriteria(criteria, 0, 1, null, false);
 	}
 	
 	public List<MbcProcEspPorCirurgias> listarMbcProcEspPorCirurgiasPorCrgSeq(Integer crgSeq, Boolean somenteAtivos,

@@ -5,13 +5,15 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.sql.JoinType;
+import org.hibernate.transform.Transformers;
 
-import br.gov.mec.aghu.dominio.DominioAgruparRelMensal;
-import br.gov.mec.aghu.dominio.DominioDiaSemanaMes;
-import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.model.*;
 import br.gov.mec.aghu.core.commons.CoreUtil;
 import org.hibernate.criterion.*;
+import br.gov.mec.aghu.dominio.DominioAgruparRelMensal;
+import br.gov.mec.aghu.dominio.DominioDiaSemanaMes;
+import br.gov.mec.aghu.dominio.DominioSituacao;
 
 /**
  * @modulo compras
@@ -359,5 +361,62 @@ public class ScoGrupoMaterialDAO extends br.gov.mec.aghu.core.persistence.dao.Ba
 			}
 		}
 		return executeCriteriaCount(criteria);
+	}
+	
+	/**
+	 * Pesquisa os grupos de materiais que estão vinculados aos almoxarifados onde os materiais estão vinculados. 
+	 * @param almoxSeq
+	 * @param _input
+	 * @return
+	 */
+	public List<ScoGrupoMaterial> pesquisarGruposMateriaisPorFiltroAlmoxarifado(Short almoxSeq, Object _input) {
+		
+		String descricao = (String) _input;
+		Integer codigo = null;
+
+		if (CoreUtil.isNumeroInteger(descricao)){
+			codigo = Integer.valueOf(descricao);
+			descricao = null;
+		}
+		
+		DetachedCriteria criteriaEstAlm = DetachedCriteria.forClass(ScoGrupoMaterial.class, "GMT");
+		criteriaEstAlm.createAlias(ScoGrupoMaterial.Fields.SCO_MATERIAL.toString(), "MAT", JoinType.LEFT_OUTER_JOIN);	
+		criteriaEstAlm.createAlias("MAT." + ScoMaterial.Fields.ESTOQUE_ALMOXARIFADO.toString(), "ESTALM", JoinType.LEFT_OUTER_JOIN);
+		
+		if (codigo != null) {
+			criteriaEstAlm.add(Restrictions.eq(ScoGrupoMaterial.Fields.CODIGO.toString(),
+					codigo));
+		}
+
+		if (descricao != null) {
+			criteriaEstAlm.add(Restrictions.ilike(ScoGrupoMaterial.Fields.DESCRICAO.toString(),
+					descricao, MatchMode.ANYWHERE));
+		}
+		
+		if (almoxSeq != null){
+			criteriaEstAlm.add(Restrictions.eq("ESTALM." +SceEstoqueAlmoxarifado.Fields.ALMOXARIFADO_SEQ.toString(), almoxSeq));
+		}
+		
+		ProjectionList projList = Projections.projectionList();
+		
+		projList.add(Projections.groupProperty(ScoGrupoMaterial.Fields.CODIGO.toString()).as(ScoGrupoMaterial.Fields.CODIGO.toString()));
+		projList.add(Property.forName(ScoGrupoMaterial.Fields.DESCRICAO.toString()).as(ScoGrupoMaterial.Fields.DESCRICAO.toString()));
+		projList.add(Property.forName(ScoGrupoMaterial.Fields.IND_CONTROLE_VALIDADE.toString()).as(ScoGrupoMaterial.Fields.IND_CONTROLE_VALIDADE.toString()));
+		projList.add(Property.forName(ScoGrupoMaterial.Fields.IND_PATRIMONIO.toString()).as(ScoGrupoMaterial.Fields.IND_PATRIMONIO.toString()));
+		projList.add(Property.forName(ScoGrupoMaterial.Fields.IND_ENG.toString()).as(ScoGrupoMaterial.Fields.IND_ENG.toString()));
+		projList.add(Property.forName(ScoGrupoMaterial.Fields.IND_NUTRICAO.toString()).as(ScoGrupoMaterial.Fields.IND_NUTRICAO.toString()));
+		projList.add(Property.forName(ScoGrupoMaterial.Fields.IND_EXIGE_FORN.toString()).as(ScoGrupoMaterial.Fields.IND_EXIGE_FORN.toString()));
+		projList.add(Property.forName(ScoGrupoMaterial.Fields.IND_GERA_MOV_ESTOQUE.toString()).as(ScoGrupoMaterial.Fields.IND_GERA_MOV_ESTOQUE.toString()));
+		projList.add(Property.forName(ScoGrupoMaterial.Fields.IND_DISPENSARIO.toString()).as(ScoGrupoMaterial.Fields.IND_DISPENSARIO.toString()));
+		projList.add(Property.forName(ScoGrupoMaterial.Fields.NTD_CODIGO.toString()).as(ScoGrupoMaterial.Fields.NTD_CODIGO.toString()));
+		projList.add(Property.forName(ScoGrupoMaterial.Fields.COD_MERCADORIA_BB.toString()).as(ScoGrupoMaterial.Fields.COD_MERCADORIA_BB.toString()));
+		
+		criteriaEstAlm.setProjection(projList);
+									
+		criteriaEstAlm.setResultTransformer(Transformers.aliasToBean(ScoGrupoMaterial.class));
+		
+		List<ScoGrupoMaterial> gruposMateriais = executeCriteria(criteriaEstAlm);
+				
+		return gruposMateriais;
 	}
 }

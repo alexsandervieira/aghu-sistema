@@ -58,7 +58,7 @@ public class RapPessoasFisicasJn extends BaseJournal implements Serializable {
 	private Integer nroLogradouro;
 	private Integer cep;
 	private String bairro;
-	private String cidadeNascimento;
+	private Integer cddCodigoMunicipio;
 	private String ufSigla;
 	private String nroIdentidade;
 	private Integer nroCartProfissional;
@@ -291,13 +291,13 @@ public class RapPessoasFisicasJn extends BaseJournal implements Serializable {
 		this.bairro = bairro;
 	}
 
-	@Column(name = "CIDADE_NASCIMENTO", length = 40)
-	public String getCidadeNascimento() {
-		return this.cidadeNascimento;
+	@Column(name = "CDD_CODIGO_MUNICIPIO")
+	public Integer getCddCodigoMunicipio() {
+		return this.cddCodigoMunicipio;
 	}
 
-	public void setCidadeNascimento(String cidadeNascimento) {
-		this.cidadeNascimento = cidadeNascimento;
+	public void setCddCodigoMunicipio(Integer cddCodigoMunicipio) {
+		this.cddCodigoMunicipio = cddCodigoMunicipio;
 	}
 
 	@Column(name = "UF_SIGLA", length = 2)

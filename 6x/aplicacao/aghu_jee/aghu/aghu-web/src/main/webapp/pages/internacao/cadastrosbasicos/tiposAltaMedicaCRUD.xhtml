@@ -14,7 +14,11 @@
             <mec:inputText value="#{tiposAltaMedicaController.tipoAltaMedica.descricao}" label="#{messages.LABEL_DESCRICAO}" title="#{messages.TITLE_CRUD_DESCRICAO_TIPO_ALTA_MEDICA}" maxlength="60" size="60" style="text-transform:uppercase" readonly="#{tiposAltaMedicaController.update}" required="#{!tiposAltaMedicaController.update}" id="descricao"/>  
             <mec:selectOneMenu items="#{tiposAltaMedicaController.listarMotivosAltaMedica()}" itemsType="entity" itemLabel="descricao" label="#{messages.LABEL_TIPO_DE_ALTA_NA_PRESCRICAO}" value="#{tiposAltaMedicaController.tipoAltaMedica.motivoAltaMedicas}" title="Selecione o motivo da alta médica na prescrição." required="true" id="mpmMotivoAltaMedica"/>  
             <mec:selectOneMenu enum="DominioSituacao" label="#{messages.LABEL_SITUACAO}" value="#{tiposAltaMedicaController.tipoAltaMedica.indSituacao}" title="Selecione a situação do tipo de alta médica." required="true" noSelectionOption="false" id="ativoInativo"/> 
-          </aghu:linha> 
+          </aghu:linha>
+          <aghu:linha>
+          	<mec:selectBooleanCheckbox label="#{messages.LABEL_PERMITIR_ALTA_SEM_SUMARIO}" title="#{messages.TITLE_PERMITIR_ALTA_SEM_SUMARIO}" value="#{tiposAltaMedicaController.tipoAltaMedica.permiteAltaAdministrativa}" id="permiteAltaAdministrativa"/>
+          	<mec:selectBooleanCheckbox label="#{messages.LABEL_PERMITIR_PERMANENCIA_SISTEMA_COM_ALTA}" title="#{messages.TITLE_PERMITIR_PERMANENCIA_SISTEMA_COM_ALTA}" value="#{tiposAltaMedicaController.tipoAltaMedica.permitePermanenciaComAlta}" id="permitePermanenciaComAlta"/>
+          </aghu:linha>
         </aghu:panelGeral>  
         <aghu:acao> 
           <mec:commandButton value="#{messages.LABEL_GRAVAR}" id="bt_salvar" action="#{tiposAltaMedicaController.confirmar}" profile="ok"/>  

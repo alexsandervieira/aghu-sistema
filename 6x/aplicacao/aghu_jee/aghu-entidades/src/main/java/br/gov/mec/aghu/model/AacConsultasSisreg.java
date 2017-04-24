@@ -457,7 +457,7 @@ public class AacConsultasSisreg extends BaseEntitySeq<Long> implements java.io.S
 
 
 	public enum Fields {
-
+		SEQ("seq"),
 		IND_MARCADO("marcado");
 
 		private String fields;

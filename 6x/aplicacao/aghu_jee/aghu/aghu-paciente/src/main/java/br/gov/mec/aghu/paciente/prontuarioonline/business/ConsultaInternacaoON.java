@@ -235,8 +235,11 @@ public class ConsultaInternacaoON extends BaseBusiness {
 				internacaoVO.setLeito(UNIDADE_+ internacao.getAtendimento().getUnidadeFuncional().getAndarAlaDescricao());
 			}
 		}
-		if (internacao.getDthrAltaMedica() != null) {
-			internacaoVO.setDthrFim(internacao.getDthrAltaMedica());
+		if (internacao.getDtSaidaPaciente()!= null) {
+			internacaoVO.setDthrFim(internacao.getDtSaidaPaciente());
+		}
+		if(internacao.getDthrAltaMedica() != null){
+			internacaoVO.setDthrAlta(internacao.getDthrAltaMedica());
 		}
 		if (internacao.getDtPrevAlta() != null) {
 			internacaoVO.setDtPrevisao(internacao.getDtPrevAlta());
@@ -336,6 +339,9 @@ public class ConsultaInternacaoON extends BaseBusiness {
 				&& altaSumario.getAltaDiagPrincipal().getCid() != null) {
 			internacaoVO.setCodigoCid(altaSumario.getAltaDiagPrincipal().getCid().getCodigo());
 			internacaoVO.setDescricaoCid(altaSumario.getAltaDiagPrincipal().getCid().getDescricao());
+			if(altaSumario.getDthrAlta() != null){
+				internacaoVO.setDthrAlta(altaSumario.getDthrAlta());
+			}
 		} else {
 			MpmCidAtendimento cidAtendimento = buscaCidAtendimentoPrincipalAlta(atendimentoUrgencia.getAtendimento());
 

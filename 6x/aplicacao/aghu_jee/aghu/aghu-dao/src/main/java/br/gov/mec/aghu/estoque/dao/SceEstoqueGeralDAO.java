@@ -745,7 +745,7 @@ public class SceEstoqueGeralDAO extends br.gov.mec.aghu.core.persistence.dao.Bas
 	}
 	
 	@SuppressWarnings({"PMD.ExcessiveMethodLength", "PMD.NPathComplexity"})
-	public List<PosicaoFinalEstoqueVO> buscaDadosPosicaoFinalEstoque(Date dtCompetencia, Integer codigoGrupo, String estocavel, String orderBy, Integer fornecedor, String siglaTipoUsoMdto, Short almoxSeq) throws BaseException{
+	public List<PosicaoFinalEstoqueVO> buscaDadosPosicaoFinalEstoque(Date dtCompetencia, Integer codigoGrupo, String estocavel, String orderBy, Integer fornecedor, String siglaTipoUsoMdto, Short almoxSeq, boolean mostrarSoAtivos) throws BaseException{
 
 		Calendar mesCompetenciaAnterior = Calendar.getInstance();
 		mesCompetenciaAnterior.setTime(dtCompetencia);
@@ -841,8 +841,9 @@ public class SceEstoqueGeralDAO extends br.gov.mec.aghu.core.persistence.dao.Bas
 			criteria.add(Restrictions.eq("eal." +SceEstoqueAlmoxarifado.Fields.ALMOXARIFADO_SEQ.toString(), almoxSeq));
 		}
 		
-		// #39411 - Relatório de Posição Final de Estoque exibe itens inativos
-		criteria.add(Restrictions.eq("mat."+ScoMaterial.Fields.SITUACAO.toString(), DominioSituacao.A));
+		if(mostrarSoAtivos){
+			criteria.add(Restrictions.eq("mat."+ScoMaterial.Fields.SITUACAO.toString(), DominioSituacao.A));
+		}
 		
 		if(OrdenacaoPosicaoFinalEstoque.C.toString().equals(orderBy)){
 			criteria.addOrder(Order.asc("mat."+ScoMaterial.Fields.CODIGO.toString()));	

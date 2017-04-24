@@ -137,7 +137,8 @@ public class MarcacaoConsultaON extends BaseBusiness {
     public enum MarcacaoConsultaONExceptionCode implements BusinessExceptionCode {
 
 		AAC_00728, AAC_00158, AAC_00778, AAC_00612, DIA_BLOQUEADO_CONSULTA_EXCEDENTE, NAO_EXISTE_CONSULTA_DATA_TURNO, AAC_00688, AAC_00166, AAC_00707, MARCACAO_PACIENTE_SEM_NUMERO_CARTAO_SUS, 
-		MARCACAO_CONSULTA_PACIENTE_SEM_ENDERECO, MENSAGEM_CONVENIO_OBRIGATORIO, MENSAGEM_FORMA_AGENDAMENTO_OBRIGATORIO, PACIENTE_BLOQUEADO_UBS, CONSULTA_JA_MARCADA,ERRO_MARCAR_FALTA ,ENDERECO_NAO_EXISTENTE_PREJUDICA_FATURAMENTO;
+		MARCACAO_CONSULTA_PACIENTE_SEM_ENDERECO, MENSAGEM_CONVENIO_OBRIGATORIO, MENSAGEM_FORMA_AGENDAMENTO_OBRIGATORIO, PACIENTE_BLOQUEADO_UBS, CONSULTA_JA_MARCADA,ERRO_MARCAR_FALTA ,ENDERECO_NAO_EXISTENTE_PREJUDICA_FATURAMENTO,
+		P_INFORMACAO_SERVIDOR_CADASTRO_TICKET_AMBULATORIO;
 	
 		public void throwException(Object... params) throws ApplicationBusinessException {
 		    throw new ApplicationBusinessException(this, params);
@@ -266,7 +267,7 @@ public class MarcacaoConsultaON extends BaseBusiness {
     }
 
     public void chegou(AacConsultas consulta, String nomeMicrocomputador) throws BaseException {
-    	AacRetornos retorno = this.getAmbulatorioFacade().obterRetorno(DominioSituacaoAtendimento.PACIENTE_ATENDIDO.getCodigo());
+    	AacRetornos retorno = this.getAmbulatorioFacade().obterRetorno(DominioSituacaoAtendimento.AGUARDANDO_ATENDIMENTO.getCodigo());
 	
 		consulta.setRetorno(retorno);
 		getPesquisarPacientesAgendadosON().registraChegadaPaciente(consulta, nomeMicrocomputador);
@@ -609,16 +610,44 @@ public class MarcacaoConsultaON extends BaseBusiness {
 		}
 		
 		if (consulta.getServidorMarcacao() != null) {//PARTE F2
-			if (StringUtils.isNotBlank(consulta.getServidorMarcacao().getPessoaFisica().getNome())){
-				relatorioVO.setNomeUsuario(consulta.getServidorMarcacao().getPessoaFisica().getNome());
+			relatorioVO.setNomeUsuario(obtemDadosServidorCadastroTicketAmbulatorioPorParametro(consulta));
+		}else{
+			relatorioVO.setNomeUsuario("");	
 			}
-			else{
-				relatorioVO.setNomeUsuario("");	
-			}
-		}
 		return relatorioVO;
     }
 
+    public String obtemDadosServidorCadastroTicketAmbulatorioPorParametro(AacConsultas consulta) throws ApplicationBusinessException {
+
+    	String dadosCadastrante = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_INFORMACAO_SERVIDOR_CADASTRO_TICKET_AMBULATORIO).getVlrTexto();
+
+    	if (StringUtils.isBlank(dadosCadastrante) || (!dadosCadastrante.equals("0")) && (!dadosCadastrante.equals("1")) && (!dadosCadastrante.equals("2"))) {
+    		return "";
+    	} else {
+    		return obtemDadosServidor(consulta, dadosCadastrante);
+    	}
+    }
+
+
+    private String obtemDadosServidor(AacConsultas consulta, String dadosCadastrante) {
+
+    	switch (dadosCadastrante) {
+
+    	case "0":
+    		String nome = consulta.getServidorMarcacao().getPessoaFisica().getNome();
+    		return nome.split(" ")[0];
+
+    	case "1":
+    		return consulta.getServidorMarcacao().getPessoaFisica().getNome();	
+
+    	case "2":
+    		return consulta.getServidorMarcacao().getUsuario();		
+
+    	default:
+    		return "";
+    	}
+    }	
+    
 	private void insereDadosUndFuncional(AacConsultas consulta, RelatorioAgendamentoConsultaVO relatorioVO) {
 		
 		relatorioVO.setSiglaSala(consulta.getGradeAgendamenConsulta().getUnidadeFuncional().getDescricao());
@@ -647,6 +676,13 @@ public class MarcacaoConsultaON extends BaseBusiness {
 		}
 		relatorioVO.setNomePaciente(consulta.getPaciente().getNome());
 	
+		
+		if(consulta.getPaciente().getNomeSocial() != null ){
+			relatorioVO.setNomeSocial(consulta.getPaciente().getNomeSocial());
+		}else{
+			relatorioVO.setNomeSocial("");
+		}
+		
 		AipGrupoFamiliarPacientes grupoFamiliar = ambulatorioFacade.obterProntuarioFamiliaPaciente(consulta.getPaciente().getCodigo());
 	    if(grupoFamiliar!=null){
 	    	 relatorioVO.setProntFamilia(grupoFamiliar.getAgfSeq());
@@ -699,10 +735,10 @@ public class MarcacaoConsultaON extends BaseBusiness {
      * @throws NumberFormatException
      */
     public void marcarFaltaPaciente(Integer consultaNumero, String nomeMicrocomputador, boolean chegou,Integer codSituacaoAtend) throws NumberFormatException, BaseException {
-            if(chegou){
+    	AacRetornos retorno = recuperaSituacaoAtendimentoPacienteFaltou(codSituacaoAtend);   
+    	if(chegou && retorno.getSeq().equals(DominioSituacaoAtendimento.PACIENTE_FALTOU.getCodigo())){
 	    		MarcacaoConsultaONExceptionCode.ERRO_MARCAR_FALTA.throwException();
-            }
-        	AacRetornos retorno = recuperaSituacaoAtendimentoPacienteFaltou(codSituacaoAtend);
+           }
         	List<AacConsultas> listaPacientesConsultaAgendada = this.getAacConsultasDAO().pesquisaConsultasNumero(consultaNumero);
     		for (AacConsultas consulta : listaPacientesConsultaAgendada) {
     		    atualizarRetornoConsulta(consulta.getNumero(), retorno, nomeMicrocomputador, new Date());
@@ -860,19 +896,22 @@ public class MarcacaoConsultaON extends BaseBusiness {
 		if(!flag){
 			str.append("Marcado por: ");
 			if(consulta.getServidorMarcacao()!=null) {
-				if (StringUtils.isNotBlank(consulta.getServidorMarcacao().getPessoaFisica().getNome())){
-					str.append(consulta.getServidorMarcacao().getPessoaFisica().getNome());				
-				}
+				str.append(obtemDadosServidorCadastroTicketAmbulatorioPorParametro(consulta));				
 			}
 		}		
 		else{//flag incluido para atender #8253
 			str.append("Marcado por: ").append(this.obterNomeServidorMarcado(consulta.getNumero(), consulta.getExcedeProgramacao(),consulta));
 		}
-		String valorParametroGuilhotina = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_CUPS_IMP_BEMATECH_GUILHOTINA).getVlrTexto();
+
+		String valorParametroGuilhotina = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_CUPS_IMP_BEMATECH_GUILHOTINA)
+				.getVlrTexto();
+		
 		str.append("\nNro Consulta: ").append(consulta.getNumero()).append('\n');
+		
 		Date dataEmissao = new Date();
-		str.append("\nData Emissão: ").append(dataConsulta.format(dataEmissao)).append(' ').append(horaConsultaEmissao.format(dataEmissao)).append("\n\n");
-	
+		str.append("\nData Emissão: ").append(dataConsulta.format(dataEmissao))
+		.append(' ').append(horaConsultaEmissao.format(dataEmissao)).append("\n\n");
+		
 		if ("S".equalsIgnoreCase(valorParametroGuilhotina)) {
 		    str.append("\n\n\n\n").append((char) 27).append((char) 119);
 		}

@@ -341,6 +341,7 @@ public class ElaboracaoPrescricaoEnfermagemController extends ActionController {
 			if(e.getLocalizedMessage().equals("PRESCRICAO_ATUAL_EM_USO")){
 				this.showModal = true;
 				this.setMensagemModal( WebUtil.initLocalizedMessage(e.getLocalizedMessage(), null, e.getParameters()));
+				this.openDialog("modalPrescricaoEmUsoWG");
 			}
 			else{
 				this.showModal = false;

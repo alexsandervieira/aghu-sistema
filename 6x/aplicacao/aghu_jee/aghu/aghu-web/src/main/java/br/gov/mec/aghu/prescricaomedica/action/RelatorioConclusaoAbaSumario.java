@@ -253,7 +253,7 @@ public class RelatorioConclusaoAbaSumario extends ActionReport {
 
 		}
 
-		MpmAltaSumarioId id = this.listaAltasSumarios.get(this.listaAltasSumarios.size() - 1).getId();
+		MpmAltaSumarioId id = this.listaAltasSumarios.get(0).getId();
 
 		colecao.add(this.buscaColecao(id));
 		

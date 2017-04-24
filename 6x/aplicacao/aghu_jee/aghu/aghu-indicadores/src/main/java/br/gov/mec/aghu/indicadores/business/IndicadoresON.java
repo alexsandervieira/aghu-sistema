@@ -3,20 +3,22 @@ package br.gov.mec.aghu.indicadores.business;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.ejb3.annotation.TransactionTimeout;
 
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.dominio.DominioTipoIndicador;
 import br.gov.mec.aghu.indicadores.vo.ReferencialClinicaEspecialidadeVO;
 import br.gov.mec.aghu.internacao.business.IInternacaoFacade;
-import br.gov.mec.aghu.core.business.BaseBMTBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 
 /**
  * ON Geral para indicadores.
@@ -25,8 +27,7 @@ import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
  * 
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-public class IndicadoresON extends BaseBMTBusiness {
+public class IndicadoresON extends BaseBusiness {
 
 	
 	@EJB
@@ -66,6 +67,8 @@ public class IndicadoresON extends BaseBMTBusiness {
 	 * @param anoMesCompetencia
 	 * @throws AGHUNegocioException
 	 */
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@TransactionTimeout(value=3, unit=TimeUnit.HOURS)
 	public void gerarIndicadoresHospitalares(Date date, String cron) throws ApplicationBusinessException {
 
 		logInfo("Rotina IndicadoresON.gerarIndicadoresHospitalares iniciada em: "
@@ -110,10 +113,11 @@ public class IndicadoresON extends BaseBMTBusiness {
 	 * @param anoMesCompetencia
 	 * @throws ApplicationBusinessException
 	 */
+	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@TransactionTimeout(value=3, unit=TimeUnit.HOURS)
 	public void gravarIndicadoresResumidos(Date anoMesCompetencia) throws ApplicationBusinessException {
 		try{
-			this.beginTransaction(3*60*60);	// 3 horas
-			
 			for (DominioTipoIndicador tipoIndicador : DominioTipoIndicador.values()) {
 				getIndicadoresResumidosRN().gravarIndicadoresPorTipo(anoMesCompetencia, tipoIndicador);
 			}
@@ -134,10 +138,8 @@ public class IndicadoresON extends BaseBMTBusiness {
 			
 			// Atualiza a tabela AGH_DATAS_IG que é necessária para as pesquisas referencias
 			this.getIndicadoresResumidosRN().atualizarDataInicialIg(mesCompetencia);
-			this.commitTransaction();
-			
 		}catch(ApplicationBusinessException e){
-			super.rollbackTransaction();
+			LOG.error(e.getMessage(), e);
 			throw e;
 		}
 	}

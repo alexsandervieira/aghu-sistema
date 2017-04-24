@@ -15,6 +15,8 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
 import org.hibernate.transform.Transformers;
 
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.persistence.dao.BaseDao;
 import br.gov.mec.aghu.dao.SequenceID;
 import br.gov.mec.aghu.dominio.DominioIndConcluido;
 import br.gov.mec.aghu.dominio.DominioIndTipoAltaSumarios;
@@ -40,8 +42,6 @@ import br.gov.mec.aghu.model.MpmSumarioAlta;
 import br.gov.mec.aghu.model.VAfaMdtoDescricao;
 import br.gov.mec.aghu.paciente.prontuario.vo.AltaObitoSumarioVO;
 import br.gov.mec.aghu.prescricaomedica.vo.MpmAltaSumarioVO;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.persistence.dao.BaseDao;
 
 /**
  * 
@@ -627,11 +627,13 @@ public class MpmAltaSumarioDAO extends BaseDao<MpmAltaSumario> {
 
 		hql.append(" int." ).append( AinInternacao.Fields.SEQ.toString() ).append( " = :internacaoSeq ");
 		hql.append(" AND asu." ).append( MpmAltaSumario.Fields.IND_CONCLUIDO.toString() ).append( " = :indConcluido ");
+		hql.append(" AND tam." ).append( AinTiposAltaMedica.Fields.IND_SITUACAO.toString() ).append( " = :indSituacao ");
 
 		javax.persistence.Query query = this.createQuery(hql.toString());
 
 		query.setParameter("internacaoSeq", internacaoSeq);
 		query.setParameter("indConcluido", DominioIndConcluido.S);
+		query.setParameter("indSituacao", DominioSituacao.A);
 		query.setMaxResults(1);
 
 		@SuppressWarnings("unchecked")
@@ -900,4 +902,5 @@ public class MpmAltaSumarioDAO extends BaseDao<MpmAltaSumario> {
 		
 		return result != null & !result.isEmpty();
 	}
+	
 }

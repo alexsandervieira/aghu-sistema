@@ -485,8 +485,8 @@ public class ProcedimentosAmbRealizadoRN extends AbstractAGHUCrudRn<FatProcedAmb
 					final FatContasHospitalares conta = getFatContasHospitalaresDAO().obterFatContaHospitalar(contaSemInt.getCthSeq());
 					conta.setEspecialidade(entidade.getEspecialidade());
 					conta.setProcedimentoHospitalarInterno(entidade.getProcedimentoHospitalarInterno());
-					
-					// Atualiza a conta
+
+					// Atualiza a conta 
 					getFaturamentoFacade().persistirContaHospitalar(conta, contaOld, nomeMicrocomputador, dataFimVinculoServidor);
 					
 					// Insere itens conta
@@ -518,7 +518,7 @@ public class ProcedimentosAmbRealizadoRN extends AbstractAGHUCrudRn<FatProcedAmb
 						
 						// Insere CID conta
 						final FatCidContaHospitalar cidConta = new FatCidContaHospitalar();
-						cidConta.setId(new FatCidContaHospitalarId(conta.getCthSeq(), vCidSeq, DominioPrioridadeCid.P));
+						cidConta.setId(new FatCidContaHospitalarId(conta.getSeq(), vCidSeq, DominioPrioridadeCid.P));
 
 						getCidContaHospitalarON().persistirCidContaHospitalar(cidConta, nomeMicrocomputador, dataFimVinculoServidor);
 					}

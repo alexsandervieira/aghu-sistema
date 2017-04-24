@@ -12,7 +12,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
 import org.hibernate.validator.constraints.Length;
 
 import br.gov.mec.aghu.core.persistence.BaseEntityId;
@@ -113,8 +112,8 @@ public class MpmItemCuidadoSumario extends BaseEntityId<MpmItemCuidadoSumarioId>
 		this.frequencia = frequencia;
 	}
 
-	@Column(name = "DESCRICAO", length = 150)
-	@Length(max = 150, message="A descrição possui mais de 150 caracteres.")
+	@Column(name = "DESCRICAO", length = 240)
+	@Length(max = 240, message="A descrição possui mais de 240 caracteres.")
 	public String getDescricao() {
 		return this.descricao;
 	}

@@ -2,23 +2,26 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:fn="http://xmlns.jcp.org/jsp/jstl/functions" xmlns:mec="http://xmlns.jcp.org/jsf/composite/components" xmlns:p="http://primefaces.org/ui" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:aghu="http://xmlns.jcp.org/jsf/component" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:c="http://xmlns.jcp.org/jsp/jstl/core" xmlns:mf="http://www.mec.gov.br/taglib">  
   <ui:composition> 
-    
+    #{mf:hasPermission(securityController,'selecionaRetornoPaciente,selecionarRetornoPaciente')}
         <mec:serverDataTable id="resultListAb2"  list="#{pesquisarPacientesAgendadosController.pacientesAguardandoList}" scrollable="true" scrollHeight="#{pesquisarPacientesAgendadosController.percPanel}" selection="consultaSelecionadaAba2" controller="#{pesquisarPacientesAgendadosController}" disabled="#{ mf:hasPermission(securityController, 'paciente, somenteLeitura')}">  
           <p:ajax event="rowSelect" process="@this" update="@(#botoesAcao)" />
-          <p:column style="text-align:center;#{pesquisarPacientesAgendadosController.consultaSelecionada eq item?'background-color:PapayaWhip;':''}" sortBy="#{item.atender}" sortable="true"> 
+          <p:column style="text-align:center;#{pesquisarPacientesAgendadosController.consultaSelecionada eq item?'background-color:PapayaWhip;':''}" sortBy="#{item.atender}" sortable="true"
+                    rendered="#{mf:hasPermission(securityController,'atenderConsulta,atender')}"> 
             <f:facet name="header"> 
               <h:outputText value="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_ATENDER}"/> 
             </f:facet>  
             
             <p:outputPanel id="checkid_Ab2" layout="inline">
-	            <p:selectBooleanCheckbox value="#{item.atender}" style="border:0px;vertical-align:middle;" rendered="#{item.controleSituacao ne 'U'}" disabled="#{ mf:hasPermission(securityController, 'paciente, somenteLeitura')}">
+	            <p:selectBooleanCheckbox value="#{item.atender}" style="border:0px;vertical-align:middle;" 
+	            rendered="#{item.controleSituacao ne 'U'}" disabled="#{ mf:hasPermission(securityController, 'paciente, somenteLeitura')}">
 					<p:ajax event="change" 
 						update="@(#checkid_Ab2)" process="@this"
 						listener="#{pesquisarPacientesAgendadosController.atender(item)}" />
 				</p:selectBooleanCheckbox>  
 			</p:outputPanel>
             
-           	<p:selectBooleanCheckbox id="checkidp_Ab2" style="border:0px;vertical-align:middle;" rendered="#{item.controleSituacao eq 'U'}">
+           	<p:selectBooleanCheckbox id="checkidp_Ab2" style="border:0px;vertical-align:middle;" 
+           	                   rendered="#{item.controleSituacao eq 'U'}">
 				<p:ajax event="change"
 					listener="#{pesquisarPacientesAgendadosController.selecionarConsulta(item)}"
 					oncomplete="PF('modalConfirmacaoAtendimentoWG').show();"
@@ -64,7 +67,19 @@
             <f:facet name="header"> 
               <h:outputText value="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_PACIENTE}"/> 
             </f:facet>  
-            <h:outputText style="#{(item.pacienteNroCartaoSaude == null)?'font-weight:bold':''}" id="colunaPaciente" value="#{item.pacienteNome}" title="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_VER_DETALHES}"/>  
+            
+           	<h:outputText 
+            	style="#{(item.pacienteNroCartaoSaude == null)?'font-weight:bold':''}" 
+            	id="colunaPaciente" 
+            	value="#{not empty item.nomeSocial ? item.nomeSocial : item.pacienteNome}" 
+            	title="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_VER_DETALHES}"/>
+            	
+			<h:graphicImage 
+				title="#{messages.LABEL_NOME_CIVIL}: #{item.pacienteNome}"  
+				value="/resources/img/icons/nome-civil-paciente.png" 
+				style="border:0px; float:right;" 
+				rendered="#{not empty item.nomeSocial}" />
+              
             <p:overlayPanel for="colunaPaciente" hideEvent="mouseout" appendToBody="true">
              #{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_GRADE}: #{item.gradeSeq} 
               <br clear="none"/> #{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_ESPECIALIDADE_AGENDA}: #{item.gradeEspNome} 

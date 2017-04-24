@@ -28,6 +28,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 
+
+
 import org.hibernate.validator.constraints.Length;
 
 import br.gov.mec.aghu.dominio.DominioIndConcluidaSolicitacaoConsultoria;
@@ -148,6 +150,8 @@ public class MpmSolicitacaoConsultoria extends ItemPrescricaoMedica<MpmSolicitac
 	 * Indica a origem da solicitação de consultoria.
 	 */
 	private DominioOrigemSolicitacaoConsultoria origem;
+	
+	private Integer ordem;
 	
 	private Set<MpmSolicitacaoConsultoria> solicitacaoConsultorias = new HashSet<MpmSolicitacaoConsultoria>(0);
 
@@ -422,6 +426,14 @@ public class MpmSolicitacaoConsultoria extends ItemPrescricaoMedica<MpmSolicitac
 			RapServidores servidorRespostaVerificacao) {
 		this.servidorRespostaVerificacao = servidorRespostaVerificacao;
 	}
+	
+	@Column(name = "ORDEM", nullable = false)
+	public Integer getOrdem() {
+		return this.ordem;
+	}
+	public void setOrdem(Integer ordem) {
+		this.ordem = ordem;
+	}
 
 	/**
 	 * Formato:<br>
@@ -475,7 +487,7 @@ public class MpmSolicitacaoConsultoria extends ItemPrescricaoMedica<MpmSolicitac
 				SERVIDOR_VALIDACAO("servidorValidacao"),
 				MOTIVO("motivo"), TIPO("tipo"), IND_URGENCIA("indUrgencia"), ATENDIMENTO("prescricaoMedica.atendimento"),
 				PRESCRICAO_MEDICA("prescricaoMedica"), DTHR_CONHECIMENTO_RESPOSTA("dthrConhecimentoResposta"),
-				IND_CONCLUIDA("indConcluida"), DTHR_PRIM_CONSULTA("dthrPrimeiraConsulta"), DTHR_RESPOSTA("dthrResposta") ;
+				IND_CONCLUIDA("indConcluida"), DTHR_PRIM_CONSULTA("dthrPrimeiraConsulta"), DTHR_RESPOSTA("dthrResposta"), ORDEM("ordem") ;
 
 		private String fields;
 

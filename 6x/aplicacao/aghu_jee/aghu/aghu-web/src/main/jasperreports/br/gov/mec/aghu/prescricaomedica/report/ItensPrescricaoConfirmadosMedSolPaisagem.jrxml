@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ItensPrescricaoConfirmados_cuidados" language="groovy" pageWidth="802" pageHeight="510" orientation="Landscape" columnWidth="802" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="bd7597c0-6add-4d07-950a-bb7da3b8a20a">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<parameter name="Tipo" class="java.lang.String"/>
+	<parameter name="subRelatorioMedSolSub" class="java.io.InputStream"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="dosagem" class="java.lang.String">
+		<fieldDescription><![CDATA[dosagem]]></fieldDescription>
+	</field>
+	<field name="class" class="java.lang.Class">
+		<fieldDescription><![CDATA[class]]></fieldDescription>
+	</field>
+	<field name="descricao" class="java.lang.String">
+		<fieldDescription><![CDATA[descricao]]></fieldDescription>
+	</field>
+	<field name="numero" class="java.lang.Integer">
+		<fieldDescription><![CDATA[numero]]></fieldDescription>
+	</field>
+	<field name="tipo" class="java.lang.String">
+		<fieldDescription><![CDATA[tipo]]></fieldDescription>
+	</field>
+	<field name="aprazamento" class="java.lang.String"/>
+	<field name="listDescMedicamentos" class="java.util.Collection">
+		<fieldDescription><![CDATA[listDescMedicamentos]]></fieldDescription>
+	</field>
+	<group name="Header" isStartNewPage="true" isReprintHeaderOnEachPage="true">
+		<groupHeader>
+			<band height="34">
+				<rectangle>
+					<reportElement stretchType="RelativeToBandHeight" x="612" y="17" width="140" height="17" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="38e14092-8bb5-4ee9-9ccd-fa4baa89a56f"/>
+				</rectangle>
+				<rectangle>
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="752" height="17" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="760f32e6-1ff6-4335-a8df-982d753b3eaf"/>
+				</rectangle>
+				<textField>
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="752" height="17" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="f05698f1-3495-4f8a-b2d5-26f0197e446c"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Arial" size="11" isBold="true" isItalic="true" pdfFontName="Helvetica-BoldOblique"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression>
+				</textField>
+				<rectangle>
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="17" width="301" height="17" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="8f351d18-e5e6-45a5-93af-98a2eaafd576"/>
+				</rectangle>
+				<rectangle>
+					<reportElement stretchType="RelativeToBandHeight" x="301" y="17" width="311" height="17" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="0a7f412a-20f7-4e4e-a284-3123859b9bca"/>
+				</rectangle>
+				<staticText>
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="17" width="301" height="17" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="ceeb06a2-8bb9-44f2-9f85-dcf1c947f996"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[POSOLOGIA]]></text>
+				</staticText>
+				<staticText>
+					<reportElement stretchType="RelativeToBandHeight" x="301" y="17" width="311" height="17" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="2680accb-4ca6-4d3b-badb-b46ce17f0fc8"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[DOSAGEM]]></text>
+				</staticText>
+				<staticText>
+					<reportElement stretchType="RelativeToBandHeight" x="612" y="17" width="140" height="17" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="e5209981-7f7d-490a-b590-17766585f77a"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[APRAZAMENTO]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+	</group>
+	<detail>
+		<band height="16" splitType="Prevent">
+			<printWhenExpression><![CDATA[$F{numero}.intValue() % 2 == 0]]></printWhenExpression>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="32" height="16" uuid="b2b78076-eb7c-42ed-9e59-9e83d6447367"/>
+			</rectangle>
+			<textField>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="1" width="30" height="14" uuid="059119a7-d620-4072-b5b5-cdcc511aad0a"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numero} + "."]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="32" y="0" width="580" height="16" uuid="973151e1-91d4-4277-af5e-dae513599696"/>
+			</rectangle>
+			<subreport isUsingCache="true">
+				<reportElement stretchType="RelativeToBandHeight" x="34" y="2" width="578" height="13" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="ea131cf3-5cf3-4c99-b779-930cea64fbc6">
+					<property name="Tipo" value="Medicamento"/>
+				</reportElement>
+				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{listDescMedicamentos})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{subRelatorioMedSolSub}]]></subreportExpression>
+			</subreport>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="612" y="0" width="140" height="16" uuid="ccc502dc-635d-4064-9737-e24b88fc8bd2"/>
+			</rectangle>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="613" y="1" width="138" height="15" uuid="4b06dbb0-cb2e-4ff8-b1f4-223aa1ca458e"/>
+				<textFieldExpression><![CDATA[$F{aprazamento}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="16" splitType="Prevent">
+			<printWhenExpression><![CDATA[$F{numero}.intValue() % 2 != 0]]></printWhenExpression>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="32" height="16" backcolor="#DCDCDC" uuid="04da7b33-3cec-4d22-915e-2b213ab627fa"/>
+			</rectangle>
+			<textField>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="1" width="30" height="14" uuid="e45b00f4-85bf-4c6e-a08f-e3251def5417"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font fontName="Arial" size="10" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numero} + "."]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="32" y="0" width="580" height="16" backcolor="#DCDCDC" uuid="b0b001eb-08c7-4aa9-be0f-750f5751a888"/>
+			</rectangle>
+			<subreport isUsingCache="true">
+				<reportElement stretchType="RelativeToBandHeight" x="34" y="2" width="578" height="13" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="80331ddd-fbb9-48e8-8a95-c4c7d95ef0fe">
+					<property name="Tipo" value="Medicamento"/>
+				</reportElement>
+				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{listDescMedicamentos})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{subRelatorioMedSolSub}]]></subreportExpression>
+			</subreport>
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="612" y="0" width="140" height="16" backcolor="#DCDCDC" uuid="cab9888c-3fc8-4c8b-b743-7e924bf4ae71"/>
+			</rectangle>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="613" y="1" width="138" height="15" uuid="da5d84d9-3f67-4473-a9c8-dad0ef716ace"/>
+				<textFieldExpression><![CDATA[$F{aprazamento}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="1"/>
+	</pageFooter>
+</jasperReport>

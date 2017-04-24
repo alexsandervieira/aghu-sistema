@@ -265,6 +265,7 @@ public class ConfirmarPrescricaoMedicaON extends BaseBusiness {
 			laudoRN.inserirListaLaudos(laudoList);
 			
 			//prescricao = this.getPrescricaoMedicaDAO().merge(prescricao);
+			prescricao.setServidorValida(servidorLogado);
 			this.getPrescricaoMedicaDAO().atualizar(prescricao);
 			
 		} catch (BaseRuntimeException e) {
@@ -1021,6 +1022,16 @@ public class ConfirmarPrescricaoMedicaON extends BaseBusiness {
 
 	protected IServidorLogadoFacade getServidorLogadoFacade() {
 		return this.servidorLogadoFacade;
+	}
+
+	public List<ItemPrescricaoMedica> listarItensPrescricaoMedica(
+			MpmPrescricaoMedica prescricao) {
+		List<ItemPrescricaoMedica> lista = this.getPrescricaoMedicaDAO().listarItensPrescricaoMedica(prescricao);
+		for (ItemPrescricaoMedica itemPrescricaoMedica : lista) {
+			itemPrescricaoMedica.possuiFilhos();
+		}
+		
+		return lista;
 	}
 
 	

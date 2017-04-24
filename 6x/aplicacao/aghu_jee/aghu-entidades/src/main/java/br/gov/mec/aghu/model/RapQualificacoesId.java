@@ -10,7 +10,6 @@ import javax.persistence.ManyToOne;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import br.gov.mec.aghu.core.persistence.EntityCompositeId;
 
@@ -68,7 +67,7 @@ public class RapQualificacoesId implements EntityCompositeId {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder().append(this.pessoaFisica)
+		return new HashCodeBuilder()
 				.append(this.sequencia).toHashCode();
 	}
 
@@ -83,10 +82,4 @@ public class RapQualificacoesId implements EntityCompositeId {
 				.append(this.sequencia, castOther.getSequencia()).isEquals();
 	}
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-				.append("pessoaFisica", this.pessoaFisica)
-				.append("sequencia", this.sequencia).toString();
-	}
 }

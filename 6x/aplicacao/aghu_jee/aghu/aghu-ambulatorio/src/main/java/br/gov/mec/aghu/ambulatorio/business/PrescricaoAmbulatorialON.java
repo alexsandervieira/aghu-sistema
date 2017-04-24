@@ -76,4 +76,33 @@ public class PrescricaoAmbulatorialON extends BaseBusiness {
 		return atendimentos;
 		
 	}
+	
+	
+	
+	public List<AghAtendimentos> pesquisarAtendimentoParaPrescricaoMedicaSemRestricaoDeHorario(Integer codigoPac, Integer atdSeq){
+		List<AghAtendimentos> atendimentos = pesquisarAtendimentoParaPrescricaoMedicaSemRestricaoDeHorario(codigoPac, atdSeq,
+						DominioOrigemAtendimento.getOrigensPrescricaoInternacao());
+		
+		return atendimentos;
+	}
+
+	public List<AghAtendimentos> pesquisarAtendimentoParaPrescricaoMedicaSemRestricaoDeHorario(
+			Integer codigoPac, Integer atdSeq, 
+			List<DominioOrigemAtendimento> origensInternacao) {
+
+		List<AghAtendimentos> atendimentos = new ArrayList<AghAtendimentos>();
+		
+		if(origensInternacao != null && !origensInternacao.isEmpty()){
+			//Para gap #34801, não considerar origem 'Hospital dia' nesta situação
+			List<DominioOrigemAtendimento> origensInternacaoTemp = new ArrayList<DominioOrigemAtendimento>(origensInternacao);//.remove(DominioOrigemAtendimento.H);
+			origensInternacaoTemp.remove(DominioOrigemAtendimento.H);
+			
+			atendimentos.addAll(
+				aghuFacade.pesquisarAtendimentos(codigoPac, atdSeq, DominioPacAtendimento.S, origensInternacaoTemp)	
+			);
+		}
+	
+		return atendimentos;
+		
+	}
 }

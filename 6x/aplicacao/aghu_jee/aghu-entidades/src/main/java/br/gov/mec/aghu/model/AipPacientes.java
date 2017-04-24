@@ -41,6 +41,12 @@ import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.validator.constraints.Length;
 
+import br.gov.mec.aghu.core.exception.BaseRuntimeException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.persistence.BaseEntityCodigo;
+import br.gov.mec.aghu.core.utils.AGHUUtil;
+import br.gov.mec.aghu.core.utils.DateUtil;
+import br.gov.mec.aghu.core.utils.StringUtil;
 import br.gov.mec.aghu.dominio.DominioCor;
 import br.gov.mec.aghu.dominio.DominioEstadoCivil;
 import br.gov.mec.aghu.dominio.DominioGrauInstrucao;
@@ -48,13 +54,6 @@ import br.gov.mec.aghu.dominio.DominioSexo;
 import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.dominio.DominioTipoDataObito;
 import br.gov.mec.aghu.dominio.DominioTipoProntuario;
-import br.gov.mec.aghu.core.exception.BaseRuntimeException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
-import br.gov.mec.aghu.core.persistence.BaseEntityCodigo;
-import br.gov.mec.aghu.core.utils.AGHUUtil;
-import br.gov.mec.aghu.core.utils.DateUtil;
-import br.gov.mec.aghu.core.utils.StringUtil;
-import br.gov.mec.aghu.core.validation.CPF;
 
 @SuppressWarnings({"PMD.AghuUsoIndevidoDaEnumDominioSimNaoEntity", "PMD.ExcessiveClassLength"})
 @Entity
@@ -161,7 +160,7 @@ public class AipPacientes extends BaseEntityCodigo<Integer> implements java.io.S
 	private Date dataValidadeCNH;
 
 	/**
-	 * Indica se o cadastro foi confirmado
+	 * Indica se o cadastro foi confirmadoget
 	 */
 	private DominioSimNao cadConfirmado;
 
@@ -675,7 +674,6 @@ public class AipPacientes extends BaseEntityCodigo<Integer> implements java.io.S
 	}
 
 	@Column(name = "CPF", precision = 11, scale = 0)
-	@CPF
 	public Long getCpf() {
 		return this.cpf;
 	}
@@ -813,6 +811,15 @@ public class AipPacientes extends BaseEntityCodigo<Integer> implements java.io.S
 	 * 
 	 * @return
 	 */
+	
+	@Transient
+	public String getProntuarioFormatado() {
+		
+		String prontAux = (String) prontuario.toString();
+		return (prontAux.substring(0, prontAux.length() - 1)
+				+ "/" + prontAux.charAt(prontAux.length() - 1));
+	}
+	
 	@Transient
 	public boolean isGerarProntuario() {
 		if (getIndGeraProntuario() != null) {
@@ -1608,6 +1615,7 @@ public class AipPacientes extends BaseEntityCodigo<Integer> implements java.io.S
 				MCI_NOTIFICACAO_GMR("mciNotificacaoGmr"),
 				MBC_CIRURGIAS("mbcCirurgias"),
 				ETNIA("etnia"),
+				ETNIA_CODIGO("etnia.id"),
 				NOME_SOCIAL("nomeSocial"),
 				ID_SISTEMA_LEGADO("idSistemaLegado"),
 				NACIONALIDADE("aipNacionalidades"),
@@ -1970,4 +1978,13 @@ public class AipPacientes extends BaseEntityCodigo<Integer> implements java.io.S
 	public void setComorbidade(Set<MtxComorbidade> comorbidade) {
 		this.comorbidade = comorbidade;
 	}
+	
+	@Transient
+	public String getNomeSocialNomeCivil() {
+		if (this.nomeSocial != null && !this.nomeSocial.equals("")) {
+			return this.nomeSocial;
+		}
+		return this.nome;
+	}
+	
 }

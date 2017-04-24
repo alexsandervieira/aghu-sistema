@@ -27,8 +27,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.validation.constraints.Digits;
 
-
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Field;
@@ -36,6 +34,7 @@ import org.hibernate.search.annotations.Index;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.Store;
 
+import br.gov.mec.aghu.core.persistence.BaseEntityCodigo;
 import br.gov.mec.aghu.dominio.DominioClassifyXYZ;
 import br.gov.mec.aghu.dominio.DominioIndFotoSensibilidade;
 import br.gov.mec.aghu.dominio.DominioIndProducaoInterna;
@@ -44,7 +43,6 @@ import br.gov.mec.aghu.dominio.DominioSazonalidade;
 import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.dominio.DominioTipoResiduo;
-import br.gov.mec.aghu.core.persistence.BaseEntityCodigo;
 
 @SuppressWarnings({"PMD.AghuUsoIndevidoDaEnumDominioSimNaoEntity","PMD.ExcessiveClassLength"})
 @Entity
@@ -1112,9 +1110,18 @@ public class ScoMaterial extends BaseEntityCodigo<Integer> implements java.io.Se
 	}
 	
 	public enum Fields {
-		CODIGO("codigo"), NOME("nome"), UNIDADE_MEDIDA("unidadeMedida"), UNIDADE_MEDIDA_CODIGO("unidadeMedida.codigo"), SITUACAO("indSituacao"), IND_ESTOCAVEL(
-				"estocavel"), ESTOQUE_GERAL("estoquesGerais"), DESCRICAO("descricao"), GRUPO_MATERIAL("grupoMaterial"), GRUPO_MATERIAL_CODIGO(
-				"grupoMaterial.codigo"), NUMERO("numero"), GENERICO("indGenerico"), MENOR_PRECO("indMenorPreco"), PRODUCAO_INTERNA("indProducaoInterna"), SERVIDOR(
+		CODIGO_NATIVO("CODIGO"),
+		CODIGO("codigo")
+		, NOME("nome")
+		, NOME_NATIVO("NOME")
+		, UNIDADE_MEDIDA("unidadeMedida"), UNIDADE_MEDIDA_CODIGO("unidadeMedida.codigo"), SITUACAO("indSituacao")
+		, IND_ESTOCAVEL("estocavel")
+		, IND_ESTOCAVEL_NATIVO("IND_ESTOCAVEL")
+		, ESTOQUE_GERAL("estoquesGerais"), DESCRICAO("descricao")
+		, GRUPO_MATERIAL("grupoMaterial")
+		, GRUPO_MATERIAL_NATIVO("GMT_CODIGO")
+		, GRUPO_MATERIAL_CODIGO("grupoMaterial.codigo")
+		, NUMERO("numero"), GENERICO("indGenerico"), MENOR_PRECO("indMenorPreco"), PRODUCAO_INTERNA("indProducaoInterna"), SERVIDOR(
 				"servidor"), SERVIDOR_DESATIVADO("servidorDesativado"), SERVIDOR_ALTERADO("servidorAlteracao"), ATU_QTDE_DISPONIVEL("indAtuQtdeDisponivel"), CLASSIF_XYZ(
 				"classifXyz"), SAZONALIDADE("sazonalidade"), OBSERVACAO("observacao"), CONTROLE_VALIDADE("indControleValidade"), LOCAL_ESTOQUE(
 				"almSeqLocalEstq"), FATURAVEL("indFaturavel"), PADRONIZADO("indPadronizado"), FOTOSENSIVEL("indFotosensivel"), TIPO_USO("indTipoUso"), SOLICITACAO_COMPRA(

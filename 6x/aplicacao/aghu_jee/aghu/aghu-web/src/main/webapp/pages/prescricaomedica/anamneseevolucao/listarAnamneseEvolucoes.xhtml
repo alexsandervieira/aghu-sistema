@@ -36,7 +36,7 @@
                 <c:set var="anamnese" value="#{item}"/>
                 <p:column> 
                   <f:facet name="header"> 
-                    <h:outputText value="#{messages.LABEL_ACAO}"/> 
+                    <h:outputText value="#{messages.LABEL_ACAO}" /> 
                   </f:facet>  
                   <mec:commandLink id="botaoEditarAnamnese" title="#{messages.LABEL_EDITAR}" 
                      rendered="#{listarAnamneseEvolucaoController.verificaEdicaoAnamnese()}" 
@@ -81,8 +81,14 @@
                   <f:facet name="header"> 
                     <h:outputText value="#{messages.LABEL_ANAMNESE_ANAMNESES_PROFISSIONAL}"/> 
                   </f:facet>  
-                  <h:outputText value="#{anamnese.atendimento.servidor.pessoaFisica.nome}"/> 
+                  <h:outputText value="#{anamnese.servidor.pessoaFisica.nome}"/> 
                 </p:column> 
+                <p:column>
+                  <f:facet name="header">
+                    <h:outputText value="#{messages.LABEL_CATEGORIA_PROFISSIONAL}" />
+                  </f:facet>
+                  <h:outputText value="#{listarAnamneseEvolucaoController.qualificacaoAnamnese.tipoQualificacao.descricao}" />
+                </p:column>
                 <p:column> 
                   <f:facet name="header"> 
                     <h:outputText value="#{messages.LABEL_ANAMNESE_ANAMNESES_SITUACAO}"/> 
@@ -182,8 +188,16 @@
                   <f:facet name="header"> 
                     <h:outputText value="#{messages.LABEL_ANAMNESE_ANAMNESES_PROFISSIONAL}"/> 
                   </f:facet>  
-                  <h:outputText value="#{evolucao.servidor.pessoaFisica.nome}"/> 
-                </p:column>   
+                  <h:outputText value="#{evolucao.nomeProfissional}"/> 
+                </p:column>
+	            <p:column>
+	               	<f:facet name="header">
+	               		<h:outputText value="#{messages.LABEL_CATEGORIA_PROFISSIONAL}" />
+	               	</f:facet>
+	               	<ui:repeat var="categoria" value="#{evolucao.categoriasProfissional}">
+						<h:outputText value="#{categoria}" /><br />               		
+	               	</ui:repeat>
+                </p:column>
                 <p:column> 
                   <f:facet name="header"> 
                     <h:outputText value="#{messages.LABEL_ANAMNESE_EVOLUCOES_SITUACAO}"/> 

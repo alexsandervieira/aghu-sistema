@@ -339,6 +339,7 @@ public class SceAlmoxarifado extends BaseEntitySeq<Short> implements Serializabl
 	}
 
 	public enum Fields {
+		SEQ_NATIVO("SEQ"),
 		SEQ("seq"), CCT_CODIGO("centroCusto"), DESCRICAO("descricao"), DIAS_ESTOQUE_MINIMO(
 				"diasEstqMinimo"), DT_ALTERA_SITUACAO("dtAlteraSituacao"), IND_BLOQ_ENTR_TRANSF(
 				"indBloqEntrTransf"), IND_CALCULA_MEDIA_PONDERADA(

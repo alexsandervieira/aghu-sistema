@@ -38,6 +38,7 @@ public class VMbcProcEspDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao
 		criteria.add(Restrictions.eq(VMbcProcEsp.Fields.SITUACAO_ESP.toString(), DominioSituacao.A));
 		criteria.add(Restrictions.eq(VMbcProcEsp.Fields.SITUACAO_ESP_PROC.toString(), DominioSituacao.A));
 		criteria.add(Restrictions.eq(VMbcProcEsp.Fields.SITUACAO_SINONIMO.toString(), DominioSituacao.A));
+		criteria.add(Restrictions.eq(VMbcProcEsp.Fields.SITUACAO_PROC.toString(), DominioSituacao.A));
 		criteria.add(Restrictions.in(VMbcProcEsp.Fields.TIPO.toString(), new DominioTipoProcedimentoCirurgico[]{DominioTipoProcedimentoCirurgico.CIRURGIA,DominioTipoProcedimentoCirurgico.PROCEDIMENTO_DIAGNOSTICO_TERAPEUTICO}));
 		
 		//filtro suggestion

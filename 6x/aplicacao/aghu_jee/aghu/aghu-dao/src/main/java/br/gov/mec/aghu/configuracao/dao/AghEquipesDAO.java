@@ -36,7 +36,10 @@ public class AghEquipesDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<
 	private static final long serialVersionUID = -6748122738133172947L;
 
 	public List<AghEquipes> pesquisarPorNomeOuCodigo(String parametro) {
-		DetachedCriteria criteria = montarCriteriaParaNomeOuCodigo(parametro);
+		return this.pesquisarPorNomeOuCodigo(parametro, null);
+	}
+	public List<AghEquipes> pesquisarPorNomeOuCodigo(String parametro, List<Integer> listIdsEquipe) {
+		DetachedCriteria criteria = montarCriteriaParaNomeOuCodigo(parametro, listIdsEquipe);
 		criteria.addOrder(Order.asc(AghEquipes.Fields.NOME.toString()));
 		return executeCriteria(criteria);
 	}
@@ -80,6 +83,10 @@ public class AghEquipesDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<
 	}
 
 	private DetachedCriteria montarCriteriaParaNomeOuCodigo(String parametro) {
+		return montarCriteriaParaNomeOuCodigo(parametro, null);
+	}
+	
+	private DetachedCriteria montarCriteriaParaNomeOuCodigo(String parametro, List<Integer> listIdsEquipe) {
 		String nomeOuCodigo = StringUtils.trimToNull(parametro);
 		DetachedCriteria criteria = DetachedCriteria.forClass(AghEquipes.class);
 		if (StringUtils.isNotEmpty(nomeOuCodigo)) {
@@ -95,6 +102,10 @@ public class AghEquipesDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<
 						AghEquipes.Fields.NOME.toString(), nomeOuCodigo,
 						MatchMode.ANYWHERE));
 			}
+		}
+		if(listIdsEquipe != null && !listIdsEquipe.isEmpty()){
+			criteria.add(Restrictions.in(
+					AghEquipes.Fields.SEQ.toString(), listIdsEquipe));
 		}
 		return criteria;
 	}

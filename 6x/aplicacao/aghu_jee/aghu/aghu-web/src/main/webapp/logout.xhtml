@@ -24,7 +24,7 @@
 
 	<ui:define name="body">
 		<h:form prependId="false">
-			<pe:remoteCommand immediate="true" name="logout" action="#{loginController.logout}" process="@this"> 
+			<pe:remoteCommand immediate="true" name="logout" action="#{loginController.logout('LOGOUT ACIONADO PELO USUÁRIO')}" process="@this"> 
 	        </pe:remoteCommand>	
 		</h:form>	
 

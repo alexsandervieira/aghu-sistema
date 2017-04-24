@@ -15,7 +15,7 @@
       <h:form prependId="false" id="cadastroAlaForm"> 
         <aghu:panelGeral legend="Manter #{LABEL_ALA}"> 
           <aghu:linha> 
-            <mec:inputText label="#{messages.LABEL_CODIGO}" id="codigo" size="8" maxlength="1" readonly="#{not empty alaController.ala.codigo}" required="true" title="Digite um valor para identificar a entidade #{LABEL_ALA}." value="#{alaController.ala.codigo}" style="text-transform:uppercase"/>  
+            <mec:inputText label="#{messages.LABEL_CODIGO}" id="codigo" size="8" maxlength="2" readonly="#{not empty alaController.ala.codigo}" required="true" title="Digite um valor para identificar a entidade #{LABEL_ALA}." value="#{alaController.ala.codigo}" style="text-transform:uppercase"/>  
             <mec:inputText label="#{messages.LABEL_DESCRICAO}" id="descricao" size="90" maxlength="50" required="true" title="Digite uma descrição para a entidade #{LABEL_ALA}." value="#{alaController.ala.descricao}" style="text-transform:uppercase"/> 
           </aghu:linha> 
         </aghu:panelGeral>  

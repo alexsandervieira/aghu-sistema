@@ -300,7 +300,7 @@ public class EtiquetasON extends BaseBusiness {
 	}	
 	
 	private boolean limiteTamanhoNomePaciente(String nomePaciente) {
-		return nomePaciente.length() > 50;
+		return nomePaciente.length() > 34;
 	}
 
 	private Boolean imprimirPulseiraAdulto() throws ApplicationBusinessException {
@@ -373,14 +373,21 @@ public class EtiquetasON extends BaseBusiness {
 
 	private String recuperaNomePacienteParte2(String nomePaciente) {
 		if (limiteTamanhoNomePaciente(nomePaciente)) {
-			return removeAcentos(nomePaciente.substring(49, nomePaciente.length()));
+			String semAcento = null;
+			if(nomePaciente.length() < 67) {
+				semAcento = removeAcentos(nomePaciente.substring(34, nomePaciente.length()));
+			} else {
+				semAcento = removeAcentos(nomePaciente.substring(34, 63));
+				semAcento = semAcento.concat("...");
+			}
+			return semAcento;
 		}
 		return StringUtils.EMPTY;
 	}
 
 	private String recuperaNomePacienteParte1(String nomePaciente) {
 		if (limiteTamanhoNomePaciente(nomePaciente)) {
-			return removeAcentos(nomePaciente.substring(0, 49));
+			return removeAcentos(nomePaciente.substring(0, 34));
 		}
 		return removeAcentos(nomePaciente);
 	}

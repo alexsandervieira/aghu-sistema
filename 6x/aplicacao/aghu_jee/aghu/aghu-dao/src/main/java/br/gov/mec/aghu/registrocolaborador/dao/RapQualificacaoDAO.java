@@ -1,6 +1,7 @@
 package br.gov.mec.aghu.registrocolaborador.dao;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -320,12 +321,13 @@ public class RapQualificacaoDAO extends br.gov.mec.aghu.core.persistence.dao.Bas
 		qualificacao.getId().setSequencia(++sequencia);
 	}
 	
-	public List<RapQualificacao> pesquisarRapQualificacaoPorServidor(RapServidores servidor) {
+	public Collection<RapQualificacao> pesquisarRapQualificacaoPorServidor(RapServidores servidor) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(RapQualificacao.class);
 		
 		if (servidor != null) {			
 			RapServidores servidorAtachado = super.find(RapServidores.class, servidor.getId());
 			criteria.createAlias(RapQualificacao.Fields.PESSOA.toString(), "PF", JoinType.LEFT_OUTER_JOIN);
+			criteria.createAlias(RapQualificacao.Fields.TIPO_QUALIFICACAO.toString() , "TQ" ,JoinType.LEFT_OUTER_JOIN);
 			criteria.add(Restrictions.eq(RapQualificacao.Fields.PESSOA.toString(), servidorAtachado.getPessoaFisica()));
 		}
 		
@@ -335,7 +337,8 @@ public class RapQualificacaoDAO extends br.gov.mec.aghu.core.persistence.dao.Bas
 	
 	public RapQualificacao obterRapQualificacaoPorServidor(RapServidores servidor) {
 		
-		List<RapQualificacao> listaRapQualificacaoPorServidor =  this.pesquisarRapQualificacaoPorServidor(servidor);
+		List<RapQualificacao> listaRapQualificacaoPorServidor =  new ArrayList<RapQualificacao>();
+		listaRapQualificacaoPorServidor.addAll(pesquisarRapQualificacaoPorServidor(servidor));
 		
 		if(listaRapQualificacaoPorServidor !=null && !listaRapQualificacaoPorServidor.isEmpty()){
 			return listaRapQualificacaoPorServidor.get(0); // Retorna o primeiro da lista

@@ -33,6 +33,7 @@ import br.gov.mec.aghu.model.AipTipoLogradouros;
 import br.gov.mec.aghu.model.AipTituloLogradouros;
 import br.gov.mec.aghu.model.AipUfs;
 import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.paciente.cadastro.business.CadastroPacienteRN;
 import br.gov.mec.aghu.paciente.dao.AipBairrosDAO;
 import br.gov.mec.aghu.paciente.dao.AipCepLogradourosDAO;
 import br.gov.mec.aghu.paciente.dao.AipCidadesDAO;
@@ -127,6 +128,9 @@ public class CadastrosBasicosPacienteFacade extends BaseFacade implements ICadas
 	
 	@Inject
 	private AipBairrosDAO aipBairrosDAO;
+	
+	@Inject
+	private CadastroPacienteRN cadastroPacienteRN;
 	
 	private static final long serialVersionUID = 8575351578055979329L;
 
@@ -932,4 +936,7 @@ public class CadastrosBasicosPacienteFacade extends BaseFacade implements ICadas
 		return getOrigemProntuarioCRUD().pesquisaOrigemProntuarioPorCodigoOuDescricao(param);
 	}	
 	
+	public void existeOrigemPadrao(Short codigo) throws ApplicationBusinessException {
+		this.cadastroPacienteRN.existeOrigemPadrao(codigo);
+	}
 }

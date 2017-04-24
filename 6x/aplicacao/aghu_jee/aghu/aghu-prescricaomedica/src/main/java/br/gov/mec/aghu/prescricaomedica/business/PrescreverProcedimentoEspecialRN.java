@@ -569,6 +569,11 @@ public class PrescreverProcedimentoEspecialRN extends BaseBusiness {
 
 		prescProc.setServidor(servidorLogado);
 		prescProc.setCriadoEm(new Date());
+		
+		if(prescProc.getOrdem() == null){
+			Integer ordem = this.mpmPrescricaoProcedimentoDAO.buscaOrdemPrescricaoProcedimentos(prescProc.getPrescricaoMedica().getId(), prescProc.getPrescricaoMedica().getDthrFim());
+			prescProc.setOrdem(ordem);
+		}
 	}
 
 	/**

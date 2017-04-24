@@ -337,7 +337,7 @@ public class DadosAltaPacienteController extends ActionController {
 	}
 	
 	public void liberaCampoTransferencia(){
-		if(getTipoAltaMedica() != null && isMostrarLinkExcluirTipoAltaMedica() && this.getTipoAltaMedica().getCodigo().equalsIgnoreCase("E")){	
+		if(getTipoAltaMedica() != null && isMostrarLinkExcluirTipoAltaMedica() && this.getTipoAltaMedica().getpermitePermanenciaComAlta() != null && this.getTipoAltaMedica().getpermitePermanenciaComAlta()){	
 			liberarCampoTransferencia = false;
 		} else {
 			liberarCampoTransferencia = true;

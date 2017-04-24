@@ -28,6 +28,7 @@ import br.gov.mec.aghu.core.etc.DynamicDataModel;
 import br.gov.mec.aghu.core.etc.Paginator;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.dominio.DominioTurno;
@@ -39,12 +40,14 @@ import br.gov.mec.aghu.model.AacFormaAgendamento;
 import br.gov.mec.aghu.model.AacFormaAgendamentoId;
 import br.gov.mec.aghu.model.AacGradeAgendamenConsultas;
 import br.gov.mec.aghu.model.AacPagador;
+import br.gov.mec.aghu.model.AacPermissaoAgendamentoConsultas;
 import br.gov.mec.aghu.model.AacTipoAgendamento;
 import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.AghEquipes;
 import br.gov.mec.aghu.model.AghEspecialidades;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.model.RapServidoresId;
 import br.gov.mec.aghu.model.VAacSiglaUnfSala;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 
@@ -160,6 +163,8 @@ public class DisponibilidadeHorariosPaginatorController extends ActionController
 	private String prontuarioSumario;
 	
 	private Boolean visualizarPrimeirasConsultasSMS = false;
+	private Boolean usuarioPossuiPermissoes = false;
+	private RapServidores servidorLogado;
 	
     @PostConstruct
     	protected void inicializar() {
@@ -185,6 +190,14 @@ public class DisponibilidadeHorariosPaginatorController extends ActionController
 			}
 		}
 
+		try {
+			this.servidorLogado = registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado(), new Date());
+			List<AacPermissaoAgendamentoConsultas> listPermissao = ambulatorioFacade.obterListaPermAgndConsPorServidorTipo(this.servidorLogado, null);
+			this.usuarioPossuiPermissoes = listPermissao != null && !listPermissao.isEmpty();
+		} catch (ApplicationBusinessException e) {
+			apresentarExcecaoNegocio(e);
+		}
+	
 	}
 	
 	private void carregarParametros() {
@@ -214,7 +227,16 @@ public class DisponibilidadeHorariosPaginatorController extends ActionController
 		if (objPesquisa!=null && objPesquisa instanceof String){
 			objPesquisa = ((String) objPesquisa).trim();
 		}
-		return ambulatorioFacade.pesquisarTodasZonas(objPesquisa);
+		List<Integer> listIdsZona = null;
+		if(usuarioPossuiPermissoes){
+			listIdsZona = ambulatorioFacade.obterListaIdsPermAgndConsPorServidorTipo(this.servidorLogado, "UNF");
+			if(listIdsZona == null || listIdsZona.isEmpty()){
+				apresentarMsgNegocio(Severity.ERROR, "MSG_ERRO_SERVIDOR_SEM_PERMISSAO_ZONA");
+				return null;
+			}
+		}
+	
+		return ambulatorioFacade.pesquisarTodasZonas(objPesquisa, listIdsZona);
 	}
 	
 	public void obterZonaSala()  {	
@@ -253,19 +275,25 @@ public class DisponibilidadeHorariosPaginatorController extends ActionController
 				listEspecialidade = obterEspecialidade(null);
 			}
 
+	    	//Verificar Permissões do Usuário Logado
+			List<Integer> listIdsEspe = ambulatorioFacade.obterListaIdsPermAgndConsPorServidorTipo(this.servidorLogado, "ESP");
+			List<Integer> listIdsEqp = ambulatorioFacade.obterListaIdsPermAgndConsPorServidorTipo(this.servidorLogado, "EQP");
+			List<Integer> listIdsUnf = ambulatorioFacade.obterListaIdsPermAgndConsPorServidorTipo(this.servidorLogado, "UNF");
+			List<Integer> listIdsGrd = ambulatorioFacade.obterListaIdsPermAgndConsPorServidorTipo(this.servidorLogado, "GRD");
+			List<RapServidoresId> listIdsProf = ambulatorioFacade.obterListaProfPermAgndConsPorServidor(this.servidorLogado);
+			visualizarPrimeirasConsultasSMS = cascaFacade.usuarioTemPermissao(obterLoginUsuarioLogado(), "visualizarPrimeirasConsultasSMS");
+
 			this.lista = ambulatorioFacade.listarDisponibilidadeHorarios(seq,
 					unfSeq, especialidade, equipe, profissional, pagador,
 					autorizacao, condicao, dtConsulta, horaConsulta, mesInicio,
 					mesFim, diaSemana, disponibilidade, zona, zonaSala,
 					ambulatorioFacade.definePeriodoTurno(turno),
-					listEspecialidade, visualizarPrimeirasConsultasSMS);
+					listEspecialidade, visualizarPrimeirasConsultasSMS, listIdsEspe, listIdsEqp, listIdsUnf, listIdsGrd, listIdsProf);
 		} catch (ApplicationBusinessException e) {
 			apresentarExcecaoNegocio(e);
 		    LOG.error(e.getMessage(), e);
 		}
 	    
-	    visualizarPrimeirasConsultasSMS = cascaFacade.usuarioTemPermissao(obterLoginUsuarioLogado(), "visualizarPrimeirasConsultasSMS");
-
 	    dataModel.reiniciarPaginator();
 	} 
 
@@ -274,6 +302,16 @@ public class DisponibilidadeHorariosPaginatorController extends ActionController
      */
 	public void validarPesquisa() {
 		try {
+			if(seq != null){
+				RapServidores servidorLogado = null;
+					servidorLogado = registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado(),
+									new Date());
+
+				if(usuarioPossuiPermissoes && this.ambulatorioFacade.obterAacPermissaoAgendConsultaPorServidorGrade(servidorLogado, seq) == null){
+					apresentarMsgNegocio(Severity.ERROR, "MSG_ERRO_SERVIDOR_SEM_PERMISSAO_GRADE");
+					return;
+				}
+			}
 			this.ambulatorioFacade.validarPesquisaDisponibilidadeHorarios(seq,
 					especialidade, horaConsulta, dtConsulta, mesInicio, mesFim,
 					diaSemana, zona, turno);
@@ -336,9 +374,18 @@ public class DisponibilidadeHorariosPaginatorController extends ActionController
 			if(origemSumario && especialidade == null){
 				listEspecialidade = obterEspecialidade(null);
 			}
+
+			//Verificar Permissões do Usuário Logado
+			List<Integer> listIdsEspe = ambulatorioFacade.obterListaIdsPermAgndConsPorServidorTipo(this.servidorLogado, "ESP");
+			List<Integer> listIdsEqp = ambulatorioFacade.obterListaIdsPermAgndConsPorServidorTipo(this.servidorLogado, "EQP");
+			List<Integer> listIdsUnf = ambulatorioFacade.obterListaIdsPermAgndConsPorServidorTipo(this.servidorLogado, "UNF");
+			List<Integer> listIdsGrd = ambulatorioFacade.obterListaIdsPermAgndConsPorServidorTipo(this.servidorLogado, "GRD");
+			List<RapServidoresId> listIdsProf = ambulatorioFacade.obterListaProfPermAgndConsPorServidor(this.servidorLogado);
+			
 			result = ambulatorioFacade.listarDisponibilidadeHorariosCount(seq, unfSeq, especialidade, equipe, profissional, pagador,
 				autorizacao, condicao, dtConsulta, horaConsulta, mesInicio, mesFim, diaSemana, disponibilidade,
-				zona, zonaSala, ambulatorioFacade.definePeriodoTurno(turno), listEspecialidade, visualizarPrimeirasConsultasSMS);
+				zona, zonaSala, ambulatorioFacade.definePeriodoTurno(turno), listEspecialidade, visualizarPrimeirasConsultasSMS,
+				listIdsEspe, listIdsEqp, listIdsUnf, listIdsGrd, listIdsProf);
 		} catch (ApplicationBusinessException e) {
 		    apresentarExcecaoNegocio(e);
 		    LOG.error(e.getMessage(), e);
@@ -420,22 +467,31 @@ public class DisponibilidadeHorariosPaginatorController extends ActionController
     }
 
     public List<AghEspecialidades> obterEspecialidade(String parametro) {
-    	if(this.origemSumario){
-    		RapServidores servidorLogado = null;
-    		try {
-    			servidorLogado = registroColaboradorFacade.obterServidorAtivoPorUsuario(obterLoginUsuarioLogado(),
-    							new Date());
-    		} catch (ApplicationBusinessException e) {
-    			apresentarExcecaoNegocio(e);
-    		}
-    		return aghuFacade.pesquisarEspecialidadesAtivasOrigemSumario((String) parametro, atendimento.getSeq(), servidorLogado);
+		List<Integer> listIdsEspe = null;
+		if(usuarioPossuiPermissoes){
+			listIdsEspe = ambulatorioFacade.obterListaIdsPermAgndConsPorServidorTipo(this.servidorLogado, "ESP");
+			if(listIdsEspe == null || listIdsEspe.isEmpty()){
+				apresentarMsgNegocio(Severity.ERROR, "MSG_ERRO_SERVIDOR_SEM_PERMISSAO_ESPECIALIDADE");
+				return null;
+			}
+		}
+   		if(this.origemSumario){
+    		return aghuFacade.pesquisarEspecialidadesAtivasOrigemSumario((String) parametro, atendimento.getSeq(), this.servidorLogado);
     	}else {
-    		return aghuFacade.pesquisarEspecialidadesAtivas((String) parametro);
+    		return aghuFacade.pesquisarEspecialidadesAtivas((String) parametro, listIdsEspe);
     	}
     }
 
     public List<AghEquipes> obterEquipe(String parametro) {
-	return aghuFacade.getListaEquipes((String) parametro);
+		List<Integer> listIdsEquipe = null;
+		if(usuarioPossuiPermissoes){
+			listIdsEquipe = ambulatorioFacade.obterListaIdsPermAgndConsPorServidorTipo(this.servidorLogado, "EQP");
+			if(listIdsEquipe == null || listIdsEquipe.isEmpty()){
+				apresentarMsgNegocio(Severity.ERROR, "MSG_ERRO_SERVIDOR_SEM_PERMISSAO_EQUIPE");
+				return null;
+			}
+		}
+		return aghuFacade.getListaEquipes((String) parametro, listIdsEquipe);
     }
 
     public List<EspCrmVO> pesquisarMedico(Object descricao) throws ApplicationBusinessException {
@@ -844,7 +900,15 @@ public class DisponibilidadeHorariosPaginatorController extends ActionController
 	}
 	
 	public List<RapServidores> obterProfissionaisPorEquipe(String parametro) {
-		return registroColaboradorFacade.listarServidoresComPessoaFisicaPorEquipe((String) parametro, equipe);
+		List<RapServidoresId> listIdProfissionais = null;
+		if(usuarioPossuiPermissoes){
+			listIdProfissionais = ambulatorioFacade.obterListaProfPermAgndConsPorServidor(this.servidorLogado);
+			if(listIdProfissionais == null || listIdProfissionais.isEmpty()){
+				apresentarMsgNegocio(Severity.ERROR, "MSG_ERRO_SERVIDOR_SEM_PERMISSAO_PROFISSIONAL");
+				return null;
+			}
+		}
+		return registroColaboradorFacade.listarServidoresComPessoaFisicaPorEquipe((String) parametro, equipe, listIdProfissionais);
 	}
 	
 }

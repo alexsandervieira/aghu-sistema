@@ -322,6 +322,7 @@ xmlns:mf="http://www.mec.gov.br/taglib">
                   <p:outputPanel id="panelEvolucao" layout="block">
                   <mec:commandLink action="#{listaPacientesInternadosController.realizarChamaEvolucao}"
                                    rendered="#{_listaPacientes.statusEvolucao != null}"
+                                   disabled="#{(mf:hasPermission(securityController, 'paciente,somenteLeitura'))}"
                                    styleClass="icon-paciente-evolucao-conectado silk-icon"
                                    ajax="true"
                                    immediate="true"
@@ -356,7 +357,7 @@ xmlns:mf="http://www.mec.gov.br/taglib">
                 			action="#{listaPacientesInternadosController.redirecionarListarAnamneseEvolucoes}"
                 			rendered="#{_listaPacientes.statusAnamneseEvolucao != null}"
                 			styleClass="#{listaPacientesInternadosController.getBundle().getString('ICONE_'.concat(_listaPacientes.statusAnamneseEvolucao.name()))} silk-icon">
-                			 <f:setPropertyActionListener target="#{listarAnamneseEvolucaoController.atdSeq}" value="#{listaPacientesInternadosController.atdSeq}" for="command"/>  
+                			 <f:setPropertyActionListener target="#{listarAnamneseEvolucaoController.atdSeq}" value="#{_listaPacientes.atdSeq}" for="command"/>  
        			 			 <f:setPropertyActionListener target="#{listarAnamneseEvolucaoController.paginaChamadora}" value="prescricaomedica-pesquisarListaPacientesInternados" for="command"/>
                 		</mec:commandLink>
                 	</p:outputPanel>
@@ -380,7 +381,7 @@ xmlns:mf="http://www.mec.gov.br/taglib">
                         value="#{messages.LABEL_PRESCREVER}"
                         rendered="#{listaPacientesInternadosController.isPrescreverAghweb() == false}"
                         action="#{listaPacientesInternadosController.realizarChamadaPrescricao}"
-                        disabled="#{empty listaPacientesInternadosController.pacienteListaProfissionalVO or listaPacientesInternadosController.disableButtonPrescrever or (mf:hasPermission(securityController, 'paciente,somenteLeitura'))}"
+                        disabled="#{(empty listaPacientesInternadosController.pacienteListaProfissionalVO) or (listaPacientesInternadosController.disableButtonPrescrever) or (mf:hasPermission(securityController, 'paciente,somenteLeitura'))}"
                         styleClass="bt_cinza">
                 <f:setPropertyActionListener target="#{verificarPrescricaoMedicaController.atendimentoSeq}" value="#{listaPacientesInternadosController.atdSeq}" for="command"/>  
                 <f:setPropertyActionListener target="#{verificarPrescricaoMedicaController.voltarPara}" value="prescricaomedica-pesquisarListaPacientesInternados" for="command"/> 
@@ -392,11 +393,32 @@ xmlns:mf="http://www.mec.gov.br/taglib">
               empty listaPacientesInternadosController.pacienteListaProfissionalVO and 
               (mf:hasPermission(securityController, 'paciente,somenteLeitura')) or
               listaPacientesInternadosController.aghuBotoesExameHemoterapia}" 
-              rendered="#{listaPacientesInternadosController.verificarModuloExameAtivo()}" styleClass="bt_cinza">
+              rendered="#{listaPacientesInternadosController.verificarModuloExameAtivo()  and (mf:hasPermission(securityController,'/exames/solicitacao/solicitacaoExameList.xhtml,render') and mf:hasPermission(securityController,'/exames/solicitacao/solicitacaoExameCRUD.xhtml,render') and listaPacientesInternadosController.buscaParametroAtivaDesativaSolicitacaoExames())}" styleClass="bt_cinza">
                 <f:setPropertyActionListener target="#{solicitacaoExameController.atendimentoSeq}" value="#{listaPacientesInternadosController.atdSeq}" for="command"/>  
                 <f:setPropertyActionListener target="#{solicitacaoExameController.atendimento}" value="#{listaPacientesInternadosController.atendimento}" for="command"/>
                 <f:setPropertyActionListener target="#{solicitacaoExameController.paginaChamadora}" value="prescricaomedica-pesquisarListaPacientesInternados" for="command"/> 
               </mec:commandButton> 
+
+
+              <!-- mec:commandButton id="bt_evolucao_aghuse"
+                value="# messages.LABEL_EVOLUCAO}" 
+                disabled="# listaPacientesInternadosController.habilitarBotaoEvolucaoAghuse() or empty listaPacientesInternadosController.pacienteListaProfissionalVO or (mf:hasPermission(securityController, 'paciente,somenteLeitura'))}"
+                action="# listaPacientesInternadosController.direcionarEvolucaoAghuse}"
+                styleClass="bt_cinza">
+                <f:setPropertyActionListener target="# atenderPacientesEvolucaoController.origem}" value="prescricaomedica-pesquisarListaPacientesInternados" for="command"/>
+                <f:setPropertyActionListener target="# atenderPacientesEvolucaoController.internado}" value="true" for="command"/>
+                <f:setPropertyActionListener target="# atenderPacientesEvolucaoController.pacienteListaProfissionalVO}" value="# listaPacientesInternadosController.pacienteListaProfissionalVO}" for="command"/>
+             </mec:commandButton -->
+             
+       		<!-- mec:commandButton id="bt_anamnese_aghuse"
+                value="# messages.LABEL_ANAMNESE}" 
+                disabled="# listaPacientesInternadosController.habilitarBotaoAnamneseAghuse() or empty listaPacientesInternadosController.pacienteListaProfissionalVO or (mf:hasPermission(securityController, 'paciente,somenteLeitura'))}"
+                action="# listaPacientesInternadosController.direcionarAnamneseAghuse}"
+                styleClass="bt_cinza">
+                <f:setPropertyActionListener target="# atenderPacientesEvolucaoController.origem}" value="prescricaomedica-pesquisarListaPacientesInternados" for="command"/>
+                <f:setPropertyActionListener target="# atenderPacientesEvolucaoController.internado}" value="true" for="command"/>
+                <f:setPropertyActionListener target="# atenderPacientesEvolucaoController.pacienteListaProfissionalVO}" value="# listaPacientesInternadosController.pacienteListaProfissionalVO}" for="command"/>
+             </mec:commandButton -->             
               
                <mec:commandButton id="bt_anamnese_evolucao" value="#{messages.LABEL_ANAMNESE_EVOLUCAO}"
               	action="#{listaPacientesInternadosController.redirecionarListarAnamneseEvolucoes}"
@@ -415,7 +437,6 @@ xmlns:mf="http://www.mec.gov.br/taglib">
             
               <mec:commandButton id="bt_evolucao"
                                  value="#{messages.LABEL_EVOLUCAO}"
-                                 disabled="#{!listaPacientesInternadosController.isToInvokeAghWebOnBtnEvolucao() or empty listaPacientesInternadosController.pacienteListaProfissionalVO}"
                                  onclick="open_modal_aghweb('#{listaPacientesInternadosController.urlBaseWebForms}', '#{listaPacientesInternadosController.atdSeq}', '#{listaPacientesInternadosController.obterTokenUsuarioLogado()}', '#{listaPacientesInternadosController.banco}', 'mamf_atu_internacao.fmx'); return false;"
                                  styleClass="bt_cinza"
                                  rendered="false"/>

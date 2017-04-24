@@ -232,7 +232,7 @@ public class AelUnfExecutaExamesDAO extends br.gov.mec.aghu.core.persistence.dao
 	}
 	
 	public List<ExameSuggestionVO> pesquisaUnidadeExecutaSinonimoExame(String nomeExame) {
-		return pesquisaUnidadeExecutaSinonimoExame(nomeExame, null, false, null, null);
+		return pesquisaUnidadeExecutaSinonimoExame(nomeExame, null, false, null, null, false);
 	}
 	
 	/**
@@ -283,7 +283,7 @@ public class AelUnfExecutaExamesDAO extends br.gov.mec.aghu.core.persistence.dao
 	 * @param nomeExame
 	 * @return Lista de array de duas posicoes de Object. Posicoes: { AelUnfExecutaExames, AelSinonimoExame }.
 	 */
-	public List<ExameSuggestionVO> pesquisaUnidadeExecutaSinonimoExame(String nomeExame,Short seqUnidade, Boolean isSus, RapServidoresId idServidor, Integer seqAtendimento) {
+	public List<ExameSuggestionVO> pesquisaUnidadeExecutaSinonimoExame(String nomeExame,Short seqUnidade, Boolean isSus, RapServidoresId idServidor, Integer seqAtendimento, Boolean filtroPorUnidade) {
 
         	DetachedCriteria criteria = DetachedCriteria.forClass(AelUnfExecutaExames.class, "UFE");
         	criteria.createAlias(AelUnfExecutaExames.Fields.EXAME_MATERIAL_ANALISE.toString(), "EMA", JoinType.INNER_JOIN);
@@ -302,7 +302,7 @@ public class AelUnfExecutaExamesDAO extends br.gov.mec.aghu.core.persistence.dao
         	criteria.add(Restrictions.eq("MAN." + AelMateriaisAnalises.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
         	criteria.add(Restrictions.eq("UNF." + AghUnidadesFuncionais.Fields.SITUACAO.toString(), DominioSituacao.A));
         
-        	if (seqUnidade != null && isSus) {
+        	if (seqUnidade != null && isSus == null || filtroPorUnidade && seqUnidade != null) {
         	    criteria.createAlias(AelUnfExecutaExames.Fields.PERMISSAOUNIDSOLICS.toString(), "UPS", JoinType.INNER_JOIN);
         	    criteria.add(Restrictions.eq("UPS." + AelPermissaoUnidSolic.Fields.UNF_SEQ_SOLICITANTE.toString(), seqUnidade));
         	}
@@ -314,10 +314,6 @@ public class AelUnfExecutaExamesDAO extends br.gov.mec.aghu.core.persistence.dao
             		,Restrictions.ilike("MAN."+AelMateriaisAnalises.Fields.DESCRICAO.toString(), nomeExame, MatchMode.ANYWHERE)
             		,Restrictions.ilike("UNF."+AghUnidadesFuncionais.Fields.DESCRICAO.toString(), nomeExame, MatchMode.ANYWHERE)
             		),
-//        	    Restrictions.or(Restrictions.ilike("SIE."+AelSinonimoExame.Fields.NOME.toString(), nomeExame.toUpperCase())
-//            		,Restrictions.ilike("MAN."+AelMateriaisAnalises.Fields.DESCRICAO.toString(), nomeExame.toUpperCase())
-//            		,Restrictions.ilike("UNF."+AghUnidadesFuncionais.Fields.DESCRICAO.toString(), nomeExame.toUpperCase())
-//            		),
         	    Restrictions.or(Restrictions.ilike("SIE."+AelSinonimoExame.Fields.NOME.toString(), StringUtil.removeCaracteresDiferentesAlfabetoEacentos(nomeExame.toUpperCase()), MatchMode.ANYWHERE)
             		,Restrictions.ilike("MAN."+AelMateriaisAnalises.Fields.DESCRICAO.toString(), StringUtil.removeCaracteresDiferentesAlfabetoEacentos(nomeExame.toUpperCase()), MatchMode.ANYWHERE)
             		,Restrictions.ilike("UNF."+AghUnidadesFuncionais.Fields.DESCRICAO.toString(), StringUtil.removeCaracteresDiferentesAlfabetoEacentos(nomeExame.toUpperCase()), MatchMode.ANYWHERE)

@@ -129,8 +129,8 @@ public class AinResponsaveisPaciente extends BaseEntitySeq<Integer> implements j
 		this.internacao = internacao;
 	}
 
-	@Column(name = "NOME", nullable = false, length = 60)
-	@Length(max = 60, message="Nome deve ter no máximo 60 caracteres.")
+	@Column(name = "NOME", nullable = false)
+	@Length(max = 100, message="Nome deve ter no máximo 100 caracteres.")
 	public String getNome() {
 		return this.nome;
 	}

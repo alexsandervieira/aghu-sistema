@@ -9,6 +9,8 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 
@@ -20,9 +22,10 @@ import br.gov.mec.aghu.casca.model.PerfisUsuarios;
 import br.gov.mec.aghu.casca.model.Permissao;
 import br.gov.mec.aghu.casca.model.PermissoesComponentes;
 import br.gov.mec.aghu.casca.model.Usuario;
-import br.gov.mec.aghu.dominio.DominioSituacao;
+import br.gov.mec.aghu.core.business.BaseBusiness;
 import br.gov.mec.aghu.core.commons.seguranca.IPermissionService;
 import br.gov.mec.aghu.core.persistence.dao.DataAccessService;
+import br.gov.mec.aghu.dominio.DominioSituacao;
 
 /**
  * Classe responsável por fazer a verificação de permissão (target/action) para
@@ -33,13 +36,16 @@ import br.gov.mec.aghu.core.persistence.dao.DataAccessService;
  */
 @Stateless
 @Remote (IPermissionService.class)
-public class PermissionService implements IPermissionService {
+public class PermissionService extends BaseBusiness implements IPermissionService {
 
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 146037184236684192L;
+
+
+	private static final Log LOG = LogFactory.getLog(PermissionService.class);
 	
 	
 	@Inject
@@ -98,6 +104,20 @@ public class PermissionService implements IPermissionService {
 		criteria.setCacheable(true);
 	
 		return criteria.list();
+	}
+	
+	
+	
+	
+	@Override
+	protected Log getLogger() {
+		return LOG;
+	}
+
+	@Override
+	public String obterLoginUsuarioLogado() {
+		String usuario = super.obterLoginUsuarioLogado(); 
+		return usuario;
 	}
 
 }

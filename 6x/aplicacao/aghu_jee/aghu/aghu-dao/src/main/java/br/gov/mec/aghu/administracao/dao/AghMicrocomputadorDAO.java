@@ -56,7 +56,8 @@ public class AghMicrocomputadorDAO extends br.gov.mec.aghu.core.persistence.dao.
 		criteria.createAlias(AghMicrocomputador.Fields.UNIDFUNCIONALSALA.toString(), "USL", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias("UNF." + AghUnidadesFuncionais.Fields.ALMOXARIFADO.toString(), "ALM", JoinType.LEFT_OUTER_JOIN);
 		
-		criteria.add(Restrictions.or(Restrictions.eq(AghMicrocomputador.Fields.NOME.toString(), computadorRede).ignoreCase(), Restrictions.eq(AghMicrocomputador.Fields.IP.toString(), computadorRede)));
+		criteria.add(Restrictions.or(Restrictions.eq(AghMicrocomputador.Fields.NOME.toString(), computadorRede).ignoreCase(), 
+					 Restrictions.eq(AghMicrocomputador.Fields.IP.toString(), computadorRede)));
 		if(caracteristica != null) {
 			criteria.createAlias(AghMicrocomputador.Fields.CARACTERISTICAS.toString(), CARACTERISTICA2);
 			criteria.add(Restrictions.eq(CARACTERISTICA2 + "." + AghCaractMicrocomputador.Fields.CARACTERISTICA.toString(), caracteristica));

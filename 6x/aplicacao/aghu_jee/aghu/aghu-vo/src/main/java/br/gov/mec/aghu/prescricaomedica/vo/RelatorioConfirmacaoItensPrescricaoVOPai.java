@@ -55,11 +55,12 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 	
 	private String dtHoraInternacao;
 
+	private String unidadeFuncionalInternacao;
 	/**
 	 * 
 	 * @param dieta
 	 */
-	public void adicionarDietaConfirmada(String descricaoDieta, String operacao, Integer ordem) {
+	public void adicionarDietaConfirmada(String descricaoDieta, String operacao, Integer ordem, String aprazamento) {
 		if (dietasConfirmadas == null) {
 			dietasConfirmadas = new ArrayList<RelatorioConfirmacaoItensPrescricaoVO>();
 		}
@@ -68,6 +69,7 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 		voDieta.setTipo("DIETA");
 		voDieta.setOperacao(operacao);
 		voDieta.setOrdem(ordem);
+		voDieta.setAprazamento(aprazamento);
 		dietasConfirmadas.add(voDieta);
 	}
 
@@ -86,6 +88,25 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 		voMedicamento.setOperacao(operacao);
 		voMedicamento.setOrdem(ordem);
 		voMedicamento.setAprazamento(aprazamento);
+		voMedicamento.setIndAntiMicrobiano(indAntiMicrobiano);
+		medicamentosConfirmados.add(voMedicamento);
+	}
+
+	/**
+	 * 
+	 * @param medicamento
+	 */
+	public void adicionarMedicamentoConfirmado(List<PosolociaDosagemMedicamentoVO> listDescMedicamentos,
+			String aprazamento, Boolean indAntiMicrobiano, String operacao, Integer ordem) {
+		if (medicamentosConfirmados == null) {
+			medicamentosConfirmados = new ArrayList<RelatorioConfirmacaoItensPrescricaoVO>();
+		}
+		RelatorioConfirmacaoItensPrescricaoVO voMedicamento = new RelatorioConfirmacaoItensPrescricaoVO();
+		voMedicamento.setTipo("MEDICAMENTOS");
+		voMedicamento.setOperacao(operacao);
+		voMedicamento.setOrdem(ordem);
+		voMedicamento.setAprazamento(aprazamento);
+		voMedicamento.setListDescMedicamentos(listDescMedicamentos);
 		voMedicamento.setIndAntiMicrobiano(indAntiMicrobiano);
 		medicamentosConfirmados.add(voMedicamento);
 	}
@@ -125,6 +146,25 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 		voSolucao.setOrdem(ordem);
 		solucoesConfirmadas.add(voSolucao);
 	}
+
+	/**
+	 * 
+	 * @param solucao
+	 */
+	public void adicionarSolucaoConfirmada(List<PosolociaDosagemMedicamentoVO> listDescMedicamentos,
+			String aprazamento, String operacao, Integer ordem) {
+		if (solucoesConfirmadas == null) {
+			solucoesConfirmadas = new ArrayList<RelatorioConfirmacaoItensPrescricaoVO>();
+		}
+		RelatorioConfirmacaoItensPrescricaoVO voSolucao = new RelatorioConfirmacaoItensPrescricaoVO();
+		voSolucao.setListDescMedicamentos(listDescMedicamentos);
+		voSolucao.setAprazamento(aprazamento);//aprazamento = "teste aprazamento";
+		voSolucao.setTipo("SOLUÇÕES");
+		voSolucao.setOperacao(operacao);
+		voSolucao.setOrdem(ordem);
+		solucoesConfirmadas.add(voSolucao);
+	}
+
 
 	/**
 	 * 
@@ -204,7 +244,7 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 
 	private void formataIndiceProcedimentosConfirmados(Integer indice) {
 		if (getProcedimentosConfirmados() != null) {
-			Collections.sort(getProcedimentosConfirmados());
+			//Collections.sort(getProcedimentosConfirmados());
 			for (RelatorioConfirmacaoItensPrescricaoVO vo : getProcedimentosConfirmados()) {
 				vo.setNumero(indice);
 				indice++;
@@ -214,7 +254,7 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 
 	private Integer formataIndiceNptConfirmadas(Integer indice) {
 		if (getNptConfirmadas() != null) {
-			Collections.sort(getNptConfirmadas());
+			//Collections.sort(getNptConfirmadas());
 			for (RelatorioConfirmacaoItensPrescricaoVO vo : getNptConfirmadas()) {
 				vo.setNumero(indice);
 				indice++;
@@ -225,7 +265,7 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 
 	private Integer formataIndiceHemoterapiasConfirmadas(Integer indice) {
 		if (getHemoterapiasConfirmadas() != null) {
-			Collections.sort(getHemoterapiasConfirmadas());
+			//Collections.sort(getHemoterapiasConfirmadas());
 			for (RelatorioConfirmacaoItensPrescricaoVO vo : getHemoterapiasConfirmadas()) {
 				vo.setNumero(indice);
 				indice++;
@@ -236,7 +276,7 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 
 	private Integer formataIndiceConsultoriasConfirmadas(Integer indice) {
 		if (getConsultoriasConfirmadas() != null) {
-			Collections.sort(getConsultoriasConfirmadas());
+			//Collections.sort(getConsultoriasConfirmadas());
 			for (RelatorioConfirmacaoItensPrescricaoVO vo : getConsultoriasConfirmadas()) {
 				vo.setNumero(indice);
 				indice++;
@@ -247,7 +287,7 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 
 	private Integer formataIndiceSolucoesConfirmadas(Integer indice) {
 		if (getSolucoesConfirmadas() != null) {
-			Collections.sort(getSolucoesConfirmadas());
+			//Collections.sort(getSolucoesConfirmadas());
 			for (RelatorioConfirmacaoItensPrescricaoVO vo : getSolucoesConfirmadas()) {
 				vo.setNumero(indice);
 				indice++;
@@ -258,7 +298,7 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 
 	private Integer formataIndiceMedicamentosConfirmados(Integer indice) {
 		if (getMedicamentosConfirmados() != null) {
-			Collections.sort(getMedicamentosConfirmados());
+			//Collections.sort(getMedicamentosConfirmados());
 			for (RelatorioConfirmacaoItensPrescricaoVO vo : getMedicamentosConfirmados()) {
 				vo.setNumero(indice);
 				indice++;
@@ -269,7 +309,7 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 
 	private Integer formataIndiceCuidadosConfirmados(Integer indice) {
 		if (getCuidadosConfirmados() != null) {
-			Collections.sort(getCuidadosConfirmados());
+			//Collections.sort(getCuidadosConfirmados());
 			for (RelatorioConfirmacaoItensPrescricaoVO vo : getCuidadosConfirmados()) {
 				vo.setNumero(indice);
 				indice++;
@@ -280,7 +320,7 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 
 	private Integer formataIndiceDietasConfirmadas(Integer indice) {
 		if (getDietasConfirmadas() != null) {
-			Collections.sort(getDietasConfirmadas());
+			//Collections.sort(getDietasConfirmadas());
 			for (RelatorioConfirmacaoItensPrescricaoVO vo : getDietasConfirmadas()) {
 				vo.setNumero(indice);
 				indice++;
@@ -494,7 +534,15 @@ public class RelatorioConfirmacaoItensPrescricaoVOPai implements Serializable, C
 	public void setDtHoraInternacao(String dtHoraInternacao) {
 		this.dtHoraInternacao = dtHoraInternacao;
 	}
-	
+
+	public String getUnidadeFuncionalInternacao() {
+		return unidadeFuncionalInternacao;
+	}
+
+	public void setUnidadeFuncionalInternacao(String unidadeFuncionalInternacao) {
+		this.unidadeFuncionalInternacao = unidadeFuncionalInternacao;
+	}
+
 	public RelatorioConfirmacaoItensPrescricaoVOPai copiar() {
 		try {
 			return (RelatorioConfirmacaoItensPrescricaoVOPai) this.clone();

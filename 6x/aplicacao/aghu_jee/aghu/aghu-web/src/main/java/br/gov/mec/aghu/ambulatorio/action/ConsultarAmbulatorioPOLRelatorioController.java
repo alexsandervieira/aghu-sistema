@@ -8,8 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
 import javax.inject.Inject;
 import javax.transaction.SystemException;
+
+import net.sf.jasperreports.engine.JRException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,17 +20,18 @@ import org.jboss.weld.context.ConversationContext;
 import org.jboss.weld.context.http.Http;
 import org.primefaces.model.StreamedContent;
 
-import com.itextpdf.text.DocumentException;
-
 import br.gov.mec.aghu.action.impressao.SistemaImpressao;
 import br.gov.mec.aghu.action.report.ActionReport;
+import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
+import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.ambulatorio.vo.RelatorioAnamneseEvolucaoVO;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.core.report.DocumentoJasper;
 import br.gov.mec.aghu.impressao.SistemaImpressaoException;
-import net.sf.jasperreports.engine.JRException;
+
+import com.itextpdf.text.DocumentException;
 
 
 public class ConsultarAmbulatorioPOLRelatorioController extends ActionReport {
@@ -38,7 +42,7 @@ public class ConsultarAmbulatorioPOLRelatorioController extends ActionReport {
 	private static final long serialVersionUID = -3744812806595136737L;
 	
 	private String voltarPara;
-
+	
 	@Inject
 	private SistemaImpressao sistemaImpressao;
 	
@@ -47,6 +51,8 @@ public class ConsultarAmbulatorioPOLRelatorioController extends ActionReport {
 
 	private List<RelatorioAnamneseEvolucaoVO> colecao = new ArrayList<RelatorioAnamneseEvolucaoVO>(0);
 	
+	@EJB
+	private IParametroFacade parametroFacade;
 
 	@PostConstruct
 	protected void inicializar(){
@@ -93,7 +99,10 @@ public class ConsultarAmbulatorioPOLRelatorioController extends ActionReport {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("dataAtual", new Date());
 		try {
-			params.put("caminhoLogo", recuperarCaminhoLogo());
+			params.put("footerNomeHospital", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_RAZAO_SOCIAL).getVlrTexto());
+			params.put("footerEnderecoHospitalLinha1", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_END_COMPLETO_LINHA1).getVlrTexto());
+			params.put("footerEnderecoHospitalLinha2", parametroFacade.buscarAghParametro(AghuParametrosEnum.P_HOSPITAL_END_COMPLETO_LINHA2).getVlrTexto());
+			params.put("footerCaminhoLogo", parametroFacade.recuperarCaminhoLogo2Relativo());
 		} catch (BaseException e) {
 			LOG.error("Erro ao tentar recuparar logotipo para o relatório", e);
 		}

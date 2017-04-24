@@ -371,12 +371,11 @@ body {
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     margin: 2px 0;    
 }
-/* Botoes de acao da tabela */
+/* Botoes de acao da tabela - width: 150px;*/
 #tabelaAcao {
 	border: 1px solid #336a20;
 	border-radius: 5px;
 	padding: 10px 7px 5px 10px;
-	width: 150px;
 	display: block;
 }
 #tabelaAcao button {

@@ -315,6 +315,7 @@ public class RelatorioRegistroControlePacienteON extends BaseBusiness {
 			// celula - valor
 			relRegistroControlePacienteVO.setValor(NAO + medicaoFormatada);
 		}
+		relRegistroControlePacienteVO.setValorTexto(ecpControlePaciente.getTexto());
 	}
 
 	private void defineLocalizacaoLeitoQuarto(RelatorioRegistroControlePacienteVO relRegistroControlePacienteVO,

@@ -57,11 +57,11 @@ public class RelatorioAltasPorPeriodoRN extends BaseBusiness{
 		}
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		for (AinInternacao internacaoComAlta : result) {
-			
+
 			AltasPorPeriodoVO altaPorPeriodoVO = new AltasPorPeriodoVO(	internacaoComAlta.getAtendimento().getProntuario().toString(),
 																		internacaoComAlta.getTipoAltaMedica().getCodigo(), //OBTIDO
 																		internacaoComAlta.getPaciente().getNome(),
-																		internacaoComAlta.getLeito().getLeitoID(),
+																		validaOcupacao(internacaoComAlta),
 																		internacaoComAlta.getEspecialidade().getSigla(),
 																		"",// CRM
 																		internacaoComAlta.getServidorDigita().getPessoaFisica().getNome(),
@@ -77,5 +77,14 @@ public class RelatorioAltasPorPeriodoRN extends BaseBusiness{
 		}
 	}
 	
-	
+	private String validaOcupacao(AinInternacao internacao){
+		
+		if(internacao.getLeito() != null){
+			return internacao.getLeito().getLeitoID();
+		}else if(internacao.getUnidadesFuncionais() != null){
+			return internacao.getUnidadesFuncionais().getSigla();
+		}else{
+			return internacao.getQuarto().getDescricao();
+		}
+	}
 }

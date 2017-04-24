@@ -20,7 +20,8 @@
   							 render="@(#botoesAcao)"
 							 controller="#{pesquisarPacientesAgendadosController}"> 
           <p:ajax event="rowSelect" process="@this" update="@(#botoesAcao)" />
-          <p:column style="text-align:center;#{pesquisarPacientesAgendadosController.consultaSelecionadaAba4 eq item?'background-color:PapayaWhip;':''}" sortBy="#{item.atender}" sortable="true"> 
+          <p:column style="text-align:center;#{pesquisarPacientesAgendadosController.consultaSelecionadaAba4 eq item?'background-color:PapayaWhip;':''}" sortBy="#{item.atender}" sortable="true"
+                    rendered="#{mf:hasPermission(securityController,'atenderConsulta,atender')}"> 
             <f:facet name="header"> 
               <h:outputText value="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_REABRIR}"/> 
             </f:facet>  
@@ -45,7 +46,19 @@
             <f:facet name="header"> 
               <h:outputText value="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_PACIENTE}"/> 
             </f:facet>  
-            <h:outputText style="#{(item.pacienteNroCartaoSaude== null)?'font-weight:bold':''}" id="colunaPaciente" value="#{item.pacienteNome}" title="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_VER_DETALHES}"/>  
+            
+			<h:outputText 
+            	style="#{(item.pacienteNroCartaoSaude == null)?'font-weight:bold':''}" 
+            	id="colunaPaciente" 
+            	value="#{not empty item.nomeSocial ? item.nomeSocial : item.pacienteNome}" 
+            	title="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_VER_DETALHES}"/>
+            	
+			<h:graphicImage 
+				title="#{messages.LABEL_NOME_CIVIL}: #{item.pacienteNome}"  
+				value="/resources/img/icons/nome-civil-paciente.png" 
+				style="border:0px; float:right;" 
+				rendered="#{not empty item.nomeSocial}" />
+            
             <p:overlayPanel for="colunaPaciente" hideEvent="mouseout" appendToBody="true">
             	#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_GRADE}: #{item.gradeSeq} 
               <br clear="none"/> #{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_ESPECIALIDADE_AGENDA}: #{item.gradeEspNome} 

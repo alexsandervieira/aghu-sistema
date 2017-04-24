@@ -97,6 +97,9 @@
                             <td rowspan="1" colspan="1"> 
                               <mec:selectBooleanCheckbox readonly="false" required="false" label="#{messages.LABEL_IND_PRESCR_AMB}" title="#{messages.TITLE_PERMITE_PRESCRICAO_AMBULATORIAL}" value="#{medicamentoController.entidade.permitePrescricaoAmbulatorial}" ajaxValidation="false" id="indPermitePma"/> 
                             </td> 
+                            <td rowspan="1" colspan="1"> 
+                              <mec:selectBooleanCheckbox readonly="false" required="false" label="#{messages.LABEL_IND_CONTROLADO}" title="#{messages.TITLE_DEFINE_MEDICAMENTO_CONTROLADO}" value="#{medicamentoController.entidade.indControlado}" ajaxValidation="false" id="indControlado"/> 
+							</td>                           
                           </tr> 
                         </table> 
                       </aghu:linha>  
@@ -116,7 +119,7 @@
                       <mec:commandButton id="bt_parametrosCalculo" value="#{messages.LABEL_PARAMETROS_CALCULO}" readonly="true" disabled="true" styleClass="bt_cinza"/>  
                       <mec:commandButton id="bt_localDispensacao" value="#{messages.LABEL_LOCAL_DISPENSACAO}" action="#{medicamentoController.localDispensacaoMedicamento}" styleClass="bt_cinza"/>  
                       <mec:commandButton id="bt_sinonimos" style="width: 96%" value="#{messages.LABEL_SINONIMOS}" action="#{medicamentoController.sinonimoMedicamento}" disabled="#{not mf:hasPermission(securityController, 'sinonimoMedicamento,pesquisar')}" styleClass="bt_cinza"/>  
-                      <mec:commandButton id="bt_diluentes" value="#{messages.LABEL_DILUENTES}" action="#{medicamentoPaginatorController.realizarChamadaDiluentes}" disabled="#{not mf:hasPermission(securityController, 'vinculoDiluentes,pesquisar')}" styleClass="bt_cinza"> 
+                      <mec:commandButton id="bt_diluentes" value="#{messages.LABEL_DILUENTES}" action="#{medicamentoPaginatorController.realizarChamadaDiluentesCRUD}" disabled="#{not mf:hasPermission(securityController, 'vinculoDiluentes,pesquisar')}" styleClass="bt_cinza"> 
 		                     <f:setPropertyActionListener target="#{cadastroDiluentesPaginatorController.medicamentoSelecionado}" value="#{medicamentoPaginatorController.medicamentoSelecionado}" for="command"/>  
 		                     <f:setPropertyActionListener target="#{cadastroDiluentesPaginatorController.fromList}" value="#{true}" for="command"/> 
 		              </mec:commandButton>   

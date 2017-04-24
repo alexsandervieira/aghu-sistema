@@ -71,7 +71,7 @@
                 <h:outputText value="#{messages.LABEL_SITUACAO}"/> 
               </f:facet>  
               <h:outputText value="#{_item.indSituacao.descricao}" id="tabela_ativo"/>  
-              <p:tooltip direction="bottom-right" styleClass="tooltip" layout="block"> 
+              <p:tooltip for="tabela_medicamento" direction="bottom-right" styleClass="tooltip" layout="block"> 
                 <h:outputText value="#{messages.LABEL_CADASTRADO_EM}: "/>  
                 <h:outputText value="#{_item.criadoEm}" isDate="true"> 
                   <f:convertDateTime pattern="dd/MM/yyyy"/> 

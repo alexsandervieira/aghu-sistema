@@ -16,6 +16,14 @@ import org.apache.commons.logging.LogFactory;
 import org.primefaces.event.TabChangeEvent;
 
 import br.gov.mec.aghu.business.IAghuFacade;
+import br.gov.mec.aghu.core.action.ActionController;
+import br.gov.mec.aghu.core.commons.NumberUtil;
+import br.gov.mec.aghu.core.commons.seguranca.IPermissionService;
+import br.gov.mec.aghu.core.converter.NumeroApConverter;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.dominio.DominioSecaoConfiguravel;
 import br.gov.mec.aghu.dominio.DominioSituacaoExamePatologia;
 import br.gov.mec.aghu.exames.action.ConsultarResultadosNotaAdicionalController;
@@ -40,28 +48,15 @@ import br.gov.mec.aghu.model.AelGrpTxtPadraoMacro;
 import br.gov.mec.aghu.model.AelItemSolicitacaoExamesId;
 import br.gov.mec.aghu.model.AelUnidExecUsuario;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
-import br.gov.mec.aghu.core.action.ActionController;
-import br.gov.mec.aghu.core.commons.NumberUtil;
-import br.gov.mec.aghu.core.commons.seguranca.IPermissionService;
-import br.gov.mec.aghu.core.converter.NumeroApConverter;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
-import br.gov.mec.aghu.core.exception.Severity;
 
-
+@SuppressWarnings("PMD.ExcessiveClassLength")
 public class LaudoUnicoController extends ActionController  {
-
-	@PostConstruct
-	protected void inicializar(){
-	 this.begin(conversation);
-	}
-
 	private static final Log LOG = LogFactory.getLog(LaudoUnicoController.class);
 	private static final long serialVersionUID = -4863767461222610277L;
 	static final Integer rowSize = 25;
 	static final Integer maxSize = 125;
 	static final Integer empty = 0;	
+	
 	private final String TAB_0="aba0", TAB_1="aba1", TAB_2="aba2", TAB_3="aba3", TAB_4="aba4", TAB_5="aba5", TAB_6="aba6";
 	
 	public enum LaudoUnicoControllerExceptionCode implements BusinessExceptionCode  {
@@ -133,7 +128,13 @@ public class LaudoUnicoController extends ActionController  {
 	private boolean renderConclusao;
 	private Integer accordionIndexLaudoUnico;
 	private final String PERMISSAO_PREENCHER_DIAGNOSTICO = "preencherDiagnosticoLaudoUnico";
-	private final String PERMISSAO_PREENCHER_TOPOGRAFIA = "preencherTopografiaLaudoUnico";			
+	private final String PERMISSAO_PREENCHER_TOPOGRAFIA = "preencherTopografiaLaudoUnico";
+	
+	@PostConstruct
+	protected void inicializar() {
+		this.begin(conversation);
+	}
+
 	/**
 	 * Método de entrada do Laudo Único.<br>
 	 * Prepara a aba de Laudo.<br>
@@ -160,7 +161,6 @@ public class LaudoUnicoController extends ActionController  {
 		}
 		
 		if(codigoBarras != null && !codigoBarras.isEmpty()) {
-			
 			accordionIndexLaudoUnico = 1;
 			
 			sigla = codigoBarras.substring(0,2);
@@ -185,7 +185,6 @@ public class LaudoUnicoController extends ActionController  {
 						telaVo.setAelAnatomoPatologico(laudo);
 						telaVo.setNumeroAp(numeroAp);
 						pacienteNaoEncontrado = Boolean.TRUE;
-	
 					} else {
 						NumeroApConverter converter = new NumeroApConverter();
 						Object[] params = new Object[] { sigla, converter.getAsString(numeroAp) };
@@ -223,14 +222,11 @@ public class LaudoUnicoController extends ActionController  {
 				}
 			} 
 		}
-		
 		inicioParte2(telaVo);
-		
-		
 	}
 	
 	private void inicioParte2(TelaLaudoUnicoVO telaVo2) {
-		if(telaVo != null && telaVo.getAelAnatomoPatologico() != null) {
+		if (telaVo != null && telaVo.getAelAnatomoPatologico() != null) {
 			try {
 				final AelExameAp aelExameAp = examesPatologiaFacade.obterAelExameApPorAelAnatomoPatologicos(telaVo.getAelAnatomoPatologico());
 				this.laudoAntigo = isLaudoUnicoAntigo(aelExameAp);
@@ -260,16 +256,14 @@ public class LaudoUnicoController extends ActionController  {
 				getLabelFiltro();
 				setHabilitaBotaoLiberarTecnica(this.examesFacade.habilitaBotaoTecnica(telaVo, DominioSituacaoExamePatologia.MC));
 				setHabilitaBotaoConcluirTecnica(this.examesFacade.habilitaBotaoTecnica(telaVo, DominioSituacaoExamePatologia.TC));
-			} 
-			catch(BaseException e) {
+			} catch(BaseException e) {
 				limpar();
 				accordionIndexLaudoUnico = 0;
 				apresentarExcecaoNegocio(e);
 				LOG.error(e.getMessage(),e);
 				return;
 			}
-		}
-		
+		}	
 	}
 
 	private boolean isLaudoUnicoAntigo(AelExameAp aelExameAp) {
@@ -279,11 +273,10 @@ public class LaudoUnicoController extends ActionController  {
 				retorno = true;
 				break;
 			}
-		}		return retorno;	}	
-	
+		}		return retorno;	
+	}
 	/**
 	 * Popula os campos de configuração de exames.
-	 * 
 	 * @param telaVo
 	 */
 	private void populaConfiguracaoCampos(TelaLaudoUnicoVO telaVo) {
@@ -340,9 +333,7 @@ public class LaudoUnicoController extends ActionController  {
 		return obrigatoriedade != null ? obrigatoriedade.booleanValue() : false;
 	}
 	
-	/**
-	 * Obtem label do filtro de consulta.
-	 * 
+	/** Obtem label do filtro de consulta.
 	 * @return Label
 	 */
 	public String getLabelFiltro() {
@@ -371,7 +362,6 @@ public class LaudoUnicoController extends ActionController  {
 		}else{
 			limparInicio();
 		}
-		
 	}
 	
 	public void limparInicio() {
@@ -445,8 +435,7 @@ public class LaudoUnicoController extends ActionController  {
 		this.exibirModalAlteracaoPendente = false;
 	}	
 	
-	/**
-	 * Identifica a tab selecionada e executa o metodo de render desta tab.<br>
+	/** Identifica a tab selecionada e executa o metodo de render desta tab.<br>
 	 * Utiliza a variavel <code>currentTabIndex</code>.
 	 */
 	public void onTabChange(TabChangeEvent event) {
@@ -536,9 +525,7 @@ public class LaudoUnicoController extends ActionController  {
 		}
 	}
 	
-	/**
-	 * 
-	 *  #21655 - Adaptar Relatorio Laudo Unico
+	/** #21655 - Adaptar Relatorio Laudo Unico
 	 * @param exameAP
 	 * @throws MECBaseException
 	 */
@@ -937,14 +924,6 @@ public class LaudoUnicoController extends ActionController  {
 			
 			if (listaRegistros != null && !listaRegistros.isEmpty()){
 				return listaRegistros.size() * rowSize;	
-				// maxSize define o número de registros que serão mostrados antes do uso de scroll.
-				// Comentado o trecho para impedir scroll no grid. 
-//				Integer numRow = listaRegistros.size();	
-//				if (numRow >= 5){
-//					return maxSize;
-//				} else {
-//					return numRow * rowSize; 
-//				}		
 			}
 		}		
 		return empty;		

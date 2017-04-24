@@ -237,9 +237,7 @@ public class ProcedimentoAtendimentoConsultaRN extends BaseBusiness {
 	 * @param oldProcedimentoRealizado
 	 * @throws ApplicationBusinessException
 	 */
-	public void removerProcedimentoRealizado(MamProcedimentoRealizado oldProcedimentoRealizado, boolean flush) 
-			throws ApplicationBusinessException {
-		validarProcedimentoAtendimentoBeforeDelete(oldProcedimentoRealizado);
+	public void removerProcedimentoRealizado(MamProcedimentoRealizado oldProcedimentoRealizado, boolean flush) throws ApplicationBusinessException {
 		getMamProcedimentoRealizadoDAO().remover(oldProcedimentoRealizado);
 		if (flush) {
 			getMamProcedimentoRealizadoDAO().flush();

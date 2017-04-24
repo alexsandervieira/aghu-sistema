@@ -14,6 +14,10 @@ import org.apache.commons.logging.LogFactory;
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.compras.business.IComprasFacade;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseListException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.estoque.dao.SceAlmoxarifadoDAO;
 import br.gov.mec.aghu.estoque.dao.SceAlmoxarifadoGruposDAO;
@@ -29,15 +33,13 @@ import br.gov.mec.aghu.model.SceAlmoxarifado;
 import br.gov.mec.aghu.model.SceAlmoxarifadoGrupos;
 import br.gov.mec.aghu.model.SceEstoqueAlmoxarifado;
 import br.gov.mec.aghu.model.SceItemPacoteMateriais;
+import br.gov.mec.aghu.model.SceItemRms;
+import br.gov.mec.aghu.model.SceItemRmsId;
 import br.gov.mec.aghu.model.ScePacoteMateriais;
 import br.gov.mec.aghu.model.ScePacoteMateriaisId;
 import br.gov.mec.aghu.model.SceReqMaterial;
 import br.gov.mec.aghu.model.ScoGrupoMaterial;
 import br.gov.mec.aghu.model.ScoMaterial;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseListException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 /**
  * Classe negocial para Pacote Materiais. (estória #6623)
@@ -50,9 +52,18 @@ public class ManterPacoteMateriaisON extends BaseBusiness {
 
 	@EJB
 	private ScePacoteMateriaisRN scePacoteMateriaisRN;
+	
+	@EJB
+	private SceReqMateriaisRN sceReqMateriaisRN;
 
 	@EJB
 	private ManterRequisicaoMaterialON manterRequisicaoMaterialON;
+	
+	@EJB
+	private IEstoqueFacade estoqueFacade;
+
+	@EJB
+	private IEstoqueBeanFacade estoqueBeanFacade;
 
 	private static final Log LOG = LogFactory.getLog(ManterPacoteMateriaisON.class);
 
@@ -379,14 +390,16 @@ public class ManterPacoteMateriaisON extends BaseBusiness {
 		return itemPacoteMateriaisVO;
 	}
 
-	public void validarInsercaoPacoteRequisicaoMaterial(SceReqMaterial reqMaterial, List<SceEstoqueAlmoxarifado> lstItemToAdd,
-			Boolean isAlmoxarife) throws ApplicationBusinessException {
+	public void validarInsercaoPacoteRequisicaoMaterial(SceReqMaterial reqMaterial, Integer codigoGrupoMaterial,
+			Boolean isAlmoxarife, String nomeMicrocomputador) throws ApplicationBusinessException {
 		List<SceAlmoxarifadoGrupos> listaAlmoxGrupos = new ArrayList<SceAlmoxarifadoGrupos>();
 
 		if (reqMaterial != null && !reqMaterial.getAlmoxarifado().getIndMultiplosGrupos()) {
 			listaAlmoxGrupos = getSceAlmoxarifadoGruposDAO().pesquisarGruposPorAlmoxarifado(reqMaterial.getAlmoxarifado());
 		}
 
+		List<SceEstoqueAlmoxarifado> lstItemToAdd = sceReqMateriaisRN.pesquisarEstoqueAlmoxarifadoPorPacote(codigoGrupoMaterial, reqMaterial.getPacoteMaterial().getId());
+		
 		Boolean primeiro = true;
 		Boolean indEstocavel = false;
 		for (SceEstoqueAlmoxarifado estoqueAlmoxarifado : lstItemToAdd) {
@@ -435,6 +448,32 @@ public class ManterPacoteMateriaisON extends BaseBusiness {
 				}
 			}
 		}
+		
+		//Trecho de codigo retirado do GeracaoRequisicaoMaterialController 1142
+		for (SceEstoqueAlmoxarifado estoqueAlmoxarifado : lstItemToAdd) {
+			/* ID do item de requisicao */
+			SceItemRmsId idItem = new SceItemRmsId();
+			// idItem.setRmsSeq(reqMaterial.getSeq());
+			idItem.setEalSeq(estoqueAlmoxarifado.getSeq());
+			idItem.setRmsSeq(reqMaterial.getSeq());
+
+			SceItemRms item = new SceItemRms();
+			item.setId(idItem);
+			item.setQtdeRequisitada(estoqueAlmoxarifado.getQuantidade());
+			item.setEstoqueAlmoxarifado(estoqueAlmoxarifado);
+			item.setScoUnidadeMedida(estoqueAlmoxarifado.getUnidadeMedida());
+			item.setIndTemEstoque(true);
+			item.setSceReqMateriais(reqMaterial);
+
+			this.estoqueFacade.preencheConsumoMedioItemRequisicao(item, reqMaterial.getCentroCustoAplica().getCodigo());
+			
+			try {
+				this.estoqueBeanFacade.gravarItensRequisicaoMaterial(item, nomeMicrocomputador);				
+			} catch (Exception e) {
+				LOG.error("Exceção Capturada:" + e.getMessage());
+			}
+		}
+		
 	}
 
 	private void validarMateriaisDiretos(SceEstoqueAlmoxarifado estoqueAlmoxarifado, Boolean isAlmoxarife, Boolean indEstocavel,

@@ -87,8 +87,18 @@ private SceEstoqueAlmoxarifadoDAO sceEstoqueAlmoxarifadoDAO;
 		this.validarAlmoxarifadosPai(itemTransferencia); // RN1
 		this.validarIndicadorBloqueioEntrada(itemTransferencia); // RN2
 		this.validarConsignado(itemTransferencia.getEstoqueAlmoxarifadoOrigem(), itemTransferencia.getEstoqueAlmoxarifado()); // RN3
-
-
+	}
+	
+	/**
+	 * ORADB TRIGGER SCET_ITR_BRI (INSERT)
+	 * @param itemTransferencia
+	 * @throws BaseException
+	 */
+	private void preInserir(SceItemTransferencia itemTransferencia, SceItemTransferencia itemTransferenciaAux) throws BaseException{
+		this.validaItemDuplicado(itemTransferencia, itemTransferenciaAux);
+		this.validarAlmoxarifadosPai(itemTransferencia); // RN1
+		this.validarIndicadorBloqueioEntrada(itemTransferencia); // RN2
+		this.validarConsignado(itemTransferencia.getEstoqueAlmoxarifadoOrigem(), itemTransferencia.getEstoqueAlmoxarifado()); // RN3
 	}
 
 	/**
@@ -101,6 +111,18 @@ private SceEstoqueAlmoxarifadoDAO sceEstoqueAlmoxarifadoDAO;
 		this.getSceItemTransferenciaDAO().persistir(itemTransferencia);
 		this.getSceItemTransferenciaDAO().flush();
 	}
+	/**
+	 * Inserir SceItemTransferencia
+	 * @param itemTransferencia
+	 * @throws BaseException
+	 */
+	public void inserir(SceItemTransferencia itemTransferencia, SceItemTransferencia itemTransferenciaAux) throws BaseException{
+		this.preInserir(itemTransferencia, itemTransferenciaAux);
+		this.getSceItemTransferenciaDAO().persistir(itemTransferencia);
+		this.getSceItemTransferenciaDAO().flush();
+	}
+	
+	
 
 	/**
 	 * ORADB PROCEDURE BUSCA_ESTQ_ALMOX_ORIG
@@ -435,6 +457,17 @@ private SceEstoqueAlmoxarifadoDAO sceEstoqueAlmoxarifadoDAO;
 		
 		}
 		
+	}
+	
+	/**
+	 * Verifica se o item é duplicado
+	 * @param itemTransferencia
+	 * @throws BaseException
+	 */
+	private void validaItemDuplicado(SceItemTransferencia itemTransferencia, SceItemTransferencia itemTransferenciaAux) throws BaseException {
+		if (itemTransferenciaAux != null) {
+			throw new ApplicationBusinessException(SceItemTransferenciaRNCode.MENSAGEM_ITEM_TRANS_DUPLICADO, itemTransferenciaAux.getEstoqueAlmoxarifado().getMaterial().getCodigo(), itemTransferenciaAux.getId().getTrfSeq());
+		}
 	}
 	
 	protected IParametroFacade getParametroFacade() {

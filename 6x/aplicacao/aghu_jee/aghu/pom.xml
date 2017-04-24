@@ -161,12 +161,12 @@ Project based on the org.jboss.spec.archetypes:jboss-javaee6-webapp-ear-archetyp
 		<entidades.nome>aghu-entidades</entidades.nome>
 		<entidades.versao>7.31-STABLE</entidades.versao>
         
-        <aghu-core-commons.versao>3.3</aghu-core-commons.versao>
-        <aghu-core-view.versao>3.7</aghu-core-view.versao>  
-        <aghu-core-business.versao>3.7</aghu-core-business.versao>
+        <aghu-core-commons.versao>3.5</aghu-core-commons.versao>
+        <aghu-core-view.versao>3.9</aghu-core-view.versao>  
+        <aghu-core-business.versao>3.9</aghu-core-business.versao>
         <aghu-core-service.versao>3.1</aghu-core-service.versao>
         <aghu-core-test.versao>3.1</aghu-core-test.versao>  
-        <aghu-core-security.versao>8.3</aghu-core-security.versao>
+        <aghu-core-security.versao>8.4</aghu-core-security.versao>
         
         <project.stage>Development</project.stage>
         

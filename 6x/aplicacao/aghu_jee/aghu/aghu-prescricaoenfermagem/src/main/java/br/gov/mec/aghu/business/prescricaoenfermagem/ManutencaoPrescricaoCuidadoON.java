@@ -12,9 +12,17 @@ import javax.inject.Inject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioIndPendenteItemPrescricao;
 import br.gov.mec.aghu.dominio.DominioIndPendentePrescricoesCuidados;
 import br.gov.mec.aghu.dominio.DominioOperacaoBanco;
+import br.gov.mec.aghu.dominio.DominioSituacaoHistPrescDiagnosticos;
+import br.gov.mec.aghu.model.EpeFatRelDiagnostico;
+import br.gov.mec.aghu.model.EpeFatRelDiagnosticoId;
+import br.gov.mec.aghu.model.EpeHistoricoPrescDiagnosticos;
 import br.gov.mec.aghu.model.EpePrescCuidDiagnostico;
 import br.gov.mec.aghu.model.EpePrescCuidDiagnosticoId;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagem;
@@ -22,16 +30,14 @@ import br.gov.mec.aghu.model.EpePrescricoesCuidados;
 import br.gov.mec.aghu.model.EpePrescricoesCuidadosId;
 import br.gov.mec.aghu.model.MpmTipoFrequenciaAprazamento;
 import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeFatRelDiagnosticoDAO;
+import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeHistoricoPrescDiagnosticosDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescCuidDiagnosticoDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescricoesCuidadosDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.vo.CuidadoVO;
 import br.gov.mec.aghu.prescricaomedica.business.IPrescricaoMedicaFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 /**
  * 
@@ -67,6 +73,12 @@ public class ManutencaoPrescricaoCuidadoON extends BaseBusiness {
 	@Inject
 	private EpePrescricoesCuidadosDAO epePrescricoesCuidadosDAO;
 
+	@Inject
+	private EpeHistoricoPrescDiagnosticosDAO epeHistoricoPrescDiagnosticosDAO;
+
+	@Inject
+	private EpeFatRelDiagnosticoDAO epeFatRelDiagnosticoDAO;
+
 	private static final long serialVersionUID = -4297398747360851368L;
 
 	public enum ManutencaoPrescricaoCuidadoONExceptionCode implements
@@ -93,7 +105,7 @@ public class ManutencaoPrescricaoCuidadoON extends BaseBusiness {
 			for (int i = listaCuidadoVO.size() - 1; i >= 0; i--) {
 				CuidadoVO cuidadoVO = listaCuidadoVO.get(i);
 
-				if (cuidadoVO.getExcluir() != null && cuidadoVO.getExcluir()) {
+				if (cuidadoVO.getExcluir() != null && cuidadoVO.getExcluir() && (cuidadoVO.getDiagnostico() == null || ! cuidadoVO.getDiagnostico())) {
 					EpePrescricoesCuidados prescricaoCuidado = cuidadoVO.getPrescricaoCuidado();
 					// Remove do banco quando existe a prescricao do cuidado
 					if (prescricaoCuidado != null && prescricaoCuidado.getId()!=null && prescricaoCuidado.getId().getSeq()!=null) {
@@ -102,6 +114,11 @@ public class ManutencaoPrescricaoCuidadoON extends BaseBusiness {
 					// Mesmo que não exista no banco, deve remover da lista sempre
 					// quando é chamado o removerCuidadosSelecionados.
 					listaCuidadoVO.remove(cuidadoVO);
+					if(prescricaoCuidado.getPrescricaoEnfermagem() != null && !this.getEpePrescCuidDiagnosticoDAO().verificarExisteCuidadoDiagnosticosRelacionadoPrescricao(prescricaoCuidado.getPrescricaoEnfermagem().getId(),
+							cuidadoVO.getFdgFreSeq(), cuidadoVO.getFdgDgnSequencia(), cuidadoVO.getFdgDgnSnbSequencia(), cuidadoVO.getFdgDgnSnbGnbSeq())){
+						validarHistoricoExlusaoPrescDiagnostico(prescricaoCuidado.getPrescricaoEnfermagem(), cuidadoVO.getFdgFreSeq(), cuidadoVO.getFdgDgnSequencia(),
+								cuidadoVO.getFdgDgnSnbSequencia(), cuidadoVO.getFdgDgnSnbGnbSeq());
+					}
 				}
 			}
 		}
@@ -249,9 +266,61 @@ public class ManutencaoPrescricaoCuidadoON extends BaseBusiness {
 		EpePrescCuidDiagnostico precCuidDiagnostico = new EpePrescCuidDiagnostico(id);
 		getEpePrescCuidDiagnosticoDAO().persistir(precCuidDiagnostico);
 		getEpePrescCuidDiagnosticoDAO().flush();
+		
 	}
 	
-	
+	public void inserirHistoricoPrescDiagnostico(EpeHistoricoPrescDiagnosticos historicoDiagnostico){
+		if(historicoDiagnostico != null){
+			historicoDiagnostico.setServidor(getServidorLogadoFacade().obterServidorLogado());
+			epeHistoricoPrescDiagnosticosDAO.persistir(historicoDiagnostico);
+			epeHistoricoPrescDiagnosticosDAO.flush();
+		}
+	}
+
+	public void validarHistoricoExlusaoPrescDiagnostico(EpePrescricaoEnfermagem prescEnfermagem, Short freSeq, Short sequencia, Short snbSequencia, Short snbGndSeq) {
+		
+		EpeFatRelDiagnostico fatRelDiagnostico = obterEpeFatRelDiagnostico(freSeq, sequencia, snbSequencia, snbGndSeq);
+		
+		EpeHistoricoPrescDiagnosticos historicoDiagnostico = epeHistoricoPrescDiagnosticosDAO.obterEpeHistoricoPrescDiagnosticosPorPrescDiag(fatRelDiagnostico, prescEnfermagem, null);
+
+		if(historicoDiagnostico != null && !historicoDiagnostico.getIndPendente()){
+			epeHistoricoPrescDiagnosticosDAO.remover(historicoDiagnostico);
+			epeHistoricoPrescDiagnosticosDAO.flush();
+			EpeHistoricoPrescDiagnosticos newHistoricoDiagnostico = new EpeHistoricoPrescDiagnosticos();
+			newHistoricoDiagnostico.setPrescricaoEnfermagem(prescEnfermagem);
+			newHistoricoDiagnostico.setCriadoEm(new Date());
+			if(fatRelDiagnostico != null && fatRelDiagnostico.getDiagnostico() != null && fatRelDiagnostico.getFatRelacionado() != null){
+				newHistoricoDiagnostico.setDescricao(fatRelDiagnostico.getDiagnostico().getDescricao().concat(" - ").concat(fatRelDiagnostico.getFatRelacionado().getDescricao()));
+				newHistoricoDiagnostico.setDiagnostico(fatRelDiagnostico.getDiagnostico());
+				newHistoricoDiagnostico.setFatRelacionado(fatRelDiagnostico.getFatRelacionado());
+			}
+			newHistoricoDiagnostico.setIndPendente(Boolean.TRUE);
+			newHistoricoDiagnostico.setSituacao(DominioSituacaoHistPrescDiagnosticos.X);
+			this.inserirHistoricoPrescDiagnostico(newHistoricoDiagnostico);
+		}else if (historicoDiagnostico != null && historicoDiagnostico.getIndPendente() && historicoDiagnostico.getSituacao().equals(DominioSituacaoHistPrescDiagnosticos.I)){
+			epeHistoricoPrescDiagnosticosDAO.remover(historicoDiagnostico);
+			epeHistoricoPrescDiagnosticosDAO.flush();
+		}else if (historicoDiagnostico != null && historicoDiagnostico.getIndPendente() && historicoDiagnostico.getSituacao().equals(DominioSituacaoHistPrescDiagnosticos.C)){
+			historicoDiagnostico.setSituacao(DominioSituacaoHistPrescDiagnosticos.X);
+			historicoDiagnostico.setServidor(getServidorLogadoFacade().obterServidorLogado());
+			epeHistoricoPrescDiagnosticosDAO.merge(historicoDiagnostico);
+			epeHistoricoPrescDiagnosticosDAO.flush();
+			
+		}
+	}
+
+	public EpeFatRelDiagnostico obterEpeFatRelDiagnostico(Short freSeq,
+			Short sequencia, Short snbSequencia, Short snbGndSeq) {
+		EpeFatRelDiagnosticoId fatRelDiagnosticoId = new EpeFatRelDiagnosticoId();
+		fatRelDiagnosticoId.setDgnSnbGnbSeq(snbGndSeq);
+		fatRelDiagnosticoId.setDgnSnbSequencia(snbSequencia);
+		fatRelDiagnosticoId.setDgnSequencia(sequencia);
+		fatRelDiagnosticoId.setFreSeq(freSeq);
+
+		EpeFatRelDiagnostico fatRelDiagnostico = epeFatRelDiagnosticoDAO.obterPorChavePrimaria(fatRelDiagnosticoId, new Enum[]{ EpeFatRelDiagnostico.Fields.DIAGNOSTICO, EpeFatRelDiagnostico.Fields.FAT_RELACIONADO});
+		return fatRelDiagnostico;
+	}
+
 	public void validarAprazamento(MpmTipoFrequenciaAprazamento tipo,
 			Short frequencia) throws ApplicationBusinessException {
 
@@ -622,5 +691,5 @@ public class ManutencaoPrescricaoCuidadoON extends BaseBusiness {
 	protected IServidorLogadoFacade getServidorLogadoFacade() {
 		return this.servidorLogadoFacade;
 	}
-		
+
 }

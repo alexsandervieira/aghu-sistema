@@ -115,25 +115,6 @@ public class AgendaProcedimentosONTest extends AGHUBaseUnitTest<AgendaProcedimen
 	}
 	
 	@Test
-	public void testPreCommitError1() {
-		AelProjetoPesquisas projetoPesquisa = criarProjetoPesquisaMock();
-		projetoPesquisa.setVoucherEletronico(false);
-		
-		MbcCirurgias cirurgia = new MbcCirurgias();
-		cirurgia.setProjetoPesquisa(projetoPesquisa);
-		
-		CirurgiaTelaVO vo = new CirurgiaTelaVO();
-		vo.setCirurgia(cirurgia);
-		
-		try {
-			systemUnderTest.preCommit(vo);
-			fail("testPreCommitError1: Exeção esperada não gerada.");
-		} catch (BaseException e) {
-			assertEquals(e.getCode(), AgendaProcedimentosONExceptionCode.MBC_01380);
-		}
-	}
-
-	@Test
 	public void testPreCommitError2() {
 		AelProjetoPesquisas projetoPesquisa = criarProjetoPesquisaMock();
 		projetoPesquisa.setVoucherEletronico(true);

@@ -176,4 +176,8 @@ private ImpServidorCupsDAO impServidorCupsDAO;
 	public List<ImpServidorCups> pesquisarServidorCups(Object paramPesquisa) {
 		return getImpServidorCupsDAO().pesquisarServidorCups(paramPesquisa);
 	}
+	public ImpServidorCups pesquisarServidorCupsPorFila(String fila) {
+		return getImpServidorCupsDAO().pesquisarServidorCupsPorFila(fila);
+	}
+	
 }

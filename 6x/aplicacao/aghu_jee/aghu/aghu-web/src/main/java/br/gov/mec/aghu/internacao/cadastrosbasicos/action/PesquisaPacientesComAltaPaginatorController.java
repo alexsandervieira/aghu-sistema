@@ -80,7 +80,7 @@ public class PesquisaPacientesComAltaPaginatorController extends ActionControlle
 		this.ordenacao= DominioOrdenacaoPesquisaPacComAlta.U;
 		this.voAltaPaciente = new VAinAltasVO();
 	}
-
+    
 
 	/**
 	 * Limpa os campos da tela.
@@ -98,7 +98,11 @@ public class PesquisaPacientesComAltaPaginatorController extends ActionControlle
 		this.dataModel.limparPesquisa();
 		//this.ativo = false;
 	}
-
+    public void limparTipoAltaAdm(){
+    	if(!this.altaAdministrativa){
+    		this.tipoAltaMedica = null;
+    	}
+    }
 	/**
 	 * Método que realiza a ação do botão pesquisar.
 	 */
@@ -341,6 +345,5 @@ public class PesquisaPacientesComAltaPaginatorController extends ActionControlle
 
 	public void setDataModel(DynamicDataModel<VAinAltasVO> dataModel) {
 		this.dataModel = dataModel;
-	}
-
+	}	
 }

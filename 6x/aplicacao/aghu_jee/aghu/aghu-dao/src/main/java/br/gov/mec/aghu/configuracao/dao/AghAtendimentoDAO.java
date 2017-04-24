@@ -860,11 +860,33 @@ public class AghAtendimentoDAO extends br.gov.mec.aghu.core.persistence.dao.Base
 		return executeCriteria(criteria);
 	}
 
-	public List<AghAtendimentos> buscaAtendimentosSumarioPrescricao(final Date dataInicio, final Date dataFim) throws ApplicationBusinessException {
-		final StringBuffer hql = new StringBuffer(180);
+	public List<AghAtendimentos> buscaAtendimentosSumarioPrescricaoMedica(final Date dataInicio, final Date dataFim) throws ApplicationBusinessException {
+		final StringBuffer hql = new StringBuffer(300);
 		hql.append(" select atd");
 		hql.append(" from AghAtendimentos atd");
+		hql.append(" left join atd.aghAtendimentoPacientes atdPac");
 		hql.append(" where atd.prontuario is not null and");
+		hql.append(" atdPac.dtRotinaMedica is null and");
+		hql.append(" atd.origem in (:DominioN, :DominioI) and");
+		hql.append(" atd.dthrFim >= :dataInicio and");
+		hql.append(" atd.dthrFim <= :dataFim");
+
+		final Query query = createHibernateQuery(hql.toString());
+		query.setParameter("dataInicio", dataInicio);
+		query.setParameter("dataFim", dataFim);
+		query.setParameter("DominioN", DominioOrigemAtendimento.N);
+		query.setParameter("DominioI", DominioOrigemAtendimento.I);
+
+		return query.list();
+	}
+	
+	public List<AghAtendimentos> buscaAtendimentosSumarioPrescricaoEnfermagem(final Date dataInicio, final Date dataFim) throws ApplicationBusinessException {
+		final StringBuffer hql = new StringBuffer(300);
+		hql.append(" select atd");
+		hql.append(" from AghAtendimentos atd");
+		hql.append(" left join atd.aghAtendimentoPacientes atdPac");
+		hql.append(" where atd.prontuario is not null and");
+		hql.append(" atdPac.dtRotinaEnfermagem is null and");
 		hql.append(" atd.origem in (:DominioN, :DominioI) and");
 		hql.append(" atd.dthrFim >= :dataInicio and");
 		hql.append(" atd.dthrFim <= :dataFim");
@@ -2254,78 +2276,6 @@ criteria.createAlias(AghAtendimentos.Fields.ESPECIALIDADE.toString()
 		return criteria;
 	}
 
-	// Fim 5465
-	@SuppressWarnings("PMD.NPathComplexity")
-	public Long pesquisaPacientesComAltaCount(final Date dataInicial, final Date dataFinal, final boolean altaAdministrativa,
-			final DominioTipoAlta tipoAlta, final Short unidFuncSeq, final Short espSeq, final String tamCodigo) {
-		Long count = 0l;
-		final StringBuilder hql = new StringBuilder(600);
-		hql.append(" SELECT ");
-		hql.append(" count (*) ");
-		hql.append(" FROM ");
-
-		hql.append(" AghAtendimentos 			atd ");
-		hql.append(" join atd.unidadeFuncional 	vuf ");
-		hql.append(" join atd.internacao 		int ");
-		hql.append(" left join atd.leito 		lei ");
-		hql.append(" join int.especialidade 	esp ");
-		hql.append(" join int.paciente			pac ");
-		hql.append(" left outer join atd.altasSumario asu  with (asu.concluido = :indConcl )");
-		hql.append(" left outer join int.observacaoPacienteAlta obs ");
-
-		hql.append(" WHERE ");
-
-		if (altaAdministrativa) {
-			hql.append(" int.dtSaidaPaciente >= :dataInicio ");
-			hql.append(" AND int.dtSaidaPaciente <= :dataFim ");
-		} else {
-			hql.append(" asu.dthrAlta >= :dataInicio ");
-			hql.append(" AND asu.dthrAlta <= :dataFim ");
-			hql.append(" and int.indPacienteInternado = :indPacienteInternado ");
-		}
-		if (DominioTipoAlta.O.equals(tipoAlta)) {
-			hql.append(" AND asu.tipo = :tipoAlta");
-		} else if (DominioTipoAlta.E.equals(tipoAlta)) {
-			hql.append(" AND (asu.tipo is null OR asu.tipo != :tipoAlta)");
-		}
-		if (unidFuncSeq != null) {
-			hql.append(" AND vuf.seq = :unidFuncSeq ");
-		}
-		if (espSeq != null) {
-			hql.append(" AND  esp.seq = :espSeq ");
-		}
-		if (tamCodigo != null) {
-			hql.append(" AND int.tipoAltaMedica.codigo = :tamCodigo ");
-		}
-
-		final javax.persistence.Query query = this.createQuery(hql.toString());
-		query.setParameter("indConcl", DominioIndConcluido.S);
-
-		query.setParameter("dataInicio", dataInicial);
-		query.setParameter("dataFim", dataFinal);
-		if (!altaAdministrativa) {
-			query.setParameter("indPacienteInternado", true);
-		}
-
-		if (DominioTipoAlta.O.equals(tipoAlta) || DominioTipoAlta.E.equals(tipoAlta)) {// Se for 'O' ou 'E'
-			query.setParameter("tipoAlta", DominioIndTipoAltaSumarios.OBT);
-		}
-		if (unidFuncSeq != null) {
-			query.setParameter("unidFuncSeq", unidFuncSeq);
-		}
-		if (espSeq != null) {
-			query.setParameter("espSeq", espSeq);
-		}
-		if (tamCodigo != null) {
-			query.setParameter("tamCodigo", tamCodigo);
-		}
-
-		count = (Long) query.getSingleResult();
-
-		return count.longValue();
-
-	}
-
 	public AghAtendimentos obterUltimoAtendimentoEmAndamentoPorPaciente(final Integer pacCodigo) {
 		final DetachedCriteria criteria = DetachedCriteria.forClass(AghAtendimentos.class, "ATD");
 		criteria.createAlias("ATD." + AghAtendimentos.Fields.PACIENTE.toString(), "PAC");
@@ -2345,8 +2295,15 @@ criteria.createAlias(AghAtendimentos.Fields.ESPECIALIDADE.toString()
 	 * 
 	 * @return List
 	 */
+	private String obterViewCountPacienteAlta(){
+		final StringBuilder hql = new StringBuilder(31);
+		hql.append(" SELECT ");
+		hql.append(" count (*) ");
+		return hql.toString();
+	}
+	
 	private String obterViewAinAltas() {
-		final StringBuilder hql = new StringBuilder(1000);
+		final StringBuilder hql = new StringBuilder(450);
 		hql.append("SELECT ");
 		hql.append(" new br.gov.mec.aghu.internacao.vo.VAinAltasVO( ");
 		hql.append(" pac.prontuario, ");
@@ -2373,11 +2330,17 @@ criteria.createAlias(AghAtendimentos.Fields.ESPECIALIDADE.toString()
 		hql.append(" obs.descricao, ");
 		hql.append(" int.seq ");
 		hql.append(" ) ");
-
+		
+		return hql.toString();
+	}
+	
+	private String obterFromPacienteAlta(){
+		final StringBuilder hql = new StringBuilder(600);
 		hql.append(" FROM ");
 		hql.append(" AghAtendimentos 					atd ");
 		hql.append(" left join atd.quarto				qrt ");
 		hql.append(" join atd.unidadeFuncional 			vuf ");
+		hql.append(" left join vuf.indAla				ala" );
 		hql.append(" join atd.internacao 				int ");
 		hql.append(" left join atd.leito 				lei ");
 		hql.append(" join int.especialidade 			esp ");
@@ -2387,82 +2350,146 @@ criteria.createAlias(AghAtendimentos.Fields.ESPECIALIDADE.toString()
 		hql.append(" left join int.convenioSaudePlano	convSaudePlano ");
 		hql.append(" left join int.servidorProfessor	servProf ");
 		hql.append(" left join esp.clinica				clin");
-		hql.append(" left outer join atd.altasSumario asu  with (asu.concluido = 'S' ) ");
+		hql.append(" left outer join atd.altasSumario asu ");
+		hql.append(" left outer join asu.altaMotivos mot ");
 		hql.append(" left outer join int.observacaoPacienteAlta obs ");
-
+		return hql.toString(); 
+	}
+	private String obterWherePacienteAlta(final boolean altaAdministrativa, final DominioTipoAlta tipoAlta,
+			                              final DominioOrdenacaoPesquisaPacComAlta ordenacao, final Short unidFuncSeq, 
+			                              final Short espSeq, final String tamCodigo){
+		final StringBuilder hql = new StringBuilder(700);
+	    final String NOT_SQL = " not";
+	    final String AND_INT = " AND int.";
+		hql.append(" WHERE ");
+		
+		if(altaAdministrativa){
+			hql.append(" int.dtSaidaPaciente").append(" is not null");
+			hql.append(AND_INT).append(AinInternacao.Fields.TAM_CODIGO).append(" is not null");
+			hql.append(" AND int.dtSaidaPaciente >= :dataInicio ");
+			hql.append(" AND int.dtSaidaPaciente <= :dataFim ");
+			hql.append(" AND (asu.").append(MpmAltaSumario.Fields.IND_SITUACAO).append(" = 'A'");
+			hql.append(" OR asu.").append(MpmAltaSumario.Fields.IND_SITUACAO).append(" is null) ");
+			if(tamCodigo != null){
+				hql.append(AND_INT).append(AinInternacao.Fields.TAM_CODIGO).append(" = :tamCodigo");
+			}
+			if(!DominioTipoAlta.T.equals(tipoAlta)){
+				
+				hql.append(AND_INT).append(AinInternacao.Fields.TAM_CODIGO);
+				if(DominioTipoAlta.E.equals(tipoAlta)){					
+					//Negando query abaixo do bloco
+					hql.append(NOT_SQL);
+				}
+				hql.append(" in(select tipo.codigo "
+						+ "from AinTiposAltaMedica tipo "
+						+ "join tipo.motivoAltaMedicas motMed "
+						+ "where motMed.indObito = 'S')");
+			}
+		}else{
+			hql.append(" int.dtSaidaPaciente").append(" is null");
+			hql.append(" AND asu.").append(MpmAltaSumario.Fields.DTHR_ALTA).append(" is not null");
+			hql.append(" AND asu.").append(MpmAltaSumario.Fields.IND_SITUACAO).append(" = 'A'");
+			hql.append(" AND asu.").append(MpmAltaSumario.Fields.DTHR_ALTA).append(" >= :dataInicio ");
+			hql.append(" AND asu.").append(MpmAltaSumario.Fields.DTHR_ALTA).append(" <= :dataFim ");
+			if(!DominioTipoAlta.T.equals(tipoAlta)){
+				
+				hql.append(" AND mot.motivoAltaMedicas.seq");
+				if(DominioTipoAlta.E.equals(tipoAlta)){					
+					//Negando query abaixo do bloco
+					hql.append(NOT_SQL);
+				}
+				hql.append(" in(select motMed.seq "
+						+ "from MpmMotivoAltaMedica motMed "
+						+ "where motMed.indObito = 'S')");
+			}
+		}
+		
+		if (unidFuncSeq != null) {
+			hql.append(" AND vuf.seq = :unidFuncSeq ");
+		}
+		
+		if (espSeq != null) {
+			hql.append(" AND  esp.seq = :espSeq ");
+		}
+		if(ordenacao != null){			
+			if (DominioOrdenacaoPesquisaPacComAlta.U.equals(ordenacao)) {
+				hql.append(" ORDER BY vuf.seq ");
+			} else {
+				hql.append(" ORDER BY pac.nome ");
+			}
+		}
 		return hql.toString();
 	}
-
-	@SuppressWarnings({ "PMD.NPathComplexity" })
+	private javax.persistence.Query setParametrosPesquisaPacientesComAlta(javax.persistence.Query query,final Integer firstResult, final Integer maxResult, 
+			                                            final Date dataInicial, final Date dataFinal,
+			                                            final Short unidFuncSeq, final Short espSeq, final String tamCodigo){
+		query.setParameter("dataInicio", dataInicial);
+		query.setParameter("dataFim", dataFinal);
+		
+		if(tamCodigo != null){
+	        query.setParameter("tamCodigo", tamCodigo);
+		}
+		
+		if (unidFuncSeq != null) {
+			query.setParameter("unidFuncSeq", unidFuncSeq);
+		}
+		
+		if (espSeq != null) {
+			query.setParameter("espSeq", espSeq);
+		}
+		
+		if(firstResult != null){			
+			query.setFirstResult(firstResult);
+		}
+		if(maxResult != null){			
+			query.setMaxResults(maxResult);
+		}
+		return query;
+	}
+	
 	public List<VAinAltasVO> pesquisaPacientesComAlta(final Integer firstResult, final Integer maxResult, final String orderProperty, final boolean asc,
 			final Date dataInicial, final Date dataFinal, final boolean altaAdministrativa, final DominioTipoAlta tipoAlta,
 			final DominioOrdenacaoPesquisaPacComAlta ordenacao, final Short unidFuncSeq, final Short espSeq, final String tamCodigo) {
 
-		final StringBuilder hql = new StringBuilder(300);
+		final StringBuilder hql = new StringBuilder(1750);
 
 		hql.append(this.obterViewAinAltas());
 
-		hql.append(" WHERE ");
-
-		if (altaAdministrativa) {
-			hql.append(" int.dtSaidaPaciente >= :dataInicio ");
-			hql.append(" AND int.dtSaidaPaciente <= :dataFim ");
-		} else {
-			hql.append(" asu.dthrAlta >= :dataInicio ");
-			hql.append(" AND asu.dthrAlta <= :dataFim ");
-			hql.append(" and int.indPacienteInternado = :indPacienteInternado ");
-		}
-		if (DominioTipoAlta.O.equals(tipoAlta)) {
-			hql.append(" AND asu.tipo = :tipoAlta");
-		} else if (DominioTipoAlta.E.equals(tipoAlta)) {
-			hql.append(" AND (asu.tipo is null OR asu.tipo != :tipoAlta) ");
-		}
-		if (unidFuncSeq != null) {
-			hql.append(" AND vuf.seq = :unidFuncSeq ");
-		}
-		if (espSeq != null) {
-			hql.append(" AND  esp.seq = :espSeq ");
-		}
-		if (tamCodigo != null) {
-			hql.append(" AND int.tipoAltaMedica.codigo = :tamCodigo ");
-		}
-
-		if (DominioOrdenacaoPesquisaPacComAlta.U.equals(ordenacao)) {
-			hql.append(" ORDER BY vuf.seq, asu.dthrAlta ");
-		} else {
-			hql.append(" ORDER BY pac.nome ");
-		}
-
-		final javax.persistence.Query query = this.createQuery(hql.toString());
-
-		query.setParameter("dataInicio", dataInicial);
-		query.setParameter("dataFim", dataFinal);
-		if (!altaAdministrativa) {
-			query.setParameter("indPacienteInternado", true);
-		}
-
-		if (DominioTipoAlta.O.equals(tipoAlta) || DominioTipoAlta.E.equals(tipoAlta)) {// Se for 'O' ou 'E'
-			query.setParameter("tipoAlta", DominioIndTipoAltaSumarios.OBT);
-		}
-		if (unidFuncSeq != null) {
-			query.setParameter("unidFuncSeq", unidFuncSeq);
-		}
-		if (espSeq != null) {
-			query.setParameter("espSeq", espSeq);
-		}
-		if (tamCodigo != null) {
-			query.setParameter("tamCodigo", tamCodigo);
-		}
-
-		query.setFirstResult(firstResult);
-		query.setMaxResults(maxResult);
-
+		hql.append(this.obterFromPacienteAlta());
+		
+		hql.append(this.obterWherePacienteAlta(altaAdministrativa, tipoAlta, ordenacao, unidFuncSeq, espSeq, tamCodigo));
+		
+		javax.persistence.Query query = this.createQuery(hql.toString());
+		
+        query = this.setParametrosPesquisaPacientesComAlta(query, firstResult, maxResult, dataInicial, dataFinal, unidFuncSeq, espSeq, tamCodigo);
+		
 		@SuppressWarnings("unchecked")
 		final List<VAinAltasVO> listaAltas = query.getResultList();
 
 		return listaAltas;
 	}
+	// Fim 5465
+	public Long pesquisaPacientesComAltaCount(final Date dataInicial, final Date dataFinal, final boolean altaAdministrativa,
+			final DominioTipoAlta tipoAlta, final Short unidFuncSeq, final Short espSeq, final String tamCodigo) {
+		Long count = 0l;
+		final StringBuilder hql = new StringBuilder(1350);
 
+		hql.append(this.obterViewCountPacienteAlta());
+
+		hql.append(this.obterFromPacienteAlta());
+		
+		hql.append(this.obterWherePacienteAlta(altaAdministrativa, tipoAlta, null, unidFuncSeq, espSeq, tamCodigo));
+		
+		javax.persistence.Query query = this.createQuery(hql.toString());
+		
+        query = this.setParametrosPesquisaPacientesComAlta(query, null, null, dataInicial, dataFinal, unidFuncSeq, espSeq, tamCodigo);
+		
+
+		count = (Long) query.getSingleResult();
+
+		return count.longValue();
+
+	}
 //	public List<AghAtendimentos> obterUnidadesAlta(final Integer codigo, final Date dataUltInternacao) {
 //		final DetachedCriteria criteria = DetachedCriteria.forClass(AghAtendimentos.class);
 //		criteria.add(Restrictions.eq(AghAtendimentos.Fields.CODIGO_PACIENTE.toString(), codigo));
@@ -2495,13 +2522,13 @@ criteria.createAlias(AghAtendimentos.Fields.ESPECIALIDADE.toString()
 	@SuppressWarnings("unchecked")
 	public List<Object[]> obterCensoUnion19(final Short unfSeq, final Short unfSeqMae, final Date data, final DominioSituacaoUnidadeFuncional status) {
 
-		final StringBuffer hql = new StringBuffer(800);
+		final StringBuffer hql = new StringBuffer(840);
 		hql.append(" select ");
 		hql.append(" 	unf.seq,  unfSeq.seq,");
 		hql.append(" 	case when lto.leitoID is null then ( case when qrt.descricao is null then '' else (qrt.descricao) end ) else lto.leitoID end, ");
 		hql.append(" 	pac.prontuario, pac.codigo, pac.nome,");
 		hql.append(" 	urg.dtAtendimento, esp.sigla, tpa.codigo,");
-		hql.append(" 	urg.seq, pac.dtNascimento, tpa.descricao, esp.nomeEspecialidade, atd.seq");
+		hql.append(" 	urg.seq, pac.dtNascimento, tpa.descricao, esp.nomeEspecialidade, atd.seq, obs.descricao");
 		hql.append(" from AghAtendimentos atd");
 		hql.append(" left join atd.internacao as int ");
 		hql.append(" join atd.atendimentoUrgencia as urg ");
@@ -2512,6 +2539,7 @@ criteria.createAlias(AghAtendimentos.Fields.ESPECIALIDADE.toString()
 		hql.append(" left join urg.tipoAltaMedica as tpa");
 		hql.append(" left join urg.quarto as qrt");
 		hql.append(" left join urg.leito as lto");
+		hql.append(" left join int.observacoesCenso as obs");
 		hql.append(" where atd.indPacAtendimento = :indPacAtd ");
 		hql.append(" and int.seq is null");
 
@@ -2905,7 +2933,7 @@ criteria.createAlias(AghAtendimentos.Fields.ESPECIALIDADE.toString()
 
 	public List<AghAtendimentos> pesquisarAtendimentosMaeGestacao(final AghAtendimentos atendimentoGestacao) {
 		final DetachedCriteria criteria = DetachedCriteria.forClass(AghAtendimentos.class);
-		criteria.add(Restrictions.eq(AghAtendimentos.Fields.ATD_SEQ_MAE.toString(), atendimentoGestacao));
+		criteria.add(Restrictions.eq(AghAtendimentos.Fields.ATD_SEQ_MAE.toString(), atendimentoGestacao.getAtendimentoMae()));
 		criteria.add(Restrictions.eq(AghAtendimentos.Fields.GSO_PAC_CODIGO.toString(), atendimentoGestacao.getGsoPacCodigo()));
 		criteria.add(Restrictions.eq(AghAtendimentos.Fields.GSO_SEQP.toString(), atendimentoGestacao.getGsoSeqp()));
 		return executeCriteria(criteria);
@@ -4910,7 +4938,7 @@ criteria.createAlias(AghAtendimentos.Fields.ESPECIALIDADE.toString()
 		criteria.createAlias(AghAtendimentos.Fields.ESPECIALIDADE.toString(), "ESP", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias(AghAtendimentos.Fields.LEITO.toString(), "LTO", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias(AghAtendimentos.Fields.UNIDADE_FUNCIONAL.toString(), "UNF", JoinType.INNER_JOIN);
-		criteria.createAlias("UNF." + AghUnidadesFuncionais.Fields.CENTRO_CUSTO.toString(), "CCAPLIC", JoinType.INNER_JOIN);
+		criteria.createAlias("UNF." + AghUnidadesFuncionais.Fields.CENTRO_CUSTO.toString(), "CCAPLIC", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias("UNF." + AghUnidadesFuncionais.Fields.CARACTERISTICAS.toString(), "CARACTS", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias(AghAtendimentos.Fields.INTERNACAO.toString(), "INT", JoinType.LEFT_OUTER_JOIN);
 

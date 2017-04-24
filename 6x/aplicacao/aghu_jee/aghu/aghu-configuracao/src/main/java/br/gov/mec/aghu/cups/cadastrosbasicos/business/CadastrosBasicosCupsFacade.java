@@ -97,7 +97,12 @@ private ImpImpressoraDAO impImpressoraDAO;
 	public List<ImpServidorCups> pesquisarServidorCups(Object paramPesquisa) {
 		return getServidorCupsON().pesquisarServidorCups(paramPesquisa);
 	}
-
+	
+	@Override
+	public ImpServidorCups pesquisarServidorCupsPorFila(String fila){
+		return getServidorCupsON().pesquisarServidorCupsPorFila(fila);
+	}
+	
 	@Override
 	public Long pesquisarClasseImpressaoCount(String classeImpressao,
 			DominioTipoImpressoraCups tipoImpressora, String descricao,

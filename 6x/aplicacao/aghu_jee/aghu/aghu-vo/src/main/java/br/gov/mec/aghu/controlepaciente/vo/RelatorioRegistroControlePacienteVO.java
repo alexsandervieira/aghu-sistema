@@ -18,6 +18,7 @@ public class RelatorioRegistroControlePacienteVO implements Serializable {
     private String  siglaUnidade;
     //celula
     private String  valor;
+    private String  valorTexto;
     private String  anotacoes;
     private Integer ordem;
 	private Boolean foraLimiteNormal;
@@ -159,6 +160,14 @@ public class RelatorioRegistroControlePacienteVO implements Serializable {
 
 	public void setProfissionais(String profissionais) {
 		this.profissionais = profissionais;
+	}
+
+	public String getValorTexto() {
+		return valorTexto;
+	}
+
+	public void setValorTexto(String valorTexto) {
+		this.valorTexto = valorTexto;
 	}
 
 }

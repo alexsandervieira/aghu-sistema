@@ -280,6 +280,11 @@ public class TransferirPacienteController extends ActionController {
 
 	@SuppressWarnings({ "PMD.ExcessiveMethodLength", "PMD.NPathComplexity" })
 	public String gravar() {		
+		// Não possui alta administrativa e Tipo de alta médica não permite permanência com alta administrativa
+		if (transferirPacienteFacade.validarPacienteNaoPossuiAltaAdministrativa(internacaoSeq) && !transferirPacienteFacade.validarTipoAltaMedicaPermitePacienteComAlta(internacaoSeq)){
+			apresentarMsgNegocio(Severity.ERROR, "PACIENTE_POSSUI_ALTA_ADMINISTRATIVA");
+			return null;
+		}
 		try {
 			if (descricaoQuartoTransferencia != null) {
 				transferirPacienteFacade.validarQuartoInexistente(descricaoQuartoTransferencia);
@@ -322,7 +327,8 @@ public class TransferirPacienteController extends ActionController {
 				LOG.error(e.getMessage(), e);
 			}
 
-			transferirPacienteFacade.validarPacienteJaPossuiAlta(internacao.getAtendimento(),dtTransferencia);
+			// #79848 permitir a transferência mesmo após alta médica.
+			//transferirPacienteFacade.validarPacienteJaPossuiAlta(internacao.getAtendimento(),dtTransferencia);
 
 			transferirPacienteFacade.validarDestino(internacao);
 
@@ -334,7 +340,8 @@ public class TransferirPacienteController extends ActionController {
 			if (transferirPacienteFacade.validarDataTransferencia(dtTransferencia)) {
 				internacao.setDthrUltimoEvento(dtTransferencia);
 
-				transferirPacienteFacade.validarDataTransferenciaPosteriorAlta(internacao);
+				// #79848 permitir a transferência mesmo após alta médica.	
+				//transferirPacienteFacade.validarDataTransferenciaPosteriorAlta(internacao);
 
 				transferirPacienteFacade.validarDataInternacao(internacao);
 

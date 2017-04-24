@@ -22,6 +22,8 @@ public interface ICadastrosBasicosCupsFacade extends Serializable {
 	public List<ImpImpressora> pesquisarImpressoraPorFila(Object paramPesquisa);
 
 	public List<ImpServidorCups> pesquisarServidorCups(Object paramPesquisa);
+	
+	public ImpServidorCups pesquisarServidorCupsPorFila(String fila);
 
 	public Long pesquisarClasseImpressaoCount(String classeImpressao,
 			DominioTipoImpressoraCups tipoImpressora, String descricao,

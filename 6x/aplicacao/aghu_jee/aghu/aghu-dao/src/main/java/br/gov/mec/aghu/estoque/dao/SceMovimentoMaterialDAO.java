@@ -1,6 +1,7 @@
 package br.gov.mec.aghu.estoque.dao;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,6 +30,10 @@ import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
 
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
+import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.utils.DateFormatUtil;
+import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dao.SequenceID;
 import br.gov.mec.aghu.dominio.DominioComparacaoDataCompetencia;
 import br.gov.mec.aghu.dominio.DominioEstocavelConsumoSinteticoMaterial;
@@ -56,10 +61,8 @@ import br.gov.mec.aghu.model.ScoFornecedor;
 import br.gov.mec.aghu.model.ScoGrupoMaterial;
 import br.gov.mec.aghu.model.ScoMateriaisClassificacoes;
 import br.gov.mec.aghu.model.ScoMaterial;
-import br.gov.mec.aghu.core.commons.CoreUtil;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.utils.DateUtil;
 
+@SuppressWarnings("PMD.ExcessiveClassLength")
 public class SceMovimentoMaterialDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<SceMovimentoMaterial> {	
 	private static final long serialVersionUID = -7575470728189081831L;
 
@@ -646,36 +649,283 @@ public class SceMovimentoMaterialDAO extends br.gov.mec.aghu.core.persistence.da
 
 		return detalhes;
 	}
+	
+	/**
+	 * Pesquisa o consumo sintético de materiais
+	 * @param cctCodigo	 
+	 * @param almSeq	 
+	 * @param estocavel	 
+	 * @param dtCompetencia	 
+	 * @param ordenacao	 
+	 * @return
+	 */
+	public List<RelatorioConsumoSinteticoMaterialVO> pesquisarRelatorioConsumoSinteticoMaterialOtimizada(final Integer cctCodigo
+			, final Short almSeq, final DominioEstocavelConsumoSinteticoMaterial estocavel, final Date dtCompetencia
+			, final DominioOrdenacaoConsumoSinteticoMaterial ordenacao, Long valorClassificacaoInicial, Long valorClassificacaoFinal
+			, ScoGrupoMaterial grupoMaterial, final Long cn5Numero) {
+		SQLQuery queryNativa = this.obterSqlNativoRelatorioConsumoSinteticoMaterial(cctCodigo, almSeq, estocavel, dtCompetencia
+					, valorClassificacaoInicial, valorClassificacaoFinal, grupoMaterial, ordenacao, cn5Numero);
+		
+		@SuppressWarnings("unchecked")
+		List<Object[]> results = queryNativa.list();
+		
+		List<RelatorioConsumoSinteticoMaterialVO> lista = new ArrayList<RelatorioConsumoSinteticoMaterialVO>();
+		
+		for(Object[] obj : results) {
+			RelatorioConsumoSinteticoMaterialVO vo = new RelatorioConsumoSinteticoMaterialVO();
+			
+			vo.setCodigoCentroCusto((Integer) obj[0]);
+			vo.setDescricaoCentroCusto((String) obj[1]);
+			vo.setNomeMaterial((String) obj[2]);
+			vo.setCodigoMaterial((Integer) obj[3]);
+			vo.setUnidadeMedidaCodigo((String) obj[4]);
+			BigInteger quantidade = (BigInteger) obj[5];
+			vo.setQuantidade(quantidade.intValue());
+			vo.setValor(BigDecimal.valueOf((Double) obj[6]));
+			vo.setCustoMedioPonderado(BigDecimal.valueOf((Double) obj[7]));
+			
+			lista.add(vo);
+		}
+		
+		return lista;
+	}
+
+	@SuppressWarnings("PMD.NPathComplexity")
+	private SQLQuery obterSqlNativoRelatorioConsumoSinteticoMaterial(Integer cctCodigo, Short almSeq,
+			DominioEstocavelConsumoSinteticoMaterial estocavel, Date dtCompetencia, Long valorClassificacaoInicial,
+			Long valorClassificacaoFinal, ScoGrupoMaterial grupoMaterial
+			, DominioOrdenacaoConsumoSinteticoMaterial ordenacao, Long cn5Numero) {
+		StringBuilder sb = new StringBuilder(3200);
+		
+		// Inicio do Projecao do SQL principal
+		sb.append(" SELECT x.cct_codigo as ").append(RelatorioConsumoSinteticoMaterialVO.Fields.CODIGO_CENTRO_CUSTO.toString());
+		sb.append(", x.cct_descricao as ").append(RelatorioConsumoSinteticoMaterialVO.Fields.DESCRICAO_CENTRO_CUSTO.toString());
+		sb.append("﻿, x.mat_nome as ").append(RelatorioConsumoSinteticoMaterialVO.Fields.NOME_MATERIAL.toString());
+		sb.append("﻿, x.mat_codigo as ").append(RelatorioConsumoSinteticoMaterialVO.Fields.CODIGO_MATERIAL.toString());
+		sb.append("﻿, x.mat_umd_codigo as ").append(RelatorioConsumoSinteticoMaterialVO.Fields.UNIDADE_MEDIDA_CODIGO.toString());
+		sb.append(", (x.soma_quantidade_n - x.soma_quantidade_s) as ").append(RelatorioConsumoSinteticoMaterialVO.Fields.QUANTIDADE.toString());
+		sb.append(", (x.soma_valor_n - x.soma_valor_s) as ").append(RelatorioConsumoSinteticoMaterialVO.Fields.VALOR.toString());
+		sb.append(",( case when (x.custo_medio_ponderado_valor <> 0 and x.custo_medio_ponderado_quant <> 0)");
+		sb.append("		then (x.custo_medio_ponderado_valor / x.custo_medio_ponderado_quant)");
+		sb.append("		else 0");
+		sb.append("	   end");
+		sb.append("	) as ").append(RelatorioConsumoSinteticoMaterialVO.Fields.CUSTO_MEDIO_PONDERADO.toString());
+		sb.append(" from ("); // Tabela x
+		
+		// Sub SQL para group by e somatorio 
+		sb.append("  select tab_filter.cct_codigo as cct_codigo");
+		sb.append("    , tab_filter.mat_codigo as mat_codigo");
+		sb.append("    , max(tab_filter.cct_descricao) as cct_descricao");
+		sb.append("    , max(tab_filter.mat_nome) as mat_nome");
+		sb.append("    , max(tab_filter.mat_umd_codigo) as mat_umd_codigo");
+		sb.append("    , sum (soma_quantidade_n) as soma_quantidade_n");
+		sb.append("    , sum (soma_quantidade_s) as soma_quantidade_s");
+		sb.append("    , sum (soma_valor_n) as soma_valor_n");
+		sb.append("    , sum (soma_valor_s) as soma_valor_s");
+		sb.append("    , sum (custo_medio_ponderado_valor) as custo_medio_ponderado_valor");
+		sb.append("    , sum (custo_medio_ponderado_quant) as custo_medio_ponderado_quant");
+		sb.append("  from ("); // Tabela tab_filter
+		
+		// Sub SQL para aplicacao das regras e campos calculados
+		sb.append(" SELECT cct1_.CODIGO as cct_codigo,");
+		sb.append("	cct1_.DESCRICAO as cct_descricao,");
+		sb.append("	mat2_.NOME as mat_nome,");
+		sb.append("	mat2_.CODIGO as mat_codigo,");
+		sb.append("	mat2_.UMD_CODIGO as mat_umd_codigo");
+		// Calcula (cálculo retirado da consulta principal) e seta a quantidade
+		sb.append("	,( CASE WHEN (this_.IND_ESTORNO = 'N') ");
+		sb.append("	   THEN ( case when (tmv3_.IND_OPERACAO_BASICA = 'DB') ");
+		sb.append("		then ( case when (this_.QUANTIDADE is not null)");
+		sb.append("			then this_.QUANTIDADE");
+		sb.append("			else 0");
+		sb.append("			end)");
+		sb.append("		else ( case when (this_.QUANTIDADE is not null)");
+		sb.append("			then this_.QUANTIDADE * -1");
+		sb.append("			else 0");
+		sb.append("			end)");
+		sb.append("		end)");
+		sb.append("	    else 0");
+		sb.append("	    END");
+		sb.append(" ) AS soma_quantidade_n");
+		sb.append(" ,( CASE WHEN (this_.IND_ESTORNO = 'S') ");
+		sb.append("		THEN ( case when (tmv3_.IND_OPERACAO_BASICA = 'DB') ");
+		sb.append("			then ( case when (this_.QUANTIDADE is not null)");
+		sb.append("				then this_.QUANTIDADE");
+		sb.append("				else 0");
+		sb.append("				end)");
+		sb.append("			else ( case when (this_.QUANTIDADE is not null)");
+		sb.append("				then this_.QUANTIDADE * -1");
+		sb.append("				else 0");
+		sb.append("				end)");
+		sb.append("			end)");
+		sb.append("		else 0");
+		sb.append("		END");
+		sb.append(" ) AS soma_quantidade_s");
+		// Calcula (cálculo retirado da consulta principal) e seta o valor
+		sb.append(" ,( CASE WHEN (this_.IND_ESTORNO = 'N') ");
+		sb.append("		THEN ( case when (tmv3_.IND_OPERACAO_BASICA = 'DB') ");
+		sb.append("			then ( case when (this_.VALOR is not null)");
+		sb.append("				then this_.VALOR");
+		sb.append("				else 0");
+		sb.append("				end)");
+		sb.append("			else ( case when (this_.VALOR is not null)");
+		sb.append("				then this_.VALOR * -1");
+		sb.append("				else 0");
+		sb.append("				end)");
+		sb.append("		end)");
+		sb.append("		else 0");
+		sb.append("		END");
+		sb.append(" ) AS soma_valor_n");
+		sb.append("	,( CASE WHEN (this_.IND_ESTORNO = 'S') ");
+		sb.append("		THEN ( case when (tmv3_.IND_OPERACAO_BASICA = 'DB') ");
+		sb.append("			then ( case when (this_.VALOR is not null)");
+		sb.append("				then this_.VALOR");
+		sb.append("				else 0");
+		sb.append("				end)");
+		sb.append("			else ( case when (this_.VALOR is not null)");
+		sb.append("				then this_.VALOR * -1");
+		sb.append("				else 0");
+		sb.append("				end)");
+		sb.append("		end)");
+		sb.append("		else 0");
+		sb.append("		END");
+		sb.append(" ) AS soma_valor_s");
+		// Calcula custo médio ponderado. Chamada para FUNCTION CF_CUSTO_MEDIOFORMULA
+		sb.append("	, ( CASE WHEN (this_.VALOR is not null)");
+		sb.append("		then this_.VALOR");
+		sb.append("		else 0");
+		sb.append("		end");
+		sb.append("	) AS custo_medio_ponderado_valor");
+		sb.append("	, ( CASE WHEN (this_.QUANTIDADE is not null)");
+		sb.append("		then this_.QUANTIDADE");
+		sb.append("		else 0");
+		sb.append("		end");
+		sb.append("	) AS custo_medio_ponderado_quant");
+		sb.append("	FROM AGH.SCE_MOVIMENTO_MATERIAIS this_");
+		sb.append("	INNER JOIN AGH.SCE_ALMOXARIFADOS alm4_ ON this_.ALM_SEQ = alm4_.SEQ");
+		sb.append("	INNER JOIN AGH.FCC_CENTRO_CUSTOS cct1_ ON this_.CCT_CODIGO = cct1_.CODIGO");
+		sb.append("	INNER JOIN AGH.SCO_MATERIAIS mat2_ ON this_.MAT_CODIGO = mat2_.CODIGO");
+		sb.append("	INNER JOIN AGH.SCE_TIPO_MOVIMENTOS tmv3_ ON this_.TMV_COMPLEMENTO = tmv3_.COMPLEMENTO");
+		sb.append("	AND this_.TMV_SEQ=tmv3_.SEQ");
+		sb.append("	WHERE 1=1 ");
+						
+		// Considera o parâmetro do código do centro de custo
+		if (cctCodigo != null) {
+			sb.append(" and cct1_.").append(FccCentroCustos.Fields.CODIGO_NATIVO.toString()).append(" = ").append(cctCodigo);
+		}
+		// Considera o parâmetro do seq do almoxarifado
+		if (almSeq != null) {
+			sb.append(" and alm4_.").append(SceAlmoxarifado.Fields.SEQ_NATIVO.toString()).append(" = ").append(almSeq);
+		}
+		// Considera o intervalo mensal da data de competência, ou seja, do primeiro dia do mês de competência até o final
+		Calendar c = GregorianCalendar.getInstance();
+		c.setTime(dtCompetencia);
+		c.set(Calendar.DATE, c.getActualMinimum(Calendar.DATE));
+		Date primeiroDiaMes = c.getTime();
+		c.set(Calendar.DATE, c.getActualMaximum(Calendar.DATE));
+		Date ultimoDiaMes = c.getTime();
+		sb.append(" and this_.").append(SceMovimentoMaterial.Fields.DATA_COMPETENCIA_NATIVO.toString());
+		
+		Date dtInicio = DateUtil.obterDataComHoraInical(primeiroDiaMes);
+		Date dtFim = DateUtil.obterDataComHoraFinal(ultimoDiaMes);
+		
+		String data1 = " to_date('" + DateFormatUtil.formataTimeStamp(dtInicio) + "', 'dd/MM/yyyy hh24:mi:ss') ";
+		String data2 = " to_date('" + DateFormatUtil.formataTimeStamp(dtFim) + "', 'dd/MM/yyyy hh24:mi:ss') ";
+		
+		sb.append(" between ").append(data1);
+		sb.append(" and ").append(data2);
+		
+		// Considera que o movimento é de consumo
+		sb.append(" and tmv3_.").append(SceTipoMovimento.Fields.IND_MOVIMENTO_CONSUMO_NATIVO.toString()).append(" = 'S' ");
+		// Considera se o material é estocável
+		if (estocavel != null) {
+			sb.append(" and mat2_.").append(ScoMaterial.Fields.IND_ESTOCAVEL_NATIVO.toString()).append(" = ")
+			.append( (DominioEstocavelConsumoSinteticoMaterial.S.equals(estocavel)) ? " 'S' " : " 'N' ");
+		}
+
+		if (grupoMaterial != null) {
+			sb.append(" and mat2_.").append(ScoMaterial.Fields.GRUPO_MATERIAL_NATIVO.toString()).append(" = ").append(grupoMaterial.getCodigo());
+		}
+		// Particularidade da PROCEDURE P_DEFINE_WHERE
+		if (valorClassificacaoInicial != null && valorClassificacaoFinal != null) {
+			sb.append(
+				addFilterMateriaisClassificados(valorClassificacaoInicial, valorClassificacaoFinal)
+			);
+		}
+		
+//		if (cn5Numero != null) {
+//		}
+		
+		// Final do Sub SQL para group by e somatorio
+		sb.append("  ) tab_filter ");
+		sb.append("  group by tab_filter.cct_codigo, tab_filter.mat_codigo ");
+		
+		// Final do SQL principal
+		sb.append(") x ");
+		
+		// Ordenacao final
+		sb.append(" ORDER BY x.").append("cct_codigo").append(" ASC ");
+		
+		// Considera a ordenação informada pelo usuário. Vide: &p_order_by
+		if (ordenacao != null) {
+			if (DominioOrdenacaoConsumoSinteticoMaterial.C.equals(ordenacao)) {
+				sb.append("    , x.").append("mat_codigo").append(" ASC ");
+			} else if (DominioOrdenacaoConsumoSinteticoMaterial.N.equals(ordenacao)) {
+				sb.append("    , x.").append("mat_nome").append(" ASC ");
+			}
+		}
+	
+		SQLQuery sqlQuery = createSQLQuery(sb.toString());
+		//sqlQuery.setTimestamp("dtInicio", DateUtil.obterDataComHoraInical(primeiroDiaMes));
+		//sqlQuery.setTimestamp("dtFim", DateUtil.obterDataComHoraFinal(ultimoDiaMes));
+		
+		return sqlQuery;
+	}
+
+	private String addFilterMateriaisClassificados(Long valorClassificacaoInicial, Long valorClassificacaoFinal) {
+		StringBuilder sbFilter = new StringBuilder(250);
+
+		sbFilter.append(" and exists ( ");
+		sbFilter.append(" select MCL_.MAT_CODIGO ");
+		sbFilter.append(" from AGH.SCO_MATERIAIS_CLASSIFICACOES MCL_ ");
+		sbFilter.append(" where ");
+		sbFilter.append(" MCL_.MAT_CODIGO = mat2_.CODIGO "); //Referencia ao campo do SQL filter
+		sbFilter.append(" and MCL_.CN5_NUMERO between ");
+		sbFilter.append(valorClassificacaoInicial).append(" and ").append(valorClassificacaoFinal);
+		// Desconsidera a Classificação de medicamentos da COMEDI
+		//sbFilter.append(" and not MCL_.CN5_NUMERO between 20001000000 and 20099999999 ");
+		sbFilter.append(" ) ");
+				
+		return sbFilter.toString();
+	}
 
 	/**
 	 * Pesquisa o consumo sintético de materiais
 	 * @param cctCodigo	 * @param almSeq	 * @param estocavel	 * @param dtCompetencia	 * @param ordenacao	 * @return
 	 */
-	public List<RelatorioConsumoSinteticoMaterialVO> pesquisarRelatorioConsumoSinteticoMaterial(final Integer cctCodigo, final Short almSeq,
-			final DominioEstocavelConsumoSinteticoMaterial estocavel, final Date dtCompetencia, final DominioOrdenacaoConsumoSinteticoMaterial ordenacao,
-			Long valorClassificacaoInicial, Long valorClassificacaoFinal, ScoGrupoMaterial grupoMaterial) {
-		DetachedCriteria criteria = this.obterCriteriaRelatorioConsumoSinteticoMaterial(cctCodigo, almSeq, estocavel, dtCompetencia, valorClassificacaoInicial, valorClassificacaoFinal, grupoMaterial);
-		criteria.setProjection(Projections.projectionList()
-				.add(Projections.distinct(Projections.property("CCT." + FccCentroCustos.Fields.CODIGO.toString())),
-						RelatorioConsumoSinteticoMaterialVO.Fields.CODIGO_CENTRO_CUSTO.toString())
-				.add(Projections.property("CCT." + FccCentroCustos.Fields.DESCRICAO.toString()), RelatorioConsumoSinteticoMaterialVO.Fields.DESCRICAO_CENTRO_CUSTO.toString())
-				.add(Projections.property("MAT." + ScoMaterial.Fields.NOME.toString()), RelatorioConsumoSinteticoMaterialVO.Fields.NOME_MATERIAL.toString())
-				.add(Projections.property("MAT." + ScoMaterial.Fields.CODIGO.toString()), RelatorioConsumoSinteticoMaterialVO.Fields.CODIGO_MATERIAL.toString())
-				.add(Projections.property("MAT." + ScoMaterial.Fields.UNIDADE_MEDIDA.toString()), RelatorioConsumoSinteticoMaterialVO.Fields.UNIDADE_MEDIDA.toString()));
-		
-		criteria.addOrder(Order.asc("CCT." + FccCentroCustos.Fields.CODIGO.toString()));
-		
-		// Considera a ordenação informada pelo usuário. Vide: &p_order_by
-		if (ordenacao != null) {
-			if (DominioOrdenacaoConsumoSinteticoMaterial.C.equals(ordenacao)) {
-				criteria.addOrder(Order.asc("MAT." + ScoMaterial.Fields.CODIGO.toString()));
-			} else if (DominioOrdenacaoConsumoSinteticoMaterial.N.equals(ordenacao)) {
-				criteria.addOrder(Order.asc("MAT." + ScoMaterial.Fields.NOME.toString()));
-			}
-		}
-		criteria.setResultTransformer(Transformers.aliasToBean(RelatorioConsumoSinteticoMaterialVO.class));
-		return executeCriteria(criteria);
-	}
+//	public List<RelatorioConsumoSinteticoMaterialVO> pesquisarRelatorioConsumoSinteticoMaterial(final Integer cctCodigo, final Short almSeq,
+//			final DominioEstocavelConsumoSinteticoMaterial estocavel, final Date dtCompetencia, final DominioOrdenacaoConsumoSinteticoMaterial ordenacao,
+//			Long valorClassificacaoInicial, Long valorClassificacaoFinal, ScoGrupoMaterial grupoMaterial) {
+//		DetachedCriteria criteria = this.obterCriteriaRelatorioConsumoSinteticoMaterial(cctCodigo, almSeq, estocavel, dtCompetencia, valorClassificacaoInicial, valorClassificacaoFinal, grupoMaterial);
+//		criteria.setProjection(Projections.projectionList()
+//				.add(Projections.distinct(Projections.property("CCT." + FccCentroCustos.Fields.CODIGO.toString())),
+//						RelatorioConsumoSinteticoMaterialVO.Fields.CODIGO_CENTRO_CUSTO.toString())
+//				.add(Projections.property("CCT." + FccCentroCustos.Fields.DESCRICAO.toString()), RelatorioConsumoSinteticoMaterialVO.Fields.DESCRICAO_CENTRO_CUSTO.toString())
+//				.add(Projections.property("MAT." + ScoMaterial.Fields.NOME.toString()), RelatorioConsumoSinteticoMaterialVO.Fields.NOME_MATERIAL.toString())
+//				.add(Projections.property("MAT." + ScoMaterial.Fields.CODIGO.toString()), RelatorioConsumoSinteticoMaterialVO.Fields.CODIGO_MATERIAL.toString())
+//				.add(Projections.property("MAT." + ScoMaterial.Fields.UNIDADE_MEDIDA.toString()), RelatorioConsumoSinteticoMaterialVO.Fields.UNIDADE_MEDIDA.toString()));
+//		criteria.addOrder(Order.asc("CCT." + FccCentroCustos.Fields.CODIGO.toString()));
+//		// Considera a ordenação informada pelo usuário. Vide: &p_order_by
+//		if (ordenacao != null) {
+//			if (DominioOrdenacaoConsumoSinteticoMaterial.C.equals(ordenacao)) {
+//				criteria.addOrder(Order.asc("MAT." + ScoMaterial.Fields.CODIGO.toString()));
+//			} else if (DominioOrdenacaoConsumoSinteticoMaterial.N.equals(ordenacao)) {
+//				criteria.addOrder(Order.asc("MAT." + ScoMaterial.Fields.NOME.toString()));
+//			}
+//		}
+//		criteria.setResultTransformer(Transformers.aliasToBean(RelatorioConsumoSinteticoMaterialVO.class));
+//		return executeCriteria(criteria);
+//	}
 
 	/**
 	 * Pesquisa o consumo sintético pro material

@@ -80,6 +80,7 @@ import br.gov.mec.aghu.model.AipUfs;
 import br.gov.mec.aghu.model.FatConvenioSaudePlano;
 import br.gov.mec.aghu.model.FccCentroCustos;
 import br.gov.mec.aghu.model.MamAltaSumario;
+import br.gov.mec.aghu.model.MbcCirurgias;
 import br.gov.mec.aghu.model.MbcProcedimentoCirurgicos;
 import br.gov.mec.aghu.model.McoRecemNascidos;
 import br.gov.mec.aghu.model.MpmAltaSumario;
@@ -149,6 +150,8 @@ public interface IPacienteFacade extends Serializable {
 	 * @return lista de atendimentos de recém-nascidos
 	 */
 	List<AghAtendimentos> obterAtendimentosRecemNascidosPorProntuarioMae(AghAtendimentos aghAtendimentos);
+	
+	Integer obterProntuarioMaePorProntuarioPaciente(Integer nroProntuario) throws ApplicationBusinessException;
 
 	ConvenioExamesLaudosVO buscarConvenioExamesLaudos(Integer seqAtendimentoParam);
 
@@ -1112,4 +1115,22 @@ public interface IPacienteFacade extends Serializable {
 	AipPacientes refreshAipPaciente(AipPacientes aipPacientes);
 
 	List<String> carregarArquivoPacientes(String caminhoAbsolutoTxt) throws FileNotFoundException;
+
+	void gerarMovimentacaoProntuario(AinInternacao internacao)
+			throws ApplicationBusinessException;
+
+	AipSolicitantesProntuario pesquisarSolicitantesProntuarioPorOrigemEventos(Short origemEventosSeq);
+
+	void gerarSolicitacaoProntuario(AinInternacao internacao) throws ApplicationBusinessException;
+	
+	void gerarPendenciasSolicitacaoArquivoClinico();
+
+	List<AipMovimentacaoProntuarios> listarMovimentacoesProntuariosPorCodigoPaciente(
+			Integer pacCodigo);
+
+	void gerarSolicitacaoProntuarioConsultas(AacConsultas consultas, Boolean exibeMsgSolicitanteInexistente)
+			throws ApplicationBusinessException;
+
+	void gerarSolicitacaoProntuarioCirurgia(MbcCirurgias cirurgia) throws ApplicationBusinessException;
+	
 }

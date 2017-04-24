@@ -239,7 +239,9 @@ public class ResponsaveisPacienteON extends BaseBusiness {
 		ainResponsaveisPacienteDAO.flush();
 		
 		criarAinResponsaveisPacienteJn(responsavelPaciente, DominioOperacoesJournal.DEL);
-		this.cadastrosApoioExamesFacade.criarAghResponsavelJn(responsavelPaciente.getResponsavelConta(), DominioOperacoesJournal.DEL);
+		if(responsavelPaciente != null && responsavelPaciente.getResponsavelConta() != null){			
+			this.cadastrosApoioExamesFacade.criarAghResponsavelJn(responsavelPaciente.getResponsavelConta(), DominioOperacoesJournal.DEL);
+		}
 	}
  	
 	private void updatePacienteInternacaoJn(AinResponsaveisPaciente responsavelPaciente, AinResponsaveisPaciente responsavelPacienteOld, RapServidores servidorLogado){

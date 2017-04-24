@@ -180,7 +180,7 @@ public class ListaPacientesInternadosController extends ActionController {
 			limpaVariaveisRedirecionaAghWeb();
 			buscaParametrosAghWeb();
 			buscaParametroUsoSumario();
-
+			this.buscaParametroAtivaDesativaSolicitacaoExames();
 			if (pesquisar) {
 				this.pesquisar();
 			}else{
@@ -211,6 +211,20 @@ public class ListaPacientesInternadosController extends ActionController {
 			aghuUsoSumario = aghParametrosUsoSumario.getVlrTexto();
 		}
 	}
+	
+	public boolean buscaParametroAtivaDesativaSolicitacaoExames() throws ApplicationBusinessException{
+		
+		AghParametros ativaDesativaSolicitacao = this.parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_ATIVA_DESATIVA_SOLICITACAO_EXAMES);
+		if (ativaDesativaSolicitacao != null) {
+			if (ativaDesativaSolicitacao.getVlrTexto().equalsIgnoreCase("S")){ 
+			return Boolean.TRUE;
+			}
+		}
+		return Boolean.FALSE;
+	}
+	
+	
+	
 	public void atualizarLista() {
 		try {
 			this.pesquisar();

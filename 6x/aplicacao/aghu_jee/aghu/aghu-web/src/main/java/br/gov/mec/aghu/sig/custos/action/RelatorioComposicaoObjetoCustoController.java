@@ -227,13 +227,13 @@ public class RelatorioComposicaoObjetoCustoController extends ActionReport {
 	 */
 	private String definirTituloRelatorio() {
 		if (this.getFiltoCentroCusto() == null && this.getFiltroObjetoCusto() == null) {
-			return "Relatório de composição dos objetos de custo não vinculados a centro de custo";
+			return "Relatório de composição dos objetos de custo não vinculados a centro de atividade";
 		} else if (this.getFiltoCentroCusto() != null && this.getFiltroObjetoCusto() == null) {
-			return "Relatório de composição dos objetos de custo do centro de custo " + this.getFiltoCentroCusto().getCodigoDescricao();
+			return "Relatório de composição dos objetos de custo do centro de atividade " + this.getFiltoCentroCusto().getCodigoDescricao();
 		} else if (this.getFiltoCentroCusto() == null && this.getFiltroObjetoCusto() != null) {
-			return "Relatório de composição do objeto de custo não vinculado a centro de custo";
+			return "Relatório de composição do objeto de custo não vinculado a centro de atividade";
 		} else if (this.getFiltoCentroCusto() != null && this.getFiltroObjetoCusto() != null) {
-			return "Relatório de composição do objeto de custo do centro de custo " + this.getFiltoCentroCusto().getCodigoDescricao();
+			return "Relatório de composição do objeto de custo do centro de atividade " + this.getFiltoCentroCusto().getCodigoDescricao();
 		} else {
 			return "Relatório de composição de objetos de custo";
 		}

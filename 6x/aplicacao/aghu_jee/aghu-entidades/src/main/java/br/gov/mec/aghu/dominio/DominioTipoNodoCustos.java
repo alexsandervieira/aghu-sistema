@@ -40,7 +40,7 @@ public enum DominioTipoNodoCustos implements Dominio {
 		case DTHR_ATENDIMENTO:
 			return "Data/hora atendimento";
 		case CENTRO_CUSTO:
-			return "Centro de Custo";
+			return "Centro de Atividade";
 		default:
 			return "";
 		}

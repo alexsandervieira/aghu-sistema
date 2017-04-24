@@ -152,32 +152,34 @@
                     </p:outputPanel> 
                   </td>  
                   <td width="1%" rowspan="1" colspan="1"/>  
-                  <td width="4%" align="center" valign="top" rowspan="1" colspan="1"> 
-                    <p:outputPanel id="tabelaAcao" layout="inline"> 
-                        <div> 
-                          <mec:commandButton disabled="#{solicitacaoInternacaoUnidadesFechadasController.disableButton or not mf:hasPermission(securityController,'agendarExame,visualizarHorariosAgendamento')}" value="#{messages.LABEL_AGENDAMENTO}" action="exames-listarAgendamento" styleClass="bt_cinza"> 
-                            <f:setPropertyActionListener target="#{listarExamesAgendamentoSelecaoController.soeSeq}" value="#{solicitacaoInternacaoUnidadesFechadasController.numero}" for="command"/>  
-                            <f:setPropertyActionListener target="#{listarExamesAgendamentoSelecaoController.voltarPara}" value="exames-pesquisaSolicitacaoInternacaoUnidadesFechadas" for="command"/> 
-                          </mec:commandButton> 
-                        </div>  
-                        <div> 
-                          <mec:commandButton disabled="#{solicitacaoInternacaoUnidadesFechadasController.disableButton or not mf:hasPermission(securityController,'imprimirExamesSolicitacao,executar') }" value="#{messages.LABEL_IMPRIME_EXAMES}" action="#{solicitacaoInternacaoUnidadesFechadasController.directPrint()}" styleClass="bt_cinza"/> 
-                        </div>  
-                        <div> 
-                          <mec:commandButton disabled="#{solicitacaoInternacaoUnidadesFechadasController.disableButton or not mf:hasPermission(securityController,'imprimirExamesSolicitacao,executar') }" value="#{messages.LABEL_VISUALIZA_EXAMES}" action="#{solicitacaoInternacaoUnidadesFechadasController.print()}" styleClass="bt_cinza"/> 
-                        </div>  
-                        <div> 
-                          <mec:commandButton disabled="#{solicitacaoInternacaoUnidadesFechadasController.disableButton or not mf:hasPermission(securityController,'recepcionarPaciente,executar')}" value="#{messages.LABEL_RECEBER_PACIENTE}" action="exames-listarExamesCriteriosSelecionados" styleClass="bt_cinza"> 
-                            <f:setPropertyActionListener target="#{listarExamesCriteriosSelecionadosController.numeroSolicitacao}" value="#{solicitacaoInternacaoUnidadesFechadasController.numero}" for="command"/>  
-                            <f:setPropertyActionListener target="#{listarExamesCriteriosSelecionadosController.voltarPara}" value="exames-pesquisaSolicitacaoInternacaoUnidadesFechadas" for="command"/> 
-                          </mec:commandButton> 
-                        </div>  
-                        <div> 
-                          <mec:commandButton disabled="#{solicitacaoInternacaoUnidadesFechadasController.disableButton or not mf:hasPermission(securityController,'imprimirEtiquetasEnvelope,imprimir')}" value="#{messages.LABEL_IMPRIME_ETIQUETA}" action="exames-relatorioEtiquetaEnvelopePaciente" styleClass="bt_cinza"> 
-                            <f:setPropertyActionListener target="#{etiquetaEnvelopePacienteController.codigoSolicitacao}" value="#{solicitacaoInternacaoUnidadesFechadasController.numero}" for="command"/>  
-                            <f:setPropertyActionListener target="#{etiquetaEnvelopePacienteController.voltarPara}" value="exames-pesquisaSolicitacaoInternacaoUnidadesFechadas" for="command"/> 
-                          </mec:commandButton> 
-                        </div> 
+                  <td width="4%" align="center" valign="top" rowspan="1" colspan="1">
+                    <p:outputPanel id="tabelaAcao" layout="inline">
+	                    <p:outputPanel layout="block" style="width:110px;"> 
+	                        <div> 
+	                          <mec:commandButton disabled="#{solicitacaoInternacaoUnidadesFechadasController.disableButton or not mf:hasPermission(securityController,'agendarExame,visualizarHorariosAgendamento')}" value="#{messages.LABEL_AGENDAMENTO}" action="exames-listarAgendamento" styleClass="bt_cinza"> 
+	                            <f:setPropertyActionListener target="#{listarExamesAgendamentoSelecaoController.soeSeq}" value="#{solicitacaoInternacaoUnidadesFechadasController.numero}" for="command"/>  
+	                            <f:setPropertyActionListener target="#{listarExamesAgendamentoSelecaoController.voltarPara}" value="exames-pesquisaSolicitacaoInternacaoUnidadesFechadas" for="command"/> 
+	                          </mec:commandButton> 
+	                        </div>  
+	                        <div> 
+	                          <mec:commandButton disabled="#{solicitacaoInternacaoUnidadesFechadasController.disableButton or not mf:hasPermission(securityController,'imprimirExamesSolicitacao,executar') }" value="#{messages.LABEL_IMPRIME_EXAMES}" action="#{solicitacaoInternacaoUnidadesFechadasController.directPrint()}" styleClass="bt_cinza"/> 
+	                        </div>  
+	                        <div> 
+	                          <mec:commandButton disabled="#{solicitacaoInternacaoUnidadesFechadasController.disableButton or not mf:hasPermission(securityController,'imprimirExamesSolicitacao,executar') }" value="#{messages.LABEL_VISUALIZA_EXAMES}" action="#{solicitacaoInternacaoUnidadesFechadasController.print()}" styleClass="bt_cinza"/> 
+	                        </div>  
+	                        <div> 
+	                          <mec:commandButton disabled="#{solicitacaoInternacaoUnidadesFechadasController.disableButton or not mf:hasPermission(securityController,'recepcionarPaciente,executar')}" value="#{messages.LABEL_RECEBER_PACIENTE}" action="exames-listarExamesCriteriosSelecionados" styleClass="bt_cinza"> 
+	                            <f:setPropertyActionListener target="#{listarExamesCriteriosSelecionadosController.numeroSolicitacao}" value="#{solicitacaoInternacaoUnidadesFechadasController.numero}" for="command"/>  
+	                            <f:setPropertyActionListener target="#{listarExamesCriteriosSelecionadosController.voltarPara}" value="exames-pesquisaSolicitacaoInternacaoUnidadesFechadas" for="command"/> 
+	                          </mec:commandButton> 
+	                        </div>  
+	                        <div> 
+	                          <mec:commandButton disabled="#{solicitacaoInternacaoUnidadesFechadasController.disableButton or not mf:hasPermission(securityController,'imprimirEtiquetasEnvelope,imprimir')}" value="#{messages.LABEL_IMPRIME_ETIQUETA}" action="exames-relatorioEtiquetaEnvelopePaciente" styleClass="bt_cinza"> 
+	                            <f:setPropertyActionListener target="#{etiquetaEnvelopePacienteController.codigoSolicitacao}" value="#{solicitacaoInternacaoUnidadesFechadasController.numero}" for="command"/>  
+	                            <f:setPropertyActionListener target="#{etiquetaEnvelopePacienteController.voltarPara}" value="exames-pesquisaSolicitacaoInternacaoUnidadesFechadas" for="command"/> 
+	                          </mec:commandButton> 
+	                        </div>
+	                	</p:outputPanel>          
                     </p:outputPanel> 
                   </td> 
                 </tr> 

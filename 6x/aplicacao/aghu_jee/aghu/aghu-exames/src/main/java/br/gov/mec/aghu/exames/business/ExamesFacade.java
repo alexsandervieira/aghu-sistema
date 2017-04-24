@@ -2068,6 +2068,11 @@ final AelExtratoItemSolicitacao extrato, final boolean flush) throws BaseExcepti
 		getAelItemHorarioAgendadoRN().cancelarHorariosExamesAgendados(
 				itemHorarioAgendado, globalUnfSeq, nomeMicrocomputador);
 	}
+	
+	@Override
+	public void atualizarItemAgendamento(AelItemSolicitacaoExames itemSolicitacaoExames, AelItemSolicitacaoExames itemSolicitacaoExameOriginal, String nomeMicrocomputador) throws BaseException {
+		getAelItemHorarioAgendadoRN().atualizarItemAgendamento(itemSolicitacaoExames, itemSolicitacaoExameOriginal, nomeMicrocomputador);
+	}
 
 	private AelItemHorarioAgendadoRN getAelItemHorarioAgendadoRN() {
 		return aelItemHorarioAgendadoRN;

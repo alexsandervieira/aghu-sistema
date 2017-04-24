@@ -24,6 +24,10 @@ import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.business.IAghuFacade;
 import br.gov.mec.aghu.configuracao.dao.AghAlaDAO;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.business.seguranca.Secure;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioLocalPaciente;
 import br.gov.mec.aghu.dominio.DominioMovimentoLeito;
 import br.gov.mec.aghu.dominio.DominioOrdenacaoPesquisaPacComAlta;
@@ -32,6 +36,7 @@ import br.gov.mec.aghu.dominio.DominioOrigemPaciente;
 import br.gov.mec.aghu.dominio.DominioSexo;
 import br.gov.mec.aghu.dominio.DominioSexoDeterminante;
 import br.gov.mec.aghu.dominio.DominioSimNao;
+import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.dominio.DominioTipoAlta;
 import br.gov.mec.aghu.internacao.administracao.business.VAinPesqPacOV;
 import br.gov.mec.aghu.internacao.business.vo.AtualizarPacienteTipo;
@@ -46,6 +51,7 @@ import br.gov.mec.aghu.internacao.dao.AinLeitosDAO;
 import br.gov.mec.aghu.internacao.dao.AinMovimentoInternacaoDAO;
 import br.gov.mec.aghu.internacao.dao.AinQuartosDAO;
 import br.gov.mec.aghu.internacao.dao.AinSolicTransfPacientesDAO;
+import br.gov.mec.aghu.internacao.dao.AinTiposAltaMedicaDAO;
 import br.gov.mec.aghu.internacao.pesquisa.vo.CidInternacaoVO;
 import br.gov.mec.aghu.internacao.pesquisa.vo.PesquisaPacientesAdmitidosVO;
 import br.gov.mec.aghu.internacao.pesquisa.vo.PesquisaPacientesComPrevisaoAltaVO;
@@ -74,11 +80,8 @@ import br.gov.mec.aghu.model.FatConvenioSaude;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.model.RapServidoresId;
 import br.gov.mec.aghu.paciente.business.IPacienteFacade;
+import br.gov.mec.aghu.prescricaomedica.dao.MpmMotivoAltaMedicaDAO;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.business.seguranca.Secure;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 @SuppressWarnings({"PMD.AghuTooManyMethods", "PMD.ExcessiveClassLength"})
 @Stateless
@@ -143,7 +146,13 @@ public class PesquisaInternacaoON extends BaseBusiness {
 	
 	@Inject
 	private AinMovimentoInternacaoDAO ainMovimentoInternacaoDAO;
-
+	
+	@Inject
+	private MpmMotivoAltaMedicaDAO mpmMotivoAltaMedicaDAO;
+	
+	@Inject
+	private AinTiposAltaMedicaDAO ainTiposAltaMedicaDAO;
+	
 	private enum PesquisaInternacaoONExceptionCode implements
 			BusinessExceptionCode {
 		ERRO_PERIODO_MAX, ERRO_DATA_INICIAL_MENOR_QUE_ATUAL, ERRO_DATA_INICIAL_MENOR_QUE_FINAL, AIN_00275, ERRO_INFORMACAO_TIPO_ALTA_COMPATIVEL, ERRO_PESQUISAR_SEM_SAIDA_POR_PERIODO, AIN_00400, AIN_00401, AIN_00313,
@@ -618,47 +627,50 @@ public class PesquisaInternacaoON extends BaseBusiness {
 		}
 
 		final Calendar auxCal = Calendar.getInstance();
-		if (altaAdministrativa) {
-			auxCal.setTime(dataInicio);
-			auxCal.add(Calendar.DAY_OF_MONTH, MAX_DIF + 1);
-
-			if (dataFim.after(auxCal.getTime())) {
-				throw new ApplicationBusinessException(
-						PesquisaInternacaoONExceptionCode.ERRO_PERIODO_MAX, MAX_DIF);
-			}
-		} else {
-			auxCal.setTime(dataFim);
-			auxCal.set(Calendar.HOUR_OF_DAY, 0);
-			auxCal.set(Calendar.MINUTE, 0);
-			auxCal.set(Calendar.SECOND, 0);
-			auxCal.set(Calendar.MILLISECOND, 0);
-
-			if (dataInicio.before(auxCal.getTime())) {
-				throw new ApplicationBusinessException(
-						PesquisaInternacaoONExceptionCode.ERRO_PESQUISAR_SEM_SAIDA_POR_PERIODO);
-			}
+		auxCal.setTime(dataInicio);
+		auxCal.add(Calendar.DAY_OF_MONTH, MAX_DIF + 1);
+		if (dataFim.after(auxCal.getTime())) {
+			throw new ApplicationBusinessException(
+				PesquisaInternacaoONExceptionCode.ERRO_PERIODO_MAX, MAX_DIF);
 		}
 
 		// OBSERVACAO:Foram utilizados as chaves 'C' e 'D' diretamente no codigo
 		// pois elas sao os IDs da classe AinTiposAltaMedica que possui uma
 		// string como ID.
-		if (DominioTipoAlta.O.equals(tipoAlta)
-				&& StringUtils.isNotBlank(tamCodigo)
-				&& !tamCodigo.trim().equalsIgnoreCase("C")
-				&& !tamCodigo.trim().equalsIgnoreCase("D")) {
-			throw new ApplicationBusinessException(
-					PesquisaInternacaoONExceptionCode.ERRO_INFORMACAO_TIPO_ALTA_COMPATIVEL);
-		}
-		if (DominioTipoAlta.E.equals(tipoAlta)
-				&& StringUtils.isNotBlank(tamCodigo)
-				&& (tamCodigo.trim().equalsIgnoreCase("C") || tamCodigo.trim()
-						.equalsIgnoreCase("D"))) {
-			throw new ApplicationBusinessException(
-					PesquisaInternacaoONExceptionCode.ERRO_INFORMACAO_TIPO_ALTA_COMPATIVEL);
+		List<String> tiposAltaMedica = obterTipoAltaMedicoObito();
+		if(tiposAltaMedica != null && tiposAltaMedica.size() > 0){		
+			if (DominioTipoAlta.O.equals(tipoAlta)
+					&& StringUtils.isNotBlank(tamCodigo)
+					&& !tiposAltaMedica.contains(tamCodigo)) {
+				throw new ApplicationBusinessException(
+						PesquisaInternacaoONExceptionCode.ERRO_INFORMACAO_TIPO_ALTA_COMPATIVEL);
+			}
+			if (DominioTipoAlta.E.equals(tipoAlta)
+					&& StringUtils.isNotBlank(tamCodigo)
+					&& tiposAltaMedica.contains(tamCodigo)) {
+				throw new ApplicationBusinessException(
+						PesquisaInternacaoONExceptionCode.ERRO_INFORMACAO_TIPO_ALTA_COMPATIVEL);
+			}
 		}
 
 	}
-
+    private List<String> obterTipoAltaMedicoObito(){
+    	List<Short> motivosAltaMedica = null;
+    	List<AinTiposAltaMedica> tiposAltaMedica = null;
+    	List<String> lista = new ArrayList<>();
+    	motivosAltaMedica = this.mpmMotivoAltaMedicaDAO.listSeqMotivoAltaMedicaObito();
+    	if(motivosAltaMedica != null && motivosAltaMedica.size() > 0){
+    	   tiposAltaMedica = ainTiposAltaMedicaDAO.pesquisarTiposAltaMedicaPorMotivos(null, motivosAltaMedica, DominioSituacao.A);
+    	}
+    	
+    	if(tiposAltaMedica != null && tiposAltaMedica.size() > 0){
+    		for(AinTiposAltaMedica tiposAlta : tiposAltaMedica){
+    			lista.add(tiposAlta.getCodigo());
+    		}
+    		return lista;
+    	}
+    	return null;
+    }
 	/**
 	 * Pesquisa os pacientes admitidos conforme os parâmetros informado.
 	 * 
@@ -874,7 +886,9 @@ public class PesquisaInternacaoON extends BaseBusiness {
 	}
 
 	public String montaLocalAltaDePaciente(String ltoLtoId, Short qrtNumero, String andar, AghAla indAla) {
-		indAla = aghAlaDAO.merge(indAla);
+		
+		validaIndAla(indAla);
+		
 		final StringBuilder local = new StringBuilder();
 		if (StringUtils.isBlank(ltoLtoId)) {
 			if (qrtNumero != null) {
@@ -893,6 +907,16 @@ public class PesquisaInternacaoON extends BaseBusiness {
 
 		return local.toString();
 	}
+
+	public AghAla validaIndAla(AghAla indAla) {
+
+		if (indAla != null ) {
+			return indAla = aghAlaDAO.merge(indAla); 	
+		}else {
+			return indAla;
+		}
+	}	
+		
 
 	@Secure("#{s:hasPermission('colaborador','pesquisar')}")
 	public String buscarNomeUsual(final Short pVinCodigo, final Integer pMatricula) {
@@ -1490,5 +1514,12 @@ public class PesquisaInternacaoON extends BaseBusiness {
 	protected IRegistroColaboradorFacade getRegistroColaboradorFacade() {
 		return this.registroColaboradorFacade;
 	}
-	
+
+	protected MpmMotivoAltaMedicaDAO getMpmMotivoAltaMedicaDAO() {
+		return mpmMotivoAltaMedicaDAO;
+	}
+
+	protected AinTiposAltaMedicaDAO getAinTiposAltaMedicaDAO() {
+		return ainTiposAltaMedicaDAO;
+	}
 }

@@ -18,9 +18,6 @@ import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.casca.autenticacao.AghuPrincipal;
 import br.gov.mec.aghu.casca.business.ICascaFacade;
 import br.gov.mec.aghu.casca.model.Usuario;
-import br.gov.mec.aghu.dominio.DominioTipoAcesso;
-import br.gov.mec.aghu.model.AghParametros;
-import br.gov.mec.aghu.prescricaomedica.business.IPrescricaoMedicaFacade;
 import br.gov.mec.aghu.core.action.HostRemotoCache;
 import br.gov.mec.aghu.core.action.SessionAttributes;
 import br.gov.mec.aghu.core.commons.criptografia.CriptografiaUtil;
@@ -28,6 +25,10 @@ import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessExceptionCode;
 import br.gov.mec.aghu.core.exception.BaseRuntimeException;
 import br.gov.mec.aghu.core.locator.ServiceLocator;
+import br.gov.mec.aghu.dominio.DominioTipoAcesso;
+import br.gov.mec.aghu.model.AghParametros;
+import br.gov.mec.aghu.paciente.business.IPacienteFacade;
+import br.gov.mec.aghu.prescricaomedica.business.IPrescricaoMedicaFacade;
 
 /**
  * Classe que agrupa métodos ouvintes de eventos relacionados ao login e ao
@@ -47,6 +48,9 @@ public class LoginObserver {
 
 	@EJB
 	private IPrescricaoMedicaFacade prescricaoMedicaFacade;
+
+	@EJB
+	private IPacienteFacade pacienteFacade;
 
 	@Inject
 	private HostRemotoCache hostRemoto;
@@ -76,12 +80,17 @@ public class LoginObserver {
 		this.ajustarTempoSessao(usuario, session);
 		this.criptografarSenha(session, eventoLogin.getPassword());
 		this.gerarPendenciasSolicitacaoConsultoria();
+		this.gerarPendenciasSolicitacaoArquivoClinico();
 		
 		session.setAttribute(SessionAttributes.USUARIO_LOGADO.toString(), loginUsuario);
 	}
 
 	private void gerarPendenciasSolicitacaoConsultoria() {
 		prescricaoMedicaFacade.gerarPendenciasSolicitacaoConsultoria();
+	}
+
+	private void gerarPendenciasSolicitacaoArquivoClinico() {
+		pacienteFacade.gerarPendenciasSolicitacaoArquivoClinico();
 	}
 
 	private void atualizarUltimoAcesso(Usuario usuario, HttpSession session)
@@ -174,12 +183,11 @@ public class LoginObserver {
 	 * @throws ApplicationBusinessException
 	 * @throws UnknownHostException
 	 */
-	// public void registrarLogout(@Observes PreLoggedOutEvent eventoLogout)
-	// throws ApplicationBusinessException, UnknownHostException {
-	// cascaFacade.registrarAcesso(identity.getAgent().getLoginName(),
-	// hostRemoto
-	// .getEnderecoIPv4HostRemoto().getHostAddress(),
-	// "LOGOUT ACIONADO PELO USUÁRIO", true, DominioTipoAcesso.SAIDA);
-	// }
+	public void registrarLogout(@Observes PreLoggedOutEvent eventoLogout)
+			throws ApplicationBusinessException, UnknownHostException {
+		cascaFacade.registrarAcesso(eventoLogout.getUsername(),
+				hostRemoto.getEnderecoIPv4HostRemoto().getHostAddress(),
+				eventoLogout.getMensagem(), true, DominioTipoAcesso.SAIDA);
+	}
 
 }

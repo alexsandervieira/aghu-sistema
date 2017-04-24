@@ -11,26 +11,28 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dominio.DominioIndPendentePrescricoesCuidados;
 import br.gov.mec.aghu.dominio.DominioOperacaoBanco;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.dominio.DominioSituacaoPrescricao;
 import br.gov.mec.aghu.model.EpeCuidados;
+import br.gov.mec.aghu.model.EpeHistoricoPrescDiagnosticos;
 import br.gov.mec.aghu.model.EpePrescCuidDiagnostico;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagem;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagemId;
 import br.gov.mec.aghu.model.EpePrescricoesCuidados;
 import br.gov.mec.aghu.model.MpmTipoFrequenciaAprazamento;
 import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeHistoricoPrescDiagnosticosDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescCuidDiagnosticoDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescricaoEnfermagemDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescricoesCuidadosDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.vo.BuscaPrescricaoEnfermagemVO;
 import br.gov.mec.aghu.prescricaomedica.business.IPrescricaoMedicaFacade;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
-import br.gov.mec.aghu.core.utils.DateUtil;
 
 /**
  * 
@@ -70,6 +72,9 @@ private IPrescricaoEnfermagemFacade prescricaoEnfermagemFacade;
 @Inject
 private EpePrescricoesCuidadosDAO epePrescricoesCuidadosDAO;
 
+@Inject
+private EpeHistoricoPrescDiagnosticosDAO epeHistoricoPrescDiagnosticosDAO;
+
 	/**
 	 * 
 	 */
@@ -78,7 +83,8 @@ private EpePrescricoesCuidadosDAO epePrescricoesCuidadosDAO;
 
 	public static enum ManutencaoPrescricaoCuidadoRNExceptionCode implements BusinessExceptionCode {
 		EPE_00117, EPE_00118, EPE_00119, EPE_00232, EPE_00243, EPE_00244, EPE_00237, EPE_00238, 
-		EPE_00281, EPE_00282, EPE_00291, EPE_00293, EPE_00292, EPE_00294, EPE_00296, EPE_00297, EPE_00299
+		EPE_00281, EPE_00282, EPE_00291, EPE_00293, EPE_00292, EPE_00294, EPE_00296, EPE_00297, EPE_00299,
+		MSG_ERRO_REMOVER_HISTORICOS_PENDENTES
 	}
 	
 //	/**
@@ -557,9 +563,27 @@ private EpePrescricoesCuidadosDAO epePrescricoesCuidadosDAO;
 				}
 			}
 
-		}	
+		}
+		
+		try {
+			//Remover históricos pendentes
+			EpePrescricaoEnfermagem prescricaoEnfermagem = getEpePrescricaoEnfermagemDAO().obterPorChavePrimaria(new EpePrescricaoEnfermagemId(penSeqAtendimento, penSeq));
+			removerHistoricosPendentes(prescricaoEnfermagem);
+			epeHistoricoPrescDiagnosticosDAO.flush();
+		} catch (ApplicationBusinessException e) {
+			logError(EXCECAO_CAPTURADA, e);
+			throw new ApplicationBusinessException(ManutencaoPrescricaoCuidadoRNExceptionCode.MSG_ERRO_REMOVER_HISTORICOS_PENDENTES);
+		}
 	}
-	
+
+	private void removerHistoricosPendentes(EpePrescricaoEnfermagem prescricaoEnfermagem) throws ApplicationBusinessException {
+		List<EpeHistoricoPrescDiagnosticos> listHistoricos = epeHistoricoPrescDiagnosticosDAO.listarEpeHistPrescDiagPorPrescSituacao(prescricaoEnfermagem, Boolean.TRUE);
+		
+		for(EpeHistoricoPrescDiagnosticos historico : listHistoricos){
+			epeHistoricoPrescDiagnosticosDAO.remover(historico);
+		}
+	}
+
 	/**
 	 * Tira uso da Prescrição de Enfermagem.
 	 * 

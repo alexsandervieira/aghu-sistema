@@ -213,8 +213,13 @@ private IAghuFacade aghuFacade;
 				informacaoComplementarVO.setLogradouro(enderecoPaciente.getLogradouro()+" "+
 						enderecoPaciente.getNroLogradouro());
 			}
-			String codIbge = enderecoPaciente.getCodIbge().toString().substring(0,6);
-			String endereco = enderecoPaciente.getCidade()+" Cod IBGE: "+ codIbge +" Estado: "+enderecoPaciente.getUf()+" CEP: "+enderecoPaciente.getCep().toString();
+			String endereco = null;
+			if(enderecoPaciente.getCodIbge()!=null){
+				String codIbge = enderecoPaciente.getCodIbge().toString().substring(0,6);
+				endereco = enderecoPaciente.getCidade()+" Cod IBGE: "+ codIbge +" Estado: "+enderecoPaciente.getUf()+" CEP: "+enderecoPaciente.getCep().toString();
+			}else{
+				 endereco = enderecoPaciente.getCidade()+" Estado: "+enderecoPaciente.getUf()+" CEP: "+enderecoPaciente.getCep().toString();
+			}
 			informacaoComplementarVO.setEndereco(endereco);
 		}
 		return informacaoComplementarVO;

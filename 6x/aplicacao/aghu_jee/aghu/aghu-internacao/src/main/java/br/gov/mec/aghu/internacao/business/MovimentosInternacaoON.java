@@ -1,5 +1,7 @@
 package br.gov.mec.aghu.internacao.business;
 
+import java.util.Date;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -53,6 +55,7 @@ private AinMovimentoInternacaoDAO ainMovimentoInternacaoDAO;
 		this.getMovimentoInternacaoRN().validarMovimentoInternacao(movimentoInternacao);
 
 		AinMovimentoInternacaoDAO ainMovimentoInternacaoDAO = this.getAinMovimentoInternacaoDAO();
+		movimentoInternacao.setCriadoEm(new Date());
 		ainMovimentoInternacaoDAO.persistir(movimentoInternacao);
 		ainMovimentoInternacaoDAO.flush();
 	}

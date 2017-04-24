@@ -1169,6 +1169,12 @@ public class AipPacientesDAO extends BaseDao<AipPacientes> {
 										.toString()))
 						.add(Projections
 								.property(AipPacientes.Fields.IND_GERA_PRONTUARIO
+										.toString()))
+						.add(Projections
+								.property(AipPacientes.Fields.NOME_SOCIAL
+										.toString()))
+						.add(Projections
+								.property(AipPacientes.Fields.ETNIA_CODIGO
 										.toString())));
 		
 		return (Object[]) this
@@ -1287,7 +1293,7 @@ public class AipPacientesDAO extends BaseDao<AipPacientes> {
 			
 			if (paramPequisa.getRespeitarOrdem() && pesquisouPorPaciente && !fonemasPaciente.isEmpty()) {
 				sql.append(" AND ");
-				for (int i = 0; i < (fonemasPaciente.size() - 1); i++) {
+				for (int i = 0; i < fonemasPaciente.size(); i++) {
 					sql.append(" EXISTS ");
 					sql.append(" (SELECT distinct fpac.aipPaciente.codigo FROM AipFonemaPacientes fpac, AipPosicaoFonemasPacientes pfp1");
 					sql.append("              WHERE pfp1.id.seq = fpac.seq");
@@ -1299,17 +1305,17 @@ public class AipPacientesDAO extends BaseDao<AipPacientes> {
 					sql.append("                                        AND pfp2.id.posicao >= pfp1.id.posicao");
 					sql.append("                                        AND fpac2.aipPaciente.codigo = pac.codigo");
 					sql.append("                                        AND fpac2.aipFonemas.fonema = :fonema");
-					sql.append(i+1);
+					sql.append(i);
 					sql.append(") )"); 
-					if ((i+1) < (fonemasPaciente.size() - 1)) {
+					if ((i+1) < fonemasPaciente.size()) {
 						sql.append(" AND ");
 					}
 				}
 			}
 			
-			if (paramPequisa.getRespeitarOrdem() && pesquisouPorMaePaciente && !fonemasMae.isEmpty()) {
+			if (paramPequisa.getRespeitarOrdem() && pesquisouPorMaePaciente && !fonemasMae.isEmpty() ) {
 				sql.append(" AND ");
-				for (int i = 0; i < (fonemasMae.size() - 1); i++) {
+				for (int i = 0; i < (fonemasMae.size()); i++) {
 					sql.append(" EXISTS ");
 					sql.append(" (SELECT distinct fmpac.aipPaciente.codigo FROM AipFonemasMaePaciente fmpac, AipPosicaoFonemasMaePaciente pfmp1");
 					sql.append("              WHERE pfmp1.id.seq = fmpac.seq");
@@ -1321,9 +1327,9 @@ public class AipPacientesDAO extends BaseDao<AipPacientes> {
 					sql.append("                                        AND pfmp2.id.posicao >= pfmp1.id.posicao");
 					sql.append("                                        AND fmpac2.aipPaciente.codigo = pac.codigo");
 					sql.append("                                        AND fmpac2.aipFonemas.fonema = :fonemaMae");
-					sql.append(i+1);
+					sql.append(i);
 					sql.append(") )"); 
-					if ((i+1) < (fonemasMae.size() - 1)) {
+					if ((i+1) < fonemasMae.size()) {
 						sql.append(" AND ");
 					}
 				}
@@ -1340,7 +1346,7 @@ public class AipPacientesDAO extends BaseDao<AipPacientes> {
 			}
 			
 			if (!paramPequisa.getIsCount()) {
-				sql.append(" ORDER BY pac.");
+				sql.append("ORDER BY pac.");
 				sql.append(AipPacientes.Fields.NOME.toString());
 				sql.append(" asc");
 			}
@@ -1375,9 +1381,9 @@ public class AipPacientesDAO extends BaseDao<AipPacientes> {
 
 	private void pesquisaFoneticaNomeSocialPaciente(PesquisaFoneticaPaciente paramPequisa, List<String> fonemasNomeSocial, StringBuilder sql,
 			Boolean pesquisouPorNomeSocialPaciente) {
-		if (paramPequisa.getRespeitarOrdem() && pesquisouPorNomeSocialPaciente && !fonemasNomeSocial.isEmpty()) {
+		if (paramPequisa.getRespeitarOrdem() && pesquisouPorNomeSocialPaciente && !fonemasNomeSocial.isEmpty() && fonemasNomeSocial.size() > 1) {
 			sql.append(" AND ");
-			for (int i = 0; i < (fonemasNomeSocial.size() - 1); i++) {
+			for (int i = 0; i < fonemasNomeSocial.size(); i++) {
 				sql.append(" EXISTS ");
 				sql.append(" (SELECT distinct fmpac.aipPaciente.codigo FROM AipFonemaNomeSocialPacientes fmNomeSocPac, AipPosicaoFonemasNomeSocialPacientes pfmNomeSocP1");
 				sql.append("              WHERE pfmNomeSocP1.id.seq = fmNomeSocPac.seq");
@@ -1389,9 +1395,9 @@ public class AipPacientesDAO extends BaseDao<AipPacientes> {
 				sql.append("                                        AND pfmNomeSocP2.id.posicao >= pfmp1.id.posicao");
 				sql.append("                                        AND fmNomeSocPac2.aipPaciente.codigo = pac.codigo");
 				sql.append("                                        AND fmNomeSocPac2.aipFonemas.fonema = :fonemaNomeSocial");
-				sql.append(i+1);
+				sql.append(i);
 				sql.append(") )"); 
-				if ((i+1) < (fonemasNomeSocial.size() - 1)) {
+				if ((i+1) < (fonemasNomeSocial.size())) {
 					sql.append(" AND ");
 				}
 			}
@@ -1541,11 +1547,6 @@ public class AipPacientesDAO extends BaseDao<AipPacientes> {
 			}
 		}		
 		
-		javax.persistence.Query query = this.createQuery(sql.toString());
-		
-		setParametroListaFonetica(fonemasPaciente, "fonema", query);
-		setParametroListaFonetica(fonemasMae, "fonemaMae", query);
-		
 		if (dataInicio != null && dataLimite != null) {
 			sql.append(" AND pac.dtNascimento BETWEEN :dataInicio AND :dataLimite ");
 		}
@@ -1565,6 +1566,11 @@ public class AipPacientesDAO extends BaseDao<AipPacientes> {
 			sql.append(AipPacientes.Fields.NOME.toString());
 			sql.append(" asc");
 		}
+
+		javax.persistence.Query query = this.createQuery(sql.toString());
+		
+		setParametroListaFonetica(fonemasPaciente, "fonema", query);
+		setParametroListaFonetica(fonemasMae, "fonemaMae", query);
 
 		if (dataInicio != null && dataLimite != null) {
 			query.setParameter("dataInicio", dataInicio.getTime());
@@ -3903,6 +3909,15 @@ public class AipPacientesDAO extends BaseDao<AipPacientes> {
 		return executeCriteriaCount(criteria);
 	}
 	
+	public Integer obterProntuarioMaePorProntuarioPaciente(Integer nroProntuario) {
+		final DetachedCriteria criteria = DetachedCriteria.forClass(AghAtendimentos.class);
 		
+		criteria.createAlias(AghAtendimentos.Fields.ATD_SEQ_MAE.toString(), "ATDM" , JoinType.INNER_JOIN);
+		criteria.setProjection(Projections.distinct(Projections.property("ATDM.prontuario")));
+
+		criteria.add(Restrictions.eq(AghAtendimentos.Fields.PRONTUARIO.toString(), nroProntuario));
+		
+		return (Integer) executeCriteriaUniqueResult(criteria);
+	}	
 	
 }

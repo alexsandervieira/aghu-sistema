@@ -12,6 +12,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.business.IAghuFacade;
+import br.gov.mec.aghu.core.action.ActionController;
+import br.gov.mec.aghu.core.commons.WebUtil;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.exames.business.IExamesFacade;
 import br.gov.mec.aghu.exames.cadastrosapoio.business.ICadastrosApoioExamesFacade;
 import br.gov.mec.aghu.exames.solicitacao.business.ISolicitacaoExameFacade;
@@ -21,11 +26,6 @@ import br.gov.mec.aghu.model.AelUnidExecUsuario;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 import br.gov.mec.aghu.view.VAelArcoSolicitacaoAghu;
-import br.gov.mec.aghu.core.action.ActionController;
-import br.gov.mec.aghu.core.commons.WebUtil;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.Severity;
 
 
 public class ReimprimirEtiquetasController extends ActionController {
@@ -49,6 +49,8 @@ public class ReimprimirEtiquetasController extends ActionController {
 	
 	private List<AelAmostrasVO> listaAmostras;
 	private List<AelAmostraItemExames> listaExamesAmostras;
+	
+	private AelAmostrasVO amostraVO;
 	
 	/*
 	 * Essa instancia armazena a descricao do material de analise da amostra
@@ -178,14 +180,13 @@ public class ReimprimirEtiquetasController extends ActionController {
 				if (this.getListaAmostras() != null && !this.getListaAmostras().isEmpty()) {
 
 					// Obtem o primeiro item da lista...
-					AelAmostrasVO itemSelecionadoListaAmostras = null;
 					/*
 					 * Caso nenhum item da lista de amostras esteja selecionado: A
 					 * consulta de items de amostra de exame tera como criterio o
 					 * primeiro item da lista
 					 */
 					if (this.getAmostraSeqpSelecionada() == null) {
-						itemSelecionadoListaAmostras = this.getListaAmostras().get(0);
+						amostraVO = this.getListaAmostras().get(0);
 					} else {
 						/*
 						 * Caso algum item da lista de amostras esteja selecionado:
@@ -194,14 +195,14 @@ public class ReimprimirEtiquetasController extends ActionController {
 						 */
 						for (final AelAmostrasVO item : getListaAmostras()) {
 							if (item.getSeqp().equals(this.getAmostraSeqpSelecionada())) {
-								itemSelecionadoListaAmostras = item;
+								amostraVO = item;
 								break;
 							}
 						}
 					}
 
 					// Pesquisa de exames amostra (items de amostra de exame)
-					this.pesquisarExamesAmostra(itemSelecionadoListaAmostras);
+					this.pesquisarExamesAmostra();
 				} else {
 					this.apresentarMsgNegocio(Severity.WARN, "MENSAGEM_SOLICITACAO_EXAME_SEM_AMOSTRAS_REIMPRIMIR_ETIQUETA", this.getAmostraSoeSeqSelecionada().toString());
 				}
@@ -232,16 +233,17 @@ public class ReimprimirEtiquetasController extends ActionController {
 	/**
 	 * Pesquisa de exames amostra (items de amostra de exame)
 	 */
-	public void pesquisarExamesAmostra(final AelAmostrasVO vo) {
+	public void pesquisarExamesAmostra() {
 
-		this.setAmostraSoeSeqSelecionada(vo.getSoeSeq());
-		this.setAmostraSeqpSelecionada(vo.getSeqp());
+		this.setAmostraSoeSeqSelecionada(amostraVO.getSoeSeq());
+		this.setAmostraSeqpSelecionada(amostraVO.getSeqp());
 
-		this.setAmostraMaterialAnalise(vo.getMaterialAnalise());
-		this.setListaExamesAmostras(this.examesFacade.buscarAelAmostraItemExamesPorAmostra(vo.getSoeSeq(), vo.getSeqp().intValue()));
+		this.setAmostraMaterialAnalise(amostraVO.getMaterialAnalise());
+		this.setListaExamesAmostras(this.examesFacade.buscarAelAmostraItemExamesPorAmostra(amostraVO.getSoeSeq(), amostraVO.getSeqp().intValue()));
 	}
 	
 	public void calcularNumeroImpressoes(final Short seqp) {
+		this.amostraSeqpSelecionada = seqp;
 		this.mensagemConfirmacaoImpressaoEtiquetas = new StringBuffer("A etiqueta da amostra ").append(this.amostraSoeSeqSelecionada).append(seqp)
 				.append(", ser\u00E1 impressa. Confirmar a impress\u00E3o da etiqueta?").toString();
 	}
@@ -342,6 +344,14 @@ public class ReimprimirEtiquetasController extends ActionController {
 
 	public String getMensagemConfirmacaoImpressaoEtiquetas() {
 		return mensagemConfirmacaoImpressaoEtiquetas;
+	}
+
+	public AelAmostrasVO getAmostraVO() {
+		return amostraVO;
+	}
+
+	public void setAmostraVO(AelAmostrasVO amostraVO) {
+		this.amostraVO = amostraVO;
 	}
 
 

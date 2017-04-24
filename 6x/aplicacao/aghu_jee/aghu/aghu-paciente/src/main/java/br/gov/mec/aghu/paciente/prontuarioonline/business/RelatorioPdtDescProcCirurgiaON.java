@@ -573,7 +573,7 @@ public class RelatorioPdtDescProcCirurgiaON extends BaseBusiness {
 							+ (getPesquisaInternacaoFacade()
 									.buscarNroRegistroConselho(
 											prof.getServidorPrf().getId().getVinCodigo(),
-											prof.getServidorPrf().getId().getMatricula()) != null ? " CREMERS "
+											prof.getServidorPrf().getId().getMatricula()) != null ? " CRM "
 									+ getPesquisaInternacaoFacade()
 											.buscarNroRegistroConselho(
 													prof.getServidorPrf().getId().getVinCodigo(),

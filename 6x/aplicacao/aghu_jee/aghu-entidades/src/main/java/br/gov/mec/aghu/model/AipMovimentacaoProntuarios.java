@@ -22,10 +22,13 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 
+
+
 import org.hibernate.validator.constraints.Length;
 
 import br.gov.mec.aghu.dominio.DominioSituacaoMovimentoProntuario;
 import br.gov.mec.aghu.dominio.DominioTipoEnvioProntuario;
+import br.gov.mec.aghu.dominio.DominioTipoSolicitacaoProntuario;
 import br.gov.mec.aghu.core.persistence.BaseEntitySeq;
 
 /**
@@ -115,7 +118,16 @@ public class AipMovimentacaoProntuarios extends BaseEntitySeq<Integer> implement
 	 * paciente.
 	 */
 	private AipPacientes paciente;
-	
+	/**
+	 * Tipo de Envio.
+	 */
+	private DominioTipoSolicitacaoProntuario indTipoSolicitacao;
+
+	/**
+	 * Unidade Funcional Solicitante.
+	 */
+	private AghUnidadesFuncionais unidadeSolicitante;
+
 	/**
 	 * version - atributo para controle de concorrência
 	 */
@@ -384,7 +396,29 @@ public class AipMovimentacaoProntuarios extends BaseEntitySeq<Integer> implement
 	public void setLocalAtual(String localAtual) {
 		this.localAtual = localAtual;
 	}
-	
+
+	@Column(name = "IND_TIPO_SOLICITACAO", nullable = false, length=1)
+	@Enumerated(EnumType.STRING)
+	public DominioTipoSolicitacaoProntuario getIndTipoSolicitacao() {
+		return indTipoSolicitacao;
+	}
+
+	public void setIndTipoSolicitacao(
+			DominioTipoSolicitacaoProntuario indTipoSolicitacao) {
+		this.indTipoSolicitacao = indTipoSolicitacao;
+	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "UNF_SOLICITANTE_SEQ")
+	public AghUnidadesFuncionais getUnidadeSolicitante() {
+		return unidadeSolicitante;
+	}
+
+	public void setUnidadeSolicitante(AghUnidadesFuncionais unidadeSolicitante) {
+		this.unidadeSolicitante = unidadeSolicitante;
+	}
+
+
 
 	public enum Fields {
 		SEQ("seq"),

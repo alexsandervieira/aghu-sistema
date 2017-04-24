@@ -104,8 +104,7 @@
 		<p:column sortable="false" style="width:350px">
 			<f:facet name="header">#{messages.LABEL_DETALHAR_REGISTRO_CIRURGIA_PROFISSIONAIS}</f:facet>
 			<p:spacer width="1" height="10" />
-			<h:outputText value="#{_listaM.anotacoesHorario} às " />
-			<h:outputText value="#{_listaM.criadoEm}" title="#{_listaM.criadoEm}">
+			<h:outputText value="#{_listaM.anotacoesHorario}" >
 				<f:convertDateTime pattern="HH:mm" />
 			</h:outputText>
 		</p:column>

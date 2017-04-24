@@ -357,9 +357,8 @@ public class ArquivoSisregON extends BaseBusiness {
 	
 	public void limparConsultasSisreg(){
 		List<AacConsultasSisreg> listaConsultasSisreg = aacConsultasSisregDAO.pesquisarConsultasSisreg();
-		for(AacConsultasSisreg consultasSisreg: listaConsultasSisreg){
-			this.getAacConsultasSisregDAO().remover(consultasSisreg);
-			this.getAacConsultasSisregDAO().flush();
+		if(listaConsultasSisreg != null && listaConsultasSisreg.size() > 0){
+			aacConsultasSisregDAO.limparConsultasSisregNaoImportadas();
 		}
 	}
 	

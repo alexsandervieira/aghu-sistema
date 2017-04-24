@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:fn="http://xmlns.jcp.org/jsp/jstl/functions" 
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:fn="http://xmlns.jcp.org/jsp/jstl/functions" 
 	xmlns:mec="http://xmlns.jcp.org/jsf/composite/components" 
-	xmlns:p="http://primefaces.org/ui" xmlns:pe="http://primefaces.org/ui/extensions" 
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions" 
 	xmlns:aghu="http://xmlns.jcp.org/jsf/component" 
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets" 
 	xmlns:f="http://xmlns.jcp.org/jsf/core" 
@@ -95,6 +97,12 @@
                       <b>#{messages.LABEL_NOME}</b> 
                     </f:facet>  
                     <h:outputText value="#{item.pessoaFisica.nome}"/> 
+                  </p:column> 
+                  <p:column> 
+                     <f:facet name="header"> 
+                       <b>#{messages.LABEL_SITUACAO}</b> 
+                     </f:facet> 
+                     <h:outputText value="#{item.situacaoServidorFormat}"/> 
                   </p:column> 
                 </mec:suggestionBox>
                 </p:outputPanel> 
@@ -289,6 +297,25 @@
           <ui:decorate template="/pages/ambulatorio/gradeagendamento/modalGerarDisponibilidade.xhtml"/> 
         </p:outputPanel> 
       </h:form> 
+
+        <p:outputPanel id="panelModalConfirmarGradesSobrepostas" layout="inline"> 
+          <p:dialog id="modalConfirmarGradesSobrepostas" width="400" height="150" modal="true" resizable="false" widgetVar="modalMensagemGradesSobrepostasWG"> 
+            <f:facet name="header"> 
+              <h:panelGroup> 
+                <h:outputText value="#{messages.TITLE_MODAL_CONFIRMACAO_HORARIOS_SOBREPOSTOS}"/> 
+              </h:panelGroup> 
+            </f:facet> 
+            #{manterGradeAgendamentoController.mensagemGradesSobrepostas}
+            <br clear="none"/>  <br clear="none"/>  <br clear="none"/>  
+            <h:panelGroup> 
+		        <h:form prependId="false" id="formModalConfirmarGradesSobrepostas"> 
+        	      <mec:commandButton id="bt_GradesSobrepostas_sim" value="#{messages.LABEL_SIM}" immediate="true" onclick="PF('modalMensagemGradesSobrepostasWG').hide();" oncomplete="PF('modalGerarDisponibilidadeWG').hide();" action="#{manterGradeAgendamentoController.gerarDisponibilidade()}" profile="ok" ajax="true" process="@this" render="modalGerarDisponibilidadePanel, listHorarioGrade"/>
+            	  <mec:commandButton id="bt_GradesSobrepostas_nao" value="#{messages.LABEL_NAO}" immediate="true" onclick="PF('modalMensagemGradesSobrepostasWG').hide();" profile="cancel" ajax="true" process="@this"/>
+            	 </h:form> 
+            </h:panelGroup> 
+          </p:dialog> 
+        </p:outputPanel> 
+      
     </ui:define> 
   </ui:composition> 
 </html>

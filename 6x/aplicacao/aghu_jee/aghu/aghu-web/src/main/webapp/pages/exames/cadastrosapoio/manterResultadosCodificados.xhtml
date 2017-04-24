@@ -46,7 +46,7 @@
               <aghu:linha> 
                 <p:outputPanel layout="block" id="panelSBResultados" rendered="#{mf:hasPermission(securityController,'manterResultadosCodificados,executar')}"> 
                   <p:outputPanel id="panelTooltipDesc" rendered="#{mf:hasPermission(securityController,'manterResultadosCodificados,executar')}" layout="inline"> 
-                    <mec:inputText label="#{messages.LABEL_DESCRICAO}" title="#{messages.TITLE_DESCRICAO_RES_DOC}" value="#{resultadosCodificadosPaginatorController.resultadoCodificado.descricao}" size="30" maxlength="120" required="#{empty resultadosCodificadosPaginatorController.resultadoCodificado.id}" readonly="#{not empty resultadosCodificadosPaginatorController.resultadoCodificado.id}" style="text-transform:uppercase" removerCaratersEspeciais="false" onkeypress="return disableEnterKey(event);" id="descricao"/>  
+                    <mec:inputText label="#{messages.LABEL_DESCRICAO}" title="#{messages.TITLE_DESCRICAO_RES_DOC}" value="#{resultadosCodificadosPaginatorController.resultadoCodificado.descricao}" size="30" maxlength="120" required="#{empty resultadosCodificadosPaginatorController.resultadoCodificado.id}" readonly="#{not empty resultadosCodificadosPaginatorController.resultadoCodificado.id}" caixaAlta="false" removerCaratersEspeciais="false" onkeypress="return disableEnterKey(event);" id="descricao"/>  
                     <p:tooltip  direction="bottom-right" styleClass="tooltip" layout="block" rendered="#{not empty resultadosCodificadosPaginatorController.resultadoCodificado.descricao}">  
                       <h:outputText value="#{resultadosCodificadosPaginatorController.resultadoCodificado.descricao}"/> 
                     </p:tooltip> 

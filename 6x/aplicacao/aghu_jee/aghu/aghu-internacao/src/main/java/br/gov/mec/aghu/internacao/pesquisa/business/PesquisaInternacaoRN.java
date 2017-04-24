@@ -7,12 +7,17 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.business.IAghuFacade;
+import br.gov.mec.aghu.constante.ConstanteAghCaractUnidFuncionais;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.faturamento.cadastrosapoio.business.IFaturamentoApoioFacade;
 import br.gov.mec.aghu.internacao.cadastrosbasicos.business.ICadastrosBasicosInternacaoFacade;
@@ -33,10 +38,6 @@ import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.model.RapServidoresId;
 import br.gov.mec.aghu.paciente.business.IPacienteFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.constante.ConstanteAghCaractUnidFuncionais;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 @Stateless
 public class PesquisaInternacaoRN extends BaseBusiness {
@@ -107,7 +108,7 @@ private static final Log LOG = LogFactory.getLog(PesquisaInternacaoRN.class);
 			RapServidoresId id = new RapServidoresId(pMatricula, pVinCodigo);
 			RapServidores rapServidores = this.getRegistroColaboradorFacade().obterRapServidoresPorChavePrimaria(id);
 			RapPessoasFisicas rapPessoasFisicas = rapServidores.getPessoaFisica();
-			nome = rapPessoasFisicas.getNomeUsual() != null ? rapPessoasFisicas.getNomeUsual() : rapPessoasFisicas.getNome();
+			nome = StringUtils.isNotBlank(rapPessoasFisicas.getNomeUsual()) ? rapPessoasFisicas.getNomeUsual() : rapPessoasFisicas.getNome();
 		}
 		return nome;
 	}

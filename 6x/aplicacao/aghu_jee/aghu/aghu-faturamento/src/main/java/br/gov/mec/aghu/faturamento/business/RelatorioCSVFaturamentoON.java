@@ -309,7 +309,7 @@ public class RelatorioCSVFaturamentoON extends BaseBusiness {
 		
 		final Writer out = new OutputStreamWriter(new FileOutputStream(file), ENCODE);
 		
-		out.write("Cód. Centro Custo"+SEPARADOR+"Descrição Centro Custo"+SEPARADOR+"Cód. Unid. Func."+SEPARADOR+"Descrição Unidade Funcional"+SEPARADOR+"Espec. Genérica"+SEPARADOR+"Espec. Específica"+SEPARADOR+
+		out.write("Cód. Centro Atividade"+SEPARADOR+"Descrição Centro Atividade"+SEPARADOR+"Cód. Unid. Func."+SEPARADOR+"Descrição Unidade Funcional"+SEPARADOR+"Espec. Genérica"+SEPARADOR+"Espec. Específica"+SEPARADOR+
 				  "Grupo"+SEPARADOR+"Subgrupo"+SEPARADOR+"Forma Org."+SEPARADOR+"SSM"+SEPARADOR+"Descrição SSM"+SEPARADOR+PHI+ SEPARADOR+
 				  "Descrição PHI"+SEPARADOR+"Cód. Financ."+SEPARADOR+"Descrição Financiamento"+SEPARADOR+"Cód. Complex."+SEPARADOR+"Descrição Complexidade"+SEPARADOR+"Total Anestesia"+ SEPARADOR+
 				  "Total Serv. Prof."+SEPARADOR+"Quantidade"+SEPARADOR+"Total"+SEPARADOR+"Teto Qtd."+SEPARADOR+"Dif. Qtd."+SEPARADOR+

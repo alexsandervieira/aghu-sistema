@@ -1,5 +1,10 @@
 package br.gov.mec.aghu.internacao.pesquisa.business;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,28 +19,31 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.business.seguranca.Secure;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioGrupoConvenioPesquisaLeitos;
 import br.gov.mec.aghu.dominio.DominioMovimentoLeito;
 import br.gov.mec.aghu.dominio.DominioSexo;
 import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.internacao.dao.AinAtendimentosUrgenciaDAO;
+import br.gov.mec.aghu.internacao.dao.AinInternacaoDAO;
 import br.gov.mec.aghu.internacao.dao.AinSolicTransfPacientesDAO;
 import br.gov.mec.aghu.internacao.dao.VAinPesqLeitosDAO;
 import br.gov.mec.aghu.internacao.pesquisa.vo.PesquisaLeitosVO;
 import br.gov.mec.aghu.model.AghAla;
 import br.gov.mec.aghu.model.AghClinicas;
+import br.gov.mec.aghu.model.AghEspecialidades;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.model.AinAcomodacoes;
 import br.gov.mec.aghu.model.AinAtendimentosUrgencia;
 import br.gov.mec.aghu.model.AinInternacao;
 import br.gov.mec.aghu.model.AinLeitos;
 import br.gov.mec.aghu.model.AinQuartos;
+import br.gov.mec.aghu.model.AinTipoCaracteristicaLeito;
 import br.gov.mec.aghu.model.AinTiposMovimentoLeito;
 import br.gov.mec.aghu.model.FatConvenioSaude;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.business.seguranca.Secure;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 @Stateless
 public class PesquisaLeitosON extends BaseBusiness {
@@ -59,12 +67,23 @@ public class PesquisaLeitosON extends BaseBusiness {
 
 	@Inject
 	private VAinPesqLeitosDAO vAinPesqLeitosDAO;
+	
+	@Inject
+	private AinInternacaoDAO ainInternacaoDAO;
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 3695165508335207888L;
 
+	private static final String EXTENSAO=".csv";
+	
+	private static final String ENCODE="ISO-8859-1";
+	
+	private static final String SEPARADOR=";";
+	
+	private static final String SEPARADOR_DE_LINHA="line.separator";
+	
 	/**
 	 * Enumeracao com os codigos de mensagens de excecoes negociais.
 	 * 
@@ -454,7 +473,7 @@ public class PesquisaLeitosON extends BaseBusiness {
 		}
 	}
 
-
+	
 	/**
 	 * Verifica qual data block deve ser executado 0 - VPL 1 - VPL1 2 - STP
 	 * 
@@ -480,21 +499,77 @@ public class PesquisaLeitosON extends BaseBusiness {
 		return getPesquisaLeitosRN().possuiAtUrgencia(leitoId);
 	}
 
-	/**
-	 * Regra de Negócio de Pesquisa Leitos
-	 */
+	public File gerarArquivoCaracteristicas(Date dataInicial, Date dataFinal, AghEspecialidades especialidade,
+			Short unfSeq, AinTipoCaracteristicaLeito ainTipoCaracteristicaLeito) throws IOException, ApplicationBusinessException  {
+		
+		List<AinInternacao> internacoes = ainInternacaoDAO.obterCaracteristicasLeitos(dataInicial, dataFinal, unfSeq, ainTipoCaracteristicaLeito, especialidade); 
+		if(internacoes != null && !internacoes.isEmpty()){
+			File file = File.createTempFile("CARAC", EXTENSAO);
+			Writer out = new OutputStreamWriter(new FileOutputStream(file), ENCODE);
+			out.write(geraCabecalho());
+			
+		
+			for (AinInternacao internacao : internacoes) {
+				
+				out.write(System.getProperty(SEPARADOR_DE_LINHA));
+				out.write(gerarLinhainternacao(internacao, out));
+			}
+			
+			out.flush();
+			out.close();
+			
+			return file;
+		}
+		return null;	
+	}
+
+	private String gerarLinhainternacao(AinInternacao internacao, Writer out) {
+
+		StringBuilder texto = new StringBuilder();
+		
+		addText(internacao.getLeito().getLeitoID(), texto);
+		addText(internacao.getPaciente().getNome(), texto);
+		addText(internacao.getPaciente().getProntuarioFormatado(), texto);
+		addText(internacao.getDataFormatadaDiaMesAno(), texto);
+		addText(internacao.getEspecialidade().getNomeEspecialidade(), texto);
+		addText(internacao.getLeito().getCaracteristicasDoLeito().get(0).getTipoCaracteristicaLeito().getDescricao(), texto);
+		
+		return texto.toString();
+	}
+
+	private void addText(Object texto, StringBuilder sb){
+		if (texto != null) {
+			sb.append(texto);
+		}
+		sb.append(SEPARADOR);
+	}
+	
+	private String geraCabecalho() {
+
+		StringBuffer sb = new StringBuffer(200);
+
+		sb.append("Leito").append(SEPARADOR)
+		.append("Nome do Paciente").append(SEPARADOR)
+		.append("Prontuário").append(SEPARADOR)
+		.append("Data Atendimento").append(SEPARADOR)
+		.append("Especialidade").append(SEPARADOR)
+		.append("Tipo de Característica").append(SEPARADOR);
+		
+		return sb.toString();
+	}
+	
 	protected PesquisaLeitosRN getPesquisaLeitosRN() {
 		return pesquisaLeitosRN;
 	}
-
+	
 	protected VAinPesqLeitosDAO getVAinPesqLeitosDAO() {
 		return vAinPesqLeitosDAO;
 	}
-
+	
 	protected AinSolicTransfPacientesDAO getAinSolicTransfPacientesDAO() {
 		return ainSolicTransfPacientesDAO;
 	}
-
+	
 	protected AinAtendimentosUrgenciaDAO getAinAtendimentosUrgenciaDAO() {
 		return ainAtendimentosUrgenciaDAO;
 	}

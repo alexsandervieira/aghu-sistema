@@ -71,6 +71,8 @@ public class ListaPacientesEnfermagemController extends ActionController {
 	private final String PAGE_PESQUISAR_EXAMES = "exames-pesquisaExames";
 
 	private static final Log LOG = LogFactory.getLog(ListaPacientesEnfermagemController.class);
+	
+	private final String PAGE_LISTAR_ANAMNESE_EVOLUCAO = "prescricaomedica-listarAnamneseEvolucoes";	
 
 	/**
 	 * 
@@ -89,7 +91,7 @@ public class ListaPacientesEnfermagemController extends ActionController {
 			return ((Comparable<Object>) o1).compareTo(o2);
 		}
 	};
-	
+
 	@EJB
 	private IPrescricaoMedicaFacade prescricaoMedicaFacade;
 
@@ -131,6 +133,7 @@ public class ListaPacientesEnfermagemController extends ActionController {
 	private Boolean desabilitaBotaoDiagEnfAtivo = true;
 	private Boolean desabilitaBotaoDiagEnfPaciente = true;
 	private Boolean escolhaConsultoriaEnfermagem = false;
+	private Boolean enableButtonAnamneseEvolucao = Boolean.FALSE;
 
 	private StatusSumarioAlta statusSumario;
 	private Comparator<PacienteEnfermagemVO> currentComparator;
@@ -328,13 +331,18 @@ public class ListaPacientesEnfermagemController extends ActionController {
 	public StatusAltaObito getLabelAlta() {
 		return labelAlta;
 	}
+	
+    public String redirecionarListarAnamneseEvolucoes() {
+    	return PAGE_LISTAR_ANAMNESE_EVOLUCAO;
+    }	
 
 	
 	public void selecionarPacienteEnfermagem(){
 		if (getPacienteEnfermagemVOSelecionado() != null){
 		     this.atdSeq = getPacienteEnfermagemVOSelecionado().getAtdSeq();
 		     this.pacCodigo =  getPacienteEnfermagemVOSelecionado().getPacCodigo();
-	         this.prontuario = getPacienteEnfermagemVOSelecionado().getProntuario();	         
+	         this.prontuario = getPacienteEnfermagemVOSelecionado().getProntuario();	   
+	         enableButtonAnamneseEvolucao = getPacienteEnfermagemVOSelecionado().isEnableButtonAnamneseEvolucao();
 	         this.habilitarBotoes();
 			
 		}
@@ -691,5 +699,14 @@ public class ListaPacientesEnfermagemController extends ActionController {
 			PacienteEnfermagemVO pacienteEnfermagemVOSelecionado) {
 		this.pacienteEnfermagemVOSelecionado = pacienteEnfermagemVOSelecionado;
 	}
+	
+	
+	public boolean isEnableButtonAnamneseEvolucao() {
+		return enableButtonAnamneseEvolucao;
+	}	
+	
+	public void setEnableButtonAnamneseEvolucao(boolean enableButtonAnamneseEvolucao) {
+		this.enableButtonAnamneseEvolucao = enableButtonAnamneseEvolucao;
+	}	
 
 }

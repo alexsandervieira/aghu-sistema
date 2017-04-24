@@ -26,7 +26,6 @@ import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.dominio.DominioExibicaoParametroCamposLaudo;
 import br.gov.mec.aghu.dominio.DominioFormaRespiracao;
-import br.gov.mec.aghu.dominio.DominioObjetoVisual;
 import br.gov.mec.aghu.dominio.DominioOrigemAtendimento;
 import br.gov.mec.aghu.dominio.DominioSexo;
 import br.gov.mec.aghu.dominio.DominioSituacaoItemSolicitacaoExame;
@@ -470,20 +469,20 @@ public class MascaraExamesJasperReportON extends BaseBusiness {
 			Map<AelParametroCamposLaudo, String> listaTemp = new HashMap<AelParametroCamposLaudo, String>();
 			Map<AelParametroCamposLaudo, IAelResultadoExame> resultadosAux = new HashMap<AelParametroCamposLaudo, IAelResultadoExame>();
 			
-			boolean achouVlrRef = false;
+//			boolean achouVlrRef = false;
 			
 			for (AelParametroCamposLaudo campo : camposDaVersaoLaudo) {
-				if (DominioObjetoVisual.VALORES_REFERENCIA.equals(campo.getObjetoVisual())) {
-					achouVlrRef = true;
-				}
+//				if (DominioObjetoVisual.VALORES_REFERENCIA.equals(campo.getObjetoVisual())) {
+//					achouVlrRef = true;
+//				}
 				listaTemp.put(campo, this.obterValor(item, resultados, campo));
 				resultadosAux.put(campo, obterResultadoExamePeloParametroCampoLaudo(resultados, campo));
 			}
 	
-			if (!achouVlrRef) {
-				String vlrRef = buscaInformacaoValoresReferenciaAntigo(item, item.getId().getSoeSeq(), item.getId().getSeqp(), resultados.get(0).getParametroCampoLaudo());
-				exame.setVlrRef(vlrRef);
-			}
+//			if (!achouVlrRef) {
+//				String vlrRef = buscaInformacaoValoresReferenciaAntigo(item, item.getId().getSoeSeq(), item.getId().getSeqp(), resultados.get(0).getParametroCampoLaudo());
+//				exame.setVlrRef(vlrRef);
+//			}
 			
 			Map<AelParametroCamposLaudo, String> listaFinal = new HashMap<AelParametroCamposLaudo, String>();
 			
@@ -700,16 +699,16 @@ public class MascaraExamesJasperReportON extends BaseBusiness {
 		}
 	}
 	
-	private String buscaInformacaoValoresReferenciaAntigo(IAelItemSolicitacaoExames itemSolicitacaoExame,
-			Integer solicitacaoExameSeq, Short itemSolicitacaoExameSeq, AelParametroCamposLaudo parametro)
-					throws BaseException {
-		String valoresReferencia = this.getMascaraExamesRN().buscaInformacaoValoresReferenciaModeloAntigo(
-				itemSolicitacaoExame.getId().getSoeSeq(), itemSolicitacaoExame.getId().getSeqp(), parametro);
-		if (parametro.getTextoLivre() != null) {
-			valoresReferencia = valoresReferencia.replace(SEM_LEGENDA, "");
-		}
-		return valoresReferencia;
-	}
+//	private String buscaInformacaoValoresReferenciaAntigo(IAelItemSolicitacaoExames itemSolicitacaoExame,
+//			Integer solicitacaoExameSeq, Short itemSolicitacaoExameSeq, AelParametroCamposLaudo parametro)
+//					throws BaseException {
+//		String valoresReferencia = this.getMascaraExamesRN().buscaInformacaoValoresReferenciaModeloAntigo(
+//				itemSolicitacaoExame.getId().getSoeSeq(), itemSolicitacaoExame.getId().getSeqp(), parametro);
+//		if (parametro.getTextoLivre() != null) {
+//			valoresReferencia = valoresReferencia.replace(SEM_LEGENDA, "");
+//		}
+//		return valoresReferencia;
+//	}
 
 	/**
 	 * Popula os vos com os campos da mascara.

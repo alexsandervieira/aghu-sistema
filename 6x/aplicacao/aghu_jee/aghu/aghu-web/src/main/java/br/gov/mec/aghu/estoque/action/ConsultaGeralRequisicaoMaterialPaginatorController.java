@@ -13,17 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.casca.business.ICascaFacade;
-import br.gov.mec.aghu.dominio.DominioCaracteristicaCentroCusto;
-import br.gov.mec.aghu.dominio.DominioImpresso;
-import br.gov.mec.aghu.dominio.DominioSimNao;
-import br.gov.mec.aghu.dominio.DominioSituacaoRequisicaoMaterial;
-import br.gov.mec.aghu.estoque.business.IEstoqueBeanFacade;
-import br.gov.mec.aghu.estoque.business.IEstoqueFacade;
-import br.gov.mec.aghu.financeiro.centrocusto.business.ICentroCustoFacade;
-import br.gov.mec.aghu.model.FccCentroCustos;
-import br.gov.mec.aghu.model.SceAlmoxarifado;
-import br.gov.mec.aghu.model.SceReqMaterial;
-import br.gov.mec.aghu.prescricaomedica.vo.LinhaReportVO;
 import br.gov.mec.aghu.core.action.ActionController;
 import br.gov.mec.aghu.core.action.ActionPaginator;
 import br.gov.mec.aghu.core.action.SecurityController;
@@ -32,6 +21,18 @@ import br.gov.mec.aghu.core.etc.Paginator;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
 import br.gov.mec.aghu.core.exception.Severity;
+import br.gov.mec.aghu.dominio.DominioCaracteristicaCentroCusto;
+import br.gov.mec.aghu.dominio.DominioImpresso;
+import br.gov.mec.aghu.dominio.DominioSimNao;
+import br.gov.mec.aghu.dominio.DominioSituacaoRequisicaoMaterial;
+import br.gov.mec.aghu.estoque.business.IEstoqueBeanFacade;
+import br.gov.mec.aghu.estoque.business.IEstoqueFacade;
+import br.gov.mec.aghu.estoque.pesquisa.action.ImprimirRequisicaoMaterialController;
+import br.gov.mec.aghu.financeiro.centrocusto.business.ICentroCustoFacade;
+import br.gov.mec.aghu.model.FccCentroCustos;
+import br.gov.mec.aghu.model.SceAlmoxarifado;
+import br.gov.mec.aghu.model.SceReqMaterial;
+import br.gov.mec.aghu.prescricaomedica.vo.LinhaReportVO;
 
 @SuppressWarnings({"PMD.AghuTooManyMethods", "PMD.ExcessiveClassLength"})
 public class ConsultaGeralRequisicaoMaterialPaginatorController extends ActionController implements ActionPaginator {
@@ -114,6 +115,8 @@ public class ConsultaGeralRequisicaoMaterialPaginatorController extends ActionCo
 	private Boolean possuiPermissaoEfetivarRM = Boolean.TRUE;
 	
 	private boolean isAlmoxarife;
+	
+	private boolean isFuncionarioAlmoxarifado;
 
 	// indica se os campos serão desabilitados
 	private Boolean desabilitarIndImpresso = Boolean.FALSE;
@@ -151,6 +154,9 @@ public class ConsultaGeralRequisicaoMaterialPaginatorController extends ActionCo
 	private SecurityController securityController;
 	
 	private Boolean habilitaAlterarRM;
+	
+	@Inject
+	private ImprimirRequisicaoMaterialController imprimirRequisicaoMaterialController;
 
 	private enum OrigemTela {
 		CONSULTAR_GERAL("consultaGeral"), CONSULTAR_RM("consultarRM");
@@ -188,6 +194,8 @@ public class ConsultaGeralRequisicaoMaterialPaginatorController extends ActionCo
 		}
 		
 		isAlmoxarife = this.getCascaFacade().usuarioTemPerfil(this.obterLoginUsuarioLogado(), "ADM29");
+		
+		isFuncionarioAlmoxarifado = isFuncionarioDoAlmoxarifado();
 		
 		if(getPreencherCentroCusto() && !this.getDataModel().getPesquisaAtiva()){
 			//seta o centro de custo do usuário no suggestion
@@ -247,6 +255,10 @@ public class ConsultaGeralRequisicaoMaterialPaginatorController extends ActionCo
 
 		desabilitarCampos();
 	
+	}
+
+	private boolean isFuncionarioDoAlmoxarifado() {
+		return this.getCascaFacade().usuarioTemPerfil(this.obterLoginUsuarioLogado(), "ADM26") || isAlmoxarife;
 	}
 	
 
@@ -428,9 +440,19 @@ public class ConsultaGeralRequisicaoMaterialPaginatorController extends ActionCo
 	}
 	
 	public String imprimirRM(){
+		if(getRequisicaoSelecionada().getIndSituacao().equals(DominioSituacaoRequisicaoMaterial.E)) {
+			imprimirRequisicaoMaterialController.setNumeroRM(getRequisicaoSelecionada().getSeq());
+			imprimirRequisicaoMaterialController.setDuasVias(DominioSimNao.N);
+			imprimirRequisicaoMaterialController.directPrint();
+			return null;
+		}
 		return IMPRIMIR_ITEM;
 	}
 
+	public String imprimirRMRedireciona(){
+		return IMPRIMIR_ITEM;
+	}
+	
 	private String redirecionaVisualizarItens(String retorno) {
 		// se tenha informado o número da requisição, manda pra tela de
 		// visualizar
@@ -629,12 +651,6 @@ public class ConsultaGeralRequisicaoMaterialPaginatorController extends ActionCo
 		setSituacaoGerada(Boolean.FALSE);
 		setSituacaoConfirmada(Boolean.FALSE);
 		setHabilitaAlterarRM(false);
-		if (getPreencherCentroCusto()) {
-			getRequisicao().setCentroCusto(centroCustoFacade.obterCentroCustosPorCodigoCentroCustoAtuacaoOuLotacao());
-		} else {
-			getRequisicao().setCentroCusto(null);
-		}
-		getRequisicao().setIndSituacao(DominioSituacaoRequisicaoMaterial.G);
 		setSeqAlmoxarifado(null);
 		dataModel.setPesquisaAtiva(false);
 		setAutomatica(null);
@@ -649,6 +665,7 @@ public class ConsultaGeralRequisicaoMaterialPaginatorController extends ActionCo
 			
 			apresentarMsgNegocio(Severity.ERROR, "ERRO_SELECIONAR_REQUISICAO");
 		} else {
+			setRequisicaoSelecionada(estoqueFacade.obterRequisicaoMaterial(getRequisicaoSelecionada().getSeq()));
 			String nomeMicrocomputador = null;
 			try {
 				nomeMicrocomputador = super.getEnderecoRedeHostRemoto();
@@ -679,6 +696,8 @@ public class ConsultaGeralRequisicaoMaterialPaginatorController extends ActionCo
 		if (getRequisicaoSelecionada().getSeq() == null) {
 			apresentarMsgNegocio(Severity.ERROR, "ERRO_SELECIONAR_REQUISICAO");
 		} else {
+			setRequisicaoSelecionada(estoqueFacade.obterRequisicaoMaterial(getRequisicaoSelecionada().getSeq()));
+			requisicaoSelecionada.setIndSituacao(DominioSituacaoRequisicaoMaterial.C);
 			String nomeMicrocomputador = null;
 			try {
 				nomeMicrocomputador = super.getEnderecoRedeHostRemoto();
@@ -686,11 +705,10 @@ public class ConsultaGeralRequisicaoMaterialPaginatorController extends ActionCo
 				LOG.error(EXCECAO_CAPUTADA, e);
 			}
 			try {
-				getRequisicaoSelecionada().setIndSituacao(DominioSituacaoRequisicaoMaterial.C);
-
-				getEstoqueBeanFacade().gravarRequisicaoMaterial(getRequisicaoSelecionada(), nomeMicrocomputador);
-				requisicaoConfirmada = this.estoqueFacade.obterRequisicaoMaterial(getRequisicaoSelecionada().getSeq());
-				apresentarMsgNegocio(Severity.INFO,"REQUISICAO_MATERIAL_CONFIRMADA_COM_SUCESSO", getRequisicaoSelecionada().getSeq().toString());
+				estoqueBeanFacade.gravarRequisicaoMaterial(requisicaoSelecionada, nomeMicrocomputador);
+				
+				requisicaoConfirmada = this.estoqueFacade.obterRequisicaoMaterial(requisicaoSelecionada.getSeq());
+				apresentarMsgNegocio(Severity.INFO,"REQUISICAO_MATERIAL_CONFIRMADA_COM_SUCESSO", requisicaoSelecionada.getSeq().toString());
 				dataModel.reiniciarPaginator();
 			} catch (BaseException e) {
 				getRequisicaoSelecionada().setIndSituacao(DominioSituacaoRequisicaoMaterial.G);
@@ -1137,7 +1155,11 @@ public class ConsultaGeralRequisicaoMaterialPaginatorController extends ActionCo
 					result = false;
 				}
 			}
-
+			if(getRequisicaoSelecionada() != null) {
+				if (isFuncionarioAlmoxarifado && DominioSituacaoRequisicaoMaterial.E.equals(getRequisicaoSelecionada().getIndSituacao())) {
+					result = Boolean.FALSE;
+				}
+			}
 		}
 		
 		if(requisicaoConfirmada!=null){

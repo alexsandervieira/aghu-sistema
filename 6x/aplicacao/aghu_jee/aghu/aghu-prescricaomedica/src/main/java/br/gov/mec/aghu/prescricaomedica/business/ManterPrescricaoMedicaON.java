@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import br.gov.mec.aghu.bancosangue.dao.AbsSolicitacoesHemoterapicasDAO;
 import br.gov.mec.aghu.business.bancosangue.IBancoDeSangueFacade;
 import br.gov.mec.aghu.core.business.BaseBusiness;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
@@ -103,8 +104,14 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 	private PrescricaoNptRN prescricaoNptRN;
 	
 	@EJB
-	private DocumentoON documentoON;
+	private ManterPrescricaoCuidadoON manterPrescricaoCuidadoON;
 	
+	@EJB
+	private DocumentoON documentoON;
+
+	@EJB
+	private PrescricaoMedicamentoRN prescricaoMedicamentoRN;
+
 	private static final Log LOG = LogFactory.getLog(ManterPrescricaoMedicaON.class);
 	
 	@Override
@@ -127,6 +134,9 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 	
 	@Inject
 	private MpmItemPrescricaoDietaDAO mpmItemPrescricaoDietaDAO;
+	
+	@Inject
+	private AbsSolicitacoesHemoterapicasDAO absSolicitacoesHemoterapicasDAO;
 	
 	@Inject
 	private MpmItemPrescricaoNptDAO mpmItemPrescricaoNptDAO;
@@ -196,6 +206,16 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 	}
 
 	private static final String SEPARADOR_LINHA = "<br/>";
+
+	private static final String SUB_TITULO_MEDICAMENTOS = "MEDICAMENTOS";
+
+	private static final String SUB_TITULO_SOLUCOES = "SOLUÇÕES";
+
+	private static final String SUB_TITULO_DIETA = "DIETA";
+
+	private static final String SUB_TITULO_CUIDADOS = "CUIDADOS";
+
+	private static final String SUB_TITULO_PROCEDIMENTOS = "PROCEDIMENTOS";
 
 	/**
 	 * @author mtocchetto
@@ -378,28 +398,36 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		PrescricaoMedicaVO prescricaoMedicaVO = new PrescricaoMedicaVO();
 		
 		if(dieta){
-			this.populaDieta(prescricaoMedicaVO, prescricaoMedicaId, listarTodas);
+			this.populaDieta(prescricaoMedicaVO, prescricaoMedicaId, listarTodas, true);
 		}
 		if(cuidadoMedico){
-			this.populaCuidadoMedico(prescricaoMedicaVO, prescricaoMedicaId, listarTodas);
+			this.populaCuidadoMedico(prescricaoMedicaVO, prescricaoMedicaId, listarTodas, true);
 		}
 		if(medicamento){
-			this.populaMedicamento(prescricaoMedicaVO, prescricaoMedicaId, listarTodas);
+			this.populaMedicamento(prescricaoMedicaVO, prescricaoMedicaId, listarTodas,true);
 		}
 		if(solucao){
-			this.populaSolucao(prescricaoMedicaVO, prescricaoMedicaId, listarTodas);
+			this.populaSolucao(prescricaoMedicaVO, prescricaoMedicaId, listarTodas, true);
 		}
 		if(consultoria){
-			this.populaConsultoria(prescricaoMedicaVO, prescricaoMedicaId, listarTodas);
+			this.populaConsultoria(prescricaoMedicaVO, prescricaoMedicaId, listarTodas, true);
 		}
 		if(hemoterapia){
-			this.populaHemoterapia(prescricaoMedicaVO, prescricaoMedicaId, listarTodas);
+			this.populaHemoterapia(prescricaoMedicaVO, prescricaoMedicaId, listarTodas, true);
 		}
 		if(nutricaoParental){
-			this.populaNutricaoParental(prescricaoMedicaVO, prescricaoMedicaId, listarTodas); // NPT
+			this.populaNutricaoParental(prescricaoMedicaVO, prescricaoMedicaId, listarTodas, true); // NPT
 		}
 		if(procedimento){
-			this.populaProcedimento(prescricaoMedicaVO, prescricaoMedicaId, listarTodas);
+			this.populaProcedimento(prescricaoMedicaVO, prescricaoMedicaId, listarTodas, true);
+		}
+		
+		int order =  1;
+		for (int i = 1; i < prescricaoMedicaVO.getItens().size(); i++) {
+			if (prescricaoMedicaVO.getItens().get(i).getIsItemPrescricao()){
+				prescricaoMedicaVO.getItens().get(i).setOrdem(order);
+				order++;
+			}
 		}
 
 		return prescricaoMedicaVO.getItens();
@@ -420,11 +448,14 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 	 * @param prescricaoMedicaVO
 	 * @param prescricaoMedicaId
 	 */
-	private void populaProcedimento(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas) {
+	private void populaProcedimento(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas, Boolean gerarSubTitulo) {
 		MpmPrescricaoMedica prescricaoMedica = this.getPrescricaoMedicaDAO().obterPorChavePrimaria(prescricaoMedicaId);
 
 		if (prescricaoMedica != null) {
 			List<MpmPrescricaoProcedimento> list = this.getMpmPrescricaoProcedimentoDAO().buscaPrescricaoProcedimentos(prescricaoMedicaId, prescricaoMedica.getDthrFim(), listarTodas);
+			if(!list.isEmpty() && gerarSubTitulo){
+				montarTitulo(prescricaoMedicaVO, SUB_TITULO_PROCEDIMENTOS);
+			}
 			for (MpmPrescricaoProcedimento mpmPrescricaoProcedimento : list) {
 				this.getMpmPrescricaoProcedimentoDAO().refresh(mpmPrescricaoProcedimento);
 				for (MpmModoUsoPrescProced mpmModoUsoPrescProced : mpmPrescricaoProcedimento.getModoUsoPrescricaoProcedimentos()) {
@@ -444,7 +475,6 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 				});
 			}
 			
-			this.ordenarListaDeItemPrescricaoMedica(list);
 			for (MpmPrescricaoProcedimento procedimento : list) {
 				this.verificaHierarquiaProcedimentos(prescricaoMedicaVO, procedimento, listOriginal, false);
 			}
@@ -466,8 +496,8 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		item.setCriadoEm(procedimento.getCriadoEm());
 		item.setAlteradoEm(procedimento.getAlteradoEm());
 		item.setSituacao(procedimento.getIndPendente());
-		item.setServidorValidacao(procedimento.getServidorValidacao());
-		item.setServidorValidaMovimentacao(procedimento.getServidorValidaMovimentacao());
+		item.setServidorValidacaoNome(validarServidorValidacaoNomeProcedimento(procedimento));
+		item.setServidorValidaMovimentacaoNome(validarServidorValidaMovimentacaoNomeProcedimento(procedimento));
 		item.setHierarquico(isHierarquico);
 		prescricaoMedicaVO.addItem(item);
 
@@ -483,6 +513,18 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		if(prescricaoAlterada != null) {
 			this.verificaHierarquiaProcedimentos(prescricaoMedicaVO, prescricaoAlterada, listaCompleta, true);	
 		}
+	}
+
+	private String validarServidorValidaMovimentacaoNomeProcedimento(MpmPrescricaoProcedimento procedimento) {
+		return procedimento.getServidorValidaMovimentacao() == null 
+				|| procedimento.getServidorValidaMovimentacao().getPessoaFisica() == null 
+				|| procedimento.getServidorValidaMovimentacao().getPessoaFisica().getNome() == null ? "" : procedimento.getServidorValidaMovimentacao().getPessoaFisica().getNome();
+	}
+
+	private String validarServidorValidacaoNomeProcedimento(MpmPrescricaoProcedimento procedimento) {
+		return procedimento.getServidorValidacao() == null 
+				|| procedimento.getServidorValidacao().getPessoaFisica() == null 
+				|| procedimento.getServidorValidacao().getPessoaFisica().getNome() == null ? "" : procedimento.getServidorValidacao().getPessoaFisica().getNome();
 	}
 
 	/**
@@ -507,7 +549,7 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 	 * @param umFilter
 	 * @throws ApplicationBusinessException
 	 */
-	private void populaNutricaoParental(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas) throws ApplicationBusinessException {
+	private void populaNutricaoParental(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas, Boolean gerarSubTitulo) throws ApplicationBusinessException {
 		try {
 			MpmPrescricaoMedicaDAO prescricaoMedicaDAO = getPrescricaoMedicaDAO();
 			MpmPrescricaoNptDAO prescricaoNptsDAO = getPrescricaoNptsDAO();
@@ -517,6 +559,9 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 
 			// MpmkVariaveis mpmkVariaveis = new MpmkVariaveis();
 			List<MpmPrescricaoNpt> listaPrescricaoNpts = prescricaoNptsDAO.pesquisarPrescricaoNptPorPME(prescricaoMedicaId, dthrFimPme, listarTodas);
+			if(!listaPrescricaoNpts.isEmpty() && gerarSubTitulo){
+				montarTitulo(prescricaoMedicaVO, "NUTRIÇÃO PARENTAL");
+			}
 			for (MpmPrescricaoNpt mpmPrescricaoNpt : listaPrescricaoNpts) {
 				prescricaoNptsDAO.refresh(mpmPrescricaoNpt);
 			}
@@ -666,8 +711,8 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		itemVO.setDthrInicio(prescricaoNpts.getDthrInicio());
 		itemVO.setDthrFim(prescricaoNpts.getDthrFim());
 		itemVO.setSituacao(prescricaoNpts.getIndPendente());
-		itemVO.setServidorValidacao(prescricaoNpts.getServidorValidacao());
-		itemVO.setServidorValidaMovimentacao(prescricaoNpts.getServidorValidaMovimentacao());			
+		itemVO.setServidorValidacaoNome(validarServidorValidacaoNomePrescricaoNpts(prescricaoNpts));
+		itemVO.setServidorValidaMovimentacaoNome(validarServidorValidaMovimentacaoNomePrescricaoNpts(prescricaoNpts));
 		itemVO.setTipo(PrescricaoMedicaTypes.NUTRICAO_PARENTAL);
 		itemVO.setHierarquico(isHierarquico);
 		prescricaoMedicaVO.addItem(itemVO);
@@ -686,6 +731,18 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		}
 		
 	}
+
+	private String validarServidorValidaMovimentacaoNomePrescricaoNpts(MpmPrescricaoNpt prescricaoNpts) {
+		return prescricaoNpts.getServidorValidaMovimentacao() == null 
+				|| prescricaoNpts.getServidorValidaMovimentacao().getPessoaFisica() == null 
+				|| prescricaoNpts.getServidorValidaMovimentacao().getPessoaFisica().getNome() == null ? "" : prescricaoNpts.getServidorValidaMovimentacao().getPessoaFisica().getNome();
+	}
+
+	private String validarServidorValidacaoNomePrescricaoNpts(MpmPrescricaoNpt prescricaoNpts) {
+		return prescricaoNpts.getServidorValidacao() == null 
+				|| prescricaoNpts.getServidorValidacao().getPessoaFisica() == null 
+				|| prescricaoNpts.getServidorValidacao().getPessoaFisica().getNome() == null ? "" : prescricaoNpts.getServidorValidacao().getPessoaFisica().getNome();
+	}
 	
 	
 
@@ -694,10 +751,14 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 	 * rcorvalao 22/09/2010
 	 * 
 	 * @param prescricaoMedicaVO
+	 * @param b 
 	 * @param umFilter
 	 */
-	private void populaHemoterapia(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas) {
+	private void populaHemoterapia(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas, Boolean gerarSubTitulo) {
 		List<AbsSolicitacoesHemoterapicas> list = this.getBancoDeSangueFacade().buscaSolicitacoesHemoterapicas(prescricaoMedicaId, listarTodas);
+		if(!list.isEmpty()  && gerarSubTitulo){
+			montarTitulo(prescricaoMedicaVO, "HEMOTERAPIA");
+		}
 		for (AbsSolicitacoesHemoterapicas absSolicitacoesHemoterapica : list) {
 			this.getBancoDeSangueFacade().refreshSolicitacoesHeoterapicas(absSolicitacoesHemoterapica);
 			for (AbsItensSolHemoterapicas item : absSolicitacoesHemoterapica.getItensSolHemoterapicas()) {
@@ -717,7 +778,6 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 			});
 		}
 
-		this.ordenarListaDeItemPrescricaoMedica(list);
 		for (AbsSolicitacoesHemoterapicas ash : list) {
 			this.verificaHierarquiaHemoterapias(prescricaoMedicaVO, ash, listOriginal, false);
 		}
@@ -738,8 +798,8 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		item.setDthrInicio(ash.getDthrSolicitacao());
 		item.setDthrFim(ash.getDthrFim());			
 		item.setSituacao(ash.getIndPendente());
-		item.setServidorValidacao(ash.getServidorValidacao());
-		item.setServidorValidaMovimentacao(ash.getServidorValidaMovimentacao());
+		item.setServidorValidacaoNome(validarServidorValidacaoNomeAsh(ash));
+		item.setServidorValidaMovimentacaoNome(validarServidorValidaMovimentacaoNomeAsh(ash));
 		item.setHierarquico(isHierarquico);
 		prescricaoMedicaVO.addItem(item);
 
@@ -757,6 +817,18 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		}
 	}
 
+	private String validarServidorValidaMovimentacaoNomeAsh(AbsSolicitacoesHemoterapicas ash) {
+		return ash.getServidorValidaMovimentacao() == null 
+				|| ash.getServidorValidaMovimentacao().getPessoaFisica() == null 
+				|| ash.getServidorValidaMovimentacao().getPessoaFisica().getNome() == null ? "" : ash.getServidorValidaMovimentacao().getPessoaFisica().getNome();
+	}
+
+	private String validarServidorValidacaoNomeAsh(AbsSolicitacoesHemoterapicas ash) {
+		return ash.getServidorValidacao() == null 
+				|| ash.getServidorValidacao().getPessoaFisica() == null 
+				|| ash.getServidorValidacao().getPessoaFisica().getNome() == null ? "" : ash.getServidorValidacao().getPessoaFisica().getNome();
+	}
+
 	
 	/**
 	 * Campos utilizados:<br>
@@ -768,11 +840,15 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 	 * rcorvalao 22/09/2010
 	 * 
 	 * @param prescricaoMedicaVO
+	 * @param b 
 	 * @param umFilter
 	 */
-	private void populaConsultoria(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas) {
+	private void populaConsultoria(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas, Boolean gerarSubTitulo) {
 
 		List<MpmSolicitacaoConsultoria> list = this.getSolicitacaoConsultoriasDAO().buscaSolicitacaoConsultoriaPorPrescricaoMedica(prescricaoMedicaId, listarTodas);
+		if (!list.isEmpty() && gerarSubTitulo){		
+			montarTitulo(prescricaoMedicaVO,"CONSULTORIA");
+		}
 		for (MpmSolicitacaoConsultoria mpmSolicitacaoConsultoria : list) {
 			this.getSolicitacaoConsultoriasDAO().refresh(mpmSolicitacaoConsultoria);
 		}
@@ -789,11 +865,18 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 			});
 		}
 		
-		this.ordenarListaDeItemPrescricaoMedica(list);
 		for (MpmSolicitacaoConsultoria solicitacaoConsultoria : list) {
 			this.verificaHierarquiaConsultorias(prescricaoMedicaVO, solicitacaoConsultoria, listOriginal, false);
 		}
 
+	}
+
+	private void montarTitulo(PrescricaoMedicaVO prescricaoMedicaVO, String titulo) {
+		ItemPrescricaoMedicaVO item = new ItemPrescricaoMedicaVO();
+		item.setIsItemPrescricao(Boolean.FALSE);
+		item.setDescricao(titulo);
+		prescricaoMedicaVO.getItens().add(item);
+		
 	}
 
 	private void verificaHierarquiaConsultorias(PrescricaoMedicaVO prescricaoMedicaVO, MpmSolicitacaoConsultoria solicitacaoConsultoria, List<MpmSolicitacaoConsultoria> listaCompleta, Boolean isHierarquico) {
@@ -808,8 +891,8 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		item.setDthrInicio(solicitacaoConsultoria.getDthrSolicitada());
 		item.setDthrFim(solicitacaoConsultoria.getDthrFim());			
 		item.setSituacao(solicitacaoConsultoria.getIndPendente());
-		item.setServidorValidacao(solicitacaoConsultoria.getServidorValidacao());
-		item.setServidorValidaMovimentacao(solicitacaoConsultoria.getServidorValidaMovimentacao());
+		item.setServidorValidacaoNome(validarServidorValidacaoNomeSolicitacaoConsultoria(solicitacaoConsultoria));
+		item.setServidorValidaMovimentacaoNome(validarServidorValidaMovimentacaoNomeSolicitacaoConsultoria(solicitacaoConsultoria));
 		item.setAtendimentoSeq(solicitacaoConsultoria.getId().getAtdSeq());
 		item.setItemSeq(Long.valueOf(solicitacaoConsultoria.getId().getSeq()));
 		item.setTipo(PrescricaoMedicaTypes.CONSULTORIA);
@@ -830,16 +913,31 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		}
 	}
 
+	private String validarServidorValidaMovimentacaoNomeSolicitacaoConsultoria(MpmSolicitacaoConsultoria solicitacaoConsultoria) {
+		return solicitacaoConsultoria.getServidorValidaMovimentacao() == null 
+				|| solicitacaoConsultoria.getServidorValidaMovimentacao().getPessoaFisica() == null 
+				|| solicitacaoConsultoria.getServidorValidaMovimentacao().getPessoaFisica().getNome() == null ? "" : solicitacaoConsultoria.getServidorValidaMovimentacao().getPessoaFisica().getNome();
+	}
+
+	private String validarServidorValidacaoNomeSolicitacaoConsultoria(MpmSolicitacaoConsultoria solicitacaoConsultoria) {
+		return solicitacaoConsultoria.getServidorValidacao() == null 
+				|| solicitacaoConsultoria.getServidorValidacao().getPessoaFisica() == null 
+				|| solicitacaoConsultoria.getServidorValidacao().getPessoaFisica().getNome() == null ? "" : solicitacaoConsultoria.getServidorValidacao().getPessoaFisica().getNome();
+	}
+
 	/**
 	 * rcorvalao 22/09/2010
 	 * 
 	 * @param prescricaoMedicaVO
 	 * @param umFilter
 	 */
-	private void populaMedicamento(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas) {
+	private void populaMedicamento(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas,  Boolean gerarSubTitulo) {
 		MpmPrescricaoMedica prescricaoMedica = this.getPrescricaoMedicaDAO().obterPorChavePrimaria(prescricaoMedicaId);
 		
 		List<MpmPrescricaoMdto> listMedicamentos = this.getMpmPrescricaoMdtoDAO().obterListaMedicamentosPrescritosPelaChavePrescricao(prescricaoMedicaId, prescricaoMedica.getDthrFim(), false, listarTodas);
+		if(!listMedicamentos.isEmpty() && gerarSubTitulo){
+			montarTitulo(prescricaoMedicaVO, SUB_TITULO_MEDICAMENTOS);
+		}
 		for (MpmPrescricaoMdto mpmPrescricaoMdto : listMedicamentos) {
 			this.getMpmPrescricaoMdtoDAO().refresh(mpmPrescricaoMdto);
 			for (MpmItemPrescricaoMdto itemPrescricaoMdto : mpmPrescricaoMdto.getItensPrescricaoMdtos()) {
@@ -859,7 +957,6 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 			});
 		}
 
-		this.ordenarListaDeItemPrescricaoMedica(listMedicamentos);
 		for (MpmPrescricaoMdto prescricaoMedicamento : listMedicamentos) {
 			this.verificaHierarquiaMedicamentos(prescricaoMedicaVO, prescricaoMedicamento, listaMedicamentosOriginal, false);
 		}
@@ -878,8 +975,8 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		item.setDthrInicio(prescricaoMedicamento.getDthrInicio());
 		item.setDthrFim(prescricaoMedicamento.getDthrFim());						
 		item.setSituacao(prescricaoMedicamento.getIndPendente());
-		item.setServidorValidacao(prescricaoMedicamento.getServidorValidacao());
-		item.setServidorValidaMovimentacao(prescricaoMedicamento.getServidorValidaMovimentacao());
+		item.setServidorValidacaoNome(validarServidorValidacaoNomePrescricaoMedicamento(prescricaoMedicamento));
+		item.setServidorValidaMovimentacaoNome(validarServidorValidaMovimentacaoNomePrescricaoMedicamento(prescricaoMedicamento));
 		item.setAtendimentoSeq(prescricaoMedicamento.getId().getAtdSeq());
 		item.setItemSeq(prescricaoMedicamento.getId().getSeq());
 		item.setTipo(prescricaoMedicamento.getTipo());
@@ -921,6 +1018,18 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		if(prescricaoAlterada != null) {
 			this.verificaHierarquiaMedicamentos(prescricaoMedicaVO, prescricaoAlterada, listaCompleta, true);	
 		}
+	}
+
+	private String validarServidorValidaMovimentacaoNomePrescricaoMedicamento(MpmPrescricaoMdto prescricaoMedicamento) {
+		return prescricaoMedicamento.getServidorValidaMovimentacao() == null 
+				|| prescricaoMedicamento.getServidorValidaMovimentacao().getPessoaFisica() == null 
+				|| prescricaoMedicamento.getServidorValidaMovimentacao().getPessoaFisica().getNome() == null ? "" : prescricaoMedicamento.getServidorValidaMovimentacao().getPessoaFisica().getNome();
+	}
+
+	private String validarServidorValidacaoNomePrescricaoMedicamento(MpmPrescricaoMdto prescricaoMedicamento) {
+		return prescricaoMedicamento.getServidorValidacao() == null 
+				|| prescricaoMedicamento.getServidorValidacao().getPessoaFisica() == null 
+				|| prescricaoMedicamento.getServidorValidacao().getPessoaFisica().getNome() == null ? "" : prescricaoMedicamento.getServidorValidacao().getPessoaFisica().getNome();
 	}
 	
 	/**
@@ -996,10 +1105,13 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 	}
 
 	
-	private void populaSolucao(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas) {
+	private void populaSolucao(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas, Boolean gerarSubTitulo) {
 		MpmPrescricaoMedica prescricaoMedica = this.getPrescricaoMedicaDAO().obterPorChavePrimaria(prescricaoMedicaId);
 		
 		List<MpmPrescricaoMdto> listSolucoes = this.getMpmPrescricaoMdtoDAO().obterListaMedicamentosPrescritosPelaChavePrescricao(prescricaoMedicaId, prescricaoMedica.getDthrFim(), true, listarTodas);
+		if(!listSolucoes.isEmpty() && gerarSubTitulo){
+			montarTitulo(prescricaoMedicaVO, SUB_TITULO_SOLUCOES);
+		}
 		for (MpmPrescricaoMdto mpmPrescricaoMdto : listSolucoes) {
 			this.getMpmPrescricaoMdtoDAO().refresh(mpmPrescricaoMdto);
 			for (MpmItemPrescricaoMdto itemPrescricaoMdto : mpmPrescricaoMdto.getItensPrescricaoMdtos()) {
@@ -1019,7 +1131,7 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 			});
 		}
 
-		this.ordenarListaDeItemPrescricaoMedica(listSolucoes);
+		//this.ordenarListaDeItemPrescricaoMedica(listSolucoes);
 		for (MpmPrescricaoMdto prescricaoMedicamento : listSolucoes) {
 			this.verificaHierarquiaMedicamentos(prescricaoMedicaVO, prescricaoMedicamento, listSolucoesOriginal, false);
 		}
@@ -1031,14 +1143,19 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 	 * 
 	 * @author mtocchetto
 	 * @param prescricaoMedicaVO
+	 * @param b 
 	 * @param umFilter
 	 */
-	private void populaCuidadoMedico(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas) {
+	private void populaCuidadoMedico(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas, Boolean gerar) {
 		MpmPrescricaoMedicaDAO daoPrescricaoMedica = this.getPrescricaoMedicaDAO();
 		MpmPrescricaoCuidadoDAO daoCuidadosMedicos = this.getMpmPrescricaoCuidadoDAO();
 		MpmPrescricaoMedica mpmPrescricaoMedica = daoPrescricaoMedica.obterPorChavePrimaria(prescricaoMedicaId);
-
+		
+		
 		List<MpmPrescricaoCuidado> listaCuidadosMedicos = daoCuidadosMedicos.pesquisarCuidadosMedicos(mpmPrescricaoMedica.getId(), mpmPrescricaoMedica.getDthrFim(), listarTodas);
+		if (!listaCuidadosMedicos.isEmpty() && gerar){
+			montarTitulo(prescricaoMedicaVO, SUB_TITULO_CUIDADOS);
+		}
 		for (MpmPrescricaoCuidado mpmPrescricaoCuidado : listaCuidadosMedicos) {
 			daoCuidadosMedicos.refresh(mpmPrescricaoCuidado);
 		}
@@ -1056,7 +1173,6 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 			});
 		}
 
-		this.ordenarListaDeItemPrescricaoMedica(listaCuidadosMedicos);
 		for (MpmPrescricaoCuidado cuidadoMedico : listaCuidadosMedicos) {
 			this.verificaHierarquiaCuidados(prescricaoMedicaVO, cuidadoMedico, listaCuidadosMedicosOriginal, false);
 		}
@@ -1074,8 +1190,8 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		item.setDthrInicio(cuidadoMedico.getDthrInicio());
 		item.setDthrFim(cuidadoMedico.getDthrFim());									
 		item.setSituacao(cuidadoMedico.getIndPendente());
-		item.setServidorValidacao(cuidadoMedico.getServidorValidacao());
-		item.setServidorValidaMovimentacao(cuidadoMedico.getServidorValidaMovimentacao());
+		item.setServidorValidacaoNome(validarServidorValidacaoNomeCuidadoMedico(cuidadoMedico));
+		item.setServidorValidaMovimentacaoNome(validarServidorValidaMovimentacaoNomeCuidadoMedico(cuidadoMedico));
 		item.setAtendimentoSeq(cuidadoMedico.getId().getAtdSeq());
 		item.setItemSeq(cuidadoMedico.getId().getSeq());
 		item.setTipo(PrescricaoMedicaTypes.CUIDADOS_MEDICOS);
@@ -1096,18 +1212,35 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		}
 	}
 
+	private String validarServidorValidaMovimentacaoNomeCuidadoMedico(MpmPrescricaoCuidado cuidadoMedico) {
+		return cuidadoMedico.getServidorValidaMovimentacao() == null 
+				|| cuidadoMedico.getServidorValidaMovimentacao().getPessoaFisica() == null 
+				|| cuidadoMedico.getServidorValidaMovimentacao().getPessoaFisica().getNome() == null ? "" : cuidadoMedico.getServidorValidaMovimentacao().getPessoaFisica().getNome();
+	}
+
+	private String validarServidorValidacaoNomeCuidadoMedico(MpmPrescricaoCuidado cuidadoMedico) {
+		return cuidadoMedico.getServidorValidacao() == null 
+				|| cuidadoMedico.getServidorValidacao().getPessoaFisica() == null 
+				|| cuidadoMedico.getServidorValidacao().getPessoaFisica().getNome() == null ? "" : cuidadoMedico.getServidorValidacao().getPessoaFisica().getNome();
+	}
+
 	
 	/**
 	 * rcorvalao 22/09/2010 bsoliveira 30/09/2010
+	 * @param b 
+	 * @param b 
 	 * 
 	 * @param {PrescricaoMedicaVO} prescricaoMedicaVO
 	 * @param {MpmPrescricaoMedicaId} prescricaoMedicaId
 	 */
-	private void populaDieta(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas) {
+	private void populaDieta(PrescricaoMedicaVO prescricaoMedicaVO, MpmPrescricaoMedicaId prescricaoMedicaId, Boolean listarTodas,Boolean gerarSubTitulo) {
 
 		MpmPrescricaoMedica prescricaoMedica = this.getPrescricaoMedicaDAO().obterPorChavePrimaria(prescricaoMedicaId);
 
 		List<MpmPrescricaoDieta> listDietas = this.getMpmPrescricaoDietaDAO().buscaDietaPorPrescricaoMedica(prescricaoMedicaId,prescricaoMedica.getDthrFim(), listarTodas);
+		if(!listDietas.isEmpty() && gerarSubTitulo){
+			montarTitulo(prescricaoMedicaVO, SUB_TITULO_DIETA);
+		}
 		for (MpmPrescricaoDieta dieta: listDietas) {
 			this.getMpmPrescricaoDietaDAO().refresh(dieta);			
 			for (MpmItemPrescricaoDieta itemdieta : dieta.getItemPrescricaoDieta()){
@@ -1146,10 +1279,9 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		item.setDthrInicio(prescricaoDieta.getDthrInicio());
 		item.setDthrFim(prescricaoDieta.getDthrFim());						
 		item.setSituacao(prescricaoDieta.getIndPendente());
-		item.setServidorValidacao(prescricaoDieta.getServidorValidacao());
-		item.setServidorValidaMovimentacao(prescricaoDieta.getServidorValidaMovimentacao());
-		item.setAtendimentoSeq(prescricaoDieta.getId()
-				.getAtdSeq());
+		item.setServidorValidacaoNome(validarServidorValidacaoNomePrescricaoDieta(prescricaoDieta));
+		item.setServidorValidaMovimentacaoNome(validarServidorValidaMovimentacaoNomePrescricaoDieta(prescricaoDieta));
+		item.setAtendimentoSeq(prescricaoDieta.getId().getAtdSeq());
 		item.setItemSeq(Long.valueOf(prescricaoDieta.getId().getSeq()));
 		item.setTipo(PrescricaoMedicaTypes.DIETA);
 		item.setHierarquico(isHierarquico);
@@ -1168,6 +1300,18 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		if(prescricaoAlterada != null) {
 			this.verificaHierarquiaDietas(prescricaoMedicaVO, prescricaoAlterada, listaCompleta, true);	
 		}
+	}
+
+	private String validarServidorValidaMovimentacaoNomePrescricaoDieta(MpmPrescricaoDieta prescricaoDieta) {
+		return prescricaoDieta.getServidorValidaMovimentacao() == null 
+				|| prescricaoDieta.getServidorValidaMovimentacao().getPessoaFisica() == null 
+				|| prescricaoDieta.getServidorValidaMovimentacao().getPessoaFisica().getNome() == null ? "" : prescricaoDieta.getServidorValidaMovimentacao().getPessoaFisica().getNome();
+	}
+
+	private String validarServidorValidacaoNomePrescricaoDieta(MpmPrescricaoDieta prescricaoDieta) {
+		return prescricaoDieta.getServidorValidacao() == null 
+				|| prescricaoDieta.getServidorValidacao().getPessoaFisica() == null 
+				|| prescricaoDieta.getServidorValidacao().getPessoaFisica().getNome() == null ? "" : prescricaoDieta.getServidorValidacao().getPessoaFisica().getNome();
 	}
 	
 	/**
@@ -1220,9 +1364,8 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		
 		switch (itemPrescricaoMedicaVO.getTipo()) {
 		case DIETA:
-			MpmPrescricaoDieta prescricaoDieta = this
-					.getPrescricaoMedicaFacade().obterPrescricaoDieta(
-							new MpmPrescricaoDietaId(atendimentoSeq, itemSeq));
+			MpmPrescricaoDieta prescricaoDieta = this.getPrescricaoMedicaFacade().obterPrescricaoDieta(new MpmPrescricaoDietaId(atendimentoSeq, itemSeq));
+			
 			if(prescricaoDieta == null){
 				itemExcluido = true;
 				break;
@@ -1513,7 +1656,7 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		}
 
 		PrescricaoMedicaVO prescricaoMedicaVO = new PrescricaoMedicaVO();		
-		this.populaProcedimento(prescricaoMedicaVO, prescricaoMedicaId, false);
+		this.populaProcedimento(prescricaoMedicaVO, prescricaoMedicaId, false, false);
 		
 		return prescricaoMedicaVO.getItens();
 	}
@@ -1525,7 +1668,7 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 		}
 
 		PrescricaoMedicaVO prescricaoMedicaVO = new PrescricaoMedicaVO();		
-		this.populaMedicamento(prescricaoMedicaVO, prescricaoMedicaId, false);
+		this.populaMedicamento(prescricaoMedicaVO, prescricaoMedicaId, false, false);
 		
 		return prescricaoMedicaVO.getItens();
 	}
@@ -1579,5 +1722,143 @@ public class ManterPrescricaoMedicaON extends BaseBusiness {
 				
 		return nomesBuilder.toString();
 	}
-	
+
+	public void trocarOrdemItemPrescricaoMedica(ItemPrescricaoMedicaVO item, ItemPrescricaoMedicaVO itemNovaOrdem, String nomeMicrocomputador) throws BaseException {
+		
+		Integer atdSeq1 = item.getAtendimentoSeq();
+		Integer atdSeq2 = itemNovaOrdem.getAtendimentoSeq();
+		Long itemSeq1 = item.getItemSeq();
+		Long itemSeq2 = itemNovaOrdem.getItemSeq();
+		Integer ordemAux = null;
+		boolean erro = false;
+		
+		switch (item.getTipo()) {
+		case CUIDADOS_MEDICOS:
+			//MpmPrescricaoCuidado prescricaoCuidadoOriginal1 = this.getPrescricaoMedicaFacade().obterPrescricaoCuidado(atdSeq1, itemSeq1);
+			//MpmPrescricaoCuidado prescricaoCuidadoOriginal2 = this.getPrescricaoMedicaFacade().obterPrescricaoCuidado(atdSeq2, itemSeq2);
+			MpmPrescricaoCuidado prescricaoCuidado1 = this.getPrescricaoMedicaFacade().obterPrescricaoCuidado(atdSeq1, itemSeq1);
+			MpmPrescricaoCuidado prescricaoCuidado2 = this.getPrescricaoMedicaFacade().obterPrescricaoCuidado(atdSeq2, itemSeq2);
+			if(prescricaoCuidado1 == null || prescricaoCuidado2 == null){
+				erro = true;
+				break;
+			}
+			ordemAux = prescricaoCuidado1.getOrdem();
+			prescricaoCuidado1.setOrdem(prescricaoCuidado2.getOrdem()); 
+			prescricaoCuidado2.setOrdem(ordemAux);
+			manterPrescricaoCuidadoON.atualizarOrdemPrescricaoCuidado(prescricaoCuidado1);
+			manterPrescricaoCuidadoON.atualizarOrdemPrescricaoCuidado(prescricaoCuidado2);
+
+			//manterPrescricaoCuidadoON.atualizarPrescricaoCuidadoOriginal(prescricaoCuidado1, prescricaoCuidadoOriginal1);
+			//manterPrescricaoCuidadoON.atualizarPrescricaoCuidadoOriginal(prescricaoCuidado2, prescricaoCuidadoOriginal2);
+			break;
+		case MEDICAMENTO:
+			//MpmPrescricaoMdto prescicaoMedicamentoOriginal1 = this.getPrescricaoMedicaFacade().obterPrescricaoMedicamento(atdSeq1, itemSeq1);
+			//MpmPrescricaoMdto prescicaoMedicamentoOriginal2 = this.getPrescricaoMedicaFacade().obterPrescricaoMedicamento(atdSeq2, itemSeq2);
+			MpmPrescricaoMdto prescicaoMedicamento1 = this.getPrescricaoMedicaFacade().obterPrescricaoMedicamento(atdSeq1, itemSeq1);
+			MpmPrescricaoMdto prescicaoMedicamento2 = this.getPrescricaoMedicaFacade().obterPrescricaoMedicamento(atdSeq2, itemSeq2);
+			if(prescicaoMedicamento1 == null || prescicaoMedicamento2 == null){
+				erro = true;
+				break;
+			}
+			ordemAux = prescicaoMedicamento1.getOrdem();
+			prescicaoMedicamento1.setOrdem(prescicaoMedicamento2.getOrdem());
+			prescicaoMedicamento2.setOrdem(ordemAux);
+			getPrescricaoMedicamentoRN().atualizarOrdemPrescricaoMedicamento(prescicaoMedicamento1);
+			getPrescricaoMedicamentoRN().atualizarOrdemPrescricaoMedicamento(prescicaoMedicamento2);
+
+			//getPrescricaoMedicamentoRN().atualizarPrescricaoMedicamento(prescicaoMedicamento1, nomeMicrocomputador, prescicaoMedicamentoOriginal1, null);
+			//getPrescricaoMedicamentoRN().atualizarPrescricaoMedicamento(prescicaoMedicamento2, nomeMicrocomputador, prescicaoMedicamentoOriginal2, null);
+
+			break;			
+		case SOLUCAO:
+			//MpmPrescricaoMdto prescicaoSolucaoOriginal1 = this.getPrescricaoMedicaFacade().obterPrescricaoMedicamento(atdSeq1, itemSeq1);
+			//MpmPrescricaoMdto prescicaoSolucaoOriginal2 = this.getPrescricaoMedicaFacade().obterPrescricaoMedicamento(atdSeq2, itemSeq2);
+			MpmPrescricaoMdto prescicaoSolucao1 = this.getPrescricaoMedicaFacade().obterPrescricaoMedicamento(atdSeq1, itemSeq1);
+			MpmPrescricaoMdto prescicaoSolucao2 = this.getPrescricaoMedicaFacade().obterPrescricaoMedicamento(atdSeq2, itemSeq2);
+			if(prescicaoSolucao1 == null || prescicaoSolucao2 == null){
+				erro = true;
+				break;
+			}
+			ordemAux = prescicaoSolucao1.getOrdem();
+			prescicaoSolucao1.setOrdem(prescicaoSolucao2.getOrdem());
+			prescicaoSolucao2.setOrdem(ordemAux);
+			getPrescricaoMedicamentoRN().atualizarOrdemPrescricaoMedicamento(prescicaoSolucao1);
+			getPrescricaoMedicamentoRN().atualizarOrdemPrescricaoMedicamento(prescicaoSolucao2);
+
+			//getPrescricaoMedicamentoRN().atualizarPrescricaoMedicamento(prescicaoSolucao1, nomeMicrocomputador, prescicaoSolucaoOriginal1, null);
+			//getPrescricaoMedicamentoRN().atualizarPrescricaoMedicamento(prescicaoSolucao2, nomeMicrocomputador, prescicaoSolucaoOriginal2, null);
+			break;
+		case CONSULTORIA:
+			MpmSolicitacaoConsultoria consultoria1 = this.getConsultoriaON().obterSolicitacaoConsultoriaPorId(atdSeq1, itemSeq1.intValue());
+			MpmSolicitacaoConsultoria consultoria2 = this.getConsultoriaON().obterSolicitacaoConsultoriaPorId(atdSeq2, itemSeq2.intValue());
+			if(consultoria1 == null || consultoria2 == null){
+				erro = true;
+				break;
+			}
+			ordemAux = consultoria1.getOrdem();
+			consultoria1.setOrdem(consultoria2.getOrdem());
+			consultoria2.setOrdem(ordemAux);
+			this.mpmSolicitacaoConsultoriaDAO.atualizar(consultoria1);
+			this.mpmSolicitacaoConsultoriaDAO.atualizar(consultoria2);
+			break;
+		case HEMOTERAPIA:
+			AbsSolicitacoesHemoterapicas solicitacaoHemoterapicaOriginal1 = this.getBancoDeSangueFacade().obterSolicitacoesHemoterapicas(atdSeq1, itemSeq1.intValue());
+			AbsSolicitacoesHemoterapicas solicitacaoHemoterapicaOriginal2 = this.getBancoDeSangueFacade().obterSolicitacoesHemoterapicas(atdSeq2, itemSeq2.intValue());
+			
+			if (solicitacaoHemoterapicaOriginal1 == null || solicitacaoHemoterapicaOriginal2 == null) {
+				erro = true;
+				break;
+			}
+			ordemAux = solicitacaoHemoterapicaOriginal1.getOrdem();
+			solicitacaoHemoterapicaOriginal1.setOrdem(solicitacaoHemoterapicaOriginal2.getOrdem());
+			solicitacaoHemoterapicaOriginal2.setOrdem(ordemAux);
+			
+			this.absSolicitacoesHemoterapicasDAO.atualizar(solicitacaoHemoterapicaOriginal1);
+			this.absSolicitacoesHemoterapicasDAO.atualizar(solicitacaoHemoterapicaOriginal2);
+
+			break;
+		case NUTRICAO_PARENTAL:
+			MpmPrescricaoNpt prescricaoNpt = mpmPrescricaoNptDAO.obterNutricaoParentaLPeloId(atdSeq1, itemSeq1.intValue());
+			MpmPrescricaoNpt prescricaoNpt2 = mpmPrescricaoNptDAO.obterNutricaoParentaLPeloId(atdSeq2, itemSeq2.intValue());
+			
+			if(prescricaoNpt == null){
+				erro = true;
+				break;
+			}
+			
+			ordemAux = prescricaoNpt.getOrdem();
+			prescricaoNpt.setOrdem(prescricaoNpt2.getOrdem());
+			prescricaoNpt2.setOrdem(ordemAux);
+			
+			this.mpmPrescricaoNptDAO.atualizar(prescricaoNpt);
+			this.mpmPrescricaoNptDAO.atualizar(prescricaoNpt2);
+			break;
+		case PROCEDIMENTO:
+			MpmPrescricaoProcedimento prescricaoProcedimento1 = getMpmPrescricaoProcedimentoDAO().obterProcedimentoPeloId(atdSeq1, itemSeq1);
+			MpmPrescricaoProcedimento prescricaoProcedimento2 = getMpmPrescricaoProcedimentoDAO().obterProcedimentoPeloId(atdSeq2, itemSeq2);
+			
+			if(prescricaoProcedimento1 == null || prescricaoProcedimento2 == null){
+				erro = true;
+				break;
+			}
+			ordemAux = prescricaoProcedimento1.getOrdem();
+			prescricaoProcedimento1.setOrdem(prescricaoProcedimento2.getOrdem());
+			prescricaoProcedimento2.setOrdem(ordemAux);
+			
+			mpmPrescricaoProcedimentoDAO.atualizar(prescricaoProcedimento1);
+			mpmPrescricaoProcedimentoDAO.atualizar(prescricaoProcedimento2);
+			
+			break;
+		default:
+			break;
+		}
+		
+		if(erro){
+			throw new ApplicationBusinessException(ManterPrescricaoMedicaExceptionCode.OPTIMISTIC_LOCK);
+		}
+		
+	}
+	protected PrescricaoMedicamentoRN getPrescricaoMedicamentoRN() {
+		return prescricaoMedicamentoRN;
+	}
 }

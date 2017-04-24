@@ -1162,6 +1162,20 @@ public class ListarCirurgiasController extends ActionController {
 		return false;
 	}
 	
+	public void gerarMovimentacaoProntuario(CirurgiaVO cirurgiaVO){
+		MbcCirurgias cirurgia = blocoCirurgicoFacade.obterCirurgiaPorChavePrimaria(cirurgiaVO.getCrgSeq());
+
+		if(cirurgia != null){
+			try{
+				this.pacienteFacade.gerarSolicitacaoProntuarioCirurgia(cirurgia);	
+				apresentarMsgNegocio(Severity.INFO, "SOLICITACAO_MOVIMENTACAO_PRONTUARIO_SUCESSO");
+			} catch(BaseException exception){
+				this.apresentarExcecaoNegocio(exception);
+				LOG.error("Exceção capturada: ", exception);
+			}
+		}
+	}
+	
 	public String getUrlBaseWebForms() {
 		return urlBaseWebForms;
 	}

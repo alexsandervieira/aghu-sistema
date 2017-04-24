@@ -20,6 +20,7 @@ import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.model.AinAcomodacoes;
 import br.gov.mec.aghu.model.AinInternacao;
 import br.gov.mec.aghu.model.AinSolicTransfPacientes;
+import br.gov.mec.aghu.model.AinTiposAltaMedica;
 import br.gov.mec.aghu.model.AipPacientes;
 import br.gov.mec.aghu.model.RapServidores;
 
@@ -113,8 +114,9 @@ public class AinSolicTransfPacientesDAO extends br.gov.mec.aghu.core.persistence
 
 		criteria.createAlias(AinSolicTransfPacientes.Fields.INTERNACAO.toString(), "INT");
 		criteria.createAlias("INT." + AinInternacao.Fields.PACIENTE, "PAC");
-
-		criteria.add(Restrictions.eq("INT." + AinInternacao.Fields.IND_PACIENTE_INTERNADO.toString(), true));
+		criteria.createAlias("INT." + AinInternacao.Fields.TIPO_ALTA_MEDICA, "ALT", JoinType.LEFT_OUTER_JOIN);
+		criteria.add(Restrictions.or(Restrictions.eq("INT." + AinInternacao.Fields.IND_PACIENTE_INTERNADO.toString(), true),
+									 Restrictions.eq("ALT." + AinTiposAltaMedica.Fields.PERMITE_PERMANENCIA_COM_ALTA.toString(), true)));
 
 		if (prontuario != null) {
 			criteria.add(Restrictions.eq("PAC." + AipPacientes.Fields.PRONTUARIO.toString(), prontuario));

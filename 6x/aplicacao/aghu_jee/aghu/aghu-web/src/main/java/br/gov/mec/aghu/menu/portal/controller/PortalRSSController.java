@@ -5,6 +5,8 @@ import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -31,12 +33,14 @@ import br.gov.mec.aghu.casca.menu.portal.rss.Channel;
 import br.gov.mec.aghu.casca.menu.portal.rss.Item;
 import br.gov.mec.aghu.core.action.ActionController;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.utils.DateFormatUtil;
 import br.gov.mec.aghu.model.AghParametros;
 
 
 public class PortalRSSController extends ActionController {
 
-	
+	private static final String SEM_LINK = "Sem link";
+
 	private static final int QUANTIDADE_NOTICIAS_PADRAO = 3;
 
 	@EJB
@@ -48,33 +52,63 @@ public class PortalRSSController extends ActionController {
 	private static final int TIMEOUT = 3 * 1000;
 
 	private static final String CHAVE_CACHE = "portalRssNews";
+
+	private static final String PORTALRSS_HOSTNAME = "www.ebserh.gov.br";
 	
-	
+	private int quantBuscaNoticiasEftuadas = 0;
 	private Channel canalPortal;
 	
 	@Inject
 	private PortalRSSCacheManager portalRSSCache;
 
 	
-	public void inicio() throws  IOException {
-		
+	
+	
+	public void inicio() throws IOException {
+		iniciarCanalPortal();
+	}
+	
+	public boolean hasPararCarregamentoNoticiasPortalRss() {
+		return (quantBuscaNoticiasEftuadas > 3);
+	}
+
+	public void carregarNoticiasPortalRss() {
 		try {
+			quantBuscaNoticiasEftuadas++;
 			Channel cacheRecuperado = recuperaCache();
 			if (cacheRecuperado == null) {
 				recuperaNoticiasPortal();
 				gravaCache();
 				log.info("Recuperando notícias do portal no cache " + CHAVE_CACHE);
-				return;
 			} else {
-				recuperaNoticiasPortalCache(cacheRecuperado);
+				setCanalPortal(cacheRecuperado);
 			}
+			
 		} catch (Exception e) {
 			log.error("Ocorreu um erro ao tentar renderizar as notícias do portal", e);
+			iniciarCanalPortal();
+		} finally {
+			if (this.getCanalPortal() != null 
+					&& !this.getCanalPortal().getItem().isEmpty() 
+					&& SEM_LINK.equalsIgnoreCase(this.getCanalPortal().getItem().get(0).getLink())) {
+				this.getCanalPortal().getItem().get(0).setDescription("Tentativa #"  + quantBuscaNoticiasEftuadas);
+				if (quantBuscaNoticiasEftuadas > 3) {
+					this.getCanalPortal().getItem().get(0).setDescription("Portal Indisponível");				
+				}
+			}
 		}
 	}
 
-	private Channel recuperaNoticiasPortalCache(Channel cacheRecuperado) {
-		return this.canalPortal = cacheRecuperado;
+	private void iniciarCanalPortal() {
+		canalPortal = new Channel();
+		Item item = new Item();
+		item.setTitle("Portal de Notícias do AGHU");
+		item.setDescription("Iniciando busca ...");
+		item.setLink(SEM_LINK);
+		item.setPubDate(DateFormatUtil.fomataDiaMesAno(new Date()));
+		List<Item> itemList = new LinkedList<>();
+		itemList.add(item);
+		canalPortal.setItem(itemList);
 	}
 
 	private Channel recuperaCache() throws ApplicationBusinessException {
@@ -93,7 +127,7 @@ public class PortalRSSController extends ActionController {
 	}
 
 	private void limitaNoticiasPeloParametro(Channel canalPortal) throws ApplicationBusinessException {
-		Integer quantidadeNoticiasParametro = recuperaValorParametroQuantidadeNoticias();
+		Integer quantidadeNoticiasParametro = recuperaValorNumericoParametroQuantidadeNoticias();
 		selecionaNoticias(canalPortal, quantidadeNoticiasParametro);
 	}
 
@@ -110,21 +144,32 @@ public class PortalRSSController extends ActionController {
 		}
 		canalPortal.setItem(itens);
 	}
-
-	private Integer recuperaValorParametroQuantidadeNoticias() {
+	
+	private String recuperarValorTextoParametroHostPortalRss() {
+		String hostname = PORTALRSS_HOSTNAME;
+		if (getParametroFacade().verificarExisteAghParametro(AghuParametrosEnum.P_AGHU_PORTALRSS_HOSTNAME)) {
+			AghParametros param = getParametroFacade().getAghParametro(AghuParametrosEnum.P_AGHU_PORTALRSS_HOSTNAME);
+			if (param != null && param.getVlrTexto() != null && !"".equalsIgnoreCase(param.getVlrTexto().trim())) {
+				hostname = param.getVlrTexto();
+			}
+		}
+		return hostname;
+	}
+	
+	private Integer recuperaValorNumericoParametroQuantidadeNoticias() {
 		AghParametros qtdeNoticiasParam = null;
 		Integer quantidadeNoticias = QUANTIDADE_NOTICIAS_PADRAO;
 		try {
-			qtdeNoticiasParam = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_PORTAL_NUMERO_DE_NOTICIAS_TELA_LOGIN);
-			quantidadeNoticias = recuperaValorParametroNoticias(qtdeNoticiasParam);
+			qtdeNoticiasParam = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_AGHU_PORTALRSS_NUMERO_DE_NOTICIAS_TELA_LOGIN);
+			quantidadeNoticias = recuperaValorNumericoParametroNoticias(qtdeNoticiasParam);
 		} catch (ApplicationBusinessException e) {
-			log.error("Ocorreu um erro ao tentar recuperar o parâmetro " + AghuParametrosEnum.P_PORTAL_NUMERO_DE_NOTICIAS_TELA_LOGIN);
+			log.error("Ocorreu um erro ao tentar recuperar o parâmetro " + AghuParametrosEnum.P_AGHU_PORTALRSS_NUMERO_DE_NOTICIAS_TELA_LOGIN);
 			log.info("Quantidade de notícias carregadas padrão: " + QUANTIDADE_NOTICIAS_PADRAO);
 		}
 		return quantidadeNoticias;
 	}
 
-	private Integer recuperaValorParametroNoticias(AghParametros qtdeNoticiasParam) {
+	private Integer recuperaValorNumericoParametroNoticias(AghParametros qtdeNoticiasParam) {
 		Integer quantidadeNoticias = qtdeNoticiasParam.getVlrNumerico() == null ? 0 : qtdeNoticiasParam.getVlrNumerico().intValue();
 		if (quantidadeNoticias == 0) {
 			quantidadeNoticias = Integer.valueOf(qtdeNoticiasParam.getVlrNumericoPadrao().intValue());
@@ -174,9 +219,10 @@ public class PortalRSSController extends ActionController {
 
 	private URI criaURL() {
 		log.info("Criando url para acesso ao RSS do portal");
+		
     	URIBuilder urlBuilder = new URIBuilder();
     	urlBuilder.setScheme("http")
-	    	.setHost("www.ebserh.gov.br")
+	    	.setHost(recuperarValorTextoParametroHostPortalRss())
 	    	.setPath("/web/aghu/informes/-/blogs/rss")
 	    	.setParameter("_33_displayStyle", "abstract")
 	    	.setParameter("_33_type", "rss")
@@ -189,7 +235,20 @@ public class PortalRSSController extends ActionController {
 			log.error("Erro ao tentar criar a URL do RSS do Portal", e);
 			return null;
 		}
-		
+	}
+	
+	/**
+	 * @return the quantBuscaNoticiasEftuadas
+	 */
+	public int getQuantBuscaNoticiasEftuadas() {
+		return quantBuscaNoticiasEftuadas;
+	}
+
+	/**
+	 * @param quantBuscaNoticiasEftuadas the quantBuscaNoticiasEftuadas to set
+	 */
+	public void setQuantBuscaNoticiasEftuadas(int quantBuscaNoticiasEftuadas) {
+		this.quantBuscaNoticiasEftuadas = quantBuscaNoticiasEftuadas;
 	}
 
 	public Channel getCanalPortal() {

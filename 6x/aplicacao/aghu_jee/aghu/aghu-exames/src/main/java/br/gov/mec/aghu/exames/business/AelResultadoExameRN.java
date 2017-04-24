@@ -279,7 +279,7 @@ public class AelResultadoExameRN extends BaseBusiness {
 				
 			}
 			//1.3
-			if(DominioTipoCampoCampoLaudo.N == campoLaudo.getTipoCampo()
+			if(DominioTipoCampoCampoLaudo.N.equals(campoLaudo.getTipoCampo())
 					&& elemento.getValor() == null) {
 				
 				throw new ApplicationBusinessException(AelResultadoExameRNExceptionCode.AEL_00801);
@@ -325,6 +325,10 @@ public class AelResultadoExameRN extends BaseBusiness {
 				tempo = paramTempo.getVlrNumerico().intValue();
 				unidTempo = DominioUnidTempo.valueOf(DominioUnidTempo.class, this.getParametroFacade().buscarAghParametro(
 						AghuParametrosEnum.P_UNID_TEMPO_APOS_LIB).getVlrTexto());
+			}
+			
+			if(tempo < 1){
+				throw new ApplicationBusinessException(AelResultadoExameRNExceptionCode.AEL_01987);
 			}
 			
 			if(DominioUnidTempo.H == unidTempo) {

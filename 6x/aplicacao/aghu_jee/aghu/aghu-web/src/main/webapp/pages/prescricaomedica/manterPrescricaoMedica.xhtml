@@ -119,11 +119,11 @@
               <tr valign="top"> 
                 <td width="70%" rowspan="1" colspan="1"> 
                   
-                  <p:outputPanel layout="block" style="width: 100%; height:390px; overflow:auto;"> 
-                    <mec:serverDataTable id="tabelaPrescricoes" scrollHeight="300px"
+                  <p:outputPanel id="prescricoes" layout="block" style="width: 100%; height:390px; overflow:auto;"> 
+                    <mec:serverDataTable id="tabelaPrescricoes" scrollHeight="300px" scrollable="true"
                     	list="#{manterPrescricaoMedicaController.prescricaoMedicaVO.itens}" rowKeyVar="rowIndex"> 
                       <c:set var="itemPrescricaoMedicaVO" value="#{item}"/>
-                      <p:column style="width:50px;#{itemPrescricaoMedicaVO.excluir ? 'background-color: #FF6347 !important;' : ';'}#{itemPrescricaoMedicaVO.represcrito ? 'background-color: #74C7FF !important' : ''}">
+                      <p:column  style="width:90px;#{itemPrescricaoMedicaVO.excluir ? 'background-color: #FF6347 !important;' : ';'}#{itemPrescricaoMedicaVO.represcrito ? 'background-color: #74C7FF !important' : ''}">
 	                    <f:facet name="header"> 
 				           <h:outputText value="#{messages.LABEL_ACAO}"/> 
 				        </f:facet>  
@@ -178,51 +178,56 @@
                           <f:setPropertyActionListener target="#{manterProcedimentoEspecialController.idConversacaoAnterior}" value="#{manterPrescricaoMedicaController.cid}" for="command"/>  
                           <f:setPropertyActionListener target="#{manterProcedimentoEspecialController.prescricaoMedicaVO}" value="#{manterPrescricaoMedicaController.prescricaoMedicaVO}" for="command"/> 
                         </mec:commandLink>  
-                        <h:selectBooleanCheckbox name="marcador" id="marcador" value="#{itemPrescricaoMedicaVO.excluir}" title="Excluir"> 
+                        <h:selectBooleanCheckbox rendered="#{itemPrescricaoMedicaVO.isItemPrescricao}" name="marcador" id="marcador" value="#{itemPrescricaoMedicaVO.excluir}" title="Excluir"> 
                           <p:ajax event="click" partialSubmit="true" async="true" update="@(#tabelaPrescricoes)" process="@this"/> 
                         </h:selectBooleanCheckbox> 
+                      	<mec:commandLink
+								rendered="#{itemPrescricaoMedicaVO.isItemPrescricao and manterPrescricaoMedicaController.prescricaoMedicaVO.itens[rowIndex-1].isItemPrescricao}"
+								action="#{manterPrescricaoMedicaController.upItemPrescricaoMedica(item, rowIndex)}"
+								title="#{messages.LABEL_UP}"
+								styleClass=" silk-arrow-up silk-icon" ajax="true"
+								render="prescricoes" process="@this" />
+							<mec:commandLink
+								rendered="#{itemPrescricaoMedicaVO.isItemPrescricao and manterPrescricaoMedicaController.prescricaoMedicaVO.itens[rowIndex+1].isItemPrescricao}"
+								action="#{manterPrescricaoMedicaController.downItemPrescricaoMedica(item, rowIndex)}"
+								title="#{messages.LABEL_ARROW}"
+								styleClass=" silk-arrow-down silk-icon" ajax="true"
+								render="prescricoes" process="@this" />
                       </p:column>
-                      <p:column style="#{itemPrescricaoMedicaVO.excluir ? 'background-color: #FF6347 !important;' : ';'}#{itemPrescricaoMedicaVO.represcrito ? 'background-color: #74C7FF !important' : ''}"> 
+                      <p:column style="#{itemPrescricaoMedicaVO.excluir ? 'background-color: #FF6347 !important;' : ';'}#{itemPrescricaoMedicaVO.represcrito ? 'background-color: #74C7FF !important' : ''} #{itemPrescricaoMedicaVO.isItemPrescricao ? '' : 'text-align:center;'}"> 
 			            <f:facet name="header"> 
 			              <h:outputText value="#{messages.LABEL_DESCRICAO}"/> 
-			            </f:facet>             
-			            
-			            <p:column>#{rowIndex+1} - </p:column>
-			              
-                      	<p:column width="18px" title="#{itemPrescricaoMedicaVO.tipo.titulo}" 
+			            </f:facet>
+		            	<p:column rendered="#{itemPrescricaoMedicaVO.isItemPrescricao}"> #{itemPrescricaoMedicaVO.ordem} - </p:column>
+						<p:column width="18px" title="#{itemPrescricaoMedicaVO.tipo.titulo}" 
                       		rendered="#{not itemPrescricaoMedicaVO.excluir}"
                       		style="max-width: 300px; word-wrap: break-word;">
-
-												<p:outputPanel class="silk-icon icon-nutricaoparenteraltotal"
-													rendered="#{itemPrescricaoMedicaVO.tipo == 'NUTRICAO_PARENTAL'}"
-														style="cursor:default !important;" title="#{itemPrescricaoMedicaVO.tipo.titulo}" />
-
-												<p:outputPanel
-													class="silk-icon icon-#{itemPrescricaoMedicaVO.tipo.toString().toLowerCase()}"
-													rendered="#{itemPrescricaoMedicaVO.tipo != 'NUTRICAO_PARENTAL'}"
-														style="cursor:default !important;"
-														title="#{itemPrescricaoMedicaVO.tipo.titulo}" />
-
-
+								<p:outputPanel class="silk-icon icon-nutricaoparenteraltotal"
+									rendered="#{itemPrescricaoMedicaVO.tipo == 'NUTRICAO_PARENTAL'}"
+									style="cursor:default !important;" title="#{itemPrescricaoMedicaVO.tipo.titulo}" />
+								<p:outputPanel
+									class="silk-icon icon-#{itemPrescricaoMedicaVO.tipo.toString().toLowerCase()}"
+									rendered="#{itemPrescricaoMedicaVO.tipo != 'NUTRICAO_PARENTAL'}"
+									style="cursor:default !important;"
+									title="#{itemPrescricaoMedicaVO.tipo.titulo}" />
 						</p:column>  
                       	<p:column width="18px" title="#{itemPrescricaoMedicaVO.tipo.titulo}" 
                       		rendered="#{itemPrescricaoMedicaVO.excluir}"
                       		style="background-color:#FF6347;">
-												<p:outputPanel class="silk-icon icon-nutricaoparenteraltotal"
-													rendered="#{itemPrescricaoMedicaVO.tipo == 'NUTRICAO_PARENTAL'}"
-														style="cursor:default !important;"
-														title="#{itemPrescricaoMedicaVO.tipo.titulo}" />
-
-												<p:outputPanel
-													class="silk-icon icon-#{itemPrescricaoMedicaVO.tipo.toString().toLowerCase()}"
-													rendered="#{itemPrescricaoMedicaVO.tipo != 'NUTRICAO_PARENTAL'}"
-														style="cursor:default !important;"
-														title="#{itemPrescricaoMedicaVO.tipo.titulo}" />
+									<p:outputPanel class="silk-icon icon-nutricaoparenteraltotal"
+										rendered="#{itemPrescricaoMedicaVO.tipo == 'NUTRICAO_PARENTAL'}"
+										style="cursor:default !important;"
+										title="#{itemPrescricaoMedicaVO.tipo.titulo}" />
+									<p:outputPanel
+										class="silk-icon icon-#{itemPrescricaoMedicaVO.tipo.toString().toLowerCase()}"
+										rendered="#{itemPrescricaoMedicaVO.tipo != 'NUTRICAO_PARENTAL'}"
+										style="cursor:default !important;"
+										title="#{itemPrescricaoMedicaVO.tipo.titulo}" />
 						</p:column>  
                       	<p:column title="#{itemPrescricaoMedicaVO.tipo.titulo}" 
 	                      	rendered="#{not itemPrescricaoMedicaVO.excluir}"
                       		style="max-width: 300px; word-wrap: break-word;"> 
-                        	<h:outputText value="#{' '}#{itemPrescricaoMedicaVO.descricao}" escape="false"/> 
+                        	<h:outputText style="#{itemPrescricaoMedicaVO.isItemPrescricao ? '' : 'font-weight:bold;font-size:13px;'}" value="#{' '}#{itemPrescricaoMedicaVO.descricao}" escape="false" /> 
                       	</p:column> 
                       	<p:column title="#{itemPrescricaoMedicaVO.tipo.titulo}" 
                       		rendered="#{itemPrescricaoMedicaVO.excluir}"
@@ -316,11 +321,12 @@
                       </mec:commandButton> 
                     </div>  
                     <div>
-                     <mec:commandButton style="width: 98%" value="#{messages.LABEL_NUTRICAO_PARENTERAL}" action="#{manterPrescricaoMedicaController.redirecionaCadastroPrescricaoNpt}" rendered="#{!(mf:hasPermission(securityController, 'altaPacientes_Enfermeiro_Obstetra,pesquisar'))}" disabled="true" styleClass="bt_cinza">
+                     <mec:commandButton style="width: 98%" value="#{messages.LABEL_NUTRICAO_PARENTERAL}" action="#{manterPrescricaoMedicaController.redirecionaCadastroPrescricaoNpt}" rendered="false" disabled="true" styleClass="bt_cinza">
                         <f:setPropertyActionListener target="#{cadastroPrescricaoNptController.seq}" value="#{itemPrescricaoMedicaVO.itemSeq}" for="command"/>  
                         <f:setPropertyActionListener target="#{cadastroPrescricaoNptController.idConversacaoAnterior}" value="#{manterPrescricaoMedicaController.cid}" for="command"/>  
                         <f:setPropertyActionListener target="#{cadastroPrescricaoNptController.prescricaoMedicaVO}" value="#{manterPrescricaoMedicaController.prescricaoMedicaVO}" for="command"/>
                       </mec:commandButton>                       
+               
                
                     </div>  
                     <div> 
@@ -415,6 +421,22 @@
 	              <f:setPropertyActionListener target="#{manterPrescricaoMedicaController.tipoConfirmacaoModalPrevPlanoAlta}" value="semImpressao" for="command"/>
 	              <f:setPropertyActionListener target="#{manterPrescricaoMedicaController.confirmacaoPelaModalPrevPlanoAlta}" value="#{false}" for="command"/> 
             </mec:commandButton>  
+
+          	<mec:commandButton id="bt_visualizarimpressao"
+				style="margin:0 5px !important;"					
+				value="#{messages.LABEL_VISUALIZAR_IMPRESSAO}"
+				action="#{manterPrescricaoMedicaController.visualizarPrescricaoMedica}"
+				profile="view"
+				process="@this @(#dataPrevAlta) @(#estadoPacienteMP)"
+				block="true">
+	              <f:setPropertyActionListener target="#{prescreverItemController.prescricaoMedicaVO}" value="#{manterPrescricaoMedicaController.prescricaoMedicaVO}" for="command"/>				
+				  <f:setPropertyActionListener target="#{manterDiagnosticosAtendimentoController.cidSeq}" value="#{null}" for="command"/>  
+	              <f:setPropertyActionListener target="#{manterDiagnosticosAtendimentoController.idConversacaoAnterior}" value="#{manterPrescricaoMedicaController.cid}" for="command"/>  
+	              <f:setPropertyActionListener target="#{manterDiagnosticosAtendimentoController.prescricaoMedicaVO}" value="#{manterPrescricaoMedicaController.prescricaoMedicaVO}" for="command"/>
+		    </mec:commandButton>
+
+
+
             <mec:commandButton id="bt_prescricao_pendente" 
             	style="margin:0px 3px 0px -3px !important" value="#{messages.LABEL_DEIXAR_PENDENTE}" 
             	hint="Deixar a prescrição atual pendente" 

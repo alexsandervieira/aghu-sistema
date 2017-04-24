@@ -3,14 +3,19 @@ package br.gov.mec.aghu.exames.solicitacao.business;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import br.gov.mec.aghu.business.IAghuFacade;
 import br.gov.mec.aghu.core.business.BaseFacade;
 import br.gov.mec.aghu.core.business.moduleintegration.BypassInactiveModule;
 import br.gov.mec.aghu.core.business.moduleintegration.Modulo;
@@ -30,6 +35,7 @@ import br.gov.mec.aghu.dominio.DominioTipoTransporteQuestionario;
 import br.gov.mec.aghu.exames.business.IExameInternetStatusBean;
 import br.gov.mec.aghu.exames.contratualizacao.vo.ItemContratualizacaoVO;
 import br.gov.mec.aghu.exames.dao.AelAmostraItemExamesDAO;
+import br.gov.mec.aghu.exames.dao.AelExameHorarioColetaDAO;
 import br.gov.mec.aghu.exames.dao.AelItemSolicitacaoExameDAO;
 import br.gov.mec.aghu.exames.dao.AelMotivoCancelaExamesDAO;
 import br.gov.mec.aghu.exames.dao.AelPermissaoUnidSolicDAO;
@@ -61,6 +67,7 @@ import br.gov.mec.aghu.exames.vo.VAelSolicAtendsVO;
 import br.gov.mec.aghu.model.AelAmostraItemExames;
 import br.gov.mec.aghu.model.AelAmostras;
 import br.gov.mec.aghu.model.AelAtendimentoDiversos;
+import br.gov.mec.aghu.model.AelExameHorarioColeta;
 import br.gov.mec.aghu.model.AelExameInternetStatus;
 import br.gov.mec.aghu.model.AelItemSolicitacaoExames;
 import br.gov.mec.aghu.model.AelLoteExameUsual;
@@ -73,6 +80,7 @@ import br.gov.mec.aghu.model.AelSolicitacaoExames;
 import br.gov.mec.aghu.model.AelTmpIntervaloColeta;
 import br.gov.mec.aghu.model.AelUnfExecutaExames;
 import br.gov.mec.aghu.model.AghAtendimentos;
+import br.gov.mec.aghu.model.AghFeriados;
 import br.gov.mec.aghu.model.AghJobDetail;
 import br.gov.mec.aghu.model.AghMicrocomputador;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
@@ -165,9 +173,15 @@ public class SolicitacaoExameFacade extends BaseFacade implements ISolicitacaoEx
 	
 	@Inject
 	private AelPermissaoUnidSolicDAO aelPermissaoUnidSolicDAO;
+	
+	@Inject
+	private AelExameHorarioColetaDAO aelExameHorarioColetaDAO;
 
 	@EJB
 	private IServidorLogadoFacade servidorLogadoFacade;
+	@EJB
+	private IAghuFacade iAghuFacade;
+	
 	/**
 	 * @param valor
 	 */
@@ -181,6 +195,7 @@ public class SolicitacaoExameFacade extends BaseFacade implements ISolicitacaoEx
 	 * @throws BaseException
 	 */
 	@Override
+	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	@Secure("#{s:hasPermission('relatorioMateriaisColetarInternacao','pesquisar')}")
 	public List<SolicitacaoColetarVO> buscaMateriaisColetarInternacao(final RelatorioMateriaisColetarInternacaoFiltroVO filtro,
 			String nomeMicrocomputador) throws BaseException {
@@ -952,12 +967,12 @@ public class SolicitacaoExameFacade extends BaseFacade implements ISolicitacaoEx
 	 */
 	@Override
 	public List<ExameSuggestionVO> pesquisaUnidadeExecutaSinonimoExame(final String nomeExame, Short seqUnidade, Boolean isSus, Boolean isOrigemInternacao, Integer seqAtendimento, boolean filtrarExamesProcEnfermagem, DominioTipoPesquisaExame tipoPesquisa) {
-		return this.getItemSolicitacaoExameON().pesquisaUnidadeExecutaSinonimoExame(nomeExame,seqUnidade,isSus, isOrigemInternacao, seqAtendimento, filtrarExamesProcEnfermagem, false, tipoPesquisa);
+		return this.getItemSolicitacaoExameON().pesquisaUnidadeExecutaSinonimoExame(nomeExame,seqUnidade,isSus, isOrigemInternacao, seqAtendimento, filtrarExamesProcEnfermagem, false, tipoPesquisa, false);
 	}
 
 	@Override
-	public List<ExameSuggestionVO> pesquisaUnidadeExecutaSinonimoExame(final String nomeExame, Short seqUnidade, Boolean isSus, Boolean isOrigemInternacao, Integer seqAtendimento, boolean filtrarExamesProcEnfermagem, boolean buscaCompleta, DominioTipoPesquisaExame tipoPesquisa) {
-		return this.getItemSolicitacaoExameON().pesquisaUnidadeExecutaSinonimoExame(nomeExame,seqUnidade, isSus, isOrigemInternacao, seqAtendimento, filtrarExamesProcEnfermagem, buscaCompleta, tipoPesquisa);
+	public List<ExameSuggestionVO> pesquisaUnidadeExecutaSinonimoExame(final String nomeExame, Short seqUnidade, Boolean isSus, Boolean isOrigemInternacao, Integer seqAtendimento, boolean filtrarExamesProcEnfermagem, boolean buscaCompleta, DominioTipoPesquisaExame tipoPesquisa, Boolean filtroPorUnidade) {
+		return this.getItemSolicitacaoExameON().pesquisaUnidadeExecutaSinonimoExame(nomeExame,seqUnidade, isSus, isOrigemInternacao, seqAtendimento, filtrarExamesProcEnfermagem, buscaCompleta, tipoPesquisa, filtroPorUnidade);
 	}
 	/**
 	 * @param nomeExame
@@ -1546,4 +1561,26 @@ public class SolicitacaoExameFacade extends BaseFacade implements ISolicitacaoEx
 		}
 		return false;
 	}
+
+	@Override
+	public AelPermissaoUnidSolic buscarAelPermissaoUnidSolicPorEmaExaSiglaEmaManSeqUnfSeqUnfSeqSolicitante(
+			String exame, Integer emaManSeq, Short unfSeq,
+			Short unfSeqSolicitante) {
+		return aelPermissaoUnidSolicDAO.buscarAelPermissaoUnidSolicPorEmaExaSiglaEmaManSeqUnfSeqUnfSeqSolicitante(exame, emaManSeq, unfSeq, unfSeqSolicitante);
+	}
+	
+	public AelExameHorarioColeta recuperarHorarioColetas(String exame, Integer matExame){
+		int dia = 0;
+		Date data = new Date();
+		AghFeriados feriado = this.iAghuFacade.obterFeriadoSemTurno(data);
+		if(feriado != null){
+			dia = 9;
+		}else{
+			Calendar c = new GregorianCalendar();
+			c.setTime(data);
+			dia = c.get(c.DAY_OF_WEEK);
+		}
+		return aelExameHorarioColetaDAO.pesquisarExameHorarioColetaPorDia(exame, matExame, dia - 1);
+	}
+	
 }

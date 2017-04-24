@@ -4412,5 +4412,10 @@ public class ComprasFacade extends BaseFacade implements IComprasFacade {
 	public Boolean verificarAcessosFronAFP(Integer afnNumero, Integer afeNumero, ScoFornecedor forcenedor){
 		return this.scoProgrAcessoFornAfpDAO.verificarAcessosFronAFP(afnNumero, afeNumero, forcenedor);
 	}
+	
+	@Override
+	public List<ScoGrupoMaterial> pesquisarGruposMateriaisPorFiltroAlmoxarifado(Short almoxSeq, Object _input) {
+		return getScoGrupoMaterialDAO().pesquisarGruposMateriaisPorFiltroAlmoxarifado(almoxSeq, _input);
+	}
 
 }

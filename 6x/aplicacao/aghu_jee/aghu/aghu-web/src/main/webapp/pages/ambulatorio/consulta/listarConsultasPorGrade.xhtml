@@ -82,7 +82,8 @@
 					  descricaoInput="id.plano" descricaoLabel="convenioPlano"
 					  width="350" maxlength="30" descricaoLimite="30" 
 					  controller="#{listarConsultasPorGradeController}"
-					  value="#{listarConsultasPorGradeController.convenioPlanoSGB}">
+					  value="#{listarConsultasPorGradeController.convenioPlanoSGB}"
+					  cache="false">
 						<p:column>
 							<f:facet name="header">
 								<b>#{messages.LABEL_PLANO}</b>

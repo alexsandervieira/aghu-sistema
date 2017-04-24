@@ -146,6 +146,7 @@
 .icon-nutricao_parental{ background-image:url('../resources/img/icons/cup_link.png') }
 .icon-procedimento{ background-image:url('../resources/img/icons/database_table.png') }
 .icon-diagnostico{ background-image:url('../resources/img/icons/chart_curve.png') }
+.icon-diagnostico_enfermagem{ background-image:url('../resources/img/icons/diagnostico.png') }
 .icon-alergias{ background-image:url('../resources/img/icons/group_delete.png') }
 .icon-modelo_basico{ background-image:url('../resources/img/icons/script.png') }
 .icon-consultar{ background-image:url('../resources/img/icons/script_edit.png') }
@@ -464,6 +465,7 @@
 .silk-text-list-numbers{background-image:url('../resources/img/icons/text_list_numbers.png')}
 .silk-text-padding-right{background-image:url('../resources/img/icons/text_padding_right.png')}
 .silk-thumb-up{background-image:url('../resources/img/icons/thumb_up.png')}
+.silk-thumb-down{background-image:url('../resources/img/icons/thumb_down.png')}
 .silk-tick{background-image:url('../resources/img/icons/tick.png')}
 .silk-transmit-go{background-image:url('../resources/img/icons/transmit_go.png')}
 .silk-trocar{background-image:url('../resources/img/icons/trocar.png')}

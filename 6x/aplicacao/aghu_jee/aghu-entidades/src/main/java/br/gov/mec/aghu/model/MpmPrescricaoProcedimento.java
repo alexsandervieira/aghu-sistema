@@ -64,6 +64,7 @@ public class MpmPrescricaoProcedimento extends ItemPrescricaoMedica<MpmPrescrica
 	private List<MpmModoUsoPrescProced> modoUsoPrescricaoProcedimentos = new LinkedList<MpmModoUsoPrescProced>();
 	private Integer pprAtdSeqPrcrAnt;
 	private Long pprSeqPrcrAnt;
+	private Integer ordem;
 	
 	public MpmPrescricaoProcedimento() {
 	}
@@ -311,6 +312,14 @@ public class MpmPrescricaoProcedimento extends ItemPrescricaoMedica<MpmPrescrica
 	public void setPprSeqPrcrAnt(Long pprSeqPrcrAnt) {
 		this.pprSeqPrcrAnt = pprSeqPrcrAnt;
 	}
+	
+	@Column(name = "ORDEM", nullable = false)
+	public Integer getOrdem() {
+		return this.ordem;
+	}
+	public void setOrdem(Integer ordem) {
+		this.ordem = ordem;
+	}
 
 	public enum Fields {
 			ID("id"), 
@@ -344,7 +353,8 @@ public class MpmPrescricaoProcedimento extends ItemPrescricaoMedica<MpmPrescrica
 			, DURACAO_TRAT_SOLICITADO("duracaoTratamentoSolicitado")
 			, JUSTIFICATIVA("justificativa"),
 			SERVIDOR_VALIDACAO_MATRICULA("servidorValidacao.id.matricula"),
-			SERVIDOR_VIN_CODIGO("servidor.id.vinCodigo");
+			SERVIDOR_VIN_CODIGO("servidor.id.vinCodigo"),
+			ORDEM("ordem");
 			
 		private String fields;
 

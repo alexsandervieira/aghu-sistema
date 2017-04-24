@@ -26,6 +26,13 @@
 			<p:ajax process="@this" event="change"/>
 		</mec:selectOneRadio>
 	</aghu:linha>
+		<mec:selectBooleanCheckbox id="filtroPorUnidadeFuncional"
+						size="10" maxlength="10"
+						title="#{messages.LABEL_TITLE_FILTRO_UNIDADE_FUNCIONAL}"
+						label="#{messages.LABEL_EXAME_FILTRO_UNIDADE_FUNCIONAL}"
+						value="#{listarExamesSendoSolicitadosController.filtroPorUnidade}">
+						<p:ajax event="change" update="@(#panelSbExames)"  process="@this" />
+		</mec:selectBooleanCheckbox>
 
 		<p:outputPanel id="panelSbExames">
 			<mec:suggestionBox label="#{messages.LABEL_SB_EXAME}"
@@ -46,8 +53,7 @@
 					<f:facet name="header">
 						<h:outputText value="#{messages.LABEL_NOME_USUAL_EXAME}" />
 					</f:facet>
-					<h:outputText value="#{itemSbExames.sinonimosComAcento != null ? itemSbExames.sinonimosComAcento : itemSbExames.sinonimoExameNome}"
-						style="white-space:pre-line;" />
+					<h:outputText value="#{itemSbExames.exaDescricao}" />
 				</p:column>
 				<p:column style="width:12% !important">
 					<f:facet name="header">
@@ -72,7 +78,8 @@
 					<f:facet name="header">
 						<h:outputText value="#{messages.LABEL_NOME}" />
 					</f:facet>
-					<h:outputText value="#{itemSbExames.exaDescricao}" />
+					<h:outputText value="#{itemSbExames.sinonimosComAcento != null ? itemSbExames.sinonimosComAcento : itemSbExames.sinonimoExameNome}"
+						style="white-space:pre-line;" />
 				</p:column>
 			</mec:suggestionBox>
 

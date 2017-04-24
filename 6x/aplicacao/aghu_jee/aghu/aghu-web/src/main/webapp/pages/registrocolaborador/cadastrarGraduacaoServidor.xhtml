@@ -21,7 +21,7 @@
             <mec:inputNumero id="pesCodigo" readonly="true" size="9" label="#{messages.LABEL_PESSOA_FISICA}" value="#{graduacaoServidorController.servidorQualificacao.pessoaFisica.codigo}"/> 
           </aghu:linha>  
           <aghu:linha> 
-            <mec:suggestionBox required="true" styleClassField="frm_obrigatorio" label="#{messages.LABEL_CURSO}" title="#{messages.TITLE_PESQUISA_CURSO}" id="curso" size="10" maxlength="45" width="550" descricaoInput="codigo" descricaoLabel="descricao" suggestionAction="buscarCursos" controller="#{graduacaoServidorController}" value="#{graduacaoServidorController.qualificacao.tipoQualificacao}"> 
+            <mec:suggestionBox required="true" styleClassField="frm_obrigatorio" label="#{messages.LABEL_CURSO}" title="#{messages.TITLE_PESQUISA_CURSO}" id="curso" size="10" maxlength="45" width="550" descricaoInput="codigo" descricaoLabel="descricao" suggestionAction="buscarCursos" controller="#{graduacaoServidorController}" value="#{graduacaoServidorController.qualificacao.tipoQualificacao}" render="conselho"> 
               <p:column> 
                 <f:facet name="header"> 
                   <h:outputText value="#{messages.LABEL_CODIGO}"/> 
@@ -44,7 +44,7 @@
               <p:ajax event="change" update="@(#conselho) @(#dtFim)" process="@this"/> 
             </mec:selectOneMenu>  
             <p:outputPanel id="conselho" layout="inline"> 
-              <mec:inputText id="nroRegConselho" maxlength="9" size="15" title="#{messages.TITLE_NRO_REGISTRO_CONSELHO}" label="#{messages.LABEL_NRO_REGISTRO_CONSELHO}" value="#{graduacaoServidorController.qualificacao.nroRegConselho}" required="#{graduacaoServidorController.qualificacao.situacao eq 'C'}"/> 
+              <mec:inputText id="nroRegConselho" maxlength="9" size="15" title="#{messages.TITLE_NRO_REGISTRO_CONSELHO}" label="#{messages.LABEL_NRO_REGISTRO_CONSELHO}" value="#{graduacaoServidorController.qualificacao.nroRegConselho}" required="#{graduacaoServidorController.qualificacao.situacao eq 'C' and graduacaoServidorController.qualificacao.tipoQualificacao.tipoQualificacao ne 'CSC'}"/> 
             </p:outputPanel> 
           </aghu:linha>  
           <aghu:linha> 

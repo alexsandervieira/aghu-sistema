@@ -1,8 +1,8 @@
 package br.gov.mec.aghu.internacao.business;
 
-import java.util.Date;
-import java.util.Iterator;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -53,28 +53,15 @@ public class MovimentoInternacaoRN extends BaseBusiness {
 	 */
 	public void validarMovimentoInternacao(
 			AinMovimentosInternacao movimentoInternacao) throws ApplicationBusinessException {
-		movimentoInternacao.setCriadoEm(new Date());
+		
 		if (movimentoInternacao.getDthrLancamento() == null) {
 			movimentoInternacao.setDthrLancamento(new Date());
 		}  else {
-			Iterator <AinMovimentosInternacao> listaMovimentosInternacao = 
-					this.getAinMovimentoInternacaoDAO().pesquisarPorInternacaoSeqOrderDtHrLanc(movimentoInternacao.getInternacao().getSeq()).iterator();
+            List<AinMovimentosInternacao> listaMovimentosInternacao = this.getAinMovimentoInternacaoDAO().pesquisarPorInternacaoSeqOrderDtHrLanc(movimentoInternacao.getInternacao().getSeq());
 			
 			if (listaMovimentosInternacao != null) {
 				
-				while (listaMovimentosInternacao.hasNext()){
-				
-					AinMovimentosInternacao auxMovimentoInternacao = listaMovimentosInternacao.next();
-					
-					if (movimentoInternacao.getDthrLancamento().compareTo(auxMovimentoInternacao.getDthrLancamento()) == 0) {
-						Calendar cal = Calendar.getInstance();
-						cal.setTime(auxMovimentoInternacao.getDthrLancamento());
-						cal.add(Calendar.MINUTE, 1);
-						
-						movimentoInternacao.setDthrLancamento(cal.getTime());
-					}
-				}
-				
+				ajustaDataHoraLancamento(movimentoInternacao, listaMovimentosInternacao);
 			}
 			
 		}
@@ -89,7 +76,25 @@ public class MovimentoInternacaoRN extends BaseBusiness {
 			}
 		}
 	}
-
+	private void ajustaDataHoraLancamento(AinMovimentosInternacao movimentoInternacao,
+			List<AinMovimentosInternacao> listaMovimentosInternacao) {
+		boolean ajustarNovamente = Boolean.FALSE;
+		for(AinMovimentosInternacao auxMovimentoInternacao : listaMovimentosInternacao){		
+			if (movimentoInternacao.getDthrLancamento().compareTo(auxMovimentoInternacao.getDthrLancamento()) == 0) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(auxMovimentoInternacao.getDthrLancamento());
+				cal.add(Calendar.MINUTE, 1);
+				
+				movimentoInternacao.setDthrLancamento(cal.getTime());
+				ajustarNovamente = Boolean.TRUE;
+				break;
+			}
+		}
+		if(ajustarNovamente){			
+			ajustaDataHoraLancamento(movimentoInternacao, listaMovimentosInternacao);
+		}
+		
+	}
 	protected AinMovimentoInternacaoDAO getAinMovimentoInternacaoDAO(){
 		return ainMovimentoInternacaoDAO;
 	}

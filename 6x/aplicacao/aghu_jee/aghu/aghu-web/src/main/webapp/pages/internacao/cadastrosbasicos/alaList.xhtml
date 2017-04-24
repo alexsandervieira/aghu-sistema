@@ -10,7 +10,7 @@
       <h:form prependId="false" id="formPesquisa"> 
         <aghu:panelGeral legend="Pesquisar #{LABEL_ALA}"> 
           <aghu:linha> 
-            <mec:inputText label="#{messages.LABEL_CODIGO}" id="codigo" size="8" maxlength="1" title="Digite um código para pesquisar por #{LABEL_ALA} com este código." value="#{alaListPaginatorController.ala.codigo}" emptyStringToNull="true" removerEspacosBrancos="false" removerCaratersEspeciais="false" caixaAlta="false"/>  
+            <mec:inputText label="#{messages.LABEL_CODIGO}" id="codigo" size="8" maxlength="2" title="Digite um código para pesquisar por #{LABEL_ALA} com este código." value="#{alaListPaginatorController.ala.codigo}" emptyStringToNull="true" removerEspacosBrancos="false" removerCaratersEspeciais="false" caixaAlta="false"/>  
             <mec:inputText label="#{messages.LABEL_DESCRICAO}" id="descricao" size="90" maxlength="50" title="Digite uma descrição para pesquisar por #{LABEL_ALA} com esta descrição." value="#{alaListPaginatorController.ala.descricao}" emptyStringToNull="true" removerEspacosBrancos="false" removerCaratersEspeciais="false" caixaAlta="false"/> 
           </aghu:linha> 
         </aghu:panelGeral>  

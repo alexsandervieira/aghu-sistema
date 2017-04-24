@@ -464,6 +464,13 @@ public class MamAnamnesesDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		criteria.add(Restrictions.isNull(MamAnamneses.Fields.DTHR_VALIDA_MVTO.toString()));
 		return executeCriteria(criteria);
 	}
+	
+	public List<MamAnamneses> pesquisarMamAnamnesesAtendimento(
+			AghAtendimentos atendimento) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(MamAnamneses.class);
+		criteria.add(Restrictions.eq(MamAnamneses.Fields.ATENDIMENTO.toString(), atendimento));
+		return executeCriteria(criteria);
+	}	
 
 	// #50745 
 	public MamAnamneses obterAnamnesePorSeqEIndPendente(Long seq, DominioIndPendenteAmbulatorio indPendente) {

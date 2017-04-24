@@ -43,9 +43,10 @@ public class MpmAnamnesesDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 	}
 	
 	public MpmAnamneses obterAnamneseAtendimento(Integer atdSeq) {
-		DetachedCriteria criteria = DetachedCriteria.forClass(
-		                MpmAnamneses.class, "MAN");
+		DetachedCriteria criteria = DetachedCriteria.forClass(MpmAnamneses.class, "MAN");
 		criteria.createAlias("MAN." + MpmAnamneses.Fields.ATENDIMENTO.toString(), "ATD");
+		criteria.createAlias("MAN." + MpmAnamneses.Fields.SERVIDOR.toString(), "SER_MAN");
+		criteria.createAlias("SER_MAN." + RapServidores.Fields.PESSOA_FISICA.toString(), "SER_PES");
 		criteria.createAlias("ATD." + AghAtendimentos.Fields.UNIDADE_FUNCIONAL.toString(), "UNF");
 		criteria.createAlias("UNF." + AghUnidadesFuncionais.Fields.CARACTERISTICAS.toString(), "CAR");
 		criteria.createAlias("ATD." + AghAtendimentos.Fields.SERVIDOR.toString(), "SER");

@@ -60,7 +60,7 @@ public class MovimentarProntuarioPaginatorController extends ActionController im
 	private AghSamis origemProntuariosPesquisa;
 	private DominioSituacaoMovimentoProntuario situacaoMovimentoProntuario;
 	private AipPacientes paciente;
-	private Boolean allChecked = Boolean.FALSE;
+	private Boolean allChecked;
 	
 	private AipSolicitantesProntuario unidadeSolicitanteAlteracao;
 	private AipSolicitantesProntuario unidadeSolicitantePesquisa;
@@ -85,9 +85,16 @@ public class MovimentarProntuarioPaginatorController extends ActionController im
 	
 
 	public void iniciar(){		
+		this.allChecked = Boolean.FALSE;
 		if (pacCodigoFonetica != null) {
 			this.paciente = this.pacienteFacade.obterPacientePorCodigo(pacCodigoFonetica);
-		}		
+		}
+		if(getRequestParameter("pacCodigo") != null){
+			this.paciente = this.pacienteFacade.obterPacientePorCodigo(Integer.valueOf(getRequestParameter("pacCodigo")));
+			if(paciente != null){
+				pesquisar();
+			}
+		}
 		movimentacoesSelecionadasCheckbox = new ArrayList<AipMovimentacaoProntuariosVO>();
 	}
 	
@@ -111,12 +118,27 @@ public class MovimentarProntuarioPaginatorController extends ActionController im
 	
 	public void checkAll() {
 		this.immediateRecuperarListaPaginada = Boolean.FALSE;
-		if (allChecked) {
-			setSelecionadoItens(listaAipMovimentacaoProntuariosVO, Boolean.TRUE);
-			movimentacoesSelecionadasCheckbox.addAll(listaAipMovimentacaoProntuariosVO);
+		AghUnidadesFuncionais unf = new AghUnidadesFuncionais();
+		if(unidadeSolicitantePesquisa != null){
+			unf = unidadeSolicitantePesquisa.getUnidadesFuncionais();
+		}
+		this.selecionaListaPaginada(listaAipMovimentacaoProntuariosVO,this.allChecked,Boolean.TRUE);
+		populaMovimentacoesSelecionadasCheckbox(unf,this.allChecked);
+		
+	}
+
+	private void populaMovimentacoesSelecionadasCheckbox(AghUnidadesFuncionais unf,boolean isSelecionar) {
+		if (isSelecionar) {
+			try{
+				this.movimentacoesSelecionadasCheckbox = this.pacienteFacade.pesquisaMovimentacoesDeProntuarios(null, null, null, 
+						false, paciente, this.origemProntuariosPesquisa, unf, 
+						this.situacaoMovimentoProntuario, this.dataMovimentacao);
+			} catch (ApplicationBusinessException e) {
+				apresentarExcecaoNegocio(e);
+			} 
 		}else{
-			setSelecionadoItens(listaAipMovimentacaoProntuariosVO, Boolean.FALSE);
-			movimentacoesSelecionadasCheckbox.removeAll(listaAipMovimentacaoProntuariosVO);
+			this.movimentacoesSelecionadasCheckbox = null;
+			this.movimentacoesSelecionadasCheckbox = new ArrayList<>();
 		}
 	}	
 	
@@ -144,10 +166,34 @@ public class MovimentarProntuarioPaginatorController extends ActionController im
 		    listaAipMovimentacaoProntuariosVO.size() == 0 || 
 		    this.immediateRecuperarListaPaginada) {
 			populaListaVODeMovimentacoes(firstResult, maxResult, orderProperty);
-			novaListaSelecao();
 		}
 		this.immediateRecuperarListaPaginada = Boolean.TRUE;
+		this.selecionaListaPaginada(listaAipMovimentacaoProntuariosVO,this.allChecked, Boolean.FALSE);
+		this.verificaSelecionaListaPaginada(this.listaAipMovimentacaoProntuariosVO,this.movimentacoesSelecionadasCheckbox);
 		return listaAipMovimentacaoProntuariosVO;
+	}
+
+	private void verificaSelecionaListaPaginada(List<AipMovimentacaoProntuariosVO> lista, List<AipMovimentacaoProntuariosVO> prontuariosSelecionados){
+		if(prontuariosSelecionados != null && prontuariosSelecionados.size() > 0){
+			for(AipMovimentacaoProntuariosVO prontuario :prontuariosSelecionados){
+				if(lista != null && lista.contains(prontuario)){
+					for (AipMovimentacaoProntuariosVO listaPaginada : lista) {
+						if(prontuario.getSeq().equals(listaPaginada.getSeq())){
+							listaPaginada.setSelecionado(Boolean.TRUE);
+						}
+					}
+				}
+			}
+		}
+	}
+	private void selecionaListaPaginada(List<AipMovimentacaoProntuariosVO> lista, boolean isSelecionado, boolean isDesmarca) {
+		if (allChecked) {
+		   setSelecionadoItens(lista, Boolean.TRUE);
+		}else{
+			if(isDesmarca){
+				setSelecionadoItens(lista, Boolean.FALSE);
+			}
+		}
 	}
 
 	
@@ -384,7 +430,7 @@ public class MovimentarProntuarioPaginatorController extends ActionController im
 
 	private void exibeMsgErroMovEmLoteNaPrimeiraMovimentacao() {
 		exibirModal = false;
-		this.apresentarMsgNegocio(Severity.ERROR,
+		this.apresentarMsgNegocio(Severity.WARN,
 				"MESSAGEM_ERRO_MOVIMENTACAO_EM_LOTE_PRIMEIRA_MOVIMENTACAO");
 	}
 

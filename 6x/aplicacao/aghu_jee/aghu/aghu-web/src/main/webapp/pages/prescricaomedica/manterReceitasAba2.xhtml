@@ -218,7 +218,9 @@
 						<mec:inputNumero id="nroVias2" required="true" label="#{messages.LABEL_TELA_RECEITAS_NRO_VIAS}"		
 								value="#{manterReceitaController.receituarioGeral.nroVias}"
 								size="4" maxlength="2"
-								style="float: right;"/>	
+								style="float: right;">
+						    <p:ajax event="change" process="@this" />
+			        	</mec:inputNumero>	
 					</p:outputPanel>
 				</p:outputPanel> 
 	      </p:tab> 

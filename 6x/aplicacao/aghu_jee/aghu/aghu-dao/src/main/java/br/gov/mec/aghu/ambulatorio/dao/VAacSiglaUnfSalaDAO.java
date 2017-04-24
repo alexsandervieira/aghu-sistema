@@ -14,10 +14,10 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.AliasToBeanConstructorResultTransformer;
 
 import br.gov.mec.aghu.ambulatorio.vo.VAacSiglaUnfSalaVO;
-import br.gov.mec.aghu.model.VAacSiglaUnfSala;
 import br.gov.mec.aghu.core.commons.CoreUtil;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessExceptionCode;
+import br.gov.mec.aghu.model.VAacSiglaUnfSala;
 
 public class VAacSiglaUnfSalaDAO extends
 		br.gov.mec.aghu.core.persistence.dao.BaseDao<VAacSiglaUnfSala> {
@@ -47,39 +47,42 @@ public class VAacSiglaUnfSalaDAO extends
 	 * Retorna lista contendo valores distintos para unfSeq, zona e descricao
 	 * 
 	 * @param objPesquisa
+	 * @param listIdsZona 
 	 * @param situacao
 	 * @return
 	 */
 
 	@SuppressWarnings("unchecked")
 	public List<VAacSiglaUnfSalaVO> pesquisarTodasZonas(String objPesquisa) {
-		return pesquisarZonas(objPesquisa, false);
+		return pesquisarZonas(objPesquisa, false, null);
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<VAacSiglaUnfSalaVO> pesquisarTodasZonas(String objPesquisa, List<Integer> listIdsZona) {
+		return pesquisarZonas(objPesquisa, false, listIdsZona);
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<VAacSiglaUnfSalaVO> pesquisarZonas(String objPesquisa) {
-		return pesquisarZonas(objPesquisa, true);
+		return pesquisarZonas(objPesquisa, true, null);
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<VAacSiglaUnfSalaVO> pesquisarZonas(String objPesquisa,
-			boolean ativas) {
+			boolean ativas, List<Integer> listIdsZona) {
 
 
 		// Consulta escrita em HQL devido a necessidade de distinct em mais de
 		// uma coluna
 		StringBuffer hql = montarHqlPesquisarZonas(ativas);
 
-		if (StringUtils.isNotBlank(objPesquisa)) {
-			hql.append("and upper(sigla) = :srtPesquisa ");
-		}
+		adicionarFiltrosCondicoes(objPesquisa, listIdsZona, hql);
+		
 		hql.append("order by sigla asc");
 
 		Query query = createHibernateQuery(hql.toString());
 
-		if (StringUtils.isNotBlank(objPesquisa)) {
-			query.setParameter("srtPesquisa", objPesquisa.toUpperCase());
-		}
+		adicionarFiltrosParametros(objPesquisa, listIdsZona, query);
 
 		List<Object[]> resultList = query.list();
 
@@ -120,6 +123,28 @@ public class VAacSiglaUnfSalaDAO extends
 		}
 
 		return zonas;
+	}
+
+	private void adicionarFiltrosParametros(String objPesquisa,
+			List<Integer> listIdsZona, Query query) {
+		if (StringUtils.isNotBlank(objPesquisa)) {
+			query.setParameter("srtPesquisa", objPesquisa.toUpperCase());
+		}
+
+		if(listIdsZona != null && !listIdsZona.isEmpty()){
+			query.setParameterList("listIdsZona", listIdsZona);
+		}
+	}
+
+	private void adicionarFiltrosCondicoes(String objPesquisa,
+			List<Integer> listIdsZona, StringBuffer hql) {
+		if (StringUtils.isNotBlank(objPesquisa)) {
+			hql.append("and upper(sigla) = :srtPesquisa ");
+		}
+		
+		if(listIdsZona != null && !listIdsZona.isEmpty()){
+			hql.append("and v.id.unfSeq in (:listIdsZona) ");
+		}
 	}
 
 	private StringBuffer montarHqlPesquisarZonas(boolean ativas) {

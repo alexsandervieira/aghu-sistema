@@ -461,7 +461,7 @@ private IServidorLogadoFacade servidorLogadoFacade;
 	 * @return
 	 * @throws BaseException 
 	 */
-	public Boolean existeAmbulatorio() throws BaseException {
+	public Boolean existeAmbulatorio(){
 		return this.getConcluirSumarioAltaRN().existeAmbulatorio();
 	}
 	

@@ -87,10 +87,13 @@ public class PessoaFisicaPaginatorController extends ActionController implements
 		this.dataModel.reiniciarPaginator();
 		
 		// seta os valores para enviar ao paginator
+		if (rapPessoaFisica.getNome() != null) {
+			setNome(registroColaboradorFacade.ajustarNomePesquisa(rapPessoaFisica.getNome()));
+			this.rapPessoaFisica.setNome(this.getNome());
+		}
 		setCodigo(rapPessoaFisica.getCodigo());
-		setNome(rapPessoaFisica.getNome());
 		setCpf(rapPessoaFisica.getCpf());
-
+		
 		// Ativa o uso de paguinação
 		this.dataModel.setPesquisaAtiva(true);
 		exibirNovo = true;
@@ -133,6 +136,9 @@ public class PessoaFisicaPaginatorController extends ActionController implements
 		exibirNovo = false;
 		this.dataModel.setPesquisaAtiva(false);
 		this.rapPessoaFisica = new RapPessoasFisicas();
+		setCodigo(null);
+		setCpf(null);
+		setNome(null);
 	}
 
 	/**

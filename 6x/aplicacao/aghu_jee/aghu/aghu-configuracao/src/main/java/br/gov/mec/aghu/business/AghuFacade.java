@@ -191,6 +191,7 @@ import br.gov.mec.aghu.vo.RapServidoresVO;
 @Stateless
 public class AghuFacade extends BaseFacade implements IAghuFacade {
  
+	
 	@EJB
 	private DocumentoContingenciaON documentoContingenciaON;
 	
@@ -3645,6 +3646,10 @@ public class AghuFacade extends BaseFacade implements IAghuFacade {
 	public AghClinicas obterClinica(final Integer codigo) {
 		return getAghClinicasDAO().obterClinica(codigo);
 	}
+	
+	public AghClinicas obterClinicaIndicadoresHospitalares(final Integer codigo) {
+		return getAghClinicasDAO().obterClinica(codigo);
+	}
 
 	@Override
 	public AghClinicas obterClinicaPorChavePrimaria(final Integer codigo) {
@@ -3856,6 +3861,11 @@ public class AghuFacade extends BaseFacade implements IAghuFacade {
 	@Override
 	public AghEspecialidades obterEspecialidade(Short seq) {
 		return this.getAghEspecialidadesDAO().obterEspecialidade(seq, LockOptions.UPGRADE);
+	}
+	
+	@Override
+	public AghEspecialidades obterEspecialidadeNone(Short seq) {
+		return this.getAghEspecialidadesDAO().obterEspecialidade(seq, LockOptions.NONE);
 	}
 	
 
@@ -4129,13 +4139,19 @@ public class AghuFacade extends BaseFacade implements IAghuFacade {
 	}
 	
 	@Override
-	public List<AghAtendimentos> buscaAtendimentosSumarioPrescricao(
+	public List<AghAtendimentos> buscaAtendimentosSumarioPrescricaoMedica(
 			final Date dataInicio, final Date dataFim)
 			throws ApplicationBusinessException {
-		return this.getAghAtendimentoDAO().buscaAtendimentosSumarioPrescricao(
+		return this.getAghAtendimentoDAO().buscaAtendimentosSumarioPrescricaoMedica(
 				dataInicio, dataFim);
 	}
-
+	@Override
+	public List<AghAtendimentos> buscaAtendimentosSumarioPrescricaoEnfermacao(
+			final Date dataInicio, final Date dataFim)
+			throws ApplicationBusinessException {
+		return this.getAghAtendimentoDAO().buscaAtendimentosSumarioPrescricaoEnfermagem(
+				dataInicio, dataFim);
+	}
 	/**
 	 * Obtem atendimento a partir de int_seq
 	 * 
@@ -6699,6 +6715,23 @@ public class AghuFacade extends BaseFacade implements IAghuFacade {
 			boolean apenasAtivos, Object[] caracteristicas){
 		return this.getAghUnidadesFuncionaisDAO().pesquisarUnidadeFuncionalPorCodigoDescricaoComFiltroPorCaract(strPesquisa,
 				ordernar, apenasAtivos, caracteristicas);
+	}
+
+	@Override
+	public List<AghEspecialidades> pesquisarEspecialidadesAtivas(
+			String parametro, List<Integer> listIdsEspe) {
+		return getAghEspecialidadeON().pesquisarEspecialidadesAtivas(parametro, listIdsEspe);
+	}
+
+	@Override
+	public List<AghEquipes> getListaEquipes(String parametro,
+			List<Integer> listIdsEquipe) {
+		return getAghEquipesDAO().pesquisarPorNomeOuCodigo(parametro, listIdsEquipe);
+	}
+
+	@Override
+	public AghAla obterAghAlaPorCodigoDescricao(AghAla ala, boolean isUpdate) {
+		return aghAlaDAO.obterAghAlaPorCodigoDescricao(ala,isUpdate);
 	}
 	
 }

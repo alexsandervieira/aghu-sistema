@@ -58,7 +58,7 @@ public class AgendaSamisON extends BaseBusiness {
 			throws ApplicationBusinessException {
 		
 		List<AacPeriodoReferencia> listaPeriodoReferencia = this.getAacPeriodoReferenciaDAO().pesquisarPeriodoReferencia();
-
+		getAacConsultasDAO().refresh(consulta);
 		Date dataReferencia = getDataReferencia(listaPeriodoReferencia);
 		Date dataConsultaInicio = getDataConsulta(consulta);
 		Date dataReferenciaInicio = getDataInicioReferencia(dataReferencia);

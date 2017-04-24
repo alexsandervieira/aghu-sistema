@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:fn="http://xmlns.jcp.org/jsp/jstl/functions"
+	xmlns:mec="http://xmlns.jcp.org/jsf/composite/components"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:aghu="http://xmlns.jcp.org/jsf/component"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+	xmlns:mf="http://www.mec.gov.br/taglib">
+<ui:composition>
+	<p:outputPanel id="formEncerrados" layout="inline">
+		<mec:serverDataTable name="tabelaMamDiagnosticosAtivos"
+				id="tabelaDiagnosticosEncerrados" rowKeyVar="row"
+				list="#{consultarHistoricoDiagnosticoController.historicoDiagnosticos}" scrollable="true"
+				scrollHeight="135">
+				<c:set var="item" value="#{item}" />
+				<p:column width="400" headerText="#{messages.LABEL_DESCRICAO}">					
+					<h:outputText value="#{item.descricao}" />
+				</p:column>
+				<p:column width="120" headerText="#{messages.LABEL_VISUALIZAR_ANAMNESE_DATA_HORA}">					
+					<h:outputText value="#{item.criadoEm}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+					</h:outputText>
+				</p:column>
+				<p:column  headerText="#{messages.LABEL_PROFISSIONAL_ENCERROU_DIAGNOSTICO}">					
+					<h:outputText value="#{consultarHistoricoDiagnosticoController.obterProfissional(item)}" />
+				</p:column>
+			</mec:serverDataTable>	
+	</p:outputPanel>
+</ui:composition>
+</html>

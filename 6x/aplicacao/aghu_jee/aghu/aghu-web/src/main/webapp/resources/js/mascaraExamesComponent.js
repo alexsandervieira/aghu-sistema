@@ -373,8 +373,8 @@ var mex = {
 		}
 
 		if(comp.attr("type") != null && comp.attr("type")=='TEXTO_LONGO'){
-			comp.css('height', '100px');
-			comp.css('width', '450px');
+			//comp.css('height', '100px');
+			//comp.css('width', '450px');
 			comp.removeClass("drag4").addClass("drag41");
 		}
 	},

@@ -75,6 +75,7 @@ public class MpmItemPrescricaoMdto extends BaseEntityId<MpmItemPrescricaoMdtoId>
 	private MpmJustificativaUsoMdto justificativaUsoMedicamento;
 	private Set<MpmLaudo> laudos = new HashSet<MpmLaudo>(0);
 	private MpmItemPrescParecerMdto itemPrescParecerMdto;
+	private Integer ordem;
 	
 	//Transient
 	private String descricaoMedicamentoPrescrito;
@@ -374,7 +375,15 @@ public class MpmItemPrescricaoMdto extends BaseEntityId<MpmItemPrescricaoMdtoId>
 	public void setItemPrescParecerMdto(MpmItemPrescParecerMdto itemPrescParecerMdto) {
 		this.itemPrescParecerMdto = itemPrescParecerMdto;
 	}
-
+	
+	@Column(name = "ORDEM", nullable = false)
+	public Integer getOrdem() {
+		return this.ordem;
+	}
+	public void setOrdem(Integer ordem) {
+		this.ordem = ordem;
+	}
+	
 	public enum Fields {
 		ID("id"), PMD_ATD_SEQ("id.pmdAtdSeq"), PMD_SEQ("id.pmdSeq"), SEQP("id.seqp"), MED_MAT_CODIGO("id.medMatCodigo"),
 		PRESCRICAO_MEDICAMENTO("prescricaoMedicamento"), MEDICAMENTO("medicamento"),

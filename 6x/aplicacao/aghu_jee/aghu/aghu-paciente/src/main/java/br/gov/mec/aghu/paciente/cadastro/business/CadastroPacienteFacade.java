@@ -27,6 +27,7 @@ import br.gov.mec.aghu.model.AipEnderecosPacientes;
 import br.gov.mec.aghu.model.AipEnderecosPacientesId;
 import br.gov.mec.aghu.model.AipOrgaosEmissores;
 import br.gov.mec.aghu.model.AipPacienteDadoClinicos;
+import br.gov.mec.aghu.model.AipPacienteProntuario;
 import br.gov.mec.aghu.model.AipPacientes;
 import br.gov.mec.aghu.model.AipPacientesDadosCns;
 import br.gov.mec.aghu.model.AipPacientesHist;
@@ -41,6 +42,7 @@ import br.gov.mec.aghu.paciente.dao.AipBairrosCepLogradouroDAO;
 import br.gov.mec.aghu.paciente.dao.AipCidadesDAO;
 import br.gov.mec.aghu.paciente.dao.AipEnderecosPacientesDAO;
 import br.gov.mec.aghu.paciente.dao.AipOrgaosEmissoresDAO;
+import br.gov.mec.aghu.paciente.dao.AipPacienteProntuarioDAO;
 import br.gov.mec.aghu.paciente.dao.AipPesoPacientesDAO;
 
 
@@ -83,6 +85,9 @@ public class CadastroPacienteFacade extends BaseFacade implements ICadastroPacie
 	
 	@Inject
 	private AipOrgaosEmissoresDAO aipOrgaosEmissoresDAO;
+
+	@Inject
+	private AipPacienteProntuarioDAO aipPacienteProntuarioDAO;
 	
 	
 	private static final long serialVersionUID = 3569348771923024065L;
@@ -523,6 +528,12 @@ public class CadastroPacienteFacade extends BaseFacade implements ICadastroPacie
 	}
 	
 	@Override
+	public void inserirPacienteMigracaoPaciente(AipPacientes paciente){
+		this.getCadastroPacienteRN().inserirPacienteMigracaoPaciente(paciente);
+	}
+	
+	
+	@Override
 	public Boolean nomeCidadeJaExistente(String nomeCidade) {
 		return this.getEnderecoON().nomeCidadeJaExistente(nomeCidade);
 	}
@@ -603,6 +614,10 @@ public class CadastroPacienteFacade extends BaseFacade implements ICadastroPacie
 	public AipOrgaosEmissores obterOrgaoEmissorPorCodigo(Short codigo) {
 		return this.aipOrgaosEmissoresDAO.obterPorChavePrimaria(codigo);
 	}
-
+	
+	@Override
+	public AipPacienteProntuario obterPacienteProntuario(Integer prontuario){
+		return this.aipPacienteProntuarioDAO.obterPorChavePrimaria(prontuario, false, new Enum[]{AipPacienteProntuario.Fields.SAMIS});
+	}
 
 }

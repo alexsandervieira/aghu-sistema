@@ -6,13 +6,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import br.gov.mec.aghu.ambulatorio.vo.FiltroConsultaRetornoConsultaVO;
 import br.gov.mec.aghu.ambulatorio.vo.FiltroParametrosPadraoConsultaVO;
-import br.gov.mec.aghu.dominio.DominioSituacao;
-import br.gov.mec.aghu.model.AacRetornos;
 import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.dominio.DominioSituacao;
+import br.gov.mec.aghu.model.AacConsultas;
+import br.gov.mec.aghu.model.AacRetornos;
 
 public class AacRetornosDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<AacRetornos> {
 	
@@ -24,8 +26,36 @@ public class AacRetornosDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao
 		return (AacRetornos) executeCriteriaUniqueResult(criteria);
 	}
 	
-	
+	public Integer obterCodigoSituacaoAtendPorConsulta(Integer consultaNumero){
+		DetachedCriteria criteria = DetachedCriteria.forClass(AacConsultas.class);
+		criteria.add(Restrictions.eq(AacConsultas.Fields.NUMERO.toString(), consultaNumero));
 		
+		criteria.setProjection(Projections.projectionList()
+				.add(Projections.property(AacConsultas.Fields.RETORNO_SEQ.toString()), "codigoRetorno"));
+		return (Integer) executeCriteriaUniqueResult(criteria);
+	}
+	
+	public List<AacRetornos> obterListaRetornosAtivos(String objPesquisa,List<Integer> codRetornos){
+		String parametro = StringUtils.trimToNull(objPesquisa);
+		DetachedCriteria criteria = DetachedCriteria.forClass(AacRetornos.class);
+		if (StringUtils.isNotEmpty(parametro)) {
+			Integer seq = -1;			
+			if (CoreUtil.isNumeroInteger(parametro)){
+				seq = Integer.parseInt(parametro); 			
+			}
+			if (seq != -1) {
+				criteria.add(Restrictions.eq(AacRetornos.Fields.SEQ.toString(), seq));
+			} else {
+				criteria.add(Restrictions.ilike(AacRetornos.Fields.DESCRICAO.toString(), parametro, MatchMode.ANYWHERE));
+			}
+		}
+		if(codRetornos != null && codRetornos.size() > 0){
+			criteria.add(Restrictions.not(Restrictions.in(AacRetornos.Fields.SEQ.toString(), codRetornos)));
+		}
+		criteria.add(Restrictions.eq(AacRetornos.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
+		criteria.addOrder(Order.asc(AacRetornos.Fields.SEQ.toString()));
+		return this.executeCriteria(criteria);
+	}	
 	public List<AacRetornos> obterListaRetornosAtivos(String objPesquisa){
 		String parametro = StringUtils.trimToNull(objPesquisa);
 		DetachedCriteria criteria = DetachedCriteria.forClass(AacRetornos.class);

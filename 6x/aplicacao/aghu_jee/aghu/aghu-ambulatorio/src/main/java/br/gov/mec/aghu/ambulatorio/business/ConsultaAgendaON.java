@@ -40,6 +40,7 @@ import br.gov.mec.aghu.model.AipCidades;
 import br.gov.mec.aghu.model.AipEnderecosPacientes;
 import br.gov.mec.aghu.model.AipNacionalidades;
 import br.gov.mec.aghu.model.AipPacientes;
+import br.gov.mec.aghu.model.MamProcedimentoRealizado;
 import br.gov.mec.aghu.model.RapPessoaTipoInformacoes;
 import br.gov.mec.aghu.model.RapPessoasFisicas;
 import br.gov.mec.aghu.model.RapQualificacao;
@@ -73,7 +74,8 @@ public class ConsultaAgendaON extends BaseBusiness implements Serializable {
 	
 	@EJB
 	private IFaturamentoFacade faturamentoFacade;
-	
+
+
 	private static final long serialVersionUID = 5932661676766248094L;
 	private static final String SEPARADOR=";";
 	private static final String QUALIFICADOR="\"";
@@ -126,7 +128,7 @@ public class ConsultaAgendaON extends BaseBusiness implements Serializable {
 				numero.add(consulta.getNumero());
 				
 				out.write(System.getProperty(SEPARADOR_DE_LINHA));
-				out.write(geraLinhaConsulta(consulta));
+				out.write(geraLinhaConsulta(consulta, out));
 			}
 		}
 		out.flush();
@@ -879,7 +881,7 @@ public class ConsultaAgendaON extends BaseBusiness implements Serializable {
 	}
 	
 	
-	public String geraLinhaConsulta(AacConsultas consulta){
+	public String geraLinhaConsulta(AacConsultas consulta, Writer out) throws IOException{
 		StringBuilder texto = new StringBuilder();
 		SimpleDateFormat ddMMyyyy = new SimpleDateFormat("dd/MM/yyyy");
 		SimpleDateFormat ddMMyyHHmm = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -901,23 +903,37 @@ public class ConsultaAgendaON extends BaseBusiness implements Serializable {
 		
 		adicionarCodigoCentralACartaoSaude(consulta, texto);
 		
-//		adicionarProcedimentos(consulta, texto);
+		adicionarProcedimentos(consulta, texto, out);
 		return texto.toString();
 	}
+	
 	//#43342
-//	private void adicionarProcedimentos(AacConsultas consulta, StringBuilder texto){
-//		List<AacConsultaProcedHospitalar> procedimentos = new ArrayList<AacConsultaProcedHospitalar>();
-//        procedimentos.addAll(consulta.getProcedimentosHospitalares());
-//		if(procedimentos != null && !procedimentos.isEmpty()){
-//			StringBuilder strProced = new StringBuilder();
-//			for (AacConsultaProcedHospitalar proc : procedimentos) {
-//                if(proc != null && proc.getProcedHospInterno() != null && proc.getProcedHospInterno().getDescricao() != null){
-//                    strProced.append(proc.getProcedHospInterno().getDescricao().trim());
-//                }
-//            }
-//			addText(strProced, texto);
-//		}
-//	}
+	private void adicionarProcedimentos(AacConsultas consulta, StringBuilder texto, Writer out) throws IOException{
+		
+		if(consulta.getProcedimentosRealizados() != null && !consulta.getProcedimentosRealizados().isEmpty()){
+			boolean variosProcedimentos = consulta.getProcedimentosRealizados().size() > 1;
+			boolean primeiroProcedimento = true;
+			StringBuilder textoAux = new StringBuilder(texto);
+			StringBuilder textoAux2 = new StringBuilder(texto);
+			for (MamProcedimentoRealizado procedimento : consulta.getProcedimentosRealizados()) {
+                if(procedimento != null && procedimento.getProcedimento() != null && procedimento.getProcedimento().getDescricao() != null){
+                    if(variosProcedimentos && primeiroProcedimento){
+                    	addText(procedimento.getProcedimento().getDescricao(), texto);
+                    	primeiroProcedimento = false;
+                    }else {
+                    	addText(procedimento.getProcedimento().getDescricao(), textoAux);
+                    	if(variosProcedimentos){
+	        				out.write(textoAux.toString());
+	        				out.write(System.getProperty(SEPARADOR_DE_LINHA));
+	                    	textoAux = new StringBuilder(textoAux2);
+                    	}else{
+                    		texto = textoAux;
+                    	}
+                    }
+                }
+            }
+		}
+	}
 
 	private void adicionarCodigoCentralACartaoSaude(AacConsultas consulta,
 			StringBuilder texto) {
@@ -930,6 +946,8 @@ public class ConsultaAgendaON extends BaseBusiness implements Serializable {
 	}
 
 	private void adicionarObservacaoATelefone(AacConsultas consulta, StringBuilder texto){
+	// Se adicionar mais alguma coluna, favor adicionar no else a quantidade separador.
+		
 		if (consulta.getPaciente()!=null){
 			addText(consulta.getPaciente().getProntuario(), texto);
 			addText(consulta.getPaciente().getNome(), texto);
@@ -960,7 +978,7 @@ public class ConsultaAgendaON extends BaseBusiness implements Serializable {
 			addText(consulta.getPaciente().getCodigo(), texto);
 			
 		}else{
-			addSeparador(5, texto);			
+			addSeparador(7, texto);			
 		}
 		addText(consulta.getRetorno()!=null?consulta.getRetorno().getDescricao():null, texto);
 
@@ -1052,7 +1070,12 @@ public class ConsultaAgendaON extends BaseBusiness implements Serializable {
 		}
 		
 		//#55743 
-		nomeMarcacao = consulta.getServidor().getPessoaFisica().getNome();
+		if (consulta.getServidorMarcacao() != null) {
+			if (consulta.getServidorMarcacao().getPessoaFisica() != null) {
+				nomeMarcacao = consulta.getServidorMarcacao().getPessoaFisica().getNome();
+			}
+		}
+		
 		addText(nomeMarcacao, texto); 
 		
 		addText(NroRegConselho,texto);

@@ -10,6 +10,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
 
+import br.gov.mec.aghu.core.commons.CoreUtil;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.model.AelExames;
 import br.gov.mec.aghu.model.AelExamesMaterialAnalise;
@@ -18,7 +19,6 @@ import br.gov.mec.aghu.model.AelMateriaisAnalises;
 import br.gov.mec.aghu.model.AelModeloCartas;
 import br.gov.mec.aghu.model.AelUnfExecutaExames;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
-import br.gov.mec.aghu.core.commons.CoreUtil;
 
 public class AelExamesMaterialAnaliseDAO  extends br.gov.mec.aghu.core.persistence.dao.BaseDao<AelExamesMaterialAnalise> {
 
@@ -67,6 +67,9 @@ public class AelExamesMaterialAnaliseDAO  extends br.gov.mec.aghu.core.persisten
 		DetachedCriteria criteria = DetachedCriteria.forClass(AelExamesMaterialAnalise.class);
 		criteria.createAlias(AelExamesMaterialAnalise.Fields.MATERIAL_ANALISE.toString(), "man", JoinType.LEFT_OUTER_JOIN);
 		criteria.add(Restrictions.eq(AelExamesMaterialAnalise.Fields.EXA_SIGLA.toString(), aelExames.getSigla()));
+		
+		criteria.addOrder(Order.asc("man." + AelMateriaisAnalises.Fields.DESCRICAO.toString()));
+		
 		return executeCriteria(criteria);
 	}
 	

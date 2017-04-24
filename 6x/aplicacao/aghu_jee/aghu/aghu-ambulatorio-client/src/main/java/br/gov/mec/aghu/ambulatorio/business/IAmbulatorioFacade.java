@@ -93,6 +93,7 @@ import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.dominio.DominioSituacaoInterconsultasPesquisa;
 import br.gov.mec.aghu.dominio.DominioSituacaoRegistro;
+import br.gov.mec.aghu.dominio.DominioTipoAgendamentoSisreg;
 import br.gov.mec.aghu.dominio.DominioTipoDocumento;
 import br.gov.mec.aghu.dominio.DominioTipoReceituario;
 import br.gov.mec.aghu.dominio.DominioTipoTratamentoAtendimento;
@@ -126,6 +127,7 @@ import br.gov.mec.aghu.procedimentoterapeutico.vo.AgendamentoAmbulatorioVO;
 import br.gov.mec.aghu.util.CapitalizeEnum;
 import br.gov.mec.aghu.view.VMamReceitas;
 import br.gov.mec.aghu.vo.RapServidoresVO;
+
 
 @SuppressWarnings({ "PMD.ExcessiveClassLength" })
 public interface IAmbulatorioFacade extends Serializable {
@@ -236,7 +238,7 @@ public interface IAmbulatorioFacade extends Serializable {
 	public void removerSituacao(AacGradeSituacao situacao) throws ApplicationBusinessException;
 	
 	public List<MamTipoAtestado> listarTodos();
-
+	public List<MamTipoAtestado> buscarTodosAtestados() throws ApplicationBusinessException;
 	/**
 	 * Lista os diagnósticos Ativos e validados de acordo com paciente e cid.
 	 * 
@@ -831,13 +833,15 @@ public interface IAmbulatorioFacade extends Serializable {
 	public List<GerarDiariasProntuariosSamisVO> pesquisarMapaDesarquivamento(Date dataDiaria) throws ApplicationBusinessException,
 			ApplicationBusinessException;
 	
-	public void movimentarProntuariosParaDesarquivamento(Date dataDiaria, String usuarioLogado, Boolean exibeMsgProntuarioJaMovimentado) throws ApplicationBusinessException;
+	public void movimentarProntuariosParaDesarquivamento(Date dataDiaria) throws ApplicationBusinessException;
 
 	public void inicioDiaria(Date dataDiaria) throws ApplicationBusinessException;
 
 	public void fimDiaria(Date dataDiaria) throws ApplicationBusinessException;
 
 	public List<AacRetornos> getListaRetornos(String objPesquisa);
+	public List<AacRetornos> getListaAacRetornos(String objPesquisa, AacRetornos retornoAtual)throws ApplicationBusinessException;
+
 
 	public List<MamItemExame> pesquisarItemExamePorDescricaoOuSeq(Object param, String ordem, Integer maxResults);
 
@@ -921,8 +925,8 @@ public interface IAmbulatorioFacade extends Serializable {
 	public void limparConsultasSisreg();
 
 	public void tratarErrosImportacaoConsultas(String nomeArquivo, StringBuilder msgErroProcedimento) throws ApplicationBusinessException;
-
-	public StringBuilder marcarConsultas(List<AacConsultasSisreg> consultasSisreg, Integer totalConsultas, String nomeMicrocomputador);
+	
+	public StringBuilder marcarConsultas(List<AacConsultasSisreg> consultasSisreg, Integer totalConsultas, String nomeMicrocomputador, DominioTipoAgendamentoSisreg tipoAgendamentoSisreg);
 
 	public List<AacConsultasSisreg> obterConsultasSisreg();
 
@@ -1536,6 +1540,8 @@ public interface IAmbulatorioFacade extends Serializable {
 	List<MamLaudoAih> pesquisarLaudosAihPorConsultaPaciente(final Integer conNumero, final Integer pacCodigo);
 
 	List<AghAtendimentos> pesquisarAtendimentoParaPrescricaoMedica(Integer codigoPac, Integer atdSeq);
+	
+	List<AghAtendimentos> pesquisarAtendimentoParaPrescricaoMedicaSemRestricaoDeHorario(Integer codigoPac, Integer atdSeq);
 
 	List<Long> buscaSeqTipoItemEvolucaoPrescEnf(final Integer atdSeq, final Date data, final Integer seqMTIE, final Integer catSeq);
 
@@ -1855,7 +1861,7 @@ public interface IAmbulatorioFacade extends Serializable {
 	public List<RelatorioControleFrequenciaVO> pesquisarControleFrequencia(
 			Boolean tipoImpressaoCF, Boolean tipoImpressaoLS);
 
-	public String obterDataLocalFormula(Integer nroConsulta);
+	public String obterDataLocalFormula(Integer nroConsulta) throws ApplicationBusinessException;
 
 	public String obterMesAnoAtual(Integer nroConsulta);
 
@@ -2445,4 +2451,60 @@ public interface IAmbulatorioFacade extends Serializable {
 	
 	public AghAtendimentos buscarAtendimentoPossuiMesmoLeitoUnidFuncional(AghAtendimentos atendimento,AghUnidadesFuncionais unidadeFuncional);
 
+	public List<AacPermissaoAgendamentoConsultas> pesquisarPermissoesAgendamentoConsulta(
+			Short vinculoServidor, Integer matriculaServidor, String nomeServidor);
+
+	public void persistirPermissaoAgendamentoConsultas(
+			AacPermissaoAgendamentoConsultas permissaoAgendamentoConsultas) throws ApplicationBusinessException;
+
+	public List<AacPermissaoAgendamentoConsultas> obterListaPermAgndConsPorServidorTipo(
+			RapServidores servidor, String string);
+
+	public void removerPermissaoAgendamentoConsultas(
+			AacPermissaoAgendamentoConsultas parametroSelecionado) throws ApplicationBusinessException;
+
+	public void persistirPermissoesAgendamentoConsultas(RapServidores rapServidores,
+			List<AacPermissaoAgendamentoConsultas> listPermissoesInserir) throws ApplicationBusinessException;
+
+	public List<Integer> obterListaIdsPermAgndConsPorServidorTipo(
+			RapServidores servidorLogado, String string);
+
+	public List<RapServidoresId> obterListaProfPermAgndConsPorServidor(
+			RapServidores servidorLogado);
+
+	public List<VAacSiglaUnfSalaVO> pesquisarTodasZonas(String objPesquisa,
+			List<Integer> listIdsZona);
+
+	public AacPermissaoAgendamentoConsultas obterAacPermissaoAgendConsultaPorServidorGrade(
+			RapServidores servidor, Integer grade);
+
+	public List<DisponibilidadeHorariosVO> listarDisponibilidadeHorarios(
+			Integer seq, Short unfSeq, AghEspecialidades especialidade,
+			AghEquipes equipe, RapServidores profissional, AacPagador pagador,
+			AacTipoAgendamento autorizacao, AacCondicaoAtendimento condicao,
+			Date dtConsulta, Date horaConsulta, Date mesInicio, Date mesFim,
+			DominioDiaSemana diaSemana, Boolean disponibilidade,
+			VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,
+			DataInicioFimVO definePeriodoTurno,
+			List<AghEspecialidades> listEspecialidade,
+			Boolean visualizarPrimeirasConsultasSMS, List<Integer> listIdsEspe,
+			List<Integer> listIdsEqp, List<Integer> listIdsUnf,
+			List<Integer> listIdsGrd, List<RapServidoresId> listIdsProf) throws ApplicationBusinessException;
+
+	public Long listarDisponibilidadeHorariosCount(Integer seq, Short unfSeq,
+			AghEspecialidades especialidade, AghEquipes equipe,
+			RapServidores profissional, AacPagador pagador,
+			AacTipoAgendamento autorizacao, AacCondicaoAtendimento condicao,
+			Date dtConsulta, Date horaConsulta, Date mesInicio, Date mesFim,
+			DominioDiaSemana diaSemana, Boolean disponibilidade,
+			VAacSiglaUnfSalaVO zona, VAacSiglaUnfSala zonaSala,
+			DataInicioFimVO definePeriodoTurno,
+			List<AghEspecialidades> listEspecialidade,
+			Boolean visualizarPrimeirasConsultasSMS, List<Integer> listIdsEspe,
+			List<Integer> listIdsEqp, List<Integer> listIdsUnf,
+			List<Integer> listIdsGrd, List<RapServidoresId> listIdsProf);
+
+	void validaHorarioAgendadoSobreposto(AacHorarioGradeConsulta entity,
+			AacGradeAgendamenConsultas grade, Date dataInicial, Date DataFinal)
+			throws ApplicationBusinessException;			
 }

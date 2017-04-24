@@ -42,7 +42,16 @@
             <aghu:panelGeral legend="#{messages.ATENDER_PACIENTES_AGENDADOS_ATENDIMENTO}" > 
               <aghu:linha> 
                 <h:outputText value="#{messages.LABEL_PESQUISAR_CONSULTAS_AGENDA_PACIENTE}:" style="padding-right:5px;"/>  
-                <h:outputText value="#{atenderPacientesAgendadosController.consultaSelecionada.paciente.nome}" style="font-weight:bold;padding-right:10px;"/>  
+                
+				<h:outputText value="#{not empty atenderPacientesAgendadosController.consultaSelecionada.paciente.nomeSocial ? atenderPacientesAgendadosController.consultaSelecionada.paciente.nomeSocial : atenderPacientesAgendadosController.consultaSelecionada.paciente.nome}"
+				 	style="font-weight:bold;padding-right:10px;" />
+            	
+				<h:graphicImage 
+					title="#{messages.LABEL_NOME_CIVIL}: #{atenderPacientesAgendadosController.consultaSelecionada.paciente.nome}"  
+					value="/resources/img/icons/nome-civil-paciente.png" 
+					style="border:0px; padding-right:10px;" 
+					rendered="#{not empty atenderPacientesAgendadosController.consultaSelecionada.paciente.nomeSocial}" />
+                  
                 <h:outputText value="#{messages.LABEL_IDADE}:" style="padding-right:5px;"/>  
                 <h:outputText value="#{atenderPacientesAgendadosController.idadeFormatada}" style="font-weight:bold;padding-right:10px;"/>  
                 <h:outputText value="#{messages.LABEL_PESQUISAR_PACIENTES_AGENDADOS_PRONTUARIO}:" style="padding-right:5px;"/>  

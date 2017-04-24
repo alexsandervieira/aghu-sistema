@@ -34,9 +34,7 @@ import br.gov.mec.aghu.model.AghFeriados;
 import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.model.AinInternacao;
 import br.gov.mec.aghu.model.AipMovimentacaoProntuarios;
-import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.paciente.business.IPacienteFacade;
-import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 
 @Stateless
 public class GerarDiariasProntuariosSamisON extends BaseBusiness {
@@ -74,9 +72,6 @@ public class GerarDiariasProntuariosSamisON extends BaseBusiness {
     
     @EJB
     private IAmbulatorioFacade ambulatorioFacade;
-
-    @EJB
-	private IServidorLogadoFacade servidorLogadoFacade;
 
     /**
 	 * 
@@ -214,20 +209,19 @@ public class GerarDiariasProntuariosSamisON extends BaseBusiness {
 	return listaVO;
     }
 
-    public void getConsultasDiariaParaMovimentar(Date dataDiaria, Boolean exibeMsgProntuarioJaMovimentado) throws ApplicationBusinessException {
+    public void getConsultasDiariaParaMovimentar(Date dataDiaria) throws ApplicationBusinessException {
 
 		AghParametros parametroDtRef = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_DT_REFERENCIA);
 	    dataDiaria = parametroDtRef.getVlrData();
 		List<AacConsultas> consultas = getAacConsultasDAO().pesquisarMapaDesarquivamento(dataDiaria);
 
 		for(AacConsultas consulta : consultas){
-			movimentarProntuariosParaDesarquivamento(consulta, exibeMsgProntuarioJaMovimentado);
+			movimentarProntuariosParaDesarquivamento(consulta);
 		}
 	}
 
-	public void movimentarProntuariosParaDesarquivamento(AacConsultas conNumero, Boolean exibeMsgProntuarioJaMovimentado) throws ApplicationBusinessException {
-		RapServidores servidorLogado = servidorLogadoFacade.obterServidorLogado();
-		this.getAmbulatorioFacade().gerarMovimentacaoProntuario(conNumero, servidorLogado,exibeMsgProntuarioJaMovimentado);
+	public void movimentarProntuariosParaDesarquivamento(AacConsultas consulta) throws ApplicationBusinessException {
+		this.pacienteFacade.gerarSolicitacaoProntuarioConsultas(consulta, false);
 	}
 
     

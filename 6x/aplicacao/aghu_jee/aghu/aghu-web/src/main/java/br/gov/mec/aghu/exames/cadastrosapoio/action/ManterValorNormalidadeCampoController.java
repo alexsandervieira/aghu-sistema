@@ -90,6 +90,8 @@ public class ManterValorNormalidadeCampoController extends ActionController {
 					valorNormalidCampo.setSituacao(DominioSituacao.A);
 				}
 				
+				verificarCampoSexo();
+				
 				this.examesFacade.atualizarValoresNormalidadeCampo(valorNormalidCampo);
 				this.pesquisarNormalidadesCampo();
 				this.cancelarEdicao();
@@ -100,6 +102,19 @@ public class ManterValorNormalidadeCampoController extends ActionController {
 		} catch (BaseException e) {
 			this.cancelarEdicao();
 			apresentarExcecaoNegocio(e);
+		}
+	}
+
+	private void verificarCampoSexo() {
+		if(valorNormalidCampo.getSexo() == null && getSexoValorNormalidade() != null){
+			switch (getSexoValorNormalidade()) {
+			case M:
+				valorNormalidCampo.setSexo(DominioSexo.M);
+				break;
+			case F:
+				valorNormalidCampo.setSexo(DominioSexo.F);
+				break;
+			}
 		}
 	}
 

@@ -36,7 +36,7 @@ return LOG;
 		return fatCompetenciaRN;
 	}
 	
-	protected void atualizarFatCompetencia(final FatCompetencia fatCompetencia) throws ApplicationBusinessException {
+	public void atualizarFatCompetencia(final FatCompetencia fatCompetencia) throws ApplicationBusinessException {
 		getFatCompetenciaRN().atualizarFatCompetencia(fatCompetencia);
 	}
 

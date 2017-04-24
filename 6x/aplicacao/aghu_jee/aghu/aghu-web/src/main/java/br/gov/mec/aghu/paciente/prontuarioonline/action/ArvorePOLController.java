@@ -449,13 +449,14 @@ public class ArvorePOLController extends ActionController {
 		
 		if (parametros.isEmpty()){
 			//--[CONFIGURA SEGURANCA]
+			parametros.put(ParametrosPOLEnum.ACESSO_PRONTUARIO_ONLINE, securityController.usuarioTemPermissao("prontuarioOnline", "pesquisar", false));
 			parametros.put(ParametrosPOLEnum.ACESSO_LIVRE_POL, securityController.usuarioTemPermissao("acessoLivrePOL", ACESSAR, false));
 			parametros.put(ParametrosPOLEnum.ACESSO_COMISSAO_POL, securityController.usuarioTemPermissao("acessoComissaoPOL", ACESSAR, false));
 			parametros.put(ParametrosPOLEnum.ACESSO_ESPECIAL_POL, securityController.usuarioTemPermissao("acessoEspecialPOL", ACESSAR, false));
 			parametros.put(ParametrosPOLEnum.ACESSO_ADMIN_POL, securityController.usuarioTemPermissao("acessoAdminPOL", ACESSAR, false));
 			parametros.put(ParametrosPOLEnum.ACESSO_MONITOR_PROJ_PESQ_POL, securityController.usuarioTemPermissao("acessoMonitorProjPesqPOL", ACESSAR, false));
 			parametros.put(ParametrosPOLEnum.ACESSO_PESQUISADOR_PROJ_POL, securityController.usuarioTemPermissao("acessoPesquisadorProjPesqPOL", ACESSAR, false));
-			parametros.put(ParametrosPOLEnum.ACESSO_VER_FLUXOGRAMA, securityController.usuarioTemPermissao("verFluxograma", "pesquisar", false));
+			parametros.put(ParametrosPOLEnum.ACESSO_VER_FLUXOGRAMA, securityController.usuarioTemPermissao("verFluxograma", ACESSAR, false));
 			parametros.put(ParametrosPOLEnum.DOCUMENTOS_CERTIFICADOS_POL, securityController.usuarioTemPermissao("documentosCertificadosPOL", "pesquisar", false));	
 			parametros.put(ParametrosPOLEnum.PAGINA_ORIGEM, pagOrigem);
 			

@@ -711,7 +711,6 @@ public class AghAtendimentos extends BaseEntitySeq<Integer> implements java.io.S
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "atendimento")
-	@OrderBy("seq")
 	public List<MpmControlPrevAltas> getControlPrevAltas() {
 		return this.controlPrevAltas;
 	}
@@ -721,7 +720,6 @@ public class AghAtendimentos extends BaseEntitySeq<Integer> implements java.io.S
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "atendimento")
-	@OrderBy("id.seqp")
 	// @JoinColumn(name = "APA_ATD_SEQ", insertable = false, updatable = false)
 	public List<MpmAltaSumario> getAltasSumario() {
 		return this.altasSumario;

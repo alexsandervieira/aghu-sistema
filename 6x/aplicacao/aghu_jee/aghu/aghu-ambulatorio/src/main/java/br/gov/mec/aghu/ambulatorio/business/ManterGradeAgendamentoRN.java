@@ -12,6 +12,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -67,6 +68,10 @@ import br.gov.mec.aghu.core.utils.DateValidator;
 @SuppressWarnings({"PMD.AghuTooManyMethods", "PMD.ExcessiveClassLength"})
 @Stateless
 public class ManterGradeAgendamentoRN extends BaseBusiness{
+
+	private static final String SALA = "sala";
+
+	private static final String ZONA = "zona";
 
 	@EJB
 	private AmbulatorioRN ambulatorioRN;
@@ -765,7 +770,7 @@ public class ManterGradeAgendamentoRN extends BaseBusiness{
 				&& gradeAgendamentoConsulta.getAacUnidFuncionalSala()
 						.getSituacao() != DominioSituacao.A) {
 			ManterGradeAgendamentoRNExceptionCode.AAC_00069.throwException(
-					parametrosZonaSala.get("zona"), parametrosZonaSala.get("sala"));
+					parametrosZonaSala.get(ZONA), parametrosZonaSala.get(SALA));
 		}
 	}
 
@@ -1042,7 +1047,7 @@ public class ManterGradeAgendamentoRN extends BaseBusiness{
 								Map<String, String> parametrosZonaSala = this.obterParametroZonaSala();
 								
 								ManterGradeAgendamentoRNExceptionCode.AAC_00131.throwException(
-										parametrosZonaSala.get("zona"), parametrosZonaSala.get("sala"), horarioGrade.getGradeAgendamentoConsulta().getSeq());
+										parametrosZonaSala.get(ZONA), parametrosZonaSala.get(SALA), horarioGrade.getGradeAgendamentoConsulta().getSeq());
 							}
 						}
 					}
@@ -1342,8 +1347,8 @@ public class ManterGradeAgendamentoRN extends BaseBusiness{
 		}
 		
 		Map<String, String> values = new HashMap<String, String>();
-		values.put("zona", labelZona);
-		values.put("sala", labelSala);
+		values.put(ZONA, labelZona);
+		values.put(SALA, labelSala);
 		
 		return values;
 	}
@@ -1358,6 +1363,88 @@ public class ManterGradeAgendamentoRN extends BaseBusiness{
 	
 	protected IServidorLogadoFacade getServidorLogadoFacade() {
 		return this.servidorLogadoFacade;
+	}
+
+
+	public void verificaAgendamentosExistentesGrade(AacHorarioGradeConsulta horarioGradeConsulta,
+			AacGradeAgendamenConsultas grade, Date dataInicio, Date dataFinal) throws ApplicationBusinessException{
+
+		if (horarioGradeConsulta.getHoraFim() == null && horarioGradeConsulta.getNumHorario() == null) {
+			return;
+		}
+		
+		Date horaFimCorrente = null;
+		Date dataConsulta = null;
+		
+		if(grade==null){
+			ManterGradeAgendamentoRNExceptionCode.AAC_00066.throwException();
+		}
+		
+		// Grades da emergencia sobrepõem, não há consistência carrega a última hora possível 
+		// dos horários para o dia da semana, para o horário sendo inserido / atualizado. 
+		if (!getInternacaoFacade().verificarCaracteristicaUnidadeFuncional(
+				grade.getAacUnidFuncionalSala().getId().getUnfSeq(),
+				ConstanteAghCaractUnidFuncionais.UNID_EMERGENCIA)) {
+			
+			if (horarioGradeConsulta.getHoraFim()!=null){
+				horaFimCorrente = horarioGradeConsulta.getHoraFim(); 
+			}else{
+				horaFimCorrente = verificaUltimoHorario(horarioGradeConsulta
+						.getHoraInicio(), horarioGradeConsulta.getNumHorario(),
+						horarioGradeConsulta.getDuracao());
+			}
+		
+			List<AacConsultas> consultasAgendadas = getAacConsultasDAO()
+					.listarConsultasMarcadasPorGradeDtInicioFim(
+							horarioGradeConsulta.getId()!=null?horarioGradeConsulta.getId().getGrdSeq():null,
+							horarioGradeConsulta.getDiaSemana(),
+							dataInicio,
+							dataFinal);
+			
+			for(AacConsultas consulta : consultasAgendadas){
+				if (consulta.getDtConsulta()!=null){
+					dataConsulta = consulta.getDtConsulta(); 
+				}else{
+					continue;
+				}
+
+				Calendar dataBaseCal = Calendar.getInstance();
+				dataBaseCal.setTime(DateUtils.truncate(dataInicio, Calendar.DATE));
+				
+				Calendar calAuxHoraInicio = Calendar.getInstance();
+				Calendar calAuxHoraFim = Calendar.getInstance();
+				Calendar calHoraInicioCorrente = Calendar.getInstance();
+				Calendar calHoraFimCorrente = Calendar.getInstance();
+				calAuxHoraInicio.setTime(horarioGradeConsulta.getHoraInicio());
+				calAuxHoraFim.setTime(horaFimCorrente);
+
+				while (!dataBaseCal.getTime().after(dataFinal)) {
+					
+					calHoraInicioCorrente.setTime(dataBaseCal.getTime());
+					calHoraInicioCorrente.set(Calendar.HOUR_OF_DAY, calAuxHoraInicio.get(Calendar.HOUR_OF_DAY));
+					calHoraInicioCorrente.set(Calendar.MINUTE, calAuxHoraInicio.get(Calendar.MINUTE));
+					calHoraInicioCorrente.set(Calendar.SECOND, 0);
+					calHoraInicioCorrente.set(Calendar.MILLISECOND, 0);
+					
+					
+					calHoraFimCorrente.setTime(dataBaseCal.getTime());
+					calHoraFimCorrente.set(Calendar.HOUR_OF_DAY, calAuxHoraFim.get(Calendar.HOUR_OF_DAY));
+					calHoraFimCorrente.set(Calendar.MINUTE, calAuxHoraFim.get(Calendar.MINUTE));
+					calHoraFimCorrente.set(Calendar.SECOND, 0);
+					calHoraFimCorrente.set(Calendar.MILLISECOND, 0);
+					
+					if (dataConsulta.after(calHoraInicioCorrente.getTime())
+							&& dataConsulta.before(calHoraFimCorrente.getTime())){
+						
+						Map<String, String> parametrosZonaSala = this.obterParametroZonaSala();
+						
+						ManterGradeAgendamentoRNExceptionCode.AAC_00131.throwException(
+								parametrosZonaSala.get(ZONA), parametrosZonaSala.get(SALA), consulta.getGradeAgendamenConsulta().getSeq());
+					}
+					dataBaseCal.add(Calendar.DATE, 1);
+				}
+			}
+		}
 	}
 	
 }

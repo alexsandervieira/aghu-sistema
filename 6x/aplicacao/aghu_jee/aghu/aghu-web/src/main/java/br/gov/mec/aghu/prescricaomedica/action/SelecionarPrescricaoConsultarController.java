@@ -56,6 +56,8 @@ public class SelecionarPrescricaoConsultarController extends ActionController {
 	private static final String SELECIONAR_PRESCRICAO_CONSULTAR = "prescricaomedica-selecionarPrescricaoConsultar";
 	private static final String LISTA_ATENDIMENTO_DIVERSO = "exames-atendimentoDiversoList";
 
+	private static final String EXCECAO_CAPTURADA = "Exceção capturada: ";
+	
 	private static final long serialVersionUID = -1908925376684731510L;
 	
 //	private static final String RELATORIO_CONTRA_CHEQUE_PRESCRICAO_MEDICA     = "prescricaomedica-relatorioContraChequePrescricaoMedica";
@@ -164,7 +166,7 @@ public class SelecionarPrescricaoConsultarController extends ActionController {
 		if (paciente != null) {
 			codigoPaciente = paciente.getCodigo();
 			prontuario = paciente.getProntuario();
-			atendimentos = ambulatorioFacade.pesquisarAtendimentoParaPrescricaoMedica(paciente.getCodigo(), atdSeq);
+			atendimentos = ambulatorioFacade.pesquisarAtendimentoParaPrescricaoMedicaSemRestricaoDeHorario(paciente.getCodigo(), atdSeq);
 			if(atendimentos != null && !atendimentos.isEmpty()) {
 				if(atendimentos.size() == 1) {
 					atendimento = atendimentos.get(0);
@@ -403,10 +405,10 @@ public class SelecionarPrescricaoConsultarController extends ActionController {
 //			}
 			
 		} catch (BaseException e) {
-            LOG.error("Exceção capturada: ", e);
+            LOG.error(EXCECAO_CAPTURADA, e);
 			apresentarExcecaoNegocio(e);
 		} catch (Exception e) {
-            LOG.error("Exceção capturada: ", e);
+            LOG.error(EXCECAO_CAPTURADA, e);
             apresentarMsgNegocio(Severity.ERROR, "MENSAGEM_NAO_FOI_POSSIVEL_IMPRIMIR_CONTRACHEQUE");
         }
 
@@ -633,6 +635,33 @@ public class SelecionarPrescricaoConsultarController extends ActionController {
 
 	public void setShowModalAtendimentos(Boolean showModalAtendimentos) {
 		this.showModalAtendimentos = showModalAtendimentos;
+	}
+	
+	public String imprimirPrescricaoMedica(MpmPrescricaoMedica prescricao) {
+		try {
+			setPrescricaoMedica(prescricao);
+			
+			this.prescricaoMedicaVO = this.prescricaoMedicaFacade.buscarDadosCabecalhoContraCheque(this.prescricaoMedica,listaItensPrescricao.isEmpty());
+			this.prescricaoMedicaVO.setItens(listaItensPrescricao);
+			
+			relatorioPrescricaoMedicaController.setTipoImpressao(EnumTipoImpressao.REIMPRESSAO);
+			relatorioPrescricaoMedicaController.setPrescricaoMedicaVO(prescricaoMedicaVO);
+			getPrescricaoMedicaVO().setPrescricaoMedica(getPrescricaoMedica());
+			relatorioPrescricaoMedicaController.setDataMovimento(new Date());
+			relatorioPrescricaoMedicaController.setServidorValido(prescricaoMedicaVO.getPrescricaoMedica().getServidorValida());
+			
+			relatorioPrescricaoMedicaController.observarEventoReimpressaoPrescricao();
+			
+			
+		} catch (BaseException e) {
+            LOG.error(EXCECAO_CAPTURADA, e);
+			apresentarExcecaoNegocio(e);
+		} catch (Exception e) {
+            LOG.error(EXCECAO_CAPTURADA, e);
+            apresentarMsgNegocio(Severity.ERROR, "MENSAGEM_NAO_FOI_POSSIVEL_IMPRIMIR_CONTRACHEQUE");
+        }
+
+		return SELECIONAR_PRESCRICAO_CONSULTAR;
 	}
 	
 }

@@ -226,7 +226,7 @@ private SigObjetoCustoVersoesDAO sigObjetoCustoVersoesDAO;
 			ItemClienteObjetoCustoVO itemVo = new ItemClienteObjetoCustoVO();
 			
 			if(cliente.getIndTodosCct() != null && cliente.getIndTodosCct()){
-				itemVo.setCliente("Todos centros de custo excluindo os do grupo de obras");
+				itemVo.setCliente("Todos centros de atividade excluindo os do grupo de obras");
 				itemVo.setDirecionador(cliente.getDirecionadores().getNome());
 			}
 			else{

@@ -84,7 +84,7 @@ public class MpmUnidadeMedidaMedicaJn extends BaseJournal implements
 		this.serVinCodigo = serVinCodigo;
 	}
 
-	@Column(name = "DESCRICAO", length = 15)
+	@Column(name = "DESCRICAO", length = 30)
 	public String getDescricao() {
 		return this.descricao;
 	}

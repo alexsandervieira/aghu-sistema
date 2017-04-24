@@ -1379,7 +1379,7 @@ public class FaturamentoFatkPmrRN extends AbstractFatDebugLogEnableRN {
 	 * @throws BaseException
 	 */
 	@SuppressWarnings({"PMD.ExcessiveMethodLength","PMD.NcssMethodCount","PMD.NPathComplexity", "ucd"})
-	void geraEspelhoFaturamentoAmbulatorio(final FatCompetencia competenciaParam, Date pCpeDtFim, Boolean pPrevia, final AghJobDetail log, String nomeMicrocomputador, final Date dataFimVinculoServidor) throws BaseException {
+	public void geraEspelhoFaturamentoAmbulatorio(final FatCompetencia competenciaParam, Date pCpeDtFim, Boolean pPrevia, final AghJobDetail log, String nomeMicrocomputador, final Date dataFimVinculoServidor) throws BaseException {
 		RapServidores servidorLogado = getServidorLogadoFacade().obterServidorLogado();
 		
 		//-- Milena outubro/2002 setando segmento rbs_large para on-line

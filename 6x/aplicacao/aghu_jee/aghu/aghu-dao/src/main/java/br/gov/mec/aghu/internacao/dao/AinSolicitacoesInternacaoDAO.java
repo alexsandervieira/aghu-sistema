@@ -24,6 +24,7 @@ import br.gov.mec.aghu.model.FatItensProcedHospitalar;
 import br.gov.mec.aghu.model.RapPessoasFisicas;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.utils.DateUtil;
 
 public class AinSolicitacoesInternacaoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<AinSolicitacoesInternacao> {
 
@@ -115,6 +116,22 @@ public class AinSolicitacoesInternacaoDAO extends br.gov.mec.aghu.core.persisten
 		return executeCriteria(criteria, firstResult, maxResults, orderProperty, asc);
 	}
 	
+	public List<AinSolicitacoesInternacao> pesquisarNegativaSolicitacaoInternacao(Date dataNegativa, AghEspecialidades especialidade)
+		  throws ApplicationBusinessException {
+		
+		DetachedCriteria criteria = DetachedCriteria.forClass(AinSolicitacoesInternacao.class);
+		
+		criteria.setFetchMode(AinSolicitacoesInternacao.Fields.PACIENTE.toString(), FetchMode.JOIN);
+		if (especialidade != null && especialidade.getSeq() != null) {
+			criteria.add(Restrictions.eq(AinSolicitacoesInternacao.Fields.ESPECIALIDADE_SEQ.toString(), especialidade.getSeq()));
+		}
+		criteria.add(Restrictions.eq(AinSolicitacoesInternacao.Fields.NEGACAO_INTERNACAO.toString(),Boolean.TRUE));
+		criteria.add(Restrictions.ge(AinSolicitacoesInternacao.Fields.NEGADO_EM.toString(),DateUtil.obterDataComHoraInical(dataNegativa)));
+		criteria.add(Restrictions.le(AinSolicitacoesInternacao.Fields.NEGADO_EM.toString(),DateUtil.obterDataComHoraFinal(dataNegativa)));
+
+		return executeCriteria(criteria);
+	}
+			
 	public Long pesquisarSolicitacaoInternacaoCount(DominioSituacaoSolicitacaoInternacao indSolicitacaoInternacao,
 			AghClinicas clinica, Date criadoEm, Date dtPrevistaInternacao, AipPacientes paciente, ServidorConselhoVO crm,
 			AghEspecialidades especialidade, ConvenioPlanoVO convenio) throws ApplicationBusinessException {

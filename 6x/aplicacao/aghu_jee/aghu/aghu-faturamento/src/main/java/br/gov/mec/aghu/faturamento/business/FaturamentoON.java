@@ -983,11 +983,13 @@ public class FaturamentoON extends BaseBusiness {
 		final String destinatariosParam = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_EMAIL_FATURAMENTO_AMBULATORIO)
 				.getVlrTexto();
 
-		final List<String> destinatarios = Arrays.asList(destinatariosParam.split(";"));
-
-		final String titulo = "Execucao do Faturamento do Ambulatório em " + DateUtil.obterDataFormatadaHoraMinutoSegundo(new Date());
-
-		getEmailUtil().enviaEmail(remetentes, destinatarios, null, titulo, msg);
+		if(destinatariosParam != null) {
+			final List<String> destinatarios = Arrays.asList(destinatariosParam.split(";"));
+			
+			final String titulo = "Execucao do Faturamento do Ambulatório em " + DateUtil.obterDataFormatadaHoraMinutoSegundo(new Date());
+			
+			getEmailUtil().enviaEmail(remetentes, destinatarios, null, titulo, msg);
+		}
 	}
 
 	public void enviaEmailResultadoEncerramentoAmbulatorio(final String msg, String remetente, List<String> destinatarios)

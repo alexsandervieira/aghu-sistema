@@ -17,7 +17,14 @@
           </div> 
         </aghu:panelGeral>  
         <aghu:acao> 
-          <mec:commandButton value="#{messages.LABEL_VOLTAR}" immediate="true" action="#{relatorioMateriaisColetarController.voltar}" styleClass=" icon-back alinha-direita bt_cinza" ajax="true" profile="back"/> 
+           <p:outputPanel rendered="true" id="panelAcoes" layout="inline">
+               <mec:commandButton id="bt_print_buttonPrint" 
+                   		          value="#{messages.LABEL_IMPRIMIR}" 
+            		              action="#{relatorioMateriaisColetarController.directPrintPDF}" 
+            		              profile="print" 
+            		              rendered="#{mf:hasPermission(securityController,'relatorioMateriaisColetarInternacao,pesquisar')}"/>
+               <mec:commandButton value="#{messages.LABEL_VOLTAR}" immediate="true" action="#{relatorioMateriaisColetarController.voltar}" styleClass=" icon-back alinha-direita bt_cinza" ajax="true" profile="back"/> 
+           </p:outputPanel>    
         </aghu:acao> 
       </h:form> 
     </ui:define> 

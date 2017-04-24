@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import br.gov.mec.aghu.dominio.DominioIndConcluido;
 import br.gov.mec.aghu.model.AinLeitos;
+import br.gov.mec.aghu.prescricaomedica.vo.PacienteListaProfissionalVO.StatusAnamneseEvolucao;
 import br.gov.mec.aghu.view.VListaEpePrescricaoEnfermagem;
 
 
@@ -36,6 +37,8 @@ public class PacienteEnfermagemVO implements Serializable{
 	private Boolean indPrevAlta;
 	private String  colorPrevAlta;
 	private StatusSinalizadorUP sinalizadorUlceraPressao;
+	private Boolean enableButtonAnamneseEvolucao;
+	private StatusAnamneseEvolucao statusAnamneseEvolucao;
 	
 	public PacienteEnfermagemVO(VListaEpePrescricaoEnfermagem atendimento) {
 		this.atdSeq = atendimento.getAtdSeq();
@@ -450,4 +453,20 @@ public class PacienteEnfermagemVO implements Serializable{
 	public int hashCode() {
 		return new HashCodeBuilder().append(this.atdSeq).toHashCode();
 	}
+
+	public boolean isEnableButtonAnamneseEvolucao() {
+		return enableButtonAnamneseEvolucao;
+	}
+
+	public void setEnableButtonAnamneseEvolucao(boolean enableButtonAnamneseEvolucao) {
+		this.enableButtonAnamneseEvolucao = enableButtonAnamneseEvolucao;
+	}
+	
+	public StatusAnamneseEvolucao getStatusAnamneseEvolucao() {
+		return statusAnamneseEvolucao;
+	}
+
+	public void setStatusAnamneseEvolucao(StatusAnamneseEvolucao statusAnamneseEvolucao) {
+		this.statusAnamneseEvolucao = statusAnamneseEvolucao;
+	}	
 }

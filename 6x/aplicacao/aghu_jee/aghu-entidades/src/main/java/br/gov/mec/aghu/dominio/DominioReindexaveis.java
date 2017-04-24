@@ -1,5 +1,6 @@
 package br.gov.mec.aghu.dominio;
 
+import br.gov.mec.aghu.casca.model.Menu;
 import br.gov.mec.aghu.model.AipCaixaPostalComunitarias;
 import br.gov.mec.aghu.model.AipCidades;
 import br.gov.mec.aghu.model.AipGrandesUsuarios;
@@ -27,7 +28,8 @@ public enum DominioReindexaveis {
 	AIPGRANDESUSUARIOS(AipGrandesUsuarios.class.getCanonicalName()),
 	SCOMARCACOMERCIAL(ScoMarcaComercial.class.getCanonicalName()),
 	SCOMARCAMODELO(ScoMarcaModelo.class.getCanonicalName()),
-	MAMORIGEMPACIENTE(MamOrigemPaciente.class.getCanonicalName());
+	MAMORIGEMPACIENTE(MamOrigemPaciente.class.getCanonicalName()),
+	MENU(Menu.class.getCanonicalName());
 	
 	private String descricao;
 

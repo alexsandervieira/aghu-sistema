@@ -217,7 +217,9 @@ public class ConsultoriaON extends BaseBusiness {
 		this.gerarValorSequencialId(solicitacaoConsultoria);
 		
 		solicitacaoConsultoria.setPrescricaoMedica(prescricao);
-
+	
+		Integer ordem = this.mpmSolicitacaoConsultoriaDAO.buscaOrdemPrescricaoConsultoria(solicitacaoConsultoria.getPrescricaoMedica().getId());
+		solicitacaoConsultoria.setOrdem(ordem);
 		this.getMpmSolicitacaoConsultoriaDAO().persistir(solicitacaoConsultoria);
 
 	}

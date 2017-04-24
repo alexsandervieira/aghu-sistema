@@ -1,12 +1,11 @@
 package br.gov.mec.aghu.estoque.ejb;
 
-import javax.ejb.Local;
+import java.io.Serializable;
 
-import br.gov.mec.aghu.model.SceReqMaterial;
 import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.model.SceReqMaterial;
 
-@Local
-public interface EfetivarRequisicaoMaterialBeanLocal {
+public interface EfetivarRequisicaoMaterialBeanLocal extends Serializable {
 
 	void efetivarRequisicaoMaterial(SceReqMaterial sceReqMateriais, String nomeMicrocomputador) throws BaseException;
 

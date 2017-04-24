@@ -5,9 +5,13 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 
 import br.gov.mec.aghu.dominio.DominioIndExcluidoDispMdtoCbSps;
 import br.gov.mec.aghu.model.AfaDispMdtoCbSps;
+import br.gov.mec.aghu.model.AfaDispensacaoMdtos;
+import br.gov.mec.aghu.model.AfaMedicamento;
+import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.SceLoteDocImpressao;
 
 
@@ -98,6 +102,14 @@ public class AfaDispMdtoCbSpsDAO extends br.gov.mec.aghu.core.persistence.dao.Ba
 			String etiqueta, DominioIndExcluidoDispMdtoCbSps indExcluido, String loteCodigo) {
 		
 		DetachedCriteria criteria = DetachedCriteria.forClass(AfaDispMdtoCbSps.class, ALIAS_AFA_DISP_MDTO_CB_SPS);
+		criteria.createAlias(ALIAS_AFA_DISP_MDTO_CB_SPS + "." + AfaDispMdtoCbSps.Fields.DISPENSACAO.toString(), "dseq", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("dseq." + AfaDispensacaoMdtos.Fields.UNID_SOLICITANTE.toString(), "unid", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("dseq." + AfaDispensacaoMdtos.Fields.FARMACIA.toString(), "unidFunc", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("dseq." + AfaDispensacaoMdtos.Fields.ATENDIMENTO.toString(), "ate", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("dseq." + AfaDispensacaoMdtos.Fields.MEDICAMENTO.toString(), "med", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("med." + AfaMedicamento.Fields.TPR.toString(), "tipoApre", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias("ate." + AghAtendimentos.Fields.PACIENTE.toString(), "pac", JoinType.LEFT_OUTER_JOIN);
+		
 		criteria.add(Restrictions.eq(AfaDispMdtoCbSps.Fields.NRO_ETIQUETA.toString(), etiqueta));
 		
 		if(indExcluido != null){

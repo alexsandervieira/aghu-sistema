@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="relatorioTicketExamesPaciente" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f1ab020d-dae3-4ae9-a230-36f1faa3b603">
-	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="396"/>
+	<property name="ireport.y" value="144"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<subDataset name="dataset1" uuid="cabc501b-095b-411d-a130-141d29fc1e75"/>
 	<parameter name="dataAtual" class="java.lang.String"/>
@@ -115,6 +115,8 @@
 		<fieldDescription><![CDATA[localizador]]></fieldDescription>
 	</field>
 	<field name="maiorTempoJejum" class="java.lang.String"/>
+	<field name="nroCartaoSaude" class="java.lang.String"/>
+	<field name="nomeSolicitante" class="java.lang.String"/>
 	<variable name="contadorDias" class="java.lang.Integer" resetType="Group" resetGroup="comparecer" calculation="Highest">
 		<variableExpression><![CDATA[$F{tempoRealizacaoDias}]]></variableExpression>
 	</variable>
@@ -138,23 +140,9 @@
 			</band>
 		</groupHeader>
 		<groupFooter>
-			<band height="190">
+			<band height="141">
 				<staticText>
-					<reportElement uuid="59780f13-03ca-4da3-8c87-c7fa27752571" x="7" y="6" width="306" height="15"/>
-					<textElement>
-						<font fontName="Courier New"/>
-					</textElement>
-					<text><![CDATA[Preparo do paciente para realização do exame:]]></text>
-				</staticText>
-				<textField>
-					<reportElement uuid="dcdb4990-8e5e-45f3-920e-51872b1d4d6c" x="7" y="21" width="184" height="20"/>
-					<textElement>
-						<font fontName="Courier New" size="16" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{maiorTempoJejum}]]></textFieldExpression>
-				</textField>
-				<staticText>
-					<reportElement uuid="839700bc-c87e-40b8-967a-41f8877cc64b" positionType="Float" x="5" y="84" width="129" height="15">
+					<reportElement uuid="839700bc-c87e-40b8-967a-41f8877cc64b" positionType="Float" x="5" y="27" width="129" height="15">
 						<printWhenExpression><![CDATA[! $F{informacoesClinicas}.equals("")]]></printWhenExpression>
 					</reportElement>
 					<textElement>
@@ -162,8 +150,8 @@
 					</textElement>
 					<text><![CDATA[Informações Clínicas:]]></text>
 				</staticText>
-				<textField isStretchWithOverflow="true">
-					<reportElement uuid="b32af130-24a4-4e30-a7ab-77a16e535d0f" positionType="Float" x="6" y="101" width="543" height="0">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement uuid="b32af130-24a4-4e30-a7ab-77a16e535d0f" positionType="Float" x="6" y="47" width="543" height="0">
 						<printWhenExpression><![CDATA[! $F{informacoesClinicas}.equals("")]]></printWhenExpression>
 					</reportElement>
 					<textElement>
@@ -172,44 +160,44 @@
 					<textFieldExpression><![CDATA[$F{informacoesClinicas}]]></textFieldExpression>
 				</textField>
 				<line>
-					<reportElement uuid="8fa12de9-3d6c-42d4-8faa-0abb2a3e466b" positionType="Float" x="7" y="120" width="15" height="1"/>
+					<reportElement uuid="8fa12de9-3d6c-42d4-8faa-0abb2a3e466b" positionType="Float" x="7" y="63" width="15" height="1"/>
 					<graphicElement>
 						<pen lineStyle="Dashed"/>
 					</graphicElement>
 				</line>
 				<line>
-					<reportElement uuid="46039c14-8652-4a93-9cab-7a46fc2388db" positionType="Float" x="160" y="120" width="390" height="1"/>
+					<reportElement uuid="46039c14-8652-4a93-9cab-7a46fc2388db" positionType="Float" x="160" y="66" width="390" height="1"/>
 					<graphicElement>
 						<pen lineStyle="Dashed"/>
 					</graphicElement>
 				</line>
 				<staticText>
-					<reportElement uuid="665f2d7b-6f26-47cf-9009-22af82b86fa5" positionType="Float" x="5" y="127" width="530" height="12"/>
+					<reportElement uuid="665f2d7b-6f26-47cf-9009-22af82b86fa5" positionType="Float" x="5" y="70" width="530" height="12"/>
 					<textElement>
 						<font fontName="Courier New"/>
 					</textElement>
 					<text><![CDATA[Guarde este documento até a data do exame.]]></text>
 				</staticText>
 				<line>
-					<reportElement uuid="6b904f65-3816-4f7c-ac75-8bf975715e6e" positionType="Float" x="7" y="169" width="545" height="1"/>
+					<reportElement uuid="6b904f65-3816-4f7c-ac75-8bf975715e6e" positionType="Float" x="7" y="115" width="545" height="1"/>
 					<graphicElement>
 						<pen lineStyle="Dashed"/>
 					</graphicElement>
 				</line>
 				<break>
-					<reportElement uuid="891b958a-a944-44cd-87a9-76e60bf1f532" x="0" y="189" width="100" height="1">
+					<reportElement uuid="891b958a-a944-44cd-87a9-76e60bf1f532" x="0" y="135" width="100" height="1">
 						<printWhenExpression><![CDATA[$P{totalRegistros} != $V{totalPaginas}]]></printWhenExpression>
 					</reportElement>
 				</break>
 				<staticText>
-					<reportElement uuid="c46876b5-6435-4ffc-948f-fd4971348e4b" x="5" y="61" width="530" height="20"/>
+					<reportElement uuid="c46876b5-6435-4ffc-948f-fd4971348e4b" x="5" y="4" width="530" height="20"/>
 					<textElement>
 						<font fontName="Courier New" size="14" isBold="true"/>
 					</textElement>
 					<text><![CDATA[Documento de identidade será exigido para realização do exame.]]></text>
 				</staticText>
 				<staticText>
-					<reportElement uuid="4008e05f-4436-4e22-98ff-5ddca7bfc180" positionType="Float" x="22" y="114" width="138" height="15">
+					<reportElement uuid="4008e05f-4436-4e22-98ff-5ddca7bfc180" positionType="Float" x="22" y="57" width="138" height="15">
 						<printWhenExpression><![CDATA[! $F{informacoesClinicas}.equals("")]]></printWhenExpression>
 					</reportElement>
 					<textElement textAlignment="Center">
@@ -274,7 +262,7 @@
 					<reportElement uuid="3579527a-66be-4168-a3b3-e9cb20b1e4f4" x="164" y="63" width="385" height="1"/>
 				</line>
 				<textField>
-					<reportElement uuid="13bb6411-c84b-4af4-800c-2f7f643eafb5" x="114" y="0" width="435" height="15">
+					<reportElement uuid="13bb6411-c84b-4af4-800c-2f7f643eafb5" x="114" y="16" width="435" height="15">
 						<printWhenExpression><![CDATA[! $F{examesAgendados}.equals("")]]></printWhenExpression>
 					</reportElement>
 					<textElement>
@@ -283,7 +271,7 @@
 					<textFieldExpression><![CDATA[$F{examesAgendados}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement uuid="14335d57-5ba1-456f-b19c-3c4fe7a2999f" x="7" y="0" width="106" height="15">
+					<reportElement uuid="14335d57-5ba1-456f-b19c-3c4fe7a2999f" x="7" y="16" width="106" height="15">
 						<printWhenExpression><![CDATA[! $F{examesAgendados}.equals("")]]></printWhenExpression>
 					</reportElement>
 					<textElement>
@@ -356,7 +344,7 @@
 				<text><![CDATA[Idade:]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="5a997c2e-21ff-4f57-b358-ce0f3961c897" x="44" y="80" width="172" height="15"/>
+				<reportElement uuid="5a997c2e-21ff-4f57-b358-ce0f3961c897" x="44" y="80" width="90" height="15"/>
 				<textElement>
 					<font fontName="Courier New"/>
 				</textElement>
@@ -374,31 +362,31 @@
 				<textElement>
 					<font fontName="Courier New"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{nomeResp} != null ? $F{nomeResp} : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{nomeSolicitante} != null ? $F{nomeSolicitante} : ""]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="4c3bbf23-2366-4af2-a139-22e5a30c6a9c" x="5" y="113" width="74" height="15"/>
+				<reportElement uuid="4c3bbf23-2366-4af2-a139-22e5a30c6a9c" x="5" y="128" width="74" height="15"/>
 				<textElement>
 					<font fontName="Courier New"/>
 				</textElement>
 				<text><![CDATA[Unid.Solic:]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="dfbba2ec-049f-42c8-9e6e-471cdbd5b14b" x="79" y="113" width="397" height="15"/>
+				<reportElement uuid="dfbba2ec-049f-42c8-9e6e-471cdbd5b14b" x="79" y="128" width="234" height="15"/>
 				<textElement>
 					<font fontName="Courier New"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{descricaoUnidadeSolicitante}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="2dff6606-ac88-4f09-86a1-c6dfa66792a0" x="5" y="129" width="74" height="15"/>
+				<reportElement uuid="2dff6606-ac88-4f09-86a1-c6dfa66792a0" x="315" y="128" width="61" height="15"/>
 				<textElement>
 					<font fontName="Courier New"/>
 				</textElement>
 				<text><![CDATA[Convênio:]]></text>
 			</staticText>
 			<textField>
-				<reportElement uuid="1fd9a599-b018-42e1-bda3-1a9db020ea7a" x="81" y="129" width="328" height="15"/>
+				<reportElement uuid="1fd9a599-b018-42e1-bda3-1a9db020ea7a" x="376" y="128" width="173" height="15"/>
 				<textElement>
 					<font fontName="Courier New"/>
 				</textElement>
@@ -447,10 +435,38 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{solicitacaoExameSeq}]]></textFieldExpression>
 			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="e7911281-105b-4296-bb9b-d8ac65b17ebf" x="243" y="80" width="150" height="16"/>
+				<textElement>
+					<font fontName="Courier New"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nroCartaoSaude}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="002dbb6b-36ac-4d58-abaf-1ead782b0667" x="175" y="80" width="68" height="16"/>
+				<textElement>
+					<font fontName="Courier New"/>
+				</textElement>
+				<text><![CDATA[Cartão SUS:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e3241211-d78e-4250-ad0c-5ce8e5d8ad63" x="5" y="112" width="74" height="15"/>
+				<textElement>
+					<font fontName="Courier New"/>
+				</textElement>
+				<text><![CDATA[Responsável:]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="14c84c23-691a-441c-96ab-d155172c0693" x="80" y="112" width="344" height="15"/>
+				<textElement>
+					<font fontName="Courier New"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nomeResp} != null ? $F{nomeResp} : ""]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageHeader>
 	<detail>
-		<band height="37" splitType="Stretch">
+		<band height="78" splitType="Stretch">
 			<textField>
 				<reportElement uuid="6c3a7af2-abb3-462b-ac14-51bd583ca33b" x="134" y="0" width="16" height="15"/>
 				<textElement>
@@ -487,6 +503,20 @@
 				</textElement>
 				<text><![CDATA[Recomendações]]></text>
 			</staticText>
+			<staticText>
+				<reportElement uuid="59780f13-03ca-4da3-8c87-c7fa27752571" positionType="FixRelativeToBottom" x="6" y="38" width="306" height="15"/>
+				<textElement>
+					<font fontName="Courier New"/>
+				</textElement>
+				<text><![CDATA[Preparo do paciente para realização do exame:]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="dcdb4990-8e5e-45f3-920e-51872b1d4d6c" positionType="FixRelativeToBottom" x="6" y="53" width="184" height="20"/>
+				<textElement>
+					<font fontName="Courier New" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{maiorTempoJejum}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<pageFooter>

@@ -112,6 +112,7 @@ import br.gov.mec.aghu.prescricaomedica.business.IPrescricaoMedicaFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 import br.gov.mec.aghu.registrocolaborador.dao.RapServidoresDAO;
+import br.gov.mec.aghu.core.commons.seguranca.IPermissionService;
 
 @SuppressWarnings({ "PMD.AghuTooManyMethods", "PMD.ExcessiveClassLength",
 		"PMD.CyclomaticComplexity", "PMD.CouplingBetweenObjects" })
@@ -253,6 +254,9 @@ public class AtendimentoPacientesAgendadosRN extends BaseBusiness {
 
 	@EJB
 	private ManterReceituarioRN manterReceituarioRN;
+	
+	@EJB
+    private IPermissionService permissionService;
 
 	/**
 	 * 
@@ -740,12 +744,10 @@ public class AtendimentoPacientesAgendadosRN extends BaseBusiness {
 				}
 				break;
 			case CONTRATADO:
-				if (!verificarEnfermeiroTecnicoEnfermagem(servidor.getUsuario(), retorno)){
-					if (escopo.equals(DominioEscopoAtendimento.N2)) {
-						retorno.append("médico contratado ");
-					}
-					retorno.append(titulo).append(' ');					
+				if (escopo.equals(DominioEscopoAtendimento.N2)) {
+					retorno.append("médico contratado ");
 				}
+				retorno.append(titulo).append(' ');					
 				break;
 			case RESIDENTE:
 				if (escopo.equals(DominioEscopoAtendimento.N2)) {
@@ -761,16 +763,12 @@ public class AtendimentoPacientesAgendadosRN extends BaseBusiness {
 				}
 				break;
 			default:
-				if (!verificarEnfermeiroTecnicoEnfermagem(servidor.getUsuario(), retorno)){
-					retorno.append(titulo).append(' ');					
-				}
+				retorno.append(titulo).append(' ');					
 				break;
 			}
 		}
 		else{
-			if (!verificarEnfermeiroTecnicoEnfermagem(servidor.getUsuario(), retorno)){
-				retorno.append(titulo).append(' ');					
-			}
+			retorno.append(titulo).append(' ');
 		}
 		retorno.append(WordUtils.capitalizeFully(servidor.getPessoaFisica()
 				.getNome()));
@@ -822,19 +820,6 @@ public class AtendimentoPacientesAgendadosRN extends BaseBusiness {
 		return retorno.toString();
 	}
 	
-	private Boolean verificarEnfermeiroTecnicoEnfermagem(String loginServidor, StringBuffer retorno){
-		Boolean ret = false;
-		if (cascaFacade.usuarioTemPerfil(loginServidor, "ENF05") && !cascaFacade.usuarioTemPerfil(loginServidor, "ENF01")){
-			retorno.append("Téc. Enf. ");
-			ret = true;
-		}
-		else if (cascaFacade.usuarioTemPerfil(loginServidor, "ENF01")){
-			retorno.append("Enf. ");
-			ret = true;
-		}
-		return ret;
-	}
-
 	public enum TipoVinculo {
 		PROFESSOR,
 		CONTRATADO,
@@ -2750,6 +2735,14 @@ public class AtendimentoPacientesAgendadosRN extends BaseBusiness {
 		return getMamTipoAtestadoDao().listarTodos();
 	}
 
+	public List<MamTipoAtestado> buscarTodosAtestados() throws ApplicationBusinessException{
+		AghParametros parametros = null;
+		boolean temPermissao = this.getPermissionService().usuarioTemPermissao(this.obterLoginUsuarioLogado(),"permitirAtestadoMedico", "acesso");
+		if(!temPermissao){
+			 parametros = this.getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_COD_ATESTADO_MEDICO);
+		}
+		return getMamTipoAtestadoDao().listarTodos((parametros != null)? parametros.getVlrNumerico().shortValue():null, Boolean.FALSE);
+	}
 	public void inserirAtestadoAmbulatorio(MamAtestados atestado) {
 		if (atestado.getSeq() == null) {
 			this.getMamAtestadosDAO().persistir(atestado);
@@ -3056,6 +3049,14 @@ public class AtendimentoPacientesAgendadosRN extends BaseBusiness {
 	
 	public void setMamAtestadosDAO(MamAtestadosDAO mamAtestadosDAO) {
 		this.mamAtestadosDAO = mamAtestadosDAO;
+	}
+
+	protected IPermissionService getPermissionService() {
+		return permissionService;
+	}
+
+	protected void setPermissionService(IPermissionService permissionService) {
+		this.permissionService = permissionService;
 	}
 	
 	

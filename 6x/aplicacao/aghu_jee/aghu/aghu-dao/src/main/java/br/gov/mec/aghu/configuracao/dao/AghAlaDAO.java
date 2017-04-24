@@ -45,8 +45,27 @@ public class AghAlaDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<AghA
 
 		return (Long) query.getSingleResult();
 	}
+		
 	
-
+	public AghAla obterAghAlaPorCodigoDescricao(AghAla ala,boolean isUpdate) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(AghAla.class);
+		
+		if (ala != null){
+			if(isUpdate){
+				criteria.add(Restrictions.ne(AghAla.Fields.CODIGO.toString(), ala.getCodigo()));
+				criteria.add(Restrictions.ilike(AghAla.Fields.DESCRICAO.toString(), ala.getDescricao(), MatchMode.EXACT));	
+			}else{
+				criteria.add(Restrictions.or(Restrictions.eq(AghAla.Fields.CODIGO.toString(), ala.getCodigo()), 
+						     Restrictions.ilike(AghAla.Fields.DESCRICAO.toString(), ala.getDescricao(), MatchMode.EXACT)));
+			}
+		}
+		List<AghAla> result = executeCriteria(criteria);
+		
+		return result != null && !result.isEmpty() ? result.get(0) : null;
+	}
+	
+	
+	
 	public List<AghAla> pesquisaAla(String codigo, String descricao) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(AghAla.class);
 		

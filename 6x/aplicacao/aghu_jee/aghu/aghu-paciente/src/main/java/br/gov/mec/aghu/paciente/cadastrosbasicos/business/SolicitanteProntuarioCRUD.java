@@ -6,11 +6,13 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.exception.ConstraintViolationException;
 
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.dominio.DominioTodosUltimo;
@@ -19,9 +21,6 @@ import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.model.AipFinalidadesMovimentacao;
 import br.gov.mec.aghu.model.AipSolicitantesProntuario;
 import br.gov.mec.aghu.paciente.dao.AipSolicitantesProntuarioDAO;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 @Stateless
 public class SolicitanteProntuarioCRUD extends BaseBusiness {
@@ -123,36 +122,40 @@ private AipSolicitantesProntuarioDAO aipSolicitantesProntuarioDAO;
 	 * @param solicitanteProntuario
 	 * @throws ApplicationBusinessException
 	 */
-	private void incluirSolicitanteProntuario(
-			AipSolicitantesProntuario solicitanteProntuario)
+	private void incluirSolicitanteProntuario(AipSolicitantesProntuario solicitanteProntuario)
 			throws ApplicationBusinessException {
-		this.validarDadosSolicitanteProntuario(solicitanteProntuario);
+		this.carregarDadosObrigatorios(solicitanteProntuario);
 		this.getAipSolicitantesProntuarioDAO().persistir(solicitanteProntuario);
 		this.getAipSolicitantesProntuarioDAO().flush();
 	}
-
+	
+	private void carregarDadosObrigatorios(AipSolicitantesProntuario solicitanteProntuario){
+		if(solicitanteProntuario != null && solicitanteProntuario.getSeparacaoPrevia() == null){
+			solicitanteProntuario.setSeparacaoPrevia(DominioSimNao.S);
+		}
+		if(solicitanteProntuario != null && solicitanteProntuario.getExigeResponsavel() == null){
+			solicitanteProntuario.setExigeResponsavel(true);
+		}
+		if(solicitanteProntuario != null && solicitanteProntuario.getRetorno() == null){
+			solicitanteProntuario.setRetorno(DominioSimNao.S);
+		}
+	}
+	
 	/**
 	 * Método responsável pela atualização de um solicitante de prontuário.
 	 * 
 	 * @param solicitanteProntuario
 	 * @throws ApplicationBusinessException
 	 */
-	private void atualizarSolicitanteProntuario(
-			AipSolicitantesProntuario solicitanteProntuario)
-			throws ApplicationBusinessException {
-		this.validarDadosSolicitanteProntuario(solicitanteProntuario);
-
+	private void atualizarSolicitanteProntuario(AipSolicitantesProntuario solicitanteProntuario)throws ApplicationBusinessException {
 		try {
 			this.getAipSolicitantesProntuarioDAO().atualizar(solicitanteProntuario);
 			this.getAipSolicitantesProntuarioDAO().flush();
 		}catch (PersistenceException ce) {
 			logError("Exceção capturada: ", ce);
 			if (ce.getCause() instanceof ConstraintViolationException) {
-				ConstraintViolationException cve = (ConstraintViolationException) ce
-						.getCause();
-				throw new ApplicationBusinessException(
-						SolicitanteProntuarioCRUDExceptionCode.AGHU_VIOLACAO_FK,
-						cve.getConstraintName());
+				ConstraintViolationException cve = (ConstraintViolationException) ce.getCause();
+				throw new ApplicationBusinessException(SolicitanteProntuarioCRUDExceptionCode.AGHU_VIOLACAO_FK,cve.getConstraintName());
 			}
 		}
 	}
@@ -165,33 +168,29 @@ private AipSolicitantesProntuarioDAO aipSolicitantesProntuarioDAO;
 	 * @param solicitanteProntuario
 	 * @throws ApplicationBusinessException
 	 */
-	private void validarDadosSolicitanteProntuario(
-			AipSolicitantesProntuario solicitanteProntuario)
-			throws ApplicationBusinessException {
-		// Regra de negócio #1: O usuário deve selecionar uma, e apenas uma,
-		// opção entre os seguintes campos: unidades funcionais, origem de
-		// eventos e descrição
-		int count = 0;
-		if (solicitanteProntuario.getUnidadesFuncionais() != null) {
-			count++;
-		}
-		if (solicitanteProntuario.getOrigemEventos() != null) {
-			count++;
-		}
-		if (!StringUtils.isBlank(solicitanteProntuario.getDescricao())) {
-			count++;
-		}
-		if (count != 1) {
-			throw new ApplicationBusinessException(
-					SolicitanteProntuarioCRUDExceptionCode.RESTRICAO_CADASTRO_SOLICITANTE_PRONTUARIO);
-		}
-
-		// Regra de negócio #2: O campo Volumes Manuseados é obrigatório
-		if (solicitanteProntuario.getVolumesManuseados() == null) {
-			throw new ApplicationBusinessException(
-					SolicitanteProntuarioCRUDExceptionCode.VOLUMES_MANUSEADOS_SOLICITANTE_PRONTUARIO_OBRIGATORIO);
-		}
-	}
+//	private void validarDadosSolicitanteProntuario(AipSolicitantesProntuario solicitanteProntuario) throws ApplicationBusinessException {
+//		// Regra de negócio #1: O usuário deve selecionar uma, e apenas uma,
+//		// opção entre os seguintes campos: unidades funcionais, origem de
+//		// eventos e descrição
+//		int count = 0;
+//		if (solicitanteProntuario.getUnidadesFuncionais() != null) {
+//			count++;
+//		}
+//		if (solicitanteProntuario.getOrigemEventos() != null) {
+//			count++;
+//		}
+//		if (!StringUtils.isBlank(solicitanteProntuario.getDescricao())) {
+//			count++;
+//		}
+//		if (count != 1) {
+//			throw new ApplicationBusinessException(SolicitanteProntuarioCRUDExceptionCode.RESTRICAO_CADASTRO_SOLICITANTE_PRONTUARIO);
+//		}
+//
+//		// Regra de negócio #2: O campo Volumes Manuseados é obrigatório
+//		if (solicitanteProntuario.getVolumesManuseados() == null) {
+//			throw new ApplicationBusinessException(SolicitanteProntuarioCRUDExceptionCode.VOLUMES_MANUSEADOS_SOLICITANTE_PRONTUARIO_OBRIGATORIO);
+//		}
+//	}
 
 	protected AipSolicitantesProntuarioDAO getAipSolicitantesProntuarioDAO() {
 		return aipSolicitantesProntuarioDAO;

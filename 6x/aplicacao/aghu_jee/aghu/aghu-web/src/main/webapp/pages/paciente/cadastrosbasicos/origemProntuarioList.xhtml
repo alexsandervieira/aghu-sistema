@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:fn="http://xmlns.jcp.org/jsp/jstl/functions" xmlns:mec="http://xmlns.jcp.org/jsf/composite/components" xmlns:p="http://primefaces.org/ui" xmlns:pe="http://primefaces.org/ui/extensions" xmlns:aghu="http://xmlns.jcp.org/jsf/component" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:c="http://xmlns.jcp.org/jsp/jstl/core" xmlns:mf="http://www.mec.gov.br/taglib">
   <ui:composition template="/WEB-INF/templates/form_template.xhtml">  
     <ui:define name="head"> 
@@ -11,7 +10,7 @@
           <aghu:linha> 
             <mec:inputNumero name="codigo" value="#{origemProntuarioPaginatorController.codigo}" label="#{messages.LABEL_CODIGO}" title="#{messages.TITLE_CODIGO_FINALIDADE_MOVIMENTACAO}" maxlength="3" size="3"/>  
             <mec:inputText name="descricao" label="#{messages.LABEL_DESCRICAO}" title="#{messages.TITLE_PESQ_DESCRICAO_UNID_FUNCIONAL}" value="#{origemProntuarioPaginatorController.descricaoPesquisa}" size="60" maxlength="60" style="text-transform:uppercase"/>  
-          	<mec:selectOneMenu enum="DominioSituacao" label="#{messages.LABEL_ATIVO}" value="#{origemProntuarioPaginatorController.situacaoOrigemProntuario}" title="#{messages.TITLE_ATIVO_SOLICITANTE_PRONTUARIO}" id="situacao"/>
+          	<mec:selectOneMenu enum="DominioSituacao" label="#{messages.LABEL_SITUACAO}" value="#{origemProntuarioPaginatorController.situacaoOrigemProntuario}" title="#{messages.TITLE_ATIVO_SOLICITANTE_PRONTUARIO}" id="situacao"/>
           </aghu:linha> 
         </aghu:panelGeral>  
         <aghu:acao> 
@@ -23,23 +22,26 @@
       <h:form prependId="false" id="resultados"> 
           <mec:serverDataTable dataModel="dataModel" value="#{origemProntuarioPaginatorController}" title="#{messages.MENSAGEM_ORIGEM_PRONTUARIO_ENCONTRADO}" id="tabelaOrigemProntuario" controller="#{origemProntuarioPaginatorController}">
           <c:set var="_origemProntuario" value="#{item}"/> 
-            <p:column headerText="#{messages.LABEL_ACAO}"> 
+            <p:column headerText="#{messages.LABEL_ACAO}" width="60"> 
 	            <mec:commandLink id="tabelaOrigemProntuario_link_editar" profile="edit" title="editar" action="#{origemProntuarioPaginatorController.prepararEdicao}"> 
 		              <f:setPropertyActionListener target="#{origemProntuarioController.samisOrigemProntuario}" value="#{_origemProntuario}" for="command"/>  
 		              <f:setPropertyActionListener for="command" target="#{origemProntuarioPaginatorController.selecionado}" value="#{_origemProntuario}"/>
 		        </mec:commandLink>
-	            <mec:commandLink id="tabelaOrigensProntuario_link_remover" profile="delete" title="excluir" action="#{origemProntuarioPaginatorController.excluir}"> 
-	              <f:setPropertyActionListener for="command" target="#{origemProntuarioPaginatorController.selecionado}" value="#{_origemProntuario}"/> 
+	            <mec:commandLink id="tabelaOrigensProntuario_link_remover" profile="delete" title="excluir" action="#{origemProntuarioPaginatorController.excluir}" render="resultados"> 
+	            	<f:setPropertyActionListener for="command" target="#{origemProntuarioPaginatorController.selecionado}" value="#{_origemProntuario}"/> 
 	            </mec:commandLink>
             </p:column> 
-            <p:column headerText="#{messages.LABEL_CODIGO}"> 
+            <p:column headerText="#{messages.LABEL_CODIGO}" width="60"> 
               <h:outputText value="#{_origemProntuario.codigo}"/> 
             </p:column>  
             <p:column headerText="#{messages.LABEL_DESCRICAO}"> 
               <h:outputText value="#{_origemProntuario.descricao}"/> 
             </p:column>  
-            <p:column headerText="#{messages.LABEL_ATIVO}"> 
+            <p:column style="text-align: center;" headerText="#{messages.LABEL_SITUACAO}" width="80"> 
               <h:outputText value="#{_origemProntuario.descricaoAtivo}"/> 
+            </p:column> 
+            <p:column style="text-align: center;" headerText="#{messages.LABEL_UNIDADE_ORIGEM_PADRAO}" width="140"> 
+              <h:outputText value="#{_origemProntuario.descricaoOrigemPadrao}"/> 
             </p:column> 
           </mec:serverDataTable> 
       </h:form>  

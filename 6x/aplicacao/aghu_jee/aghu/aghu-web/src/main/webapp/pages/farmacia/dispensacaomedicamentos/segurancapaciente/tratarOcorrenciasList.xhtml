@@ -7,7 +7,7 @@
     </ui:define>  
     <ui:define name="metadata"> 
       <f:metadata> 
-        <f:viewAction action="#{tratarOcorrenciasPaginatorController.iniciarPagina}"/> 
+        <f:viewAction action="#{tratarOcorrenciasPaginatorController.iniciarPagina}" /> 
       </f:metadata> 
     </ui:define>  
     <ui:define name="body"> 
@@ -96,7 +96,7 @@
             </mec:suggestionBox> 
           </aghu:linha>  
           <aghu:linha> 
-            <mec:suggestionBox label="#{messages.LABEL_FARMACIA}" title="#{messages.TITLE_TRATAR_OCORRENCIAS_FARMACIA_DISPENSADORA}" descricaoInput="seq" descricaoLabel="andarAlaDescricao" suggestionAction="pesquisarFarmacias" readonly="#{tratarOcorrenciasPaginatorController.origemTelaRealizarTriagem}" width="500" id="farmacia" controller="#{tratarOcorrenciasPaginatorController}" value="#{tratarOcorrenciasPaginatorController.farmacia}"> 
+            <mec:suggestionBox label="#{messages.LABEL_FARMACIA}" title="#{messages.TITLE_TRATAR_OCORRENCIAS_FARMACIA_DISPENSADORA}" descricaoInput="seq" descricaoLabel="andarAlaDescricao" suggestionAction="pesquisarFarmacias" readonly="#{tratarOcorrenciasPaginatorController.origemTelaRealizarTriagem}" width="500" id="farmacia" controller="#{tratarOcorrenciasPaginatorController}" value="#{tratarOcorrenciasPaginatorController.farmacia}" required="true"> 
               <p:column> 
                 <f:facet name="header"> 
                   <h:outputText value="#{messages.LABEL_CODIGO_UNIDADE}" style="font-weight: bold;"/> 
@@ -209,7 +209,7 @@
       	<p:outputPanel id="panelComRegistro" rendered="#{not empty tratarOcorrenciasPaginatorController.listaOcorrenciasMdtosDispensados}" styleClass="aghu-panel-geral"> 
           <aghu:panelGeral style="padding-left: 10px; padding-right: 10px;" legend="#{messages.TITLE_TRATAR_OCORRENCIAS}">
           
-          	<h:form prependId="false" id="formCodBarras">
+         <h:form prependId="false" id="formCodBarras">
 			<aghu:linha>
 				<mec:inputText id="etiqueta"
 					label="#{messages.LABEL_NUMERO_ETIQUETA}"
@@ -221,8 +221,9 @@
 					styleClass="laudoCodigoBarraClass" style="display:none;"
 					action="#{tratarOcorrenciasPaginatorController.pesquisaEtiquetaComCbMedicamento()}"
 					value="Cod. Barras oculto"
-					block="true"
-					render="idColumnSinaleiro, idColumnDisp, idCorSinaleiro, tabelaResultadosPanel"
+					block="true" ajax="true"
+					render="idColumnSinaleiro, idColumnDisp, idCorSinaleiro, itemDispensadoSemEtiqueta, etiqueta, tabelaResultadosPanel, tabela_resultados"
+					oncomplete="focusEtiqueta();"
 				/>
 			</aghu:linha>
 			</h:form>

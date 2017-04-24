@@ -173,7 +173,7 @@ public class FinalizaAtendimentoRN extends BaseBusiness {
 		MAM_00968, MAM_00970, MAM_00971, MAM_00972, MAM_00973, MAM_00975, MAM_00901, MAM_00902, MAM_00903, MAM_00904,
 		ERRO_CLONE_NOTA_ADICIONAL_ANAMNESES, ERRO_CLONE_NOTA_ADICIONAL_EVOLUCAO, ERRO_CLONE_PROCEDIMENTO_REALIZADO, MAM_00895,
 		MAM_00840, MAM_00841, MAM_00842, MAM_00843, MAM_00844, MAM_00633, MAM_00258, MAM_00260, MAM_00261, MAM_00263, MAM_00272,
-		MAM_00268, MAM_01201, MAM_01759, MAM_00574,ERRO_ATENDER,ERRO_ATENDER_SITUACAO;
+		MAM_00268, MAM_01201, MAM_01759, MAM_00574,ERRO_ATENDER,ERRO_ATENDER_SITUACAO,MAM_AEL_00728;
 		
 		public void throwException(Object... params)
 			throws ApplicationBusinessException {
@@ -1650,10 +1650,14 @@ public class FinalizaAtendimentoRN extends BaseBusiness {
 						} catch(Exception e){
 							logError(EXCECAO_CAPTURADA, e);
 							//throw new ApplicationBusinessException(FinalizaAtendimentoRNExceptionCode.MAM_01201, e);
-							FinalizaAtendimentoRNExceptionCode.MAM_01201.throwException(e.getMessage());
+							if(e.getMessage().equals("AEL_00728")){
+								FinalizaAtendimentoRNExceptionCode.MAM_AEL_00728.throwException(e.getMessage());
+							}else{
+								FinalizaAtendimentoRNExceptionCode.MAM_01201.throwException(e.getMessage());
+							}
 						}
 					}
-				}
+				} 
 				
 			}
 		}

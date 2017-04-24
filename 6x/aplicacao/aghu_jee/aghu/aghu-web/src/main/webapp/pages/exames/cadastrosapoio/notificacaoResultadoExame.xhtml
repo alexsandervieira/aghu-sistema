@@ -87,7 +87,7 @@
               </aghu:linha>  
               <mec:serverDataTable id="tabelaResultadosNotificados" rendered="#{not empty notificacaoResultadoExameController.listaExameResultadoNotificacao}" list="#{notificacaoResultadoExameController.listaExameResultadoNotificacao}" scrollable="true"> 
                 <c:set var="_item" value="#{item}"/>  
-                <p:column rendered="#{mf:hasPermission(securityController,'notificacaoResultadoExame,persistir')}" style="width:60px;#{(_item.id.seqp == notificacaoResultadoExameController.exameResultadoNotificacao.id.seqp)?'background-color:yellow;':''}"> 
+                <p:column rendered="#{mf:hasPermission(securityController,'notificacaoResultadoExame,persistir')}" style="width:60px;"> 
                   <f:facet name="header"> 
                     <h:outputText value="#{messages.LABEL_ACAO}"/> 
                   </f:facet>  
@@ -96,31 +96,31 @@
                   	<f:setPropertyActionListener target="#{notificacaoResultadoExameController.exameResultadoNotificacao}" value="#{_item}" for="command"/>
                  </mec:commandLink> 
                 </p:column>  
-                <p:column style="#{(_item.id.seqp == notificacaoResultadoExameController.exameResultadoNotificacao.id.seqp)?'background-color:yellow;':''}"> 
+                <p:column> 
                   <f:facet name="header"> 
                     <h:outputText value="#{messages.LABEL_CODIGO_RESULTADO_NOTIFICADO}"/> 
                   </f:facet>  
                   <h:outputText value="#{_item.id.seqp}"/> 
                 </p:column>  
-                <p:column style="#{(_item.id.seqp == notificacaoResultadoExameController.exameResultadoNotificacao.id.seqp)?'background-color:yellow;':''}"> 
+                <p:column> 
                   <f:facet name="header"> 
                     <h:outputText value="#{messages.LABEL_RESULTADO_CODIFICADO}"/> 
                   </f:facet>  
                   <h:outputText value="#{_item.aelResultadoCodificado.codigoDescricao}"/> 
                 </p:column>  
-                <p:column style="#{(_item.id.seqp == notificacaoResultadoExameController.exameResultadoNotificacao.id.seqp)?'background-color:yellow;':''}"> 
+                <p:column> 
                   <f:facet name="header"> 
                     <h:outputText value="#{messages.LABEL_RESULTADO_NUMERICO}"/> 
                   </f:facet>  
                   <h:outputText value="#{_item.resultadoNumExp}"/> 
                 </p:column>  
-                <p:column style="#{(_item.id.seqp == notificacaoResultadoExameController.exameResultadoNotificacao.id.seqp)?'background-color:yellow;':''}"> 
+                <p:column> 
                   <f:facet name="header"> 
                     <h:outputText value="#{messages.LABEL_RESULTADO_ALFANUMERICO}"/> 
                   </f:facet>  
                   <h:outputText value="#{_item.resultadoAlfanum}"/> 
                 </p:column>  
-                <p:column style="#{(_item.id.seqp == notificacaoResultadoExameController.exameResultadoNotificacao.id.seqp)?'background-color:yellow;':''}"> 
+                <p:column> 
                   <f:facet name="header"> 
                     <h:outputText value="#{messages.LABEL_SITUACAO}"/> 
                   </f:facet>  

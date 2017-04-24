@@ -24,6 +24,7 @@ import br.gov.mec.aghu.business.jobs.AghuJob;
 import br.gov.mec.aghu.business.jobs.JobParameterUtils;
 import br.gov.mec.aghu.business.jobs.manual.PassivarProntuarioJob;
 import br.gov.mec.aghu.business.jobs.manual.ProcessadorArquivosContratualizacaoJob;
+import br.gov.mec.aghu.business.jobs.manual.ProgramarEncerramentoJob;
 import br.gov.mec.aghu.business.scheduler.AutomaticJobScheduler;
 import br.gov.mec.aghu.business.scheduler.IAutomaticJobEnum;
 import br.gov.mec.aghu.business.scheduler.JobEnum;
@@ -507,6 +508,9 @@ public class SchedulerRN extends BaseBusiness {
 			break;
 		case PROCESSADOR_ARQUIVOS_CONTRATUALIZACAO:
 			classeJob = ProcessadorArquivosContratualizacaoJob.class;
+			break;
+		case PROGRAMAR_ENCERRAMENTO:
+			classeJob = ProgramarEncerramentoJob.class;
 			break;
 		default:
 			classeJob = null;

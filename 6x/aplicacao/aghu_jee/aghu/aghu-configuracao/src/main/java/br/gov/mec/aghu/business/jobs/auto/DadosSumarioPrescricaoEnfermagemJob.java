@@ -23,7 +23,7 @@ public class DadosSumarioPrescricaoEnfermagemJob extends AghuJob {
 		LOG.info("Executando processo de negocio " + nomeProcessoQuartz);
 		
 		String cron = getCron(jobExecutionContext);
-		prescricaoEnfermagemFacade.agendarGerarDadosSumarioPrescricaoEnfermagem(cron, null, null);
+		prescricaoEnfermagemFacade.agendarGerarDadosSumarioPrescricaoEnfermagem(cron, null, null,nomeProcessoQuartz);
 		
 	}
 

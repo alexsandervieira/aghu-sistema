@@ -208,7 +208,7 @@ public class RetornoCirurgiaEmLoteON extends BaseBusiness {
 		for(AghCaractUnidFuncionais caracteristica : iAghuFacade.listarCaractUnidFuncionaisEUnidadeFuncional(cirurgia.getUnidadeFuncional().getSeq().toString(), ConstanteAghCaractUnidFuncionais.BLOCO)){
 			if(caracteristica.getId().getCaracteristica() == ConstanteAghCaractUnidFuncionais.BLOCO){
 				if(cirurgia.getDigitaNotaSala()){
-					this.getMbcCirurgiasVerificacoes2RN().verificarProfissionalEnfermagem(cirurgia.getSeq());
+					this.getMbcCirurgiasVerificacoes2RN().verificarProfissionalEnfermagem(cirurgia.getSeq(), null);
 					this.getMbcCirurgiasVerificacoesRN().verificarNecessidadeAnestesista(cirurgia.getSeq());
 				}
 

@@ -3,6 +3,7 @@ package br.gov.mec.aghu.business.prescricaoenfermagem.cadastrosapoio;
 import java.io.Serializable;
 import java.util.List;
 
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.dominio.DominioSituacaoMedicamento;
 import br.gov.mec.aghu.model.AfaMedicamento;
@@ -23,7 +24,6 @@ import br.gov.mec.aghu.model.EpeSinCaractDefinidoraId;
 import br.gov.mec.aghu.model.EpeSubgrupoNecesBasica;
 import br.gov.mec.aghu.model.EpeSubgrupoNecesBasicaId;
 import br.gov.mec.aghu.prescricaoenfermagem.vo.DiagnosticosSinaisSintomasVO;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 
 public interface IPrescricaoEnfermagemApoioFacade extends Serializable {
 	
@@ -143,5 +143,9 @@ public interface IPrescricaoEnfermagemApoioFacade extends Serializable {
 	List<EpeFatRelacionado> pesquisarEtiologiasNaoRelacionadas(String filtro, Short dgnSnbGnbSeq, Short dgnSnbSequencia, Short dgnSequencia);
 
 	Long pesquisarEtiologiasNaoRelacionadasCount(String filtro, Short dgnSnbGnbSeq, Short dgnSnbSequencia, Short dgnSequencia);
+
+	EpeDiagnostico obterDiagnosticoPorId(EpeDiagnosticoId diagnosticoId);
+
+	EpeFatRelDiagnostico obterEpeFatRelDiagnosticoPorId(EpeFatRelDiagnosticoId id);
 
 }

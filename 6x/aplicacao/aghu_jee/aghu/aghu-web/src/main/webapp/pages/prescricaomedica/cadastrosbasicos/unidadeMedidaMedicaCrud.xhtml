@@ -17,7 +17,7 @@
           <p:outputPanel id="campos" layout="inline"> 
             <aghu:linha> 
               <mec:inputNumero required="false" value="#{unidadeMedidaMedicaController.unidade.seq}" label="#{messages.LABEL_CODIGO}" maxlength="6" readonly="true" size="6" rendered="#{unidadeMedidaMedicaController.unidade.seq != null}" id="codigo"/>  
-              <mec:inputText label="#{messages.LABEL_DESCRICAO_POS_ALTA}" size="16" maxlength="35" value="#{unidadeMedidaMedicaController.unidade.descricao}" title="#{(empty unidadeMedidaMedicaController.unidade.seq) ? (messages.TITLE_DESCRICAO_UNIDADE_MEDIDA_MEDICA_EDIT) : ('')}" readonly="#{not empty unidadeMedidaMedicaController.unidade.descricao}" required="#{empty unidadeMedidaMedicaController.unidade.descricao}" styleclass="suggestion_input" caixaAlta="false" removerCaratersEspeciais="false" id="descricao"/>  
+              <mec:inputText label="#{messages.LABEL_DESCRICAO_POS_ALTA}" size="16" maxlength="30" value="#{unidadeMedidaMedicaController.unidade.descricao}" title="#{(empty unidadeMedidaMedicaController.unidade.seq) ? (messages.TITLE_DESCRICAO_UNIDADE_MEDIDA_MEDICA_EDIT) : ('')}" readonly="#{not empty unidadeMedidaMedicaController.unidade.descricao}" required="#{empty unidadeMedidaMedicaController.unidade.descricao}" styleclass="suggestion_input" caixaAlta="false" removerCaratersEspeciais="false" id="descricao"/>  
               <mec:selectOneMenu enum="DominioSituacao" label="#{messages.LABEL_SITUACAO}" value="#{unidadeMedidaMedicaController.unidade.indSituacao}" title="#{messages.TITLE_SITUACAO_UNIDADE_MEDIDA_MEDICA}" required="true" id="ativoInativo"/> 
             </aghu:linha>  
             <aghu:linha> 

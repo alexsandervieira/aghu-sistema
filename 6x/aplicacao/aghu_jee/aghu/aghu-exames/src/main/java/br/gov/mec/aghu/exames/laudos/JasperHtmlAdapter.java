@@ -48,6 +48,13 @@ public class JasperHtmlAdapter {
 		tags.add(new HtmlTagsAdapter("<s>", "<span style=\"text-decoration: line-through;\">"));
 		tags.add(new HtmlTagsAdapter("</s>", "</span>"));
 		
+		tags.add(new HtmlTagsAdapter("&ccedil;", "ç"));
+		tags.add(new HtmlTagsAdapter("&oacute;", "ó"));
+		tags.add(new HtmlTagsAdapter("&ocirc;", "ô"));
+		tags.add(new HtmlTagsAdapter("&atilde;", "ã"));
+		tags.add(new HtmlTagsAdapter("&ecirc;", "ê"));
+		
+		
 		for (HtmlTagsAdapter tag : tags) {
 			texto = texto.replace(tag.getOrigem(), tag.getDestino());
 		}

@@ -31,7 +31,7 @@ public class ImpComputadorDAO extends br.gov.mec.aghu.core.persistence.dao.BaseD
 		
 		criteria.add(Restrictions.or(
 				Restrictions.eq(ImpComputador.Fields.IP.toString(), ipComputador),
-				Restrictions.eq(ImpComputador.Fields.NOME.toString(), ipComputador).ignoreCase()));
+				Restrictions.ilike(ImpComputador.Fields.NOME.toString(), ipComputador,MatchMode.EXACT)));
 		
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 

@@ -4,7 +4,6 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -12,8 +11,9 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
+import org.apache.commons.beanutils.BeanComparator;
+import org.apache.commons.collections.comparators.ComparatorChain;
+import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,16 +21,23 @@ import org.apache.commons.logging.LogFactory;
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.constantes.TipoItemAprazamento;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioSituacaoPrescricao;
 import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.model.AinInternacao;
 import br.gov.mec.aghu.model.AipPacientes;
+import br.gov.mec.aghu.model.EpePrescCuidDiagnostico;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagem;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagemId;
 import br.gov.mec.aghu.model.EpePrescricoesCuidados;
 import br.gov.mec.aghu.model.RapServidores;
+import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescCuidDiagnosticoDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescricaoEnfermagemDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescricoesCuidadosDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.util.TipoPrescricaoCuidadoEnfermagem;
@@ -39,11 +46,6 @@ import br.gov.mec.aghu.prescricaoenfermagem.vo.PrescricaoEnfermagemVO;
 import br.gov.mec.aghu.prescricaomedica.business.IPrescricaoMedicaFacade;
 import br.gov.mec.aghu.prescricaomedica.vo.BuscaConselhoProfissionalServidorVO;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.commons.CoreUtil;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 /**
  * 
@@ -83,6 +85,8 @@ public class ManutencaoPrescricaoEnfermagemON extends BaseBusiness {
 	@Inject
 	private EpePrescricoesCuidadosDAO epePrescricoesCuidadosDAO;
 
+	@Inject
+	private EpePrescCuidDiagnosticoDAO epePrescCuidDiagnosticoDAO;
 	/**
 	 * 
 	 */
@@ -270,7 +274,22 @@ public class ManutencaoPrescricaoEnfermagemON extends BaseBusiness {
 		
 		return prescricaoEnfermagemVO.getListaCuidadoVO();
 	}
-	
+
+	public List<CuidadoVO> buscarCuidadosDiagnosticosPrescricaoEnfermagem(
+			EpePrescricaoEnfermagemId prescricaoEnfermagemId, Boolean listarTodas) {
+					if (prescricaoEnfermagemId == null || prescricaoEnfermagemId.getAtdSeq() == null || prescricaoEnfermagemId.getSeq() == null) {
+			throw new IllegalArgumentException(
+					"buscarCuidadosPrescricaoEnfermagem: parametros de filtro invalido");
+		}
+		
+		PrescricaoEnfermagemVO prescricaoEnfermagemVO = new PrescricaoEnfermagemVO();
+		
+		// Busca dos Cuidados
+		this.popularCuidadoDiagnosticoEnfermagem(prescricaoEnfermagemVO, prescricaoEnfermagemId, listarTodas);
+		
+		return prescricaoEnfermagemVO.getListaCuidadoVO();
+	}
+
 
 	/**
 	 * Popula um objeto PrescricaoEnfermagemVO com os 
@@ -280,6 +299,95 @@ public class ManutencaoPrescricaoEnfermagemON extends BaseBusiness {
 	 * @param prescricaoEnfermagemId
 	 * @param listarTodas
 	 */
+	private void popularCuidadoDiagnosticoEnfermagem(PrescricaoEnfermagemVO prescricaoEnfermagemVO, 
+			EpePrescricaoEnfermagemId prescricaoEnfermagemId, Boolean listarTodas) {
+		
+		EpePrescricaoEnfermagem prescricaoEnfermagem = getEpePrescricaoEnfermagemDAO().obterPorChavePrimaria(prescricaoEnfermagemId);
+		Short snbGnbSeqAux = null;
+		Short snbSequenciaAux = null;
+		Short sequenciaAux = null;
+		Short freSeqAux = null;
+		Short cuidadoRotinaOrdemPadrao = -1;
+
+		if(prescricaoEnfermagem != null && this.getEpePrescricaoEnfermagemDAO().contains(prescricaoEnfermagem)){
+			getEpePrescricaoEnfermagemDAO().refresh(prescricaoEnfermagem);
+		}
+
+		List<EpePrescricoesCuidados> listaCuidadosEnfermagemDiag = epePrescricoesCuidadosDAO
+				.pesquisarCuidadosPrescricao(prescricaoEnfermagem.getId(), prescricaoEnfermagem.getDthrFim(), listarTodas);
+		
+		List<CuidadoVO> listCuidadoVO = new ArrayList<CuidadoVO>(); 
+		for (EpePrescricoesCuidados prescricaoCuidado : listaCuidadosEnfermagemDiag) {
+			//epePrescCuidDiagnosticoDAO.refresh(prescCuidDiagnostico);
+			CuidadoVO cuidadoVO = new CuidadoVO();
+			cuidadoVO.setPrescricaoCuidado(prescricaoCuidado);
+			cuidadoVO.setCuidado(prescricaoCuidado.getCuidado());
+			cuidadoVO.setDescricao(prescricaoCuidado.getDescricaoFormatada());
+			if (prescricaoCuidado.getCuidado().getIndRotina()) {
+				cuidadoVO.setTipoPrescricaoCuidado(TipoPrescricaoCuidadoEnfermagem.CUIDADOS_MEDICOS_ROTINA);
+				cuidadoVO.setDescricaoDiagnostico("CUIDADOS DE ROTINA");
+				cuidadoVO.setFdgDgnSnbGnbSeq(cuidadoRotinaOrdemPadrao);
+				cuidadoVO.setFdgDgnSnbSequencia(cuidadoRotinaOrdemPadrao);
+				cuidadoVO.setFdgDgnSequencia(cuidadoRotinaOrdemPadrao);
+				cuidadoVO.setFdgFreSeq(cuidadoRotinaOrdemPadrao);
+			} else {
+				// Função recursiva para buscar a prescrição original (primeira)
+				EpePrescCuidDiagnostico presCuidDiag = buscaPrescCuidadoDiagnostico(prescricaoCuidado);
+				if(presCuidDiag != null){
+					cuidadoVO.setTipoPrescricaoCuidado(TipoPrescricaoCuidadoEnfermagem.CUIDADOS_MEDICOS);
+					cuidadoVO.setFdgDgnSnbGnbSeq(presCuidDiag.getId().getCdgFdgDgnSnbGnbSeq());
+					cuidadoVO.setFdgDgnSnbSequencia(presCuidDiag.getId().getCdgFdgDgnSnbSequencia());
+					cuidadoVO.setFdgDgnSequencia(presCuidDiag.getId().getCdgFdgDgnSequencia());
+					cuidadoVO.setFdgFreSeq(presCuidDiag.getId().getCdgFdgFreSeq());
+					cuidadoVO.setDescricaoDiagnostico(presCuidDiag.getDiagnostico().getDescricao().concat(" - ").concat(presCuidDiag.getFatRelacionado().getDescricao()));
+				}
+			}
+			// Adiciona item a lista nova
+			listCuidadoVO.add(cuidadoVO);
+		}
+		// Ordena Lista
+		final ComparatorChain chainSorter = new ComparatorChain();
+		final BeanComparator ordemSorter = new BeanComparator("fdgFreSeq", new NullComparator(false));
+		chainSorter.addComparator(ordemSorter);
+		if (listCuidadoVO != null){
+			Collections.sort(listCuidadoVO, chainSorter);			
+		}
+		
+		// Monta títulos
+		for (CuidadoVO cuidadoVO : listCuidadoVO) {
+
+			if(freSeqAux == null || !cuidadoVO.getFdgFreSeq().equals(freSeqAux) ){
+				CuidadoVO cuidadoVOTitulo = new CuidadoVO();
+				snbGnbSeqAux = cuidadoVO.getFdgDgnSnbGnbSeq();
+				snbSequenciaAux = cuidadoVO.getFdgDgnSnbSequencia();
+				sequenciaAux = cuidadoVO.getFdgDgnSequencia();
+				freSeqAux = cuidadoVO.getFdgFreSeq();
+				cuidadoVOTitulo.setFdgDgnSnbGnbSeq(snbGnbSeqAux);
+				cuidadoVOTitulo.setFdgDgnSnbSequencia(snbSequenciaAux);
+				cuidadoVOTitulo.setFdgDgnSequencia(sequenciaAux);
+				cuidadoVOTitulo.setFdgFreSeq(freSeqAux);
+				cuidadoVOTitulo.setDescricaoDiagnostico(cuidadoVO.getDescricaoDiagnostico());
+				cuidadoVOTitulo.setPrescricaoCuidado(cuidadoVO.getPrescricaoCuidado());
+				cuidadoVOTitulo.setCuidado(cuidadoVO.getCuidado());
+				cuidadoVOTitulo.setDiagnostico(true);
+				prescricaoEnfermagemVO.adicionarCuidado(cuidadoVOTitulo);
+			}
+			cuidadoVO.setDescricaoDiagnostico(null);
+			prescricaoEnfermagemVO.adicionarCuidado(cuidadoVO);
+		}
+
+	}	
+
+	public EpePrescCuidDiagnostico buscaPrescCuidadoDiagnostico(
+			EpePrescricoesCuidados prescricaoCuidado) {
+		if (prescricaoCuidado.getPrescricaoCuidado() == null){
+			List <EpePrescCuidDiagnostico> list = epePrescCuidDiagnosticoDAO.listarPrescCuidDiagnosticoPorPrescricaoCuidado(prescricaoCuidado);
+			return list != null && !list.isEmpty() ? list.get(0) : null;
+		} else {
+			return buscaPrescCuidadoDiagnostico(prescricaoCuidado.getPrescricaoCuidado());
+		}
+	}
+
 	private void popularCuidadoEnfermagem(PrescricaoEnfermagemVO prescricaoEnfermagemVO, 
 			EpePrescricaoEnfermagemId prescricaoEnfermagemId, Boolean listarTodas) {
 		EpePrescricoesCuidadosDAO epePrescricoesCuidadosDao = this.getEpePrescricoesCuidadosDAO();
@@ -288,10 +396,10 @@ public class ManutencaoPrescricaoEnfermagemON extends BaseBusiness {
 		if(prescricaoEnfermagem != null && this.getEpePrescricaoEnfermagemDAO().contains(prescricaoEnfermagem)){
 			getEpePrescricaoEnfermagemDAO().refresh(prescricaoEnfermagem);
 		}
-		
-		List<EpePrescricoesCuidados> listaCuidadosEnfermagem = epePrescricoesCuidadosDao
+
+		List<EpePrescricoesCuidados> listaCuidadosEnfermagemRotina = epePrescricoesCuidadosDao
 				.pesquisarCuidadosPrescricao(prescricaoEnfermagem.getId(), prescricaoEnfermagem.getDthrFim(), listarTodas);
-		for (EpePrescricoesCuidados prescricaoCuidado : listaCuidadosEnfermagem) {
+		for (EpePrescricoesCuidados prescricaoCuidado : listaCuidadosEnfermagemRotina) {
 			epePrescricoesCuidadosDao.refresh(prescricaoCuidado);
 			CuidadoVO cuidadoVO = new CuidadoVO();
 			cuidadoVO.setPrescricaoCuidado(prescricaoCuidado);
@@ -305,37 +413,9 @@ public class ManutencaoPrescricaoEnfermagemON extends BaseBusiness {
 			}
 			prescricaoEnfermagemVO.adicionarCuidado(cuidadoVO);
 		}
-		
-		if(listarTodas) {
-			CollectionUtils.filter(listaCuidadosEnfermagem, new Predicate() {  
-				public boolean evaluate(Object o) {  
-					if(((EpePrescricoesCuidados)o).getPrescricaoCuidado() == null) {								
-						return true;  
-					}
-					return false;  
-				}  
-			});
-		}
-		
 
-
-		this.ordenarListaCuidadosPrescricaoEnfermagem(listaCuidadosEnfermagem);
 	}	
-	
-	/**
-	 * Orderna lista pela descricaoFormatada
-	 * 
-	 * @param list
-	 */
-	private void ordenarListaCuidadosPrescricaoEnfermagem(List<? extends EpePrescricoesCuidados> list) {
-		Collections.sort(list, new Comparator<EpePrescricoesCuidados>() {
-			@Override
-			public int compare(EpePrescricoesCuidados item1, EpePrescricoesCuidados item2) {
-				return item1.getDescricaoFormatada().compareTo(item2.getDescricaoFormatada());
-			}
-		});
-	}
-	
+
 	/**
 	 * Popula itens do relatório associados a uma Prescrição de Enfermagem. 
 	 * 
@@ -372,7 +452,7 @@ public class ManutencaoPrescricaoEnfermagemON extends BaseBusiness {
 					.getDthrFim(), cuidados.getTipoFrequenciaAprazamento(),
 					TipoItemAprazamento.CUIDADO, null, null, frequencia));
 
-			if(aprazamento.isEmpty()){
+			if(aprazamento.isEmpty() && !cuidadoVO.getDiagnostico()){
 				aprazamento = cuidadoVO.getDescricao().split(",")[cuidadoVO.getDescricao().split(",").length-1];
 				if(aprazamento.substring(aprazamento.length()-1, aprazamento.length()).equals(";")){
 					aprazamento = aprazamento.substring(0,aprazamento.length()-1);
@@ -381,9 +461,17 @@ public class ManutencaoPrescricaoEnfermagemON extends BaseBusiness {
 				aprazamento = aprazamento.substring(0, 17);
 			}
 			cuidadoVO.setAprazamento(aprazamento);
-			cuidadoVO.setDescricao(StringUtils.capitalize(cuidados.getDescricaoFormatada().toLowerCase()));
-			cuidadoVO.setTipo("CUIDADOS");
-			cuidadoVO.setNumero(numero++);
+
+			String descricaoPrescCuidado = cuidados.getDescricao();
+			StringBuffer descricaoCuidado = new StringBuffer(cuidados.getCuidado().getDescricao());
+			if (descricaoPrescCuidado != null) {
+				descricaoCuidado.append(" - ").append(descricaoPrescCuidado);
+			}
+			cuidadoVO.setDescricao(StringUtils.capitalize(descricaoCuidado.toString().toLowerCase()));
+			cuidadoVO.setTipo("DIAGNÓSTICOS/CUIDADOS");
+			if(!cuidadoVO.getDiagnostico()){
+				cuidadoVO.setNumero(numero++);
+			}
 		}
 		prescricaoEnfermagemVO.setOrdemTela(0);
 

@@ -12,22 +12,22 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
 import org.hibernate.transform.Transformers;
 
+import br.gov.mec.aghu.core.commons.CoreUtil;
 import br.gov.mec.aghu.dominio.DominioSituacao;
 import br.gov.mec.aghu.model.MpmTipoFrequenciaAprazamento;
-import br.gov.mec.aghu.core.commons.CoreUtil;
 
 public class MpmTipoFrequenciaAprazamentoDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDao<MpmTipoFrequenciaAprazamento> {
 
 	private static final long serialVersionUID = 6414617983030613062L;
 
 	public List<MpmTipoFrequenciaAprazamento> obterListaTipoFrequenciaAprazamento(String strPesquisa) {
-		DetachedCriteria criteria = this.montaFiltroPesquisaTipoFrequenciaAprazamento(strPesquisa);
+		DetachedCriteria criteria = this.montaFiltroPesquisaTipoFrequenciaAprazamento(strPesquisa, false);
 		criteria.addOrder(Order.asc(MpmTipoFrequenciaAprazamento.Fields.SINTAXE.toString()));
 		criteria.addOrder(Order.asc(MpmTipoFrequenciaAprazamento.Fields.DESCRICAO.toString()));
 		return  executeCriteria(criteria);
 	}
 
-	private DetachedCriteria montaFiltroPesquisaTipoFrequenciaAprazamento(String strPesquisa){
+	private DetachedCriteria montaFiltroPesquisaTipoFrequenciaAprazamento(String strPesquisa, boolean isCount){
 		DetachedCriteria criteria = DetachedCriteria.forClass(MpmTipoFrequenciaAprazamento.class);
 		if (StringUtils.isNotBlank(strPesquisa)) {
 			criteria.add(Restrictions.ilike(MpmTipoFrequenciaAprazamento.Fields.SIGLA.toString(), strPesquisa, MatchMode.EXACT));
@@ -39,8 +39,10 @@ public class MpmTipoFrequenciaAprazamentoDAO extends br.gov.mec.aghu.core.persis
 				criteria = DetachedCriteria.forClass(MpmTipoFrequenciaAprazamento.class);
 				criteria.add(Restrictions.ilike(MpmTipoFrequenciaAprazamento.Fields.DESCRICAO.toString(), strPesquisa, MatchMode.ANYWHERE));
 				criteria.add(Restrictions.eq(MpmTipoFrequenciaAprazamento.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
-				criteria.addOrder(Order.asc(MpmTipoFrequenciaAprazamento.Fields.SINTAXE.toString()));
-				criteria.addOrder(Order.asc(MpmTipoFrequenciaAprazamento.Fields.DESCRICAO.toString()));
+				if(!isCount) {
+					criteria.addOrder(Order.asc(MpmTipoFrequenciaAprazamento.Fields.SINTAXE.toString()));
+					criteria.addOrder(Order.asc(MpmTipoFrequenciaAprazamento.Fields.DESCRICAO.toString()));
+				}
 				return criteria;
 			} 
 		}	
@@ -51,7 +53,7 @@ public class MpmTipoFrequenciaAprazamentoDAO extends br.gov.mec.aghu.core.persis
 	}
 
 	public Long obterListaTipoFrequenciaAprazamentoCount(String strPesquisa) {
-		DetachedCriteria criteria = this.montaFiltroPesquisaTipoFrequenciaAprazamento(strPesquisa);
+		DetachedCriteria criteria = this.montaFiltroPesquisaTipoFrequenciaAprazamento(strPesquisa, true);
 		return  executeCriteriaCount(criteria);
 	}
 	

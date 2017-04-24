@@ -92,7 +92,7 @@ public class ImportarArquivoSusController extends ActionController {
 			}
 			
 			try {
-				parametroValidaArquivo = DominioSimNao.valueOf(parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_VALIDA_ARQUIVO_SUS).getVlrTexto());
+				parametroValidaArquivo = DominioSimNao.valueOf(parametroFacade.buscarAghParametro(AghuParametrosEnum. P_AGHU_VALIDA_ARQUIVO_SUS_SIGTAP).getVlrTexto());
 			} catch (final ApplicationBusinessException e) {
 				apresentarExcecaoNegocio(e);
 			}		

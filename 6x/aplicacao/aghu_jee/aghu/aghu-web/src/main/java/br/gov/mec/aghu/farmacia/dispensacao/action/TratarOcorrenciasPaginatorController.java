@@ -11,8 +11,7 @@ import javax.ejb.EJB;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import com.itextpdf.text.DocumentException;
-
+import net.sf.jasperreports.engine.JRException;
 import br.gov.mec.aghu.administracao.business.IAdministracaoFacade;
 import br.gov.mec.aghu.business.IAghuFacade;
 import br.gov.mec.aghu.core.action.ActionController;
@@ -34,7 +33,8 @@ import br.gov.mec.aghu.model.AinLeitos;
 import br.gov.mec.aghu.model.AipPacientes;
 import br.gov.mec.aghu.paciente.business.IPacienteFacade;
 import br.gov.mec.aghu.paciente.vo.CodPacienteFoneticaVO;
-import net.sf.jasperreports.engine.JRException;
+
+import com.itextpdf.text.DocumentException;
 
 public class TratarOcorrenciasPaginatorController extends ActionController implements ActionPaginator{
 	
@@ -334,14 +334,12 @@ public class TratarOcorrenciasPaginatorController extends ActionController imple
 			if (prontuarioRecebido != null){
 				paciente = this.pacienteFacade.obterPacientePorProntuario(prontuarioRecebido);	
 				prontuario = paciente.getProntuario();
+				codigoPaciente = paciente.getCodigo();
 			}else{
 				prontuario = null;
 			}
 		}
 		try{
-			if(farmacia == null){
-				throw new ApplicationBusinessException("MENSAGEM_FARMACIA_OBRIGATORIA_TRATAR_OCORRENCIA", Severity.ERROR);
-			}
 			listaOcorrenciasMdtosDispensados = this.farmaciaDispensacaoFacade.recuperarlistaOcorrenciasMdtosDispensados(unidadeFuncional,data,tipoOcorDispensacao,prontuario,leito,farmacia);
 			ativo = Boolean.TRUE;
 		} catch (ApplicationBusinessException e) {
@@ -437,6 +435,7 @@ public class TratarOcorrenciasPaginatorController extends ActionController imple
 	}
 	
 	public String voltar() {
+		paciente = null;
 		return urlBtVoltar;
 	}
 	

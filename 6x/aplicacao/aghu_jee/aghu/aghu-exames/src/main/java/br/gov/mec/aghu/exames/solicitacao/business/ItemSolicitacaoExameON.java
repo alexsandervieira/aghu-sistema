@@ -1342,7 +1342,7 @@ public class ItemSolicitacaoExameON extends BaseBusiness {
 	 * @param buscaCompleta 
 	 * @return list of UnfExecutaSinonimoExameVO
 	 */
-	public List<ExameSuggestionVO> pesquisaUnidadeExecutaSinonimoExame(String nomeExame, Short seqUnidade, Boolean isSus, Boolean isOrigemInternacao, Integer seqAtendimento, boolean filtrarExamesProcEnfermagem, boolean buscaCompleta, DominioTipoPesquisaExame tipoPesquisa) {
+	public List<ExameSuggestionVO> pesquisaUnidadeExecutaSinonimoExame(String nomeExame, Short seqUnidade, Boolean isSus, Boolean isOrigemInternacao, Integer seqAtendimento, boolean filtrarExamesProcEnfermagem, boolean buscaCompleta, DominioTipoPesquisaExame tipoPesquisa, Boolean filtroPorUnidade) {
 		RapServidoresId idServidor = null;
 		List<String> siglasFiltro = null;
 
@@ -1371,7 +1371,7 @@ public class ItemSolicitacaoExameON extends BaseBusiness {
 		    	lista = filtrarPorNome(lista, nomeExame, tipoPesquisa);
 			}
 		}else {
-		    lista = getAelUnfExecutaExamesDAO().pesquisaUnidadeExecutaSinonimoExame(nomeExame,seqUnidade,isSus, idServidor, seqAtendimento);
+		    lista = getAelUnfExecutaExamesDAO().pesquisaUnidadeExecutaSinonimoExame(nomeExame,seqUnidade,isSus, idServidor, seqAtendimento, filtroPorUnidade);
 		}
 		return lista;
 		
@@ -1465,7 +1465,7 @@ public class ItemSolicitacaoExameON extends BaseBusiness {
 	 * @return list of UnfExecutaSinonimoExameVO
 	 */
 	public List<ExameSuggestionVO> pesquisaUnidadeExecutaSinonimoExame(String nomeExame, DominioTipoPesquisaExame tipoPesquisa) {
-		return pesquisaUnidadeExecutaSinonimoExame(nomeExame,null,false, false, null, false, false, tipoPesquisa);
+		return pesquisaUnidadeExecutaSinonimoExame(nomeExame, null, false, false, null, false, false, tipoPesquisa, false);
 	}
 	
 	public List<UnfExecutaSinonimoExameVO> pesquisaUnidadeExecutaSinonimoExameAntigo(String nomeExame) {
@@ -2831,7 +2831,7 @@ public class ItemSolicitacaoExameON extends BaseBusiness {
 			Date dthrProgramadaInicio = null;
 			Date dthrProgramadaFim = null;
 			List<Date> listDate = this.calcularRangeSolicitacao(itemSolicitacaoExameVO);
-			if (!listDate.isEmpty()) {
+ 			if (!listDate.isEmpty()) {
 				dthrProgramadaInicio = listDate.get(0);
 				dthrProgramadaFim = listDate.get(1);
 			}

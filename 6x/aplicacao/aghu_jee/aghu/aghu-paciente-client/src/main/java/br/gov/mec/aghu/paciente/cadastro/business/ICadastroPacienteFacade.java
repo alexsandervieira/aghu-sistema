@@ -20,6 +20,7 @@ import br.gov.mec.aghu.model.AipEnderecosPacientes;
 import br.gov.mec.aghu.model.AipEnderecosPacientesId;
 import br.gov.mec.aghu.model.AipOrgaosEmissores;
 import br.gov.mec.aghu.model.AipPacienteDadoClinicos;
+import br.gov.mec.aghu.model.AipPacienteProntuario;
 import br.gov.mec.aghu.model.AipPacientes;
 import br.gov.mec.aghu.model.AipPacientesDadosCns;
 import br.gov.mec.aghu.model.AipPacientesHist;
@@ -558,6 +559,7 @@ public interface ICadastroPacienteFacade extends Serializable {
 	
 	public void inserirPacienteMigracao(AipPacientes paciente);
 	
+	public void inserirPacienteMigracaoPaciente(AipPacientes paciente);
 
 	public List<VAipCeps> pesquisarVAipCeps(Integer cep, String logradouro, String cidade) throws ApplicationBusinessException;
 
@@ -603,5 +605,7 @@ public interface ICadastroPacienteFacade extends Serializable {
 	public AipOrgaosEmissores obterOrgaoEmissorPorCodigo(Short codigo);
 	
 	List<AipCidades> pesquisarCidadesPorNome(String nome);
+
+	AipPacienteProntuario obterPacienteProntuario(Integer prontuario);
 	
 }

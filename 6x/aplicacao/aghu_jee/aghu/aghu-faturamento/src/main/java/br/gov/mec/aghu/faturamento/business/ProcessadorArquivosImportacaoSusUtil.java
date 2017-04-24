@@ -105,14 +105,9 @@ public class ProcessadorArquivosImportacaoSusUtil extends BaseBMTBusiness{
 				aghArquivo.setDthrFimProcessamento(fimProcessamento);
 			}
 			iAghuFacade.atualizarAghArquivoProcessamento(aghArquivo.getSeq(), aghArquivo.getDthrUltimoProcessamento(), aghArquivo.getPercentualProcessado(), aghArquivo.getDthrFimProcessamento());
-			// desatachando objetos (performance)
-			// this.entityManager.clear();
 			super.commitTransaction();
-			
 		} catch (final Exception e) {
 			super.rollbackTransaction();
-//			userTx = reIniciarTransacao(userTx);
-//			userTx = obterUserTransaction(null);
 			LOG.error(e.getMessage());
 			LOG.error(e.getMessage(), e);
 			if (tentativas < MAX_TENTATIVAS + 1) {

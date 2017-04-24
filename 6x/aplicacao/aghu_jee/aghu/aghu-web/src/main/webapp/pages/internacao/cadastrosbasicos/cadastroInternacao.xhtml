@@ -47,17 +47,7 @@
                 <f:facet name="header">#{messages.LABEL_CLINICA}</f:facet> #{item.clinica.descricao}
               </p:column> 
             </mec:suggestionBox> 
-          </aghu:linha>  
-          <aghu:linha> 
-            <mec:suggestionBox label="#{messages.LABEL_PROJETO_PESQUISA}" title="#{messages.TITLE_LABEL_PROJETO_PESQUISA_INT}" width="600" descricaoInput="seq" descricaoLabel="nome" suggestionAction="pesquisarProjetoPesquisa" id="projetoPesquisa" controller="#{cadastroInternacaoController}" value="#{cadastroInternacaoController.projetoPesquisaPesq}"> 
-              <p:column> 
-                <f:facet name="header">#{messages.LABEL_SEQ}</f:facet> #{item.seq}
-              </p:column>  
-              <p:column> 
-                <f:facet name="header">#{messages.LABEL_NOME}</f:facet> #{item.nome}
-              </p:column> 
-            </mec:suggestionBox> 
-          </aghu:linha>  
+          </aghu:linha>
           <p:outputPanel id="modalConvenioPanel" layout="inline"> 
             <aghu:linha> 
               <mec:inputNumero label="#{messages.CODIGO_CONVENIO}" size="3" title="#{messages.TITLE_CODIGO_CONVENIO_INT}" 
@@ -164,9 +154,9 @@
           <aghu:linha> 
             <mec:inputTextData title="#{messages.TITLE_DATA_INTERNACAO}" label="Data da Internação" id="dtInternacao" value="#{cadastroInternacaoController.internacao.dthrInternacao}" direction="bottom-right" showApplyButton="true" enableManualInput="true" immediate="true" oninputkeypress="return mascaraCampoDados(this, event, '##/##/#### ##:##');" cellWidth="24px" cellHeight="22px" oninputblur="javascript:validarCampoDataHora(this);" style="width:200px" required="true" tipo="datahora"/>  
             <mec:selectBooleanCheckbox size="10" label="#{messages.LABEL_DIFERENCA_DE_CLASSE}" value="#{cadastroInternacaoController.indDifClasse}" title="#{messages.TITLE_LABEL_DIFERENCA_DE_CLASSE_INT}" id="diferencaClasse"/>  
-            <mec:selectBooleanCheckbox label="#{messages.LABEL_AVISO_SAMIS}" size="10" value="#{cadastroInternacaoController.indEnvProntUnidInt}" 
-            title="#{messages.TITLE_LABEL_AVISO_SAMIS_INT}" id="avisoSamis">
-            	<p:ajax event="change" process="@this" />
+			<mec:selectBooleanCheckbox label="#{messages.LABEL_SOLICITAR_PRONTUARIO}" size="10" value="#{cadastroInternacaoController.indEnvProntUnidInt}" 
+            	readonly="#{cadastroInternacaoController.indEnvProntUnidInt and cadastroInternacaoController.modoEdicao}" title="#{messages.TITLE_SOLICITAR_PRONTUARIO}" id="sbcSolicitarProntuario">
+               	<p:ajax event="change" process="@this" />
             </mec:selectBooleanCheckbox> 
           </aghu:linha>  
           <aghu:linha> 

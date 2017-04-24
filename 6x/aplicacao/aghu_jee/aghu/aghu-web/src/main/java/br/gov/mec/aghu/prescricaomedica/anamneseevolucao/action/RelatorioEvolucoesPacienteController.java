@@ -83,11 +83,9 @@ public class RelatorioEvolucoesPacienteController extends ActionReport {
 	}
 	
 
-	public void imprimirEvolucoesEmVisualizacao() {
-		for(MpmEvolucoes evolucao : evolucoesVisualizacao){
-			this.colecao = this.prescricaoMedicaFacade.gerarRelatorioEvolucaoPaciente(evolucao.getSeq());
-			directPrint();
-		}
+	public void imprimirEvolucoesEmVisualizacao(){
+
+		directPrint();
 		this.apresentarMsgNegocio(Severity.INFO, "MENSAGEM_SUCESSO_IMPRESSAO");
 	}
 

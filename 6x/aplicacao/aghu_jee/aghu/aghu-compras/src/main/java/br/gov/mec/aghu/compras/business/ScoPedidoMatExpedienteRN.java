@@ -313,7 +313,7 @@ public class ScoPedidoMatExpedienteRN extends BaseBMTBusiness {
 		String dataPedido = DateUtil.obterDataFormatada(pedido.getDataPedido(), "dd/MM/yyyy");
 
 		mensagemFormatada.append(" <br> Pedido: ").append(pedido.getNumeroPedido())
-		.append(" &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp;  &nbsp;  Centro de Custo: ").append(pedido.getCentroCusto().getCodigo()) 
+		.append(" &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp;  &nbsp;  Centro de Atividade: ").append(pedido.getCentroCusto().getCodigo()) 
 		.append("<br />")
 		.append("Data Pedido: ").append(dataPedido)
 		.append("&nbsp; &nbsp; &nbsp; Solicitante: ").append(pedido.getServidorSolicitante().getMatriculaVinculoNome())

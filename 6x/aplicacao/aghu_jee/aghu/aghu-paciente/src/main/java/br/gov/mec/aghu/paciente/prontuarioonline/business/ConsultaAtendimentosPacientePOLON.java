@@ -1,6 +1,7 @@
 package br.gov.mec.aghu.paciente.prontuarioonline.business;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -17,13 +18,13 @@ import org.apache.commons.logging.LogFactory;
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.business.IAghuFacade;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.model.RapPessoasFisicas;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.paciente.prontuarioonline.vo.AtendimentosVO;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 
 @Stateless
 public class ConsultaAtendimentosPacientePOLON extends BaseBusiness
@@ -72,7 +73,8 @@ private IAghuFacade aghuFacade;
 		//TODO descomentar apos criancao do Parametro P_PAC_EXTERNO_POL
 		// Verifica se vai mostrar pacientes externos na consulta final		
 		AghParametros pacExterno = getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_PAC_EXTERNO_POL);
-		if (pacExterno.getVlrNumerico().equals(1)) {
+		int numerico = 1;
+		if (pacExterno.getVlrNumerico().equals(new BigDecimal(numerico))) {
 			atendimentos.addAll(pesquisarAtendimentosPacExternos(numeroProntuario));
 		}
 		

@@ -92,11 +92,13 @@
 							title="#{(geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'C' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'A' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'E')?(messages.TITLE_CC_REQ):null}"
 							suggestionAction="obterFccCentroCustosReq"
 							descricaoInput="codigo" descricaoLabel="descricao"
+							posDeleteAction="limparCamposCCRequisicao"
 							required="#{(geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'C' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'A' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'E') or (geracaoRequisicaoMaterialController.habilitarEdicao())}"
 							readonly="#{(not geracaoRequisicaoMaterialController.habilitarEdicao()) or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'A' or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'E'}"
 							maxlength="30"
 							controller="#{geracaoRequisicaoMaterialController}"
-							value="#{geracaoRequisicaoMaterialController.reqMaterial.centroCusto}">
+							value="#{geracaoRequisicaoMaterialController.reqMaterial.centroCusto}"
+							render="@(#panelCampos)">
 							<p:column>
 								<f:facet name="header">
 									<b>#{messages.LABEL_CODIGO}</b>
@@ -114,11 +116,13 @@
 								title="#{(geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'C' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'A' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'E')?(messages.TITLE_CC_APLICACAO):null}"
 								suggestionAction="obterFccCentroCustosAplicacao"
 								descricaoInput="codigo" descricaoLabel="descricao"
+								posDeleteAction="limparCamposCCAplicacao"
 								required="#{(geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'C' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'A' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'E') or (geracaoRequisicaoMaterialController.habilitarEdicao())}"
 								readonly="#{(not geracaoRequisicaoMaterialController.habilitarEdicao()) or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'A' or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'E'}"
 								maxlength="30"
 								controller="#{geracaoRequisicaoMaterialController}"
-								value="#{geracaoRequisicaoMaterialController.reqMaterial.centroCustoAplica}">
+								value="#{geracaoRequisicaoMaterialController.reqMaterial.centroCustoAplica}"
+								render="@(#panelCampos)">
 								<p:column>
 									<f:facet name="header">
 										<b>#{messages.LABEL_CODIGO}</b>
@@ -137,14 +141,17 @@
 							label="#{messages.LABEL_ALMOXARIFADO}"
 							title="#{(geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'C' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'A' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'E')?(messages.TITLE_ALMOXARIFADO):null}"
 							suggestionAction="obterSceAlmoxarifado"
-							posDeleteAction="limparItemEstoqueAlmoxarifado"
+							posDeleteAction="limparDadosPosdeleteAlmox"
 							descricaoInput="seq" descricaoLabel="descricao"
 							required="#{geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'C' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'A' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'E'}"
-							readonly="#{geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'C' or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'A' or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'E' or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'G'}"
+							readonly="#{geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'C' or 
+							            geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'A' or 
+							            geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'E' or 
+							            geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'G'}"
 							maxlength="30"
 							controller="#{geracaoRequisicaoMaterialController}"
 							value="#{geracaoRequisicaoMaterialController.reqMaterial.almoxarifado}"
-							render="panelSBQuantidade">
+							render="panelSBQuantidade,@(#panelCampos)">
 							<p:column>
 								<f:facet name="header">
 									<b>#{messages.LABEL_CODIGO}</b>
@@ -160,13 +167,16 @@
 							label="#{messages.LABEL_GRP_MATERIAL}"
 							title="#{(geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'C' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'A' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'E')?(messages.TITLE_GRP_MATERIAL):null}"
 							suggestionAction="obterScoGrupoMaterial"
-							posDeleteAction="limparPacote" descricaoInput="codigo"
+							posDeleteAction="limparDadosPosdeleteGrupoMaterial" descricaoInput="codigo"
 							descricaoLabel="descricao"
-							readonly="#{geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'C' or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'A' or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'E'}"
+							readonly="#{geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'C' or
+							           geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'A' or 
+							           geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'E' or
+							           empty geracaoRequisicaoMaterialController.reqMaterial.almoxarifado}"
 							maxlength="30" cache ="false"
 							controller="#{geracaoRequisicaoMaterialController}"
 							value="#{geracaoRequisicaoMaterialController.reqMaterial.grupoMaterial}"
-							render="sbGrupoMaterial,sbGrupoMaterial">
+							render="sbGrupoMaterial,sbGrupoMaterial,@(#panelCampos)">
 							<p:column>
 								<f:facet name="header">
 									<b>#{messages.LABEL_CODIGO}</b>
@@ -183,7 +193,13 @@
 							title="#{(geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'C' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'A' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'E')?(messages.TITLE_PACOTE):null}"
 							suggestionAction="obterScePacoteMaterial"
 							descricaoInput="id.numero" descricaoLabel="descricao" width="550"
-							readonly="#{geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'C' or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'A' or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'E' or (not empty geracaoRequisicaoMaterialController.sceItemRmses)}"
+							readonly="#{geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'C' or 
+							           geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'A' or 
+							           geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'E' or 
+							           (not empty geracaoRequisicaoMaterialController.sceItemRmses) or 
+							           empty geracaoRequisicaoMaterialController.reqMaterial.almoxarifado or
+							           empty geracaoRequisicaoMaterialController.reqMaterial.centroCusto or
+							           empty geracaoRequisicaoMaterialController.reqMaterial.centroCustoAplica}" 
 							maxlength="30"
 							controller="#{geracaoRequisicaoMaterialController}"
 							value="#{geracaoRequisicaoMaterialController.reqMaterial.pacoteMaterial}"
@@ -409,7 +425,12 @@
 										posDeleteAction="limparEstoqueAlmoarifado"
 										required="#{(not geracaoRequisicaoMaterialController.verificaDisableSB and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'C' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'A' and geracaoRequisicaoMaterialController.reqMaterial.indSituacao ne 'E') or (geracaoRequisicaoMaterialController.habilitarEdicao())}"
 										width="820"
-										readonly="#{((geracaoRequisicaoMaterialController.verificaDisableSB or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'C') and not geracaoRequisicaoMaterialController.habilitarEdicao()) or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'A' or geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'E'}"
+										readonly="#{((geracaoRequisicaoMaterialController.verificaDisableSB or 
+										              geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'C') and 
+										              not geracaoRequisicaoMaterialController.habilitarEdicao()) or 
+										              geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'A' or 
+										              geracaoRequisicaoMaterialController.reqMaterial.indSituacao eq 'E' or
+										              empty geracaoRequisicaoMaterialController.reqMaterial.almoxarifado}"
 										controller="#{geracaoRequisicaoMaterialController}"
 										value="#{geracaoRequisicaoMaterialController.material}"
 										render="panelBtAdicionar,panelAvisoAlmox,qtd, qtdMaterial">
@@ -560,7 +581,7 @@
 											title="#{messages.LABEL_EXCLUIR}"
 											action="#{geracaoRequisicaoMaterialController.excluir}"
 											profile="delete" ajax="true"
-											render="panelEtiquetaCodigoBarra, tabelaAcao">
+											render="panelEtiquetaCodigoBarra, tabelaAcao, formRequisicaoMaterialItens">
 											<f:setPropertyActionListener
 												target="#{geracaoRequisicaoMaterialController.rmsSeqEx}"
 												value="#{_material.id.rmsSeq}" for="command" />
@@ -678,7 +699,8 @@
 					name="formmodalConfirmacao">
 					<mec:commandButton includePageParams="false" id="bt_sim"
 						onclick="PF('modalConfirmacaoWG').hide();;PF('modalConfirmacaoImpressaoWG').show();;return false;"
-						value="#{messages.LABEL_SIM}"  profile="ok" />
+						value="#{messages.LABEL_SIM}"  profile="ok" 
+						action="#{geracaoRequisicaoMaterialController.confirmarImpressaoParametro}" />
 					<mec:commandButton value="#{messages.LABEL_NAO}"
 						onclick="PF('modalConfirmacaoWG').hide();" id="bt_nao"
 						profile="cancel" ajax="true" />
@@ -687,7 +709,7 @@
 		</p:dialog>
 		
 		<p:dialog id="modalConfirmacaoImpressao" width="400" height="150" modal="true"
-			resizable="false" widgetVar="modalConfirmacaoImpressaoWG">
+			resizable="false" widgetVar="modalConfirmacaoImpressaoWG" rendered="#{geracaoRequisicaoMaterialController.mostrarModalConfirmacaoImpressaoWG}">
 			<f:facet name="header">
 				<h:panelGroup>
 					<h:outputText

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 
 import org.hibernate.Hibernate;
 
@@ -14,6 +15,7 @@ import br.gov.mec.aghu.core.business.moduleintegration.ModuloEnum;
 import br.gov.mec.aghu.core.business.seguranca.Secure;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.internacao.dao.AinInternacaoDAO;
 import br.gov.mec.aghu.internacao.vo.ProfessorCrmInternacaoVO;
 import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.AghEspecialidades;
@@ -36,6 +38,9 @@ public class TransferirPacienteFacade extends BaseFacade implements ITransferirP
 
 	@EJB
 	private TransferirPacienteON transferirPacienteON;
+
+	@Inject
+	private AinInternacaoDAO ainInternacaoDAO;
 
 	private static final long serialVersionUID = -6143961227866606542L;
 
@@ -68,6 +73,7 @@ public class TransferirPacienteFacade extends BaseFacade implements ITransferirP
 		if (internacao.getEspecialidade() != null) {
 			Hibernate.initialize(internacao.getEspecialidade().getClinica());
 		}
+		
 		Hibernate.initialize(internacao.getServidorProfessor());
 		if (internacao.getServidorProfessor() != null) {
 			Hibernate.initialize(internacao.getServidorProfessor().getPessoaFisica());
@@ -92,6 +98,8 @@ public class TransferirPacienteFacade extends BaseFacade implements ITransferirP
 		Hibernate.initialize(internacao.getUnidadesFuncionais());
 		Hibernate.initialize(internacao.getConvenioSaude());
 		Hibernate.initialize(internacao.getConvenioSaudePlano());
+		Hibernate.initialize(internacao.getCidsInternacao());
+		Hibernate.initialize(internacao.getResponsaveisPaciente());
 	}
 
 	@Override
@@ -219,6 +227,15 @@ public class TransferirPacienteFacade extends BaseFacade implements ITransferirP
 	@Secure("#{s:hasPermission('leito','pesquisar')}")
 	public AinLeitos pesquisarApenasLeitoConcedido(Object strPesq, Integer intSeq) {
 		return getTransferirPacienteON().pesquisarApenasLeitoConcedido(strPesq, intSeq);
+	}
+
+	@Override
+	public boolean validarPacienteNaoPossuiAltaAdministrativa(Integer internacaoSeq) {
+		return ainInternacaoDAO.pesquisarPacienteComAltaAdministrativa(internacaoSeq); 
+	}
+
+	public boolean validarTipoAltaMedicaPermitePacienteComAlta(Integer internacaoSeq) {
+		return ainInternacaoDAO.pesquisarTipoAltaMedicaPermitePacienteComAlta(internacaoSeq);
 	}
 
 }

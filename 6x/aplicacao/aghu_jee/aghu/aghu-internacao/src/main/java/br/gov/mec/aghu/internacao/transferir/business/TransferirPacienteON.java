@@ -327,6 +327,7 @@ public class TransferirPacienteON extends BaseBusiness {
 
 	public List<AinInternacao> pesquisarInternacao(Integer firstResult, Integer maxResults, String orderProperty, boolean asc,
 			Integer prontuario) {
+		
 		return getAinInternacaoDAO().pesquisarInternacao(firstResult, maxResults, orderProperty, asc, prontuario);
 	}
 

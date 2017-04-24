@@ -117,6 +117,7 @@ public class AacConsultas extends BaseEntityNumero<Integer> implements java.io.S
 	private Short serVinCodigoConsutlado;
 	private Set<FatProcedAmbRealizado> procedAmbRealizado;
 	private Set<MamControles> controles;
+	private Set<MamProcedimentoRealizado> procedimentosRealizados;
 	
 	private VRapPessoaServidor pessoaServidor;
 	
@@ -623,6 +624,7 @@ public class AacConsultas extends BaseEntityNumero<Integer> implements java.io.S
 		GRDSEQ("grdSeq"),
 		PROCEDIMENTO_AMB_REALIZADOS("procedAmbRealizado"),
 		PROCEDIMENTOS_HOSPITALARES("procedimentosHospitalares"),
+		PROCEDIMENTOS_REALIZADOS("procedimentosRealizados"),
 		CSP_SEQ("convenioSaudePlano.id.seq"),
 		TPS_TIPO("tpsTipo"),
 		GRADE_AGENDA_CONSULTA_UNF_SALA("gradeAgendamenConsulta.siglaUnfSala"),
@@ -707,9 +709,8 @@ public class AacConsultas extends BaseEntityNumero<Integer> implements java.io.S
 	
 	public void setControles(Set<MamControles> setControles) {
 		this.controles = setControles;
-	}
+	}	
 
-	
 	@Transient
 	public MamControles getControle() {
 		return (getControles() != null && !getControles().isEmpty()) ? getControles().iterator().next() : null;
@@ -724,6 +725,16 @@ public class AacConsultas extends BaseEntityNumero<Integer> implements java.io.S
 		}
 		
 		this.controles.add(controle);
+	}
+	
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "consulta")
+	public Set<MamProcedimentoRealizado> getProcedimentosRealizados() {
+		return procedimentosRealizados;
+	}
+
+	public void setProcedimentosRealizados(Set<MamProcedimentoRealizado> procedimentosRealizados) {
+		this.procedimentosRealizados = procedimentosRealizados;
 	}
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "consultas")

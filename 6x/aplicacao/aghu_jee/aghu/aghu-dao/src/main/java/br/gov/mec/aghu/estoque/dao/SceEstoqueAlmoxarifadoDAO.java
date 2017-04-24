@@ -909,20 +909,55 @@ public class SceEstoqueAlmoxarifadoDAO extends br.gov.mec.aghu.core.persistence.
 	public SceEstoqueAlmoxarifado obterEstoqueAlmoxarifadoOrigemSaldoMenorIgualEstoqueMinimoPorMaterialFornecedor(
 			Short seqAlmoxarifadoOrigem, Integer codigoMaterial, Integer numeroFornecedor) {
 
-		DetachedCriteria criteria = DetachedCriteria.forClass(SceEstoqueAlmoxarifado.class, "EAL_O");
-
-		criteria.createAlias("EAL_O." + SceEstoqueAlmoxarifado.Fields.ALMOXARIFADO.toString(), "ALM_O", JoinType.INNER_JOIN);
-		criteria.createAlias("EAL_O." + SceEstoqueAlmoxarifado.Fields.FORNECEDOR.toString(), "FRN_O", JoinType.INNER_JOIN);
-		criteria.createAlias("EAL_O." + SceEstoqueAlmoxarifado.Fields.MATERIAL.toString(), "MAT_O", JoinType.INNER_JOIN);
-
-		criteria.add(Restrictions.eq("EAL_O." + SceEstoqueAlmoxarifado.Fields.IND_ESTOCAVEL.toString(), Boolean.TRUE));
-		criteria.add(Restrictions.eq("EAL_O." + SceEstoqueAlmoxarifado.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
-
-		criteria.add(Restrictions.eq("ALM_O." + SceAlmoxarifado.Fields.SEQ.toString(), seqAlmoxarifadoOrigem));
-		criteria.add(Restrictions.eq("MAT_O." + ScoMaterial.Fields.CODIGO.toString(), codigoMaterial));
-		criteria.add(Restrictions.eq("FRN_O." + ScoFornecedor.Fields.NUMERO.toString(), numeroFornecedor));
-
-		return (SceEstoqueAlmoxarifado) executeCriteriaUniqueResult(criteria);
+		StringBuilder hql = new StringBuilder(226);
+		org.hibernate.Query query = null;
+		
+		hql.append("select ")
+		.append("EAL_O ")
+		.append("from ")
+		.append(SceEstoqueAlmoxarifado.class.getName())
+		.append(" as EAL_O ")
+		
+		.append("INNER JOIN EAL_O.")
+		.append(SceEstoqueAlmoxarifado.Fields.ALMOXARIFADO.toString())
+		.append(" as ALM_O ")
+		.append(" INNER JOIN EAL_O.")
+		.append(SceEstoqueAlmoxarifado.Fields.FORNECEDOR.toString())
+		.append(" as FRN_O ")
+		.append(" INNER JOIN EAL_O.")
+		.append(SceEstoqueAlmoxarifado.Fields.MATERIAL.toString())
+		.append(" as MAT_O ")
+		
+		.append(" where ")
+		.append("EAL_O.")
+		.append(SceEstoqueAlmoxarifado.Fields.IND_ESTOCAVEL.toString())
+		.append(" = :indEstocavel ")
+		.append("and ")
+		.append("EAL_O.")
+		.append(SceEstoqueAlmoxarifado.Fields.IND_SITUACAO.toString())
+		.append("= :indSituacao ")
+		.append("and ")
+		
+		.append("ALM_O.")
+		.append(SceAlmoxarifado.Fields.SEQ.toString())
+		.append(" = :seq ")
+		.append("and ")
+		.append("MAT_O.")
+		.append(ScoMaterial.Fields.CODIGO.toString())
+		.append(" = :codigo ")
+		.append("and ")
+		.append("FRN_O.")
+		.append(ScoFornecedor.Fields.NUMERO.toString())
+		.append(" = :numero ");
+		
+		query =  createHibernateQuery(hql.toString());
+		query.setParameter("indEstocavel", Boolean.TRUE);
+		query.setParameter("indSituacao", DominioSituacao.A);
+		query.setParameter("seq", seqAlmoxarifadoOrigem);
+		query.setParameter("codigo", codigoMaterial);
+		query.setParameter("numero", numeroFornecedor);
+		
+		return (SceEstoqueAlmoxarifado) query.uniqueResult();
 
 	}
 
@@ -1410,9 +1445,9 @@ public class SceEstoqueAlmoxarifadoDAO extends br.gov.mec.aghu.core.persistence.
 			}
 
 		}
-
 		criteria.add(Restrictions.eq(SceEstoqueAlmoxarifado.Fields.ALMOXARIFADO_SEQ.toString(), almoxSeqReceb));
 		criteria.add(Restrictions.eq(SceEstoqueAlmoxarifado.Fields.IND_SITUACAO.toString(), DominioSituacao.A));
+		criteria.add(Restrictions.eq("MAT1." + ScoMaterial.Fields.SITUACAO.toString(), DominioSituacao.A));
 
 		StringBuilder sb = new StringBuilder(600).append("{alias}.MAT_CODIGO + coalesce({alias}.FRN_NUMERO,0) in");
 		sb.append("       						(	select 	eal1.mat_codigo + coalesce(eal1.frn_numero,0)");

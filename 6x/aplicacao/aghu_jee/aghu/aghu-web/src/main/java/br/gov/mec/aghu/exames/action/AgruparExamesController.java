@@ -18,6 +18,10 @@ import org.apache.commons.logging.LogFactory;
 import br.gov.mec.aghu.action.impressao.SistemaImpressao;
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
+import br.gov.mec.aghu.core.action.ActionController;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.Severity;
 import br.gov.mec.aghu.exames.business.IExamesFacade;
 import br.gov.mec.aghu.exames.solicitacao.business.ISolicitacaoExameFacade;
 import br.gov.mec.aghu.exames.solicitacao.vo.AmostraVO;
@@ -30,10 +34,6 @@ import br.gov.mec.aghu.model.AelPatologista;
 import br.gov.mec.aghu.model.AghUnidadesFuncionais;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
-import br.gov.mec.aghu.core.action.ActionController;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.Severity;
 
 
 public class AgruparExamesController extends ActionController {
@@ -214,7 +214,8 @@ public class AgruparExamesController extends ActionController {
 								siglaAnterior = etiquetaVo.getSigla();
 							}
 						} catch (SistemaImpressaoException e) {
-							this.apresentarMsgNegocio(Severity.ERROR, "MSG_ERRO_IMPRIMIR_NRO_AP");
+							LOG.error(e.getMessage(), e);
+							this.apresentarMsgNegocio(Severity.ERROR, "MSG_ERRO_IMPRIMIR_NRO_AP", e.getMessage());
 						} catch (BaseException e) {
 							this.apresentarExcecaoNegocio(e);
 						}
@@ -229,6 +230,7 @@ public class AgruparExamesController extends ActionController {
 		} catch (BaseException e) {
 			this.apresentarExcecaoNegocio(e);
 		} catch (UnknownHostException e) {
+			LOG.error(e.getMessage(), e);
 			this.apresentarMsgNegocio(Severity.ERROR, e.getMessage());
 		}
 		return null;

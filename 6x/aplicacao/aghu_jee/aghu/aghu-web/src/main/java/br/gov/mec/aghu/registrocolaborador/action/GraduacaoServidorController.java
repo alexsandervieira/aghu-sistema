@@ -71,6 +71,13 @@ public class GraduacaoServidorController extends ActionController {
 	public String salvar() {
 
 		try {
+			
+			if(this.qualificacao.getNroRegConselho() != null){
+				if(this.validarNrConselho(this.qualificacao)){
+					return null;
+				}
+			}
+			
 			if (edicao) {
 				RapServidores servidorLogado = servidorLogadoFacade.obterServidorLogado();
 				registroColaboradorFacade.alterar(qualificacao, servidorLogado);
@@ -118,7 +125,23 @@ public class GraduacaoServidorController extends ActionController {
 	public List<RapInstituicaoQualificadora> pesquisarInstituicao(String param){
 		return this.cadastrosBasicosFacade.pesquisarInstituicao(param);
 	}
-
+	
+	public boolean validarNrConselho(RapQualificacao qualificação) {
+		char[] conselho = this.qualificacao.getNroRegConselho().toCharArray();
+		boolean numero = false;
+		
+		for ( int i = 0; i < conselho.length; i++ ){
+			if ( Character.isDigit( conselho[ i ] ) ) {
+				numero = true;
+				break;
+			}
+		}
+		if( !numero ){
+			this.apresentarMsgNegocio(Severity.ERROR, "Número Regional Conselho deve possuir números");
+		}
+		return !numero;
+	}
+	
 	// getters & setters
 
 	public RapQualificacao getQualificacao() {

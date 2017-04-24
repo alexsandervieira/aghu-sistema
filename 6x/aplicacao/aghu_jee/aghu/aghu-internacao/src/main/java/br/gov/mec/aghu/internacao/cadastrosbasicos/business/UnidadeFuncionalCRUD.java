@@ -213,7 +213,8 @@ public class UnidadeFuncionalCRUD extends BaseBusiness {
 		ERRO_CARACTERISTICA_UNIDADE_FARMACIA_HORARIO_VALIDADE, 
 		ERRO_SIGLA_EXISTENTE,
 		ERRO_EXIGE_UNIDADE_FUNCIONAL,
-		CENTRO_CUSTO_NAO_INFORMADO;
+		CENTRO_CUSTO_NAO_INFORMADO,
+		ERRO_CARACTS_EXAMES;
 	}
 		
 	/**
@@ -965,7 +966,7 @@ public class UnidadeFuncionalCRUD extends BaseBusiness {
 		 * Ao tornar o horário de validade da prescrição nulo não pode haver a
 		 * característica de prescrição médica informatizada
 		 */
-		verificarHorarioValidadePreecricao(unidadeOriginal, unidadeNova, caracteristicasOld);
+		verificarHorarioValidadePreecricao(unidadeOriginal, unidadeNova, caracteristicas);
 
 		// Não pode desativar unidade funcional se existem atendimentos em
 		// hospital dia para ela.
@@ -1062,6 +1063,20 @@ public class UnidadeFuncionalCRUD extends BaseBusiness {
 	private void validarDadosCaractUnidade(final AghUnidadesFuncionais unidadeNova, List<ConstanteAghCaractUnidFuncionais> caracteristicas) throws ApplicationBusinessException {
 		
 		//Validar características
+		Integer countUnidExames = 0;
+		if(caracteristicas.contains(ConstanteAghCaractUnidFuncionais.UNID_EXECUTORA_EXAMES)) {
+			countUnidExames++;
+		}
+		if(caracteristicas.contains(ConstanteAghCaractUnidFuncionais.UNID_COLETA)) {
+			countUnidExames++;
+		}
+		if(caracteristicas.contains(ConstanteAghCaractUnidFuncionais.CENTRAL_RECEBIMENTO_MATERIAIS)) {
+			countUnidExames++;
+		}
+		if(countUnidExames > 1) {
+			throw new ApplicationBusinessException(UnidadeFuncionalCRUDExceptionCode.ERRO_CARACTS_EXAMES);
+		}
+		
 		if(caracteristicas.contains(ConstanteAghCaractUnidFuncionais.PME_CONSECUTIVA) && 
 				!caracteristicas.contains(ConstanteAghCaractUnidFuncionais.PME_INFORMATIZADA)){
 			LOG.debug("AGH-00242 Ao inserir a característica de prescrição médica consecutiva deve haver a característica de prescrição médica consecutiva");
@@ -1219,14 +1234,14 @@ public class UnidadeFuncionalCRUD extends BaseBusiness {
 	 * @param unidadeNova
 	 * @throws ApplicationBusinessException
 	 */
-	private void verificarHorarioValidadePreecricao(final AghUnidadesFuncionais unidadeOriginal, final AghUnidadesFuncionais unidadeNova, final List<ConstanteAghCaractUnidFuncionais> caracteristicasOld) throws ApplicationBusinessException {
+	private void verificarHorarioValidadePreecricao(final AghUnidadesFuncionais unidadeOriginal, final AghUnidadesFuncionais unidadeNova, final List<ConstanteAghCaractUnidFuncionais> caracteristicas) throws ApplicationBusinessException {
 		/*
 		 * ao tornar o horário de validade da prescrição nulo não pode haver
 		 * a característica de prescrição médica informatizada
 		 */
 		if (unidadeOriginal.getHrioValidadePme() != null && unidadeNova.getHrioValidadePme() == null
 				&& unidadeNova.getCaracteristicas() != null
-				&& caracteristicasOld.contains(ConstanteAghCaractUnidFuncionais.PME_INFORMATIZADA)) {
+				&& caracteristicas.contains(ConstanteAghCaractUnidFuncionais.PME_INFORMATIZADA)) {
 			LOG.debug("ao tornar o horário de validade da prescrição nulo não pode haver a característica de prescrição médica informatizada.");
 			throw new ApplicationBusinessException(UnidadeFuncionalCRUDExceptionCode.ERRO_CARACTERISTICA_PRESCRICAO_INFORMATIZADA);
 		}

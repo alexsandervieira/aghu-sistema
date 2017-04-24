@@ -16,6 +16,7 @@ import org.hibernate.transform.Transformers;
 import org.hibernate.type.IntegerType;
 
 import br.gov.mec.aghu.bancosangue.vo.SolicitacaoHemoterapicaVO;
+import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dao.SequenceID;
 import br.gov.mec.aghu.dominio.DominioIndPendenteItemPrescricao;
 import br.gov.mec.aghu.dominio.DominioResponsavelColeta;
@@ -28,7 +29,6 @@ import br.gov.mec.aghu.model.AbsSolicitacoesHemoterapicasId;
 import br.gov.mec.aghu.model.AghAtendimentos;
 import br.gov.mec.aghu.model.MpmPrescricaoMedica;
 import br.gov.mec.aghu.model.MpmPrescricaoMedicaId;
-import br.gov.mec.aghu.core.utils.DateUtil;
 
 public class AbsSolicitacoesHemoterapicasDAO extends
 		br.gov.mec.aghu.core.persistence.dao.BaseDao<AbsSolicitacoesHemoterapicas> {
@@ -173,28 +173,22 @@ public class AbsSolicitacoesHemoterapicasDAO extends
 		 */
 		List<AbsSolicitacoesHemoterapicas> list;
 
-		DetachedCriteria criteria = DetachedCriteria
-				.forClass(AbsSolicitacoesHemoterapicas.class);
+		DetachedCriteria criteria = DetachedCriteria.forClass(AbsSolicitacoesHemoterapicas.class);
 
 		// she.pme_atd_seq = p_atd_seq
 		if (id.getAtdSeq() != null) {
-			criteria.add(Restrictions.eq(
-					AbsSolicitacoesHemoterapicas.Fields.PME_ATD_SEQ.toString(),
-					id.getAtdSeq()));
+			criteria.add(Restrictions.eq(AbsSolicitacoesHemoterapicas.Fields.PME_ATD_SEQ.toString(),id.getAtdSeq()));
 		}
 		// and she.pme_seq = p_pme_seq
 		if (id.getSeq() != null) {
-			criteria.add(Restrictions.eq(
-					AbsSolicitacoesHemoterapicas.Fields.PME_SEQ.toString(),
-					id.getSeq()));
+			criteria.add(Restrictions.eq(AbsSolicitacoesHemoterapicas.Fields.PME_SEQ.toString(),id.getSeq()));
 		}
 
 		// and dthr_desativacao is null
 		if (!listarTodas) {
-			criteria.add(Restrictions
-					.isNull(AbsSolicitacoesHemoterapicas.Fields.DTHR_FIM
-							.toString()));
+			criteria.add(Restrictions.isNull(AbsSolicitacoesHemoterapicas.Fields.DTHR_FIM.toString()));
 		}
+		criteria.addOrder(Order.asc(AbsSolicitacoesHemoterapicas.Fields.ORDEM.toString()));
 		list = super.executeCriteria(criteria);
 
 		return list;
@@ -559,5 +553,22 @@ public class AbsSolicitacoesHemoterapicasDAO extends
 				Restrictions.and(Restrictions.eq(AbsSolicitacoesHemoterapicas.Fields.IND_SIT_COLETA.toString(), DominioSituacaoColeta.E), 
 						Restrictions.eq(AbsSolicitacoesHemoterapicas.Fields.IND_RESP_COLETA.toString(), DominioResponsavelColeta.S))));
 		return executeCriteria(criteria);
+	}
+	
+	public Integer buscaOrdemPrescricaoConsultoria(MpmPrescricaoMedicaId id, Date dthrFim) {
+		
+		List<AbsSolicitacoesHemoterapicas> list;
+
+		DetachedCriteria criteria = obterCriteriaHemoterapiasPorPrescricao(id);
+		criteria.add(Restrictions.or(Restrictions.isNull(AbsSolicitacoesHemoterapicas.Fields.DTHR_FIM.toString()),
+				Restrictions.eq(AbsSolicitacoesHemoterapicas.Fields.DTHR_FIM.toString(),dthrFim)));
+
+		criteria.addOrder(Order.desc(AbsSolicitacoesHemoterapicas.Fields.ORDEM.toString()));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		
+		list = super.executeCriteria(criteria);
+
+		Integer ordem = list != null && !list.isEmpty() ? list.get(0).getOrdem() != null && list.get(0).getOrdem() > 0 ? list.get(0).getOrdem()  +1 : list.size() +1 : 1;
+		return ordem;
 	}
 }

@@ -16,7 +16,11 @@
         <h:form prependId="false" id="formPesqResultados"> 
           <aghu:panelGeral legend="#{messages.TITLE_ESCALA_PREVIA_DEFINITIVA}"> 
             <aghu:linha> 
-              <mec:suggestionBox id="sbUnidadeFuncional" label="#{messages.LABEL_UNIDADE_FUNCIONAL}" title="#{messages.TITLE_UNIDADE_FUNCIONAL_ESCALA_CIRURGICA}" suggestionAction="obterUnidadeFuncional" descricaoInput="seq" descricaoLabel="descricao" maxlength="30" required="true" block="true" width="500" posSelectionAction="pesquisar" posDeleteAction="limpar" onkeypress="return disableEnterKey(event);" controller="#{solicitarEscalaCirurgicaPaginatorController}" value="#{solicitarEscalaCirurgicaPaginatorController.unidadeFuncional}" render="panelTodo"> 
+              <mec:suggestionBox id="sbUnidadeFuncional" label="#{messages.LABEL_UNIDADE_FUNCIONAL}" 
+             		 title="#{messages.TITLE_UNIDADE_FUNCIONAL_ESCALA_CIRURGICA}" suggestionAction="obterUnidadeFuncional" descricaoInput="seq" 
+             		 descricaoLabel="descricao" maxlength="30" required="true" block="true" width="500" 
+              		 controller="#{solicitarEscalaCirurgicaPaginatorController}" 
+              		 value="#{solicitarEscalaCirurgicaPaginatorController.unidadeFuncional}"> 
                 <p:column> 
                   <f:facet name="header"> 
                     <b>#{messages.LABEL_CODIGO}</b> 
@@ -28,7 +32,13 @@
                   </f:facet> #{item.descricao}
                 </p:column> 
               </mec:suggestionBox> 
+               <mec:inputTextData id="dtInicio" label="#{messages.LABEL_DT_INICIAL_ESCALA}" 
+               		size="10" maxlength="10" value="#{solicitarEscalaCirurgicaPaginatorController.dtInicio}"  tipo="data"/>  
+              <mec:inputTextData id="dtFim" label="#{messages.LABEL_DT_FINAL_ESCALA}" size="10" maxlength="10" 
+             		value="#{solicitarEscalaCirurgicaPaginatorController.dtFim}"  tipo="data"/> 
             </aghu:linha> 
+           	  <mec:commandButton id="bt_pesquisar" value="#{messages.LABEL_PESQUISAR}" block="true" action="#{solicitarEscalaCirurgicaPaginatorController.pesquisar}" profile="search" render="panelTodo"/> 
+              <mec:commandButton id="bt_limpar" value="#{messages.LABEL_LIMPAR}" action="#{solicitarEscalaCirurgicaPaginatorController.limpar}" styleClass="bt_cinza" profile="clear" onkeypress="return disableEnterKey(event);"/> 
           </aghu:panelGeral> 
         </h:form>  
         <p:outputPanel id="panelLista" rendered="#{solicitarEscalaCirurgicaPaginatorController.dataModel.pesquisaAtiva}" layout="inline" styleClass="aghu-panel-geral"> 

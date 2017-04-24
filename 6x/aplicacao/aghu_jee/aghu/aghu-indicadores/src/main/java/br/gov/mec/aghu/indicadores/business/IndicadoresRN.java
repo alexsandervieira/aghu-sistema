@@ -15,8 +15,6 @@ import java.util.Set;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -29,6 +27,12 @@ import org.apache.commons.logging.LogFactory;
 import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
 import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.business.IAghuFacade;
+import br.gov.mec.aghu.constante.ConstanteAghCaractUnidFuncionais;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.commons.CoreUtil;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.utils.DateUtil;
 import br.gov.mec.aghu.dominio.DominioMovimentoLeito;
 import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.dominio.DominioTipoUnidade;
@@ -52,12 +56,6 @@ import br.gov.mec.aghu.model.AinLeitos;
 import br.gov.mec.aghu.model.AinMovimentosInternacao;
 import br.gov.mec.aghu.model.AinQuartos;
 import br.gov.mec.aghu.model.RapServidores;
-import br.gov.mec.aghu.core.business.BaseBMTBusiness;
-import br.gov.mec.aghu.core.commons.CoreUtil;
-import br.gov.mec.aghu.constante.ConstanteAghCaractUnidFuncionais;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
-import br.gov.mec.aghu.core.utils.DateUtil;
 
 /**
  * RN Geral para Indicadores.
@@ -67,8 +65,7 @@ import br.gov.mec.aghu.core.utils.DateUtil;
  */
 @SuppressWarnings({"PMD.AghuTooManyMethods", "PMD.CyclomaticComplexity", "PMD.ExcessiveClassLength", "PMD.SuspiciousConstantFieldName"})
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
-public class IndicadoresRN extends BaseBMTBusiness {
+public class IndicadoresRN extends BaseBusiness {
 
 	
 	private static final String PRIVATIVO = "PRIVATIVO";
@@ -144,7 +141,6 @@ public class IndicadoresRN extends BaseBMTBusiness {
 	 */
 	public void gerarIndicadoresHospitalares(Date anoMesCompetencia) throws ApplicationBusinessException {
 		try {
-			this.beginTransaction(3*60*60);	// 3 horas
 
 			Calendar cal1 = Calendar.getInstance();
 			indicadoresVO.setCountLog(0);
@@ -202,10 +198,8 @@ public class IndicadoresRN extends BaseBMTBusiness {
 			LOG.info("Mes competencia da geração = " + sdf.format(MES_COMPETENCIA.getTime()));
 			LOG.info("Dias do mes da competencia= " + X_DIAS_MES);
 
-			// commit
-			super.commitTransaction();
 		} catch (ApplicationBusinessException e) {
-			super.rollbackTransaction();
+			LOG.error(e.getMessage(), e);
 			throw e;
 		}
 	}
@@ -2164,6 +2158,7 @@ public class IndicadoresRN extends BaseBMTBusiness {
 
 		AghEspecialidades aghEspecialidades = pEsp == null ? null : getAghuFacade()
 				.obterAghEspecialidadesPorChavePrimaria(pEsp);
+		
 		
 		AghClinicas aghClinicas = pClin == null ? null : getAghuFacade().obterClinica(pClin);
 		

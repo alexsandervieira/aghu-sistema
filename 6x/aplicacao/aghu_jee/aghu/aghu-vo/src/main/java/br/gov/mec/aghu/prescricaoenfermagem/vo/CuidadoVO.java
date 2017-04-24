@@ -50,6 +50,7 @@ public class CuidadoVO  implements Serializable, Cloneable, BaseBean {
 	
 	// Utilizado no relatório da prescrição enfermagem
 	private Integer numero;
+	private Integer ordem;
 	private String tipo;
 	private String aprazamento;
 	
@@ -57,13 +58,13 @@ public class CuidadoVO  implements Serializable, Cloneable, BaseBean {
 	 * Utilizado na tela de prescricao medica.
 	 * Quando o usuario marcar o item para exclusao.
 	 */
-	private Boolean excluir;
+	private Boolean excluir = Boolean.FALSE;
 
 	/**
 	 * Utilizado para identificar se o item foi marcado na tela.
 	 * Uso geral.
 	 */
-	private Boolean marcado;
+	private Boolean marcado = Boolean.FALSE;
 	
 	/**
 	 * Indica de forma diferenciada o item em uma lista.
@@ -96,6 +97,10 @@ public class CuidadoVO  implements Serializable, Cloneable, BaseBean {
 	 * NOME DO CUIDADO - COMPLEMENTO, APRAZAMENTO;
 	 */
 	private String descricao;
+	
+	private String descricaoDiagnostico;
+	
+	private Boolean diagnostico = Boolean.FALSE;
 	
 	public CuidadoVO() { }
 	
@@ -312,6 +317,22 @@ public class CuidadoVO  implements Serializable, Cloneable, BaseBean {
 		return descricao;
 	}
 
+	public String getDescricaoDiagnostico() {
+		return descricaoDiagnostico;
+	}
+
+	public void setDescricaoDiagnostico(String descricaoDiagnostico) {
+		this.descricaoDiagnostico = descricaoDiagnostico;
+	}
+
+	public Boolean getDiagnostico() {
+		return diagnostico;
+	}
+
+	public void setDiagnostico(Boolean diagnostico) {
+		this.diagnostico = diagnostico;
+	}
+
 	@Override
 	public int hashCode() {
 		HashCodeBuilder umHashCodeBuilder = new HashCodeBuilder();
@@ -375,4 +396,12 @@ public class CuidadoVO  implements Serializable, Cloneable, BaseBean {
 		this.imprimeAprazamento = imprimeAprazamento;
 	}
 
+	public Integer getOrdem() {
+		return ordem;
+	}
+
+	public void setOrdem(Integer ordem) {
+		this.ordem = ordem;
+	}
+	
 }

@@ -10,9 +10,10 @@
 	<name>entidades: JAR Module</name>
 
 	<properties>
-		<aghu-core-commons.versao>3.3</aghu-core-commons.versao>
+		<aghu-core-commons.versao>3.5</aghu-core-commons.versao>
  		<aghu-core-test.versao>3.1</aghu-core-test.versao>  
- 		<aghu-core-business.versao>3.7</aghu-core-business.versao>  
+ 		<aghu-core-business.versao>3.9</aghu-core-business.versao>
+ 		<aghu-core-dialect.versao>3.1</aghu-core-dialect.versao>
 		<maven-pmd-plugin.version>3.3</maven-pmd-plugin.version>
 		<pmd.version>5.2.2</pmd.version>
 		<minimumPriority>2</minimumPriority>
@@ -120,6 +121,19 @@
 			<exclusion>
 			  	<groupId>br.gov.mec.aghu-core</groupId>
 				<artifactId>aghu-core-business</artifactId>
+		  	</exclusion>
+		  </exclusions>
+		</dependency>
+		
+		<dependency>
+			<groupId>br.gov.mec.aghu-core</groupId>
+			<artifactId>dialetosaghu</artifactId>
+			<version>${aghu-core-dialect.versao}</version>
+			<scope>test</scope>
+			<exclusions>
+			<exclusion>
+			  	<groupId>org.hibernate</groupId>
+			  	<artifactId>hibernate-search</artifactId>
 		  	</exclusion>
 		  </exclusions>
 		</dependency>

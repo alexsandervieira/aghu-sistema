@@ -146,12 +146,23 @@
               <p:tooltip for="panelFrn" direction="bottom-right" styleClass="tooltip" layout="block"> 
                 <h:outputText value="#{estoque.fornecedor.numero} - #{estoque.fornecedor.nomeFantasia}"/> 
               </p:tooltip> 
-            </p:column>  
+            </p:column>
+            
+            <p:column style="#{((estoque.almoxarifado.seq eq estoque.material.almoxarifado.seq) and (pesquisaEstoqueAlmoxPaginatorController.fornecedorPadrao eq estoque.fornecedor.numero)) ? 'background-color:#F8C88D;' : ''}"> 
+              <f:facet name="header"> 
+                <h:outputText value="#{messages.LABEL_CODIGO_MATERIAL}" title="#{messages.TITLE_COD_MATERIAL}"/> 
+              </f:facet> 
+              <h:outputText id="panelCod" value="#{estoque.material.codigo}"/>	
+              <p:tooltip for="panelCod" direction="bottom-right" styleClass="tooltip" layout="block"> 
+                <h:outputText value="#{estoque.material.codigo} - #{estoque.material.nome}"/> 
+              </p:tooltip> 
+            </p:column>   
+            
             <p:column width="160" style="#{((estoque.almoxarifado.seq eq estoque.material.almoxarifado.seq) and (pesquisaEstoqueAlmoxPaginatorController.fornecedorPadrao eq estoque.fornecedor.numero)) ? 'background-color:#F8C88D;' : ''}"> 
               <f:facet name="header"> 
                 <h:outputText value="#{messages.LABEL_MATERIAL}" title="#{messages.LABEL_MATERIAL}"/> 
               </f:facet>  
-    	      	  <h:outputText id="panelMat" value="#{estoque.material.codigo} - #{pesquisaEstoqueAlmoxPaginatorController.abreviar(estoque.material.nome, 20)}"/>
+    	      	  <h:outputText id="panelMat" value="#{pesquisaEstoqueAlmoxPaginatorController.abreviar(estoque.material.nome, 28)}"/>
 	              <p:tooltip for="panelMat" direction="bottom-right" styleClass="tooltip" layout="block"> 
 	                <h:outputText value="#{estoque.material.codigo}"/>  
 	                <h:outputText value=" - "/>  

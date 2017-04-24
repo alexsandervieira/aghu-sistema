@@ -94,4 +94,14 @@ public class AelPermissaoUnidSolicDAO extends br.gov.mec.aghu.core.persistence.d
 
 		return executeCriteria(dc);
 	}
+	
+	
+	public List<AelPermissaoUnidSolic> buscarAelPermissaoUnidSolicPorUnfSeqSolicitante(Short unfSeqSolicitante) {
+		DetachedCriteria dc = obterCriteria();
+		dc.add(Restrictions.eq(AelPermissaoUnidSolic.Fields.UNF_SEQ_SOLICITANTE.toString(), unfSeqSolicitante));
+
+		return executeCriteria(dc);
+	}
+	
+	
 }

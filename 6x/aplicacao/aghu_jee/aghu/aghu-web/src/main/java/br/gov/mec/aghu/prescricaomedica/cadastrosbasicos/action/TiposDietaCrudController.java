@@ -341,8 +341,15 @@ public class TiposDietaCrudController extends ActionController {
 			this.apresentarMsgNegocio(Severity.ERROR, "MENSAGEM_UNIDADE_FUNCIONAL_TIPO_DIETA_OBRIGATORIA");
 			return;
 		}
+		
+		for (AnuTipoItemDietaUnfs anuTipoItemDietaUnfs : this.getTipoDietaUnidadeFuncionais()) {
+			if(anuTipoItemDietaUnfs.getUnidadeFuncional().getDescricao().equals(this.getUnidadeFuncionalSelecionada().getDescricao())){
+				this.apresentarMsgNegocio(Severity.ERROR, "Unidade Funcional Associada já está inclusa");
+				return;
+			}
+		}
 
-		if (getTipoDietaUnidadeFuncionais() != null && !getTipoDietaUnidadeFuncionais().contains(getUnidadeFuncionalSelecionada())) {
+		if (getTipoDietaUnidadeFuncionais() != null) {
 			Collections.sort(listaUnidadesFuncionais, UNIDADE_COMPARATOR);
 			tipoDietaUnfs.setCriadoEm(new Date());
 			tipoDietaUnfs.setServidor(registroColaboradorFacade.obterServidorAtivoPorUsuario(this.obterLoginUsuarioLogado()));

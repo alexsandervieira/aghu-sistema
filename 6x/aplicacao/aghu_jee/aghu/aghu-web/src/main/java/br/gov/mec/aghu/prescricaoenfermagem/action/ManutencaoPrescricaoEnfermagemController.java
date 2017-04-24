@@ -99,7 +99,11 @@ public class ManutencaoPrescricaoEnfermagemController extends ActionController {
 	
 	public void iniciar() {
 	 
+		atualizarListaCuidados();
+	
+	}
 
+	private void atualizarListaCuidados() {
 		try {
 			if (this.penSeqAtendimento != null && this.penSeq != null) {
 				EpePrescricaoEnfermagemId prescricaoId = new EpePrescricaoEnfermagemId(this.penSeqAtendimento, this.penSeq);
@@ -108,7 +112,7 @@ public class ManutencaoPrescricaoEnfermagemController extends ActionController {
 					.buscarDadosCabecalhoPrescricaoEnfermagemVO(prescricaoId));
 
 				List<CuidadoVO> listaCuidadoVO = null;
-				listaCuidadoVO = this.prescricaoEnfermagemFacade.buscarCuidadosPrescricaoEnfermagem(prescricaoId, false);
+				listaCuidadoVO = this.prescricaoEnfermagemFacade.buscarCuidadosDiagnosticosPrescricaoEnfermagem(prescricaoId, false);
 
 				this.prescricaoEnfermagemTemplateController.getPrescricaoEnfermagemVO().setListaCuidadoVO(listaCuidadoVO);
 				
@@ -119,9 +123,35 @@ public class ManutencaoPrescricaoEnfermagemController extends ActionController {
 			apresentarExcecaoNegocio(e);
 			LOG.error("Erro",e);
 		}
-	
 	}
 	
+	public void marcarPorDiagnostico(CuidadoVO cuidadoDiagnostico){
+		for (int i = getPrescricaoEnfermagemVO().getListaCuidadoVO().size() - 1; i >= 0; i--) {
+			CuidadoVO cuidado = getPrescricaoEnfermagemVO().getListaCuidadoVO().get(i);
+			if(cuidado.getFdgFreSeq().equals(cuidadoDiagnostico.getFdgFreSeq())){
+				cuidado.setExcluir(cuidadoDiagnostico.getExcluir());
+			}
+		}
+	}
+	
+	public void desmarcarDiagnostico(CuidadoVO cuidadoSelecionado){
+		CuidadoVO cuidadoDiagAux = null;
+		boolean checkDiagnostico = true;
+		for (int i = getPrescricaoEnfermagemVO().getListaCuidadoVO().size() - 1; i >= 0; i--) {
+			CuidadoVO cuidado = getPrescricaoEnfermagemVO().getListaCuidadoVO().get(i);
+			if(cuidado.getFdgFreSeq().equals(cuidadoSelecionado.getFdgFreSeq())){
+				if(cuidado.getDiagnostico()){
+					cuidadoDiagAux = cuidado;
+				} else if (!cuidado.getExcluir()){
+					checkDiagnostico = false;
+				}
+			}
+		}
+		if(cuidadoDiagAux != null){
+			cuidadoDiagAux.setExcluir(checkDiagnostico);
+		}
+	}
+
 	/**
 	 * Busca os itens relacionados à Prescrição Médica.
 	 * O seq do atendimento é o mesmo para Prescrição de Enfermagem e Prescrição Médica
@@ -181,7 +211,7 @@ public class ManutencaoPrescricaoEnfermagemController extends ActionController {
 	 */
 	public String obterEstiloColuna(CuidadoVO cuidadoVO) {
 		String retorno = "";
-		if (cuidadoVO != null && cuidadoVO.getExcluir() != null && cuidadoVO.getExcluir()) {
+		if (cuidadoVO != null && cuidadoVO.getExcluir() != null && cuidadoVO.getExcluir() && !cuidadoVO.getDiagnostico()) {
 			retorno = "background-color:#FF6347;";
 		}
 		return retorno;// + "max-width: 300px; word-wrap: break-word;";
@@ -228,7 +258,9 @@ public class ManutencaoPrescricaoEnfermagemController extends ActionController {
 	 */
 	public void removerCuidadosSelecionados() {
 		try {			
-			prescricaoEnfermagemFacade.removerCuidadosSelecionados(this.prescricaoEnfermagemTemplateController.getPrescricaoEnfermagemVO().getListaCuidadoVO());	
+			prescricaoEnfermagemFacade.removerCuidadosSelecionados(this.prescricaoEnfermagemTemplateController.getPrescricaoEnfermagemVO().getListaCuidadoVO());
+			atualizarListaCuidados();
+
 		} catch (BaseException e) {
 			apresentarExcecaoNegocio(e);
 			LOG.error("Erro",e);

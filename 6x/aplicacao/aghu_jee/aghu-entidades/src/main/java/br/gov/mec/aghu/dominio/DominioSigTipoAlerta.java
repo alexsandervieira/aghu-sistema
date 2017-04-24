@@ -38,7 +38,7 @@ public enum DominioSigTipoAlerta implements Dominio{
 		case CR:
 			return "Calculo somente para rateio";
 		case NC:
-			return "Centro de custo sem objetos de custos ativos";
+			return "Centro de atividade sem objetos de custos ativos";
 		case CP:
 			return "Cliente sem peso na coleta de direcionadores";
 		default:

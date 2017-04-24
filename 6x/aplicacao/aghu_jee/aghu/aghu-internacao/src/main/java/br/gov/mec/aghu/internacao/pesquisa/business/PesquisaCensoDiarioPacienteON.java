@@ -1,6 +1,7 @@
 package br.gov.mec.aghu.internacao.pesquisa.business;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -276,7 +277,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 		}
 		
-		if (obterCensoLeitoUnico().isSim()) {
+		if (obterCensoLeitoUnico().isSim() && DateUtil.validaDataMenor(DateUtil.truncaData(data), DateUtil.truncaData(new Date())) ) {
 			lista.addAll(obterCriteriaCensoUnionAll(unfSeq, unfSeqMae, data, status));
 		}
 		
@@ -430,6 +431,14 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 				vo.setDescricaoEsp(((String) obj[18]));
 			}
 
+			if (obj[19] != null) {
+				vo.setObservacao(((String) obj[19]));
+			}
+
+			if (obj[20] != null) {
+				vo.setNroCartaoSaude(((BigInteger) obj[20]));
+			}
+			
 			// Acreditem, os ifs abaixos foram simplificados !
 			if (seDataPesquisaAnteriorHojeEStatusPaciente(dataPesquisa, status)) {
 				dataPesquisaUltimaHora(dataPesquisa);
@@ -640,7 +649,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -766,6 +775,10 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 				vo.setDescricaoEsp(((String) obj[18]));
 			}
 
+			if (obj[19] != null) {
+				vo.setObservacao(((String) obj[19]));
+			}
+
 			if (data != null && (data.before(DateUtil.truncaData(new Date()))
 					|| !status.equals(DominioSituacaoUnidadeFuncional.PACIENTES))) {
 				dataPesquisaUltimaHora(data);
@@ -799,7 +812,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 
@@ -928,6 +941,10 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 				vo.setDescricaoEsp(((String) obj[18]));
 			}
 
+			if (obj[19] != null) {
+				vo.setObservacao(((String) obj[19]));
+			}
+
 			if (data != null && (data.before(DateUtil.truncaData(new Date()))
 					|| !status.equals(DominioSituacaoUnidadeFuncional.PACIENTES))) {
 				dataPesquisaUltimaHora(data);
@@ -955,7 +972,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -1064,6 +1081,10 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 				vo.setDescricaoEsp(((String) obj[20]));
 			}
 
+			if (obj[21] != null) {
+				vo.setObservacao(((String) obj[21]));
+			}
+
 			vo.setStatus(DominioSituacaoUnidadeFuncional.ENVIADOS);
 
 			vo.setGrupoMvtoLeito(DominioMovimentoLeito.O);
@@ -1107,7 +1128,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -1295,6 +1316,10 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 				vo.setDescricaoEsp(((String) obj[19]));
 			}
 
+			if (obj[20] != null) {
+				vo.setDescricaoEsp(((String) obj[20]));
+			}
+
 			vo.setStatus(DominioSituacaoUnidadeFuncional.RECEBIDOS);
 
 			vo.setGrupoMvtoLeito(DominioMovimentoLeito.O);
@@ -1312,7 +1337,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -1420,6 +1445,10 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 				vo.setDescricaoEsp(((String) obj[17]));
 			}
 
+			if (obj[18] != null) {
+				vo.setObservacao(((String) obj[18]));
+			}
+
 			vo.setStatus(DominioSituacaoUnidadeFuncional.ENVIADOS);
 
 			vo.setGrupoMvtoLeito(DominioMovimentoLeito.O);
@@ -1464,7 +1493,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -1575,7 +1604,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -1715,7 +1744,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -1862,7 +1891,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -2004,7 +2033,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -2150,7 +2179,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -2289,7 +2318,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -2432,7 +2461,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-					completaCensoVO(vo, data, status);
+					completaCensoVOCNS(vo, data, status);
 					lista.add(vo);
 			}
 		}
@@ -2568,7 +2597,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -2711,7 +2740,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -2841,7 +2870,15 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (obj[17] != null) {
-				vo.setEstadoSaude(buscaEstadoSaudeAtual(((Integer) obj[17]), data));
+				vo.setEstadoSaude(buscaEstadoSaudeAtual(((Integer) obj[17]),((Short) obj[0]), data));
+			}
+
+			if (obj[18] != null) {
+				vo.setObservacao(obj[18].toString() );
+			}
+
+			if (obj[19] != null) {
+				vo.setNroCartaoSaude(((BigInteger) obj[19]));
 			}
 
 			vo.setStatus(DominioSituacaoUnidadeFuncional.PACIENTES);
@@ -2869,6 +2906,37 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 		return lista;
 	}
 
+	private String buscaEstadoSaudeAtual(Integer atdSeq, Short unfSeq, Date dataValida) {
+
+		if (atdSeq != null || unfSeq != null) {
+
+			if (this.internacaoFacade.verificarCaracteristicaUnidadeFuncional(unfSeq,
+					ConstanteAghCaractUnidFuncionais.INFORMA_ESTADO_SAUDE)) {
+
+				Calendar auxDataValida = Calendar.getInstance();
+
+				if (dataValida != null) {
+					auxDataValida.setTime(dataValida);
+					auxDataValida.set(Calendar.HOUR_OF_DAY, 24);
+				}
+
+				MamTipoEstadoPaciente estadoPaciente = ambulatorioFacade.obterEstadoAtual(atdSeq,
+						auxDataValida.getTime());
+
+				if (estadoPaciente != null && estadoPaciente.getTitulo() != null) {
+					return estadoPaciente.getDescricao();
+				} else {
+					return null;
+				}
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+
+	}
+	
 	private String buscaEstadoSaudeAtual(Integer atdSeq, Date dataValida) {
 		// System.out.println("atdSeq: " + atdSeq + " e dataValida: " +
 		// dataValida);
@@ -2912,7 +2980,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			return null;
 		}
 
-	}
+	}	
 
 	/**
 	 * ORADB VIEW V_AIN_CENSO Este método implementa a query da 18ª UNION da
@@ -2997,7 +3065,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -3118,6 +3186,10 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 				vo.setEstadoSaude(buscaEstadoSaudeAtual(((Integer) obj[13]), data));
 			}
 
+			if (obj[14] != null) {
+				vo.setObservacao((String) obj[14]);
+			}
+
 			vo.setStatus(DominioSituacaoUnidadeFuncional.PACIENTES);
 
 			vo.setGrupoMvtoLeito(DominioMovimentoLeito.O);
@@ -3131,7 +3203,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -3271,7 +3343,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 			}
 
 			if (adicionar) {
-				completaCensoVO(vo, data, status);
+				completaCensoVOCNS(vo, data, status);
 				lista.add(vo);
 			}
 		}
@@ -3305,7 +3377,7 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 
 			if (obj[0] != null) {
 				vo.setUnfSeq((Short) obj[0]);
-		}
+			}
 
 			if (obj[1] != null) {
 				vo.setUnfMaeSeq((Short) obj[1]);
@@ -3577,6 +3649,16 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 		return result.get(0);
 	}
 
+	private void completaCensoVOCNS(VAinCensoVO vAinCensoVO, Date dataPesquisa, DominioSituacaoUnidadeFuncional status)
+			throws ApplicationBusinessException {
+		completaCensoVO(vAinCensoVO, dataPesquisa, status);
+		
+		if (vAinCensoVO.getPacCodigo() != null) {
+			AipPacientes paciente = pacienteFacade.obterPaciente(vAinCensoVO.getPacCodigo());
+			vAinCensoVO.setNroCartaoSaude(paciente.getNroCartaoSaude());
+		}
+	}
+	
 	private void completaCensoVO(VAinCensoVO vAinCensoVO, Date dataPesquisa, DominioSituacaoUnidadeFuncional status)
 			throws ApplicationBusinessException {
 
@@ -3599,10 +3681,6 @@ public class PesquisaCensoDiarioPacienteON extends BaseBusiness {
 		vAinCensoVO.setIconeBotaoInternacao(
 				this.definirIconeBotaoInternacao(vAinCensoVO.getTipo(), vAinCensoVO.getGrupoMvtoLeito()));
 		vAinCensoVO.setEstadoSaude(vAinCensoVO.getEstadoSaude());
-		if (vAinCensoVO.getPacCodigo() != null) {
-			AipPacientes paciente = pacienteFacade.obterPaciente(vAinCensoVO.getPacCodigo());
-			vAinCensoVO.setNroCartaoSaude(paciente.getNroCartaoSaude());
-		}
 
 		// atualiza previsão de alta nas próximas XX horas
 		vAinCensoVO.setPrevisaoDeAltaNasProximasHoras(

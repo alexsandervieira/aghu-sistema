@@ -593,10 +593,10 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 			Date horaConsulta, DominioDiaSemana diaSemana, boolean mostrarTodosHorarios, boolean excluirPrimeiraConsulta, boolean visualizarPrimeirasConsultasSMS)
 			throws ApplicationBusinessException {
 
-		StringBuilder hql = new StringBuilder(447);
+		StringBuilder hql = new StringBuilder(600);
 		hql.append("select ")
 		.append(AacConsultas.Fields.CONSULTA.toString())
-		.append(", pag, con, ta, ca, pac, gac ")
+		.append(", pag, con, ta, ca, pac, gac, profe, rapServ ")
 
 
 		.append(" from ")
@@ -609,6 +609,9 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		.append(" left outer join fetch consulta.").append(AacConsultas.Fields.CONDICAO_ATENDIMENTO.toString()).append(" ca ")
 		.append(" left outer join fetch consulta.").append(AacConsultas.Fields.PACIENTE.toString()).append(" pac ")
 		.append(" left outer join fetch consulta.").append(AacConsultas.Fields.GRADE_AGENDA_CONSULTA.toString()).append(" gac ")
+		.append(" left outer join fetch gac.").append(AacGradeAgendamenConsultas.Fields.PROF_ESPECIALIDADE.toString()).append(" profe ")
+		.append(" left outer join fetch profe.").append(AghProfEspecialidades.Fields.RAP_SERVIDOR.toString()).append(" rapServ ")
+		
 		
 		.append(" where")
 		.append(" consulta.").append(AacConsultas.Fields.SEQ_GRADE_AGENDA_CONSULTA.toString()).append(" = :seqGrade ");
@@ -697,8 +700,7 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 			}
 			//#52061 - Caso não possua permissão específica não lista Primeiras Consultas da Secretaria Municipal da Saúde
 			if (!visualizarPrimeirasConsultasSMS){
-				hql.append("and (consulta.").append(AacConsultas.Fields.CAA_SEQ.toString()).append(" <> :seqCondPrimeiraConsulta ");
-				hql.append("or consulta.").append(AacConsultas.Fields.TAG_SEQ.toString()).append(" <> :seqTipoAgendamentoSMS)");
+				hql.append("and consulta.").append(AacConsultas.Fields.CAA_SEQ.toString()).append(" = :seqCondPrimeiraConsulta ");
 			}
 		}
 
@@ -778,9 +780,7 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 			}
 			//#52061
 			if (!visualizarPrimeirasConsultasSMS){
-				Short seqTipoAgendamentoSMS = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_TAG_SMS).getVlrNumerico().shortValue();
-				Short seqCondPrimeiraConsulta = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_CAA_CONSULTA).getVlrNumerico().shortValue();
-				query.setParameter("seqTipoAgendamentoSMS", seqTipoAgendamentoSMS);
+				Short seqCondPrimeiraConsulta = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_FILTRO_VISUALIZA_CODICOES_CONSULTA).getVlrNumerico().shortValue();
 				query.setParameter("seqCondPrimeiraConsulta", seqCondPrimeiraConsulta);
 			}
 		}
@@ -867,8 +867,7 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		criteria.createAlias(AacConsultas.Fields.FORMA_AGENDAMENTO.toString(), "FA", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias(AacConsultas.Fields.PROJETO_PESQUISA.toString(), "PP", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias(AacConsultas.Fields.SERVIDOR_CONSULTADO.toString(), "SC", JoinType.LEFT_OUTER_JOIN);
-		criteria.createAlias(AacConsultas.Fields.SERVIDOR_ATENDIDO.toString(), "SA", JoinType.LEFT_OUTER_JOIN);
-		
+				
 		criteria.createAlias(AacConsultas.Fields.CONVENIO_SAUDE_PLANO.toString(), "CSP", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias(AacConsultas.Fields.PACIENTE.toString(), PAC, JoinType.LEFT_OUTER_JOIN);
 
@@ -876,7 +875,17 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		criteria.createAlias(AacConsultas.Fields.GRADE_AGENDA_CONSULTA_ESPECIALIDADE.toString(), "CAC_ESP", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias(AacConsultas.Fields.SITUACAO_CONSULTA.toString(), "SITUACAO", JoinType.LEFT_OUTER_JOIN);
 		
-		criteria.createAlias("SA."+RapServidores.Fields.PESSOA_FISICA.toString(), "SERV_ATEND_PF", JoinType.LEFT_OUTER_JOIN);
+		String gradeAgendaConsulta = AacConsultas.Fields.GRADE_AGENDA_CONSULTA.toString();
+		String profEspecialidade = AacGradeAgendamenConsultas.Fields.PROF_ESPECIALIDADE.toString();
+		String servidor = AghProfEspecialidades.Fields.SERVIDOR.toString();
+		
+		criteria.createAlias(gradeAgendaConsulta + "." + AacGradeAgendamenConsultas.Fields.PROF_ESPECIALIDADE.toString()
+				, profEspecialidade, JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias(profEspecialidade + "." + AghProfEspecialidades.Fields.SERVIDOR.toString()
+				, servidor, JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias(servidor + "." + RapServidores.Fields.PESSOA_FISICA.toString()
+				, RapServidores.Fields.PESSOA_FISICA.toString(), JoinType.LEFT_OUTER_JOIN);
+		
 
 
 		if (relacionaFormaAgendamento){
@@ -1179,6 +1188,7 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		criteria.createAlias(GRADE2 + AacGradeAgendamenConsultas.Fields.PROF_ESPECIALIDADE.toString(), "profEspecialidade", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias(aliasConsulta + "." + AacConsultas.Fields.CONDICAO_ATENDIMENTO.toString(), "condicaoAtendimento", JoinType.LEFT_OUTER_JOIN);
 		criteria.createAlias(aliasConsulta + "." + AacConsultas.Fields.SITUACAO_CONSULTA.toString(), "sitConsulta", JoinType.LEFT_OUTER_JOIN);
+		criteria.createAlias(aliasConsulta + "." + AacConsultas.Fields.PROCEDIMENTOS_REALIZADOS.toString(), "procedRealizado", JoinType.LEFT_OUTER_JOIN);
 
 		
 		if (filtroHoraConsulta != null) {
@@ -1567,6 +1577,7 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 				break;
 			case AGUARDANDO:
 				criteria.add(Restrictions.eq(SIT_ANTEND + MamSituacaoAtendimentos.Fields.AGUARDANDO.toString(), Boolean.TRUE));
+				criteria.add(Restrictions.eq("retorno." + AacRetornos.Fields.SEQ.toString(),DominioSituacaoAtendimento.AGUARDANDO_ATENDIMENTO.getCodigo()));
 				break;
 			case EM_ATENDIMENTO:
 
@@ -1583,6 +1594,7 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 				break;
 			case ATENDIDO:
 				criteria.add(Restrictions.eq(SIT_ANTEND + MamSituacaoAtendimentos.Fields.ATEND_CONCLUIDO.toString(), Boolean.TRUE));
+				criteria.add(Restrictions.eq("retorno." + AacRetornos.Fields.SEQ.toString(),DominioSituacaoAtendimento.PACIENTE_ATENDIDO.getCodigo()));
 				break;
 			}
 		}
@@ -2537,10 +2549,9 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		
 		//#52061 - Caso não possua permissão específica não lista Primeiras Consultas da Secretaria Municipal da Saúde
 		if (!visualizarPrimeirasConsultasSMS){
-			hql.append("and (aac.").append(AacConsultas.Fields.CAA_SEQ.toString()).append(" <> :seqCondPrimeiraConsulta ");
-			hql.append("or aac.").append(AacConsultas.Fields.TAG_SEQ.toString()).append(" <> :seqTipoAgendamentoSMS)");
+			hql.append("and aac.").append(AacConsultas.Fields.CAA_SEQ.toString()).append(" = :seqCondPrimeiraConsulta ");
 		}
-
+		
 		org.hibernate.Query query = createHibernateQuery(hql.toString());
 		query.setParameter("grdSeq", grdSeq);
 		if (pagador != null && pagador.getSeq() != null) {
@@ -2580,10 +2591,8 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		
 		//#52061
 		if (!visualizarPrimeirasConsultasSMS){
-			Short seqTipoAgendamentoSMS = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_TAG_SMS).getVlrNumerico().shortValue();
-			Short seqCondPrimeiraConsulta = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_CAA_CONSULTA).getVlrNumerico().shortValue();
+			Short seqCondPrimeiraConsulta = parametroFacade.buscarAghParametro(AghuParametrosEnum.P_FILTRO_VISUALIZA_CODICOES_CONSULTA).getVlrNumerico().shortValue();
 			query.setParameter("seqCondPrimeiraConsulta", seqCondPrimeiraConsulta);
-			query.setParameter("seqTipoAgendamentoSMS", seqTipoAgendamentoSMS);
 		}
 
 		return query.list();
@@ -4039,6 +4048,7 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		projections.add(Projections.property("CON." + AacConsultas.Fields.DTHR_INICIO.toString()), "dtHrInicioConsulta");
 		projections.add(Projections.property("CAA." + AacCondicaoAtendimento.Fields.SEQ.toString()), "caaSeq");
 		projections.add(Projections.property("PAC." + AipPacientes.Fields.NOME.toString()), "nome");
+		projections.add(Projections.property("PAC." + AipPacientes.Fields.NOME_SOCIAL.toString()), "nomeSocial");
 		projections.add(Projections.property("PAC." + AipPacientes.Fields.PRONTUARIO.toString()), "prontuario");
 		projections.add(Projections.property("SER." + RapServidores.Fields.VIN_CODIGO.toString()), "serVinCodigo");
 		projections.add(Projections.property("SER." + RapServidores.Fields.MATRICULA.toString()), "serMatricula");
@@ -4174,6 +4184,7 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		projections.add(Projections.property("CON." + AacConsultas.Fields.DTHR_INICIO.toString()), "dtHrInicioConsulta");
 		projections.add(Projections.property("CAA." + AacCondicaoAtendimento.Fields.SEQ.toString()), "caaSeq");
 		projections.add(Projections.property("PAC." + AipPacientes.Fields.NOME.toString()), "nome");
+		projections.add(Projections.property("PAC." + AipPacientes.Fields.NOME_SOCIAL.toString()), "nomeSocial");
 		projections.add(Projections.property("PAC." + AipPacientes.Fields.PRONTUARIO.toString()), "prontuario");
 		projections.add(Projections.property("SER." + RapServidores.Fields.VIN_CODIGO.toString()), "serVinCodigo");
 		projections.add(Projections.property("SER." + RapServidores.Fields.MATRICULA.toString()), "serMatricula");
@@ -4301,6 +4312,13 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		subGetAgendado.add(Subqueries.propertyEq("SEC." + MamExtratoControles.Fields.SEQP.toString(), subSubGetAgendado));
 		criteria.add(Subqueries.eq(DominioSimNao.N.isSim(), subGetAgendado));
 		
+		List<Integer> situacoesNaoconsideradas = new ArrayList<Integer>();
+		situacoesNaoconsideradas.add(DominioSituacaoAtendimento.PACIENTE_FALTOU.getCodigo());
+		situacoesNaoconsideradas.add(DominioSituacaoAtendimento.PACIENTE_DESISTIU_CONS.getCodigo());
+		situacoesNaoconsideradas.add(DominioSituacaoAtendimento.PROFISSIONAL_FALTOU.getCodigo());
+		
+		criteria.add(Restrictions.not(Restrictions.in("CON." + AacConsultas.Fields.RETORNO_SEQ.toString(),situacoesNaoconsideradas)));
+
 		// @ORADB AACC_DEFINE_TURNO
 		if (turno != null && turno.getDataInicial() != null && turno.getDataFinal() != null) {
 			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
@@ -4347,6 +4365,7 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		projections.add(Projections.property("CON." + AacConsultas.Fields.DTHR_INICIO.toString()), "dtHrInicioConsulta");
 		projections.add(Projections.property("CAA." + AacCondicaoAtendimento.Fields.SEQ.toString()), "caaSeq");
 		projections.add(Projections.property("PAC." + AipPacientes.Fields.NOME.toString()), "nome");
+		projections.add(Projections.property("PAC." + AipPacientes.Fields.NOME_SOCIAL.toString()), "nomeSocial");
 		projections.add(Projections.property("PAC." + AipPacientes.Fields.PRONTUARIO.toString()), "prontuario");
 		projections.add(Projections.property("SER." + RapServidores.Fields.VIN_CODIGO.toString()), "serVinCodigo");
 		projections.add(Projections.property("SER." + RapServidores.Fields.MATRICULA.toString()), "serMatricula");
@@ -4596,6 +4615,7 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 															//campo faz a seguinte conversão to_char (cons.dt_consulta, 'DD/MM/YYYY HH24:MI')
 															.add(Projections.property("CON." + AacConsultas.Fields.DATA_CONSULTA.toString()), "dtConsulta")
 															.add(Projections.property("PAC." + AipPacientes.Fields.NOME.toString()), "pacienteNome")
+															.add(Projections.property("PAC." + AipPacientes.Fields.NOME_SOCIAL.toString()), "nomeSocial")
 															.add(Projections.property("PAC." + AipPacientes.Fields.PRONTUARIO.toString()), "prontuario")
 															.add(Projections.property("CON." + AacConsultas.Fields.NUMERO.toString()), "numero")
 															//campo faz a seguinte conversão TRUNC(MONTHS_BETWEEN(SYSDATE,pac.dt_nascimento)/12) idade realizado no VO
@@ -5649,4 +5669,18 @@ public class AacConsultasDAO extends br.gov.mec.aghu.core.persistence.dao.BaseDa
 		
 		return (EspecialidadeRelacionadaVO) executeCriteriaUniqueResult(criteria);
 	}
+	public List<AacConsultas> listarConsultasMarcadasPorGradeDtInicioFim(Integer grdSeq, DominioDiaSemana dominioDiaSemana, Date dtInicio, Date dtFim) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(AacConsultas.class);
+		criteria.createAlias(AacConsultas.Fields.SITUACAO_CONSULTA.toString(), AacConsultas.Fields.SITUACAO_CONSULTA.toString());
+		criteria.createAlias(AacConsultas.Fields.GRADE_AGENDA_CONSULTA.toString(), AacConsultas.Fields.GRADE_AGENDA_CONSULTA.toString());
+		criteria.add(Restrictions.eq(AacConsultas.Fields.GRADE_AGENDA_CONSULTA.toString() + "." + AacGradeAgendamenConsultas.Fields.SEQ.toString(),
+				grdSeq));
+		criteria.add(Restrictions.eq(AacConsultas.Fields.DIA_SEMANA.toString() , dominioDiaSemana));
+		criteria.add(Restrictions.eq(AacConsultas.Fields.SITUACAO_CONSULTA.toString() + "." + AacSituacaoConsultas.Fields.IND_BLOQUEIO.toString(),
+				false));
+		criteria.add(Restrictions.ge(AacConsultas.Fields.DATA_CONSULTA.toString(), DateUtil.obterDataComHoraInical(dtInicio)));
+		criteria.add(Restrictions.le(AacConsultas.Fields.DATA_CONSULTA.toString(), DateUtil.obterDataComHoraFinal(dtFim)));
+		return executeCriteria(criteria);
+	}
+
 }

@@ -223,9 +223,7 @@ public class SolicitanteProntuarioPaginatorController extends ActionController i
 			abaSelecionada = TAB_0;
 		} else if (this.origemEvento != null) {
 			abaSelecionada = TAB_1;
-		} else if (verificarPreenchimentoAbaDescricao()) {
-			abaSelecionada = TAB_2;
-		}		
+		}
 	}	
 
 	public List<AghUnidadesFuncionais> pesquisarUnidadeFuncionalPorCodigoPorAndarAlaDescricao(String param) {
@@ -398,7 +396,7 @@ public class SolicitanteProntuarioPaginatorController extends ActionController i
 	}
 	
 	public void onTabChange() {
-	  if(this.unidadeFuncional != null || this.origemEvento != null || this.verificarPreenchimentoAbaDescricao()){   
+	  if(this.unidadeFuncional != null || this.origemEvento != null){   
 		  openDialog("modalConfirmacaoMudancaAbaWG");
 	  }
 	}

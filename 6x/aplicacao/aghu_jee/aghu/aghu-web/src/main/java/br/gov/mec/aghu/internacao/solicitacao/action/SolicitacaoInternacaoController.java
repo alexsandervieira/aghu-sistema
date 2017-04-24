@@ -8,6 +8,8 @@ import javax.ejb.EJB;
 
 import org.apache.commons.lang3.StringUtils;
 
+import br.gov.mec.aghu.aghparametros.business.IParametroFacade;
+import br.gov.mec.aghu.aghparametros.util.AghuParametrosEnum;
 import br.gov.mec.aghu.business.IAghuFacade;
 import br.gov.mec.aghu.dominio.DominioSimNao;
 import br.gov.mec.aghu.dominio.DominioSituacaoSolicitacaoInternacao;
@@ -15,7 +17,9 @@ import br.gov.mec.aghu.faturamento.cadastrosapoio.business.IFaturamentoApoioFaca
 import br.gov.mec.aghu.internacao.cadastrosbasicos.business.ICadastrosBasicosInternacaoFacade;
 import br.gov.mec.aghu.internacao.solicitacao.business.ISolicitacaoInternacaoFacade;
 import br.gov.mec.aghu.internacao.vo.EspCrmVO;
+import br.gov.mec.aghu.model.AghCid;
 import br.gov.mec.aghu.model.AghEspecialidades;
+import br.gov.mec.aghu.model.AghParametros;
 import br.gov.mec.aghu.model.AinAcomodacoes;
 import br.gov.mec.aghu.model.AinSolicitacoesInternacao;
 import br.gov.mec.aghu.model.AipPacientes;
@@ -49,6 +53,9 @@ public class SolicitacaoInternacaoController extends ActionController {
 
 	@EJB
 	private IAghuFacade aghuFacade;
+	
+	@EJB
+	private IParametroFacade parametroFacade;
 
 	@EJB
 	private ICadastrosBasicosInternacaoFacade cadastrosBasicosInternacaoFacade;
@@ -69,6 +76,8 @@ public class SolicitacaoInternacaoController extends ActionController {
 	private Integer aipPacienteCodigo;
 
 	private Integer solicitacaoInternacaoSeq;
+	
+	private boolean campoObrigatorio = false;
 
 	/**
 	 * Plano de saude sendo vinculado ao usuário.
@@ -135,9 +144,24 @@ public class SolicitacaoInternacaoController extends ActionController {
 	public List<FatVlrItemProcedHospComps> pesquisarSsm(String descricaoSsm) throws ApplicationBusinessException {
 		return solicitacaoInternacaoFacade.pesquisarFatVlrItemProcedHospComps(descricaoSsm, this.getPaciente(), null);
 	}
-
+	
+	public boolean isCampoProcedimentoObrigatorio() {
+		try {
+			AghParametros aghParametros = this.getParametroFacade().buscarAghParametro(AghuParametrosEnum.P_PROCEDIMENTO_SSM_OBRIG);
+			String paramObrigatorio = null;
+			paramObrigatorio = aghParametros.getVlrTexto().toLowerCase();
+			if (paramObrigatorio.equalsIgnoreCase("s")) {
+				this.campoObrigatorio = true;
+			} 
+		} catch (Exception e) {
+			this.campoObrigatorio = false;
+			return false;
+		}
+		return this.campoObrigatorio;
+	}
+	
 	public void inicio() {
-	 
+		
 
 		try {
 			if (solicitacaoInternacaoSeq != null) { // Edição
@@ -157,6 +181,10 @@ public class SolicitacaoInternacaoController extends ActionController {
 				this.setPaciente(solicitacaoInternacao.getPaciente());
 				this.ocultarSituacaoSolicitacao = false;
 
+			}else{
+			    if(this.solicitacaoInternacao != null && this.solicitacaoInternacao.getSeq() == null){
+						this.solicitacaoInternacao.setObservacao(null);
+				}
 			}
 			if (aipPacienteCodigo != null && solicitacaoInternacaoSeq == null) {
 				paciente = pacienteFacade.obterPacientePorCodigo(this.getAipPacienteCodigo());
@@ -202,6 +230,17 @@ public class SolicitacaoInternacaoController extends ActionController {
 
 	public String salvar() {
 		try {
+
+			if (solicitacaoInternacao.getCid() == null){
+				apresentarMsgNegocio(Severity.ERROR,"AIN_CID_OBRIGATORIO");
+				return null;
+			}
+			
+			if(!verificaProcedimentoObrigatorio()){
+				return null;
+			}
+			
+			
 			if (this.getEspCrmVO() != null && this.getEspCrmVO().getMatricula() != null && this.getEspCrmVO().getVinCodigo() != null) {
 				RapServidores servidor = registroColaboradorFacade
 						.obterServidor(this.getEspCrmVO().getVinCodigo(), this
@@ -244,6 +283,19 @@ public class SolicitacaoInternacaoController extends ActionController {
 		}
 	}
 
+	private boolean verificaProcedimentoObrigatorio() {
+		if (isCampoProcedimentoObrigatorio() && this.getVlrItemProcedHospComp() == null) {
+				apresentarMsgNegocio(Severity.ERROR, "AIN_SSM_OBRIGATORIO");
+				return false;
+		} else if (this.getVlrItemProcedHospComp() != null
+			 &&
+			 this.getVlrItemProcedHospComp().getFatItensProcedHospitalar().getCodTabela()
+			 != null) {
+			 solicitacaoInternacao.setProcedimento(this.getVlrItemProcedHospComp().getFatItensProcedHospitalar());
+		}
+		return true;
+	}
+
 	private String processarRetornoSalvar() {
 		if(Origens.CIRURGIAS.name().equals(origemChamada)){
 			return PAG_LISTA_CIRURGIAS;
@@ -273,6 +325,10 @@ public class SolicitacaoInternacaoController extends ActionController {
 
 		return retorno;
 
+	}
+	
+	public List<AghCid> pesquisarCids(String param) {
+		return aghuFacade.pesquisarCidsPorDescricaoOuId(param, 300);
 	}
 
 	public String cancelar() {
@@ -620,6 +676,18 @@ public class SolicitacaoInternacaoController extends ActionController {
 
 	public void setOrigemChamada(String origemChamada) {
 		this.origemChamada = origemChamada;
+	}
+	
+	protected IParametroFacade getParametroFacade() {
+		return parametroFacade;
+	}
+	
+	public boolean isCampoObrigatorio() {
+		return campoObrigatorio;
+	}
+
+	public void setCampoObrigatorio(boolean campoObrigatorio) {
+		this.campoObrigatorio = campoObrigatorio;
 	}
 
 }

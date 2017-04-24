@@ -335,7 +335,7 @@
 
 <aghu:column type="table">
 <p:outputPanel id="outpanelListaCirurgias" layout="inline">
-<mec:serverDataTable id="listaCirurgias" scrollHeight="200"
+<mec:serverDataTable id="listaCirurgias" scrollHeight="420"
                      list="#{listarCirurgiasController.cirurgias}" scrollable="true"
                      widgetVar="listaCirurgiasWG"
                      filteredValue="#{listarCirurgiasController.filteredCirurgias}"
@@ -349,7 +349,7 @@
 
 <p:ajax event="rowSelect"
         listener="#{listarCirurgiasController.carregarCirurgiaSelecionada}"
-        update="@(#panelBotoes) @(#panelCancelamento) @(#panelModais)" 
+        update="@(#tabelaAcao) @(#panelCancelamento) @(#panelModais)" 
        	onstart="PF('loadDialogWG').show();" 
 		oncomplete="PF('loadDialogWG').hide();" />
 
@@ -369,7 +369,7 @@
 </f:facet>
 
 
-<p:column style="width:70px;white-space:nowrap; #{background}">
+<p:column style="width:88px;white-space:nowrap; #{background}">
 
     <f:facet name="header">
         <h:outputText value="#{messages.LABEL_ACAO}"/>
@@ -409,6 +409,11 @@
            	   		rendered="#{not empty _cirurgia.prontuario and mf:hasPermission(securityController, '/paciente/prontuarioonline/arvorePOL.xhtml,render')}" 
            	   		onclick="parent.addPOLProntuario(#{_cirurgia.prontuario})" 
            	   		styleClass="silk-icon silk-pol16 silk-icon" ajax="true" />
+
+    <mec:commandLink
+	           	styleClass="silk-icon silk-solicitar-prontuario" title="#{messages.TITLE_PESQUISAR_PACIENTES_AGENDADOS_SOLICITAR_SAMIS}"
+	           	action="#{listarCirurgiasController.gerarMovimentacaoProntuario(_cirurgia)}" process="@this" ajax="true">
+   </mec:commandLink>
 </p:column>
 
 <p:column id="dataInicioCirurgia"
@@ -624,10 +629,9 @@
 </p:outputPanel>
 </aghu:column>
 
-<div style="padding-right:80px;">
-<aghu:column type="button"  style="width:150px;margin-bottom: 5px">
-    <p:outputPanel id="panelBotoes">
-      <aghu:panelGeral>	
+<aghu:column type="button" >
+    <p:outputPanel id="tabelaAcao">
+      	
         <mec:commandButton id="bt_solicitar"
                            value="#{messages.LABEL_SOLIC_EXAMES}"
                            action="#{listarCirurgiasController.redirecionarSolicitacaoExame}"
@@ -844,10 +848,10 @@
                 onclick="{PF('modalLegendaCirurgiasWG').show();return false;}"
                 styleClass="bt_cinza" 
                 style="width: 100%;margin-bottom: 5px"/>
-      </aghu:panelGeral>   
+         
     </p:outputPanel>
 </aghu:column>
-</div>
+
 		<aghu:linha>
 			<p:outputPanel id="panelCancelamento" layout="inline">
 				<mec:field id="motivoCancelamentoField" size="100"

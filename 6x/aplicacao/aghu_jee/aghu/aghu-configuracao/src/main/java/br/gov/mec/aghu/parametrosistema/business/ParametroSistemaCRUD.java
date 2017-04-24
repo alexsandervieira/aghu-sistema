@@ -363,7 +363,7 @@ public class ParametroSistemaCRUD extends BaseBusiness {
 		String login = obterLoginUsuarioLogado();
 		LOG.info("obterLoginUsuarioLogado: " + login);
 		Principal usuario = SecurityContextAssociation.getPrincipal();
-		LOG.info("SecurityContextAssociation.getPrincipal: " + usuario != null ? usuario.getName() : "nao informado");
+		LOG.info(usuario != null ? "SecurityContextAssociation.getPrincipal: " + usuario.getName() : "Usuario nao informado");
 		
 		getSchedulerFacade().adicionarLog(job, "Tarefa: executarParametroSistema - Inicio ...");
 		

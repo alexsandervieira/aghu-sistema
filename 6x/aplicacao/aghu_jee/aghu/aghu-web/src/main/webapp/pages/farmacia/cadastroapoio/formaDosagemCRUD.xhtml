@@ -16,12 +16,13 @@
 	        </aghu:linha>  
 	        <aghu:linha> 
 	          <mec:inputText label="#{messages['LABEL_CODIGO']}" readonly="true" size="5" maxlength="5" value="#{formaDosagemController.medicamento.tipoApresentacaoMedicamento.sigla}" style="text-transform:uppercase" id="tpr_sigla"/>  
-	          <mec:inputText readonly="true" label="#{messages['LABEL_APRESENTACAO']}" value="#{formaDosagemController.medicamento.tipoApresentacaoMedicamento.descricao}" id="apresentacaoUMM"/> 
+	          <mec:inputText readonly="true" label="#{messages['LABEL_APRESENTACAO']}" value="#{formaDosagemController.medicamento.tipoApresentacaoMedicamento.descricao}" id="apresentacaoUMM"/>
+	          <mec:inputNumero readonly="true" size="5" maxlength="5" id="inputNumero"/>    
 	        </aghu:linha> 
 	      </aghu:panelGeral>  
         <aghu:panelGeral legend="#{messages['LABEL_FORMA_DOSAGEM']}"> 
           <aghu:linha> 
-            <mec:inputNumero label="#{messages['LABEL_FATOR_CONVERSAO']}" required="true" readonly="false" title="#{messages['HINT_FDS_FATOR_CONVERSAO_UP']}" value="#{formaDosagemController.entidade.fatorConversaoUp}" style="text-transform:uppercase" size="15" maxlength="15" styleClass="mask_dose_medicamento" converter="#{bigDecimalDoseConverter}" id="fatorConversao"/>  
+            <mec:inputDecimal label="#{messages['LABEL_FATOR_CONVERSAO']}" required="true" readonly="false" title="#{messages['HINT_FDS_FATOR_CONVERSAO_UP']}" value="#{formaDosagemController.entidade.fatorConversaoUp}" size="15" maxlength="15" id="fatorConversao"/>  
             <mec:inputText required="false" readonly="true" label="#{messages['LABEL_UNIDADE']}" itemsType="entity" value="#{formaDosagemController.descricaoUMM}" rendered="#{formaDosagemController.edicao}" id="unidadeMedidaMedica"/>  
             <mec:selectOneMenu items="#{formaDosagemController.getListaUnidadeMedidaMedica()}" readonly="false" required="#{formaDosagemController.obrigaUMM}" label="#{messages.LABEL_UNIDADE}" value="#{formaDosagemController.entidade.unidadeMedidaMedicas}" title="#{messages.HINT_FDS_DSP_DESCRICAO}" itemsType="entity" itemLabel="descricao" rendered="#{!formaDosagemController.edicao}" id="unidadeMedidaMedicaSelectOne"/>  
             <mec:selectBooleanCheckbox label="#{messages['LABEL_USUAL_PRESCRICAO']}" title="#{messages['HINT_FDS_IND_USUAL_PRESCRICAO']}" value="#{formaDosagemController.entidade.indUsualPrescricao}" id="usualPrescricao"/>  

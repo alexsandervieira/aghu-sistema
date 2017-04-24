@@ -191,7 +191,7 @@ public class VerificarPrescricaoMedicaController extends ActionController {
 	private boolean aghuBotoesExameHemoterapia;
 	
     @PostConstruct
-	protected void inicializar(){
+	protected void inicializar() throws ApplicationBusinessException{
 		this.begin(conversation);
 		// #28133
 		obterParametrosIniciacao();
@@ -237,7 +237,7 @@ public class VerificarPrescricaoMedicaController extends ActionController {
 			apresentarExcecaoNegocio(e);
 		}
 	}
-	private void obterParametrosIniciacao() {
+	private void obterParametrosIniciacao() throws ApplicationBusinessException {
 		String prontPacParm = getRequestParameter("prontPac");
 		if(StringUtils.isNotBlank(prontPacParm)){
 			this.prontuario = Integer.valueOf(prontPacParm);
@@ -260,6 +260,7 @@ public class VerificarPrescricaoMedicaController extends ActionController {
 		if(StringUtils.isNotBlank(numeroConsultaParm)){		
 			this.numeroConsulta = Integer.valueOf(numeroConsultaParm);
 		}
+		this.buscaParametroAtivaDesativaSolicitacaoExames();
 	}
 	
 	private void buscarParametroDesabilitarBotoesExameHemoterapia() throws ApplicationBusinessException {
@@ -335,6 +336,18 @@ public class VerificarPrescricaoMedicaController extends ActionController {
 			aghuUsoSumario = aghParametrosUsoSumario.getVlrTexto();
 		}
 	}
+	
+	public boolean buscaParametroAtivaDesativaSolicitacaoExames() throws ApplicationBusinessException{
+		
+		AghParametros ativaDesativaSolicitacao = this.parametroFacade.buscarAghParametro(AghuParametrosEnum.P_AGHU_ATIVA_DESATIVA_SOLICITACAO_EXAMES);
+		if (ativaDesativaSolicitacao != null) {
+			if (ativaDesativaSolicitacao.getVlrTexto().equalsIgnoreCase("S")){ 
+			return Boolean.TRUE;
+			}
+		}
+		return Boolean.FALSE;
+	}
+	
 	
 	public String redirecionarPesquisaFonetica(){
 		return PESQUISA_FONETICA;

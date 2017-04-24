@@ -84,6 +84,8 @@ public class RelatorioPrescricaoMedicaController extends ActionController {
 	//@In(required = false)
 	private Integer seqPrescricaoMedicaSelecionada;
 	
+	private Boolean prescricaoMedicaRascunho = false;
+	
 	@PostConstruct
 	protected void inicializar() {
 		this.begin(conversation);
@@ -106,7 +108,7 @@ public class RelatorioPrescricaoMedicaController extends ActionController {
 			itensDaPrescricaoConfirmacao = prescricaoMedicaFacade.listarItensPrescricaoMedicaConfirmados(this.prescricao);
 
 		// Quando tipo for SEM_IMPRESSAO carrega os dados para gerar pendência para certificação eletrônica
-		} else if ((tipoImpressao == EnumTipoImpressao.IMPRESSAO || tipoImpressao == EnumTipoImpressao.SEM_IMPRESSAO) && servidorValido != null) {
+		} else if (tipoImpressao == EnumTipoImpressao.VISUALIZAR_RELATORIO ||((tipoImpressao == EnumTipoImpressao.IMPRESSAO || tipoImpressao == EnumTipoImpressao.SEM_IMPRESSAO) && servidorValido != null)) {
 			itensDaPrescricaoConfirmacao = itensConfirmados;
 		}
 
@@ -120,6 +122,7 @@ public class RelatorioPrescricaoMedicaController extends ActionController {
 		report.setTipoImpressao(tipoImpressao);
 		report.setImpressaoTotal(true);
 		report.setDataMovimento(dataMovimento);
+		report.setPrescricaoMedicaRascunho(this.prescricaoMedicaRascunho);
 		report.setItensDaPrescricaoConfirmacao(itensDaPrescricaoConfirmacao);
 	}
 
@@ -320,4 +323,13 @@ public class RelatorioPrescricaoMedicaController extends ActionController {
 	public void setPaginaOrigem(String paginaOrigem) {
 		this.paginaOrigem = paginaOrigem;
 	}
+
+	public Boolean getPrescricaoMedicaRascunho() {
+		return prescricaoMedicaRascunho;
+	}
+
+	public void setPrescricaoMedicaRascunho(Boolean prescricaoMedicaRascunho) {
+		this.prescricaoMedicaRascunho = prescricaoMedicaRascunho;
+	}
+	
 }

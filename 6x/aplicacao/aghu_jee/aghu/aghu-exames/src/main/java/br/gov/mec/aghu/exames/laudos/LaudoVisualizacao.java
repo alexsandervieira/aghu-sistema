@@ -3,11 +3,11 @@ package br.gov.mec.aghu.exames.laudos;
 public class LaudoVisualizacao extends LaudoMascara {
 
 	@Override
-	public void executar() {
+	public void executar(Boolean consideraAlinhamentoVertical) {
 		for (ExameVO exame : this.getExamesLista().getExames()) {
 			super.criarCabecalhoExame(exame);
 			super.criarMensagemResultadoNaoLiberado(exame);
-			super.processaMascaras(exame);
+			super.processaMascaras(exame, consideraAlinhamentoVertical);
 			super.criarRecebimentoLiberacao(exame);
 			super.criarAssinaturaMedico(exame);
 			super.criarInformacoesColeta(exame);

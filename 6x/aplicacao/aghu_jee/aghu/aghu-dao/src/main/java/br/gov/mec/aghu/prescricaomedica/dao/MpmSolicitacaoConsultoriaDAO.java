@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.persistence.Query;
 
+import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
@@ -65,18 +66,13 @@ public class MpmSolicitacaoConsultoriaDAO extends
 
 		DetachedCriteria criteria = DetachedCriteria
 				.forClass(MpmSolicitacaoConsultoria.class);
-		criteria.add(Restrictions.eq(
-				MpmSolicitacaoConsultoria.Fields.PME_ATD_SEQ.toString(), id
-						.getAtdSeq()));
-		criteria.add(Restrictions.eq(MpmSolicitacaoConsultoria.Fields.PME_SEQ
-				.toString(), id.getSeq()));
-		criteria.add(Restrictions.eq(MpmSolicitacaoConsultoria.Fields.ORIGEM
-				.toString(), DominioOrigemSolicitacaoConsultoria.M));
+		criteria.add(Restrictions.eq(MpmSolicitacaoConsultoria.Fields.PME_ATD_SEQ.toString(), id.getAtdSeq()));
+		criteria.add(Restrictions.eq(MpmSolicitacaoConsultoria.Fields.PME_SEQ.toString(), id.getSeq()));
+		criteria.add(Restrictions.eq(MpmSolicitacaoConsultoria.Fields.ORIGEM.toString(), DominioOrigemSolicitacaoConsultoria.M));
 		if(!listarTodas) {
-			criteria.add(Restrictions
-					.isNull(MpmSolicitacaoConsultoria.Fields.DTHR_FIM
-							.toString()));
+			criteria.add(Restrictions.isNull(MpmSolicitacaoConsultoria.Fields.DTHR_FIM.toString()));
 		}
+		criteria.addOrder(Order.asc(MpmSolicitacaoConsultoria.Fields.ORDEM.toString()));
 		list = super.executeCriteria(criteria);
 
 		return list;
@@ -953,6 +949,25 @@ public class MpmSolicitacaoConsultoriaDAO extends
 		Query query = this.createNativeQuery(sql.toString());
 		query.setParameter("seqConsultoria", seqConsultoria);
 		return query.getSingleResult();
+	}
+
+	public Integer buscaOrdemPrescricaoConsultoria(MpmPrescricaoMedicaId id) {
+		
+		List<MpmSolicitacaoConsultoria> list;
+
+		DetachedCriteria criteria = DetachedCriteria.forClass(MpmSolicitacaoConsultoria.class);
+	
+		criteria.add(Restrictions.eq(MpmSolicitacaoConsultoria.Fields.PME_ATD_SEQ.toString(), id.getAtdSeq()));
+		criteria.add(Restrictions.eq(MpmSolicitacaoConsultoria.Fields.PME_SEQ.toString(), id.getSeq()));
+		criteria.add(Restrictions.eq(MpmSolicitacaoConsultoria.Fields.ORIGEM.toString(), DominioOrigemSolicitacaoConsultoria.M));
+		criteria.addOrder(Order.desc(MpmSolicitacaoConsultoria.Fields.ORDEM.toString()));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		
+		list = super.executeCriteria(criteria);
+
+		Integer ordem = list != null && !list.isEmpty() ? list.get(0).getOrdem() > 0 ? list.get(0).getOrdem()  +1 : list.size() +1 : 1;
+		return ordem;
+	
 	}
 
 }

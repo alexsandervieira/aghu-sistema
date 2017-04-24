@@ -52,6 +52,13 @@
 	
 	<navigation-rule>
 		<navigation-case>
+			<from-outcome>prescricaoenfermagem-consutarHistoricoDiagnostico</from-outcome>
+			<to-view-id>/pages/prescricaoenfermagem/diagnosticos/consultarHistoricoDiagnosticos.xhtml</to-view-id>
+		<redirect/></navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<navigation-case>
 			<from-outcome>prescricaoenfermagem-encerrarDiagnosticos</from-outcome>
 			<to-view-id>/pages/prescricaoenfermagem/diagnosticos/encerrarDiagnosticos.xhtml</to-view-id>
 		<redirect/></navigation-case>

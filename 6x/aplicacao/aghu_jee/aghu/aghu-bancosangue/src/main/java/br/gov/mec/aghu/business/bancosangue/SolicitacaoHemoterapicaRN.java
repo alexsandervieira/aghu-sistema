@@ -301,6 +301,10 @@ public class SolicitacaoHemoterapicaRN extends BaseBusiness implements Serializa
 		this.verificaDatasSolicitacaoHemoterapica(null,
 				solicitacoesHemoterapica.getDthrSolicitacao(), null,
 				solicitacoesHemoterapica.getDthrFim());
+				
+		Integer ordem = this.absSolicitacoesHemoterapicasDAO.buscaOrdemPrescricaoConsultoria(solicitacoesHemoterapica.getPrescricaoMedica().getId(), solicitacoesHemoterapica.getPrescricaoMedica().getDthrFim());
+		solicitacoesHemoterapica.setOrdem(ordem);
+		
 	}
 
 	/**

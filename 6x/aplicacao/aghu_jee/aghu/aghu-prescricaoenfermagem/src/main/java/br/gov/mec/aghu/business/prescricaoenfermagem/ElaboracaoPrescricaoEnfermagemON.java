@@ -1,6 +1,7 @@
 package br.gov.mec.aghu.business.prescricaoenfermagem;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -16,8 +17,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import br.gov.mec.aghu.business.IAghuFacade;
+import br.gov.mec.aghu.constante.ConstanteAghCaractUnidFuncionais;
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
+import br.gov.mec.aghu.core.utils.DateUtil;
+import br.gov.mec.aghu.core.utils.DateValidator;
 import br.gov.mec.aghu.dominio.DominioIndPendentePrescricoesCuidados;
 import br.gov.mec.aghu.dominio.DominioPacAtendimento;
+import br.gov.mec.aghu.dominio.DominioSituacaoHistPrescDiagnosticos;
 import br.gov.mec.aghu.dominio.DominioSituacaoPrescricao;
 import br.gov.mec.aghu.internacao.cadastrosbasicos.business.ICadastrosBasicosInternacaoFacade;
 import br.gov.mec.aghu.model.AghAtendimentos;
@@ -26,6 +35,9 @@ import br.gov.mec.aghu.model.AinLeitos;
 import br.gov.mec.aghu.model.AipPacientes;
 import br.gov.mec.aghu.model.EpeCuidadoDiagnostico;
 import br.gov.mec.aghu.model.EpeCuidadoDiagnosticoId;
+import br.gov.mec.aghu.model.EpeFatRelDiagnostico;
+import br.gov.mec.aghu.model.EpeFatRelDiagnosticoId;
+import br.gov.mec.aghu.model.EpeHistoricoPrescDiagnosticos;
 import br.gov.mec.aghu.model.EpePrescCuidDiagnostico;
 import br.gov.mec.aghu.model.EpePrescCuidDiagnosticoId;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagem;
@@ -34,17 +46,12 @@ import br.gov.mec.aghu.model.EpePrescricoesCuidados;
 import br.gov.mec.aghu.model.EpePrescricoesCuidadosId;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.paciente.business.IPacienteFacade;
+import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeFatRelDiagnosticoDAO;
+import br.gov.mec.aghu.prescricaoenfermagem.dao.EpeHistoricoPrescDiagnosticosDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescCuidDiagnosticoDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescricaoEnfermagemDAO;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescricoesCuidadosDAO;
 import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.constante.ConstanteAghCaractUnidFuncionais;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
-import br.gov.mec.aghu.core.utils.DateUtil;
-import br.gov.mec.aghu.core.utils.DateValidator;
 
 @SuppressWarnings("PMD.AghuTooManyMethods")
 @Stateless
@@ -55,6 +62,9 @@ public class ElaboracaoPrescricaoEnfermagemON extends BaseBusiness {
 	
 	@EJB
 	private ManutencaoPrescricaoCuidadoON manutencaoPrescricaoCuidadoON;
+
+	@EJB
+	private ManutencaoPrescricaoEnfermagemON manutencaoPrescricaoEnfermagemON;
 	
 	private static final Log LOG = LogFactory.getLog(ElaboracaoPrescricaoEnfermagemON.class);
 	
@@ -84,7 +94,13 @@ public class ElaboracaoPrescricaoEnfermagemON extends BaseBusiness {
 	
 	@Inject
 	private EpePrescricoesCuidadosDAO epePrescricoesCuidadosDAO;
-	
+
+	@Inject
+	private EpeFatRelDiagnosticoDAO epeFatRelDiagnosticoDAO;
+
+	@Inject
+	private EpeHistoricoPrescDiagnosticosDAO epeHistoricoPrescDiagnosticosDAO;
+
 	/**
 	 * 
 	 */
@@ -181,15 +197,10 @@ public class ElaboracaoPrescricaoEnfermagemON extends BaseBusiness {
 	public AghAtendimentos obterAtendimentoAtualPorLeitoId(final String leitoId) throws ApplicationBusinessException {
 		AinLeitos leito = getCadastrosBasicosInternacaoFacade().obterLeitoPorId(leitoId);
 		List<AghAtendimentos> listaAtendimentos = getAghuFacade().pesquisarAtendimentoVigentePrescricaoEnfermagemPorLeito(leito);
-		if (listaAtendimentos.size() == 1){
+		if (listaAtendimentos.size() > 0){
 			return listaAtendimentos.get(0);
 		}
-		
-		if (listaAtendimentos.size() > 1){
-			throw new ApplicationBusinessException(
-					ElaboracaoPrescricaoEnfermagemONExceptionCode.MAIS_DE_UM_ATENDIMENTO_ENCONTRADO, leitoId);
-		}
-		
+
 		throw new ApplicationBusinessException(
 				ElaboracaoPrescricaoEnfermagemONExceptionCode.NENHUM_ATENDIMENTO_ENCONTRADO, leitoId);		
 	}
@@ -647,16 +658,17 @@ public class ElaboracaoPrescricaoEnfermagemON extends BaseBusiness {
 		List<EpePrescricoesCuidados> listaCuidados = epePrescricoesCuidadosDAO
 			.pesquisarCuidadosUltimaPrescricao(prescricaoEnfAnterior);
 		
+		List<EpeFatRelDiagnosticoId> listFatRelDiagInseridos = new ArrayList<EpeFatRelDiagnosticoId>();
+		
 		try{
 			for (EpePrescricoesCuidados prescCuidado : listaCuidados){
 				// Insere um novo cuidado de prescrição (cópia do cuidado da prescrição anterior)
 				EpePrescricoesCuidados novoPrescCuidado = 
 						this.inserirPrescricaoCuidado(prescricaoEnfNova, prescCuidado, dtInicio, dataFim);
 				// Insere a cópia do diagnostico para o cuidado
-				List<EpePrescCuidDiagnostico> listaPrescCuidDiagnostico = 
-						epePrescCuidDiagnosticoDAO.listarPrescCuidDiagnosticoPorPrescricaoCuidado(prescCuidado);
-				if (!listaPrescCuidDiagnostico.isEmpty()) {
-					EpePrescCuidDiagnostico prescCuidDiagnostico = (EpePrescCuidDiagnostico) listaPrescCuidDiagnostico.get(0);
+				EpePrescCuidDiagnostico prescCuidDiagnostico = 
+						manutencaoPrescricaoEnfermagemON.buscaPrescCuidadoDiagnostico(prescCuidado);
+				if (prescCuidDiagnostico != null) {
 					EpePrescCuidDiagnostico novoPrescCuidDiagnostico = clonarPrescCuidDiagnostico(prescCuidDiagnostico);
 					EpePrescCuidDiagnosticoId prescCuidDiagnosticoId = novoPrescCuidDiagnostico.getId();
 					prescCuidDiagnosticoId.setPrcSeq(novoPrescCuidado.getId().getSeq());
@@ -666,6 +678,17 @@ public class ElaboracaoPrescricaoEnfermagemON extends BaseBusiness {
 					novoPrescCuidDiagnostico.setPrescricaoCuidado(novoPrescCuidado);
 					epePrescCuidDiagnosticoDAO.desatachar(prescCuidDiagnostico);
 					getEpePrescCuidDiagnosticoDAO().persistir(novoPrescCuidDiagnostico);
+					
+					EpeFatRelDiagnosticoId epeFatRelDiagnosticoId = new EpeFatRelDiagnosticoId();
+					epeFatRelDiagnosticoId.setDgnSnbGnbSeq(novoPrescCuidDiagnostico.getId().getCdgFdgDgnSnbGnbSeq());
+					epeFatRelDiagnosticoId.setDgnSnbSequencia(novoPrescCuidDiagnostico.getId().getCdgFdgDgnSnbSequencia());
+					epeFatRelDiagnosticoId.setDgnSequencia(novoPrescCuidDiagnostico.getId().getCdgFdgDgnSequencia());
+					epeFatRelDiagnosticoId.setFreSeq(novoPrescCuidDiagnostico.getId().getCdgFdgFreSeq());
+
+					if(listFatRelDiagInseridos.isEmpty() || !listFatRelDiagInseridos.contains(epeFatRelDiagnosticoId)){
+						 inserirHistoricoPrescDiagnostico(prescricaoEnfNova, epeFatRelDiagnosticoId);
+						 listFatRelDiagInseridos.add(epeFatRelDiagnosticoId);
+					}
 				}
 			}
 		} catch (BaseException e) {
@@ -677,7 +700,28 @@ public class ElaboracaoPrescricaoEnfermagemON extends BaseBusiness {
 					ElaboracaoPrescricaoEnfermagemONExceptionCode.ERRO_PRESCRICAO_ENFERMAGEM_COPIAR_PRESCRICAO_CUIDADOS, e);
 		}
 	}
-	
+
+	private void inserirHistoricoPrescDiagnostico(EpePrescricaoEnfermagem prescricaoEnfNova, EpeFatRelDiagnosticoId epeFatRelDiagnosticoId) {
+		
+		Enum[] fetch = { EpeFatRelDiagnostico.Fields.DIAGNOSTICO, EpeFatRelDiagnostico.Fields.FAT_RELACIONADO};
+		EpeFatRelDiagnostico fatRelDiagnostico = epeFatRelDiagnosticoDAO.obterPorChavePrimaria(epeFatRelDiagnosticoId, fetch);
+
+		EpeHistoricoPrescDiagnosticos historicoDiagnostico = new EpeHistoricoPrescDiagnosticos();
+
+		historicoDiagnostico = new EpeHistoricoPrescDiagnosticos();
+		historicoDiagnostico.setPrescricaoEnfermagem(prescricaoEnfNova);
+		historicoDiagnostico.setCriadoEm(new Date());
+		if(fatRelDiagnostico != null){
+			historicoDiagnostico.setDescricao(fatRelDiagnostico.getDiagnostico().getDescricao().concat(" - ").concat(fatRelDiagnostico.getFatRelacionado().getDescricao()));
+		}
+		historicoDiagnostico.setServidor(getServidorLogadoFacade().obterServidorLogado());
+		historicoDiagnostico.setDiagnostico(fatRelDiagnostico.getDiagnostico());
+		historicoDiagnostico.setFatRelacionado(fatRelDiagnostico.getFatRelacionado());
+		historicoDiagnostico.setIndPendente(Boolean.TRUE);
+		historicoDiagnostico.setSituacao(DominioSituacaoHistPrescDiagnosticos.C);
+		this.epeHistoricoPrescDiagnosticosDAO.persistir(historicoDiagnostico);
+	}
+
 	/**
 	 * Metodo para clonar uma entidade da classe EpePrescCuidDiagnostico 
 	 * @param EpePrescCuidDiagnostico

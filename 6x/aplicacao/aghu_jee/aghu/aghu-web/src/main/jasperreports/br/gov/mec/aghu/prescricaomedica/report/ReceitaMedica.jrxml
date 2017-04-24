@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ReceitaMedica" language="groovy" columnCount="2" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="383" columnSpacing="15" leftMargin="30" rightMargin="30" topMargin="30" bottomMargin="30" uuid="0bffc0a6-1657-41e1-87af-25d0d817bba9">
-	<property name="ireport.zoom" value="1.6500000000000004"/>
-	<property name="ireport.x" value="20"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.zoom" value="2.727272727272727"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="36"/>
 	<style name="bordar superior" fill="Solid">
 		<box>
 			<topPen lineWidth="1.0"/>
@@ -11,13 +11,13 @@
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA[" /home/aghu/AGHU/workspace/aghu_3.2.1_construcao/web/src/main/resources/br/gov/mec/aghu/prescricaomedica/report/ItensReceitaMedica.jasper"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="caminhoLogo" class="java.lang.String">
-		<defaultValueExpression><![CDATA["logo-hospital.png"]]></defaultValueExpression>
-	</parameter>
 	<parameter name="ENDERECO_COMPLETO" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["Rua Ramiro Barcelos 2350 - Largo Eduardo Zacaro Faraco \nCEP 90035-903 / Fone: (51) 3359.8000"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="nomeHospital" class="java.lang.String"/>
+	<parameter name="footerCaminhoLogo" class="java.lang.String"/>
+	<parameter name="footerNomeHospital" class="java.lang.String"/>
+	<parameter name="footerEnderecoHospitalLinha1" class="java.lang.String"/>
+	<parameter name="footerEnderecoHospitalLinha2" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -94,43 +94,50 @@
 				<reportElement uuid="5cb1c2a4-3c60-466d-b7ba-1791380f0e3f" x="1" y="0" width="383" height="64"/>
 			</rectangle>
 			<textField>
-				<reportElement uuid="41c2169a-97c0-4915-9d6f-351b03cb47d1" x="152" y="34" width="226" height="14"/>
-				<textElement textAlignment="Center">
+				<reportElement uuid="41c2169a-97c0-4915-9d6f-351b03cb47d1" x="97" y="37" width="281" height="11"/>
+				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{nomeHospital}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{footerEnderecoHospitalLinha1}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="f325a2e5-798e-40e1-ba7b-37c07357a2eb" x="10" y="37" width="85" height="12"/>
-				<textElement textAlignment="Center">
+				<reportElement uuid="f325a2e5-798e-40e1-ba7b-37c07357a2eb" x="10" y="42" width="85" height="10"/>
+				<textElement>
 					<font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="70824858-d485-4b87-9f35-629210ce51a5" x="10" y="48" width="85" height="14"/>
-				<textElement textAlignment="Center">
+				<reportElement uuid="70824858-d485-4b87-9f35-629210ce51a5" x="10" y="52" width="85" height="10"/>
+				<textElement>
 					<font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{via} + "\u00aa Via"]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement uuid="f28b6a1f-e2c4-48a7-8d40-db23d6c0416f" x="152" y="48" width="226" height="14"/>
+				<reportElement uuid="f28b6a1f-e2c4-48a7-8d40-db23d6c0416f" x="97" y="44" width="281" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{footerEnderecoHospitalLinha2}]]></textFieldExpression>
+			</textField>
+			<image scaleImage="RetainShape" isUsingCache="true" onErrorType="Blank">
+				<reportElement uuid="5277f1be-9893-4027-8e8b-ce1277607142" x="10" y="4" width="85" height="37"/>
+				<imageExpression><![CDATA[$P{footerCaminhoLogo}]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement uuid="57cb6593-0fde-4fe5-86af-34f006bbffbb" x="97" y="4" width="281" height="39"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{footerNomeHospital}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f28b6a1f-e2c4-48a7-8d40-db23d6c0416f" x="97" y="52" width="281" height="10"/>
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{especialidade}]]></textFieldExpression>
-			</textField>
-			<image scaleImage="RetainShape" isUsingCache="true" onErrorType="Blank">
-				<reportElement uuid="5277f1be-9893-4027-8e8b-ce1277607142" x="10" y="4" width="98" height="31"/>
-				<imageExpression><![CDATA[$P{caminhoLogo}]]></imageExpression>
-			</image>
-			<textField>
-				<reportElement uuid="57cb6593-0fde-4fe5-86af-34f006bbffbb" x="135" y="4" width="246" height="29"/>
-				<textElement textAlignment="Center">
-					<font size="8" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{ENDERECO_COMPLETO}]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>

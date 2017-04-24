@@ -3,6 +3,7 @@ package br.gov.mec.aghu.prescricaomedica.business;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -39,11 +40,15 @@ import br.gov.mec.aghu.model.MamTipoItemEvolucao;
 import br.gov.mec.aghu.model.MpmAnamneses;
 import br.gov.mec.aghu.model.MpmEvolucoes;
 import br.gov.mec.aghu.model.MpmEvolucoesJn;
+import br.gov.mec.aghu.model.RapQualificacao;
 import br.gov.mec.aghu.model.RapServidores;
 import br.gov.mec.aghu.prescricaomedica.dao.MpmAnamnesesDAO;
 import br.gov.mec.aghu.prescricaomedica.dao.MpmEvolucoesDAO;
 import br.gov.mec.aghu.prescricaomedica.dao.MpmEvolucoesJnDAO;
 import br.gov.mec.aghu.prescricaomedica.dao.MpmNotaAdicionalEvolucoesDAO;
+import br.gov.mec.aghu.prescricaomedica.vo.EvolucaoPrescricaoVO;
+import br.gov.mec.aghu.registrocolaborador.business.IRegistroColaboradorFacade;
+import br.gov.mec.aghu.registrocolaborador.business.IServidorLogadoFacade;
 
 @Stateless
 public class MpmEvolucoesRN extends BaseBusiness {
@@ -73,6 +78,12 @@ public class MpmEvolucoesRN extends BaseBusiness {
 	
 	@Inject
 	private AghUnidadesFuncionaisDAO aghUnidadesFuncionaisDAO;
+	
+	@EJB
+	private IServidorLogadoFacade servidorLogado;
+	
+	@EJB
+	private IRegistroColaboradorFacade registroColaboradorFacade;
 
 	@Override
 	@Deprecated
@@ -113,6 +124,12 @@ public class MpmEvolucoesRN extends BaseBusiness {
 		mpmEvolucoesDAO.persistir(novaEvolucao);
 		return novaEvolucao;
 	}
+	
+	public EvolucaoPrescricaoVO criarEvolucoesPrescricao(MpmAnamneses anamnese, Date dataReferencia,
+			RapServidores servidor) throws ApplicationBusinessException {
+		MpmEvolucoes evolucao = criarMpmEvolucoes(anamnese,dataReferencia,servidor);
+		return populateEvolucaoPrescricaoVO(evolucao);
+	}
 
 	public MpmEvolucoes criarMpmEvolucaoComDescricao(String descricao,
 			MpmAnamneses anamnese, Date dataReferencia, RapServidores servidor)
@@ -123,9 +140,48 @@ public class MpmEvolucoesRN extends BaseBusiness {
 		mpmEvolucoesDAO.atualizar(evolucao);
 		return evolucao;
 	}
+	
+	public EvolucaoPrescricaoVO criarEvolucaoVoComDescricao(String descricao,
+			MpmAnamneses anamnese, Date dataReferencia, RapServidores servidor)
+			throws ApplicationBusinessException {
+		MpmEvolucoes evolucao = criarMpmEvolucaoComDescricao(descricao, anamnese, dataReferencia, servidor);
+		return populateEvolucaoPrescricaoVO(evolucao);
+	}
+	
+	public List<EvolucaoPrescricaoVO> obterEvolucoesVO(MpmAnamneses anamnese, 
+			List<DominioIndPendenteAmbulatorio> situacoes, Date dataInicio, Date dataFim) {
+		List<EvolucaoPrescricaoVO> evolucoes = mpmEvolucoesDAO.obterEvolucoesAnamneseProjection(anamnese, situacoes, dataInicio, dataFim);
+		RapServidores servidor;
+		Collection<RapQualificacao> qualificacoesServidor;
+		List<String> categoriasProfissional;
+		for (EvolucaoPrescricaoVO vo : evolucoes) {
+			categoriasProfissional = new ArrayList<String>();
+			servidor = servidorLogado.obterServidorPorChavePrimaria(vo.getMatricula(), vo.getVinCodigo());
+			qualificacoesServidor = registroColaboradorFacade.obterRapQualificacoesPorServidor(servidor);
+			registroColaboradorFacade.obterRapQualificacaoPorServidor(servidor);
+			for (RapQualificacao qualificacao : qualificacoesServidor) {
+				categoriasProfissional.add(qualificacao.getTipoQualificacao().getDescricao());
+			}
+			vo.setCategoriasProfissional(categoriasProfissional);
+		} 
+		return evolucoes;
+	}
+	
+	private EvolucaoPrescricaoVO populateEvolucaoPrescricaoVO(MpmEvolucoes evolucao) {
+		EvolucaoPrescricaoVO vo = new EvolucaoPrescricaoVO();
+		vo.setDescricao(evolucao.getDescricao());
+		vo.setDthrCriacao(evolucao.getDthrCriacao());
+		vo.setDthrFim(evolucao.getDthrFim());
+		vo.setDthrReferencia(evolucao.getDthrReferencia());
+		vo.setPendente(evolucao.getPendente());
+		vo.setSeq(evolucao.getSeq());
+		vo.setSituacao(evolucao.getSituacao());
+		return vo;
+	}
 
-	public void atualizarMpmEvolucaoEmUso(MpmEvolucoes evolucao,
+	public void atualizarMpmEvolucaoEmUso(EvolucaoPrescricaoVO evolucaoVO,
 			RapServidores servidor) {
+		MpmEvolucoes evolucao = mpmEvolucoesDAO.buscarMpmEvolucoes(evolucaoVO.getSeq());
 		Date dataAtual = new Date();
 		evolucao.setDthrAlteracao(dataAtual);
 		evolucao.setSituacao(DominioSituacaoEvolucao.U);
@@ -316,8 +372,9 @@ public class MpmEvolucoesRN extends BaseBusiness {
 
 	}
 
-	public void validarEvolucaoEmUso(MpmEvolucoes evolucao)
+	public void validarEvolucaoEmUso(EvolucaoPrescricaoVO evolucaoVO)
 			throws ApplicationBusinessException {
+		MpmEvolucoes evolucao = mpmEvolucoesDAO.buscarMpmEvolucoes(evolucaoVO.getSeq());
 		if (DominioSituacaoEvolucao.U.equals(evolucao.getSituacao())) {
 			throw new ApplicationBusinessException(MpmEvolucoesRNExceptionCode.EVOLUCAO_EM_USO,
 					new SimpleDateFormat("dd/MM/yyyy HH:mm").format( 
@@ -325,7 +382,6 @@ public class MpmEvolucoesRN extends BaseBusiness {
 					),obterLoginUsuarioLogado()
 			);
 		}
-
 	}
 
 	/**
@@ -815,4 +871,5 @@ public class MpmEvolucoesRN extends BaseBusiness {
 		}
 
 	}
+
 }

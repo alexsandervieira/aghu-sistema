@@ -10,15 +10,15 @@ import javax.inject.Inject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import br.gov.mec.aghu.core.business.BaseBusiness;
+import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
+import br.gov.mec.aghu.core.exception.BaseException;
+import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 import br.gov.mec.aghu.dominio.DominioIndPendentePrescricoesCuidados;
 import br.gov.mec.aghu.dominio.DominioSituacaoPrescricao;
 import br.gov.mec.aghu.model.EpePrescricaoEnfermagem;
 import br.gov.mec.aghu.model.EpePrescricoesCuidados;
 import br.gov.mec.aghu.prescricaoenfermagem.dao.EpePrescricoesCuidadosDAO;
-import br.gov.mec.aghu.core.business.BaseBusiness;
-import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
-import br.gov.mec.aghu.core.exception.BaseException;
-import br.gov.mec.aghu.core.exception.BusinessExceptionCode;
 
 /**
  * Regras para deixar prescrição de enfermagem como pendente
@@ -45,6 +45,9 @@ private IPrescricaoEnfermagemFacade prescricaoEnfermagemFacade;
 
 @Inject
 private EpePrescricoesCuidadosDAO epePrescricoesCuidadosDAO;
+
+@EJB
+private FinalizacaoPrescricaoEnfermagemRN finalizacaoPrescricaoEnfermagemRN; 
 
 	/**
 	 * 
@@ -82,6 +85,7 @@ private EpePrescricoesCuidadosDAO epePrescricoesCuidadosDAO;
 		}		
 		marcarCuidadosPendentes(prescricaoEnfermagem,dthrUsado);
 		marcarPrescricaoEnfermagemPendente(prescricaoEnfermagem);
+		finalizacaoPrescricaoEnfermagemRN.confirmarHistoricosPendentes(prescricaoEnfermagem);
 	}
 	
 	/** Esta procedure marca a prescricao de enfermagem como pendente

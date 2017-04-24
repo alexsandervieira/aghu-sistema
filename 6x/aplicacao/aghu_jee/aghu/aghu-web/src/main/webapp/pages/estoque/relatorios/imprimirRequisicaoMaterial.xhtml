@@ -18,7 +18,7 @@
         <aghu:acao> 
           <mec:commandButton id="bt_imprime_buttonView" value="#{messages.LABEL_VISUALIZAR_IMPRESSAO_RELATORIO}" action="#{imprimirRequisicaoMaterialController.print}" profile="view" onclick="PF('loadDialogWG').show()"/>  
           <mec:commandButton id="bt_imprime_buttonPrint" value="#{messages.LABEL_IMPRIMIR}" action="#{imprimirRequisicaoMaterialController.directPrint}" profile="print" onclick="PF('loadDialogWG').show()"/>  
-          <mec:commandButton value="#{messages.LABEL_VOLTAR}" action="#{imprimirRequisicaoMaterialController.voltar}" id="bt_voltar" rendered="#{'estoque-consultarGeralRequisicaoMaterial' eq imprimirRequisicaoMaterialController.voltarPara or 'estoque-consultarRM' eq imprimirRequisicaoMaterialController.voltarPara}" profile="back"/> 
+          <mec:commandButton value="#{messages.LABEL_VOLTAR}" action="#{imprimirRequisicaoMaterialController.voltar}" id="bt_voltar" rendered="#{'estoque-consultarGeralRequisicaoMaterial' eq imprimirRequisicaoMaterialController.voltarPara or 'estoque-consultarRM' eq imprimirRequisicaoMaterialController.voltarPara}" profile="back" immediate="true"/> 
         </aghu:acao> 
       </h:form> 
     </ui:define> 

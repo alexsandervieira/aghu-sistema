@@ -378,7 +378,7 @@ public class RapServidores extends BaseEntityId<RapServidoresId> implements java
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "DT_FIM_VINCULO")
-	public Date getDtFimVinculo() {
+	public Date getDtFimVinculo() { 
 		return this.dtFimVinculo;
 	}
 
@@ -849,6 +849,17 @@ public class RapServidores extends BaseEntityId<RapServidoresId> implements java
 		return true;
 	}
 
+	@Transient 
+	public String getSituacaoServidorFormat(){
+		if(this.getIndSituacao() != null && (this.getIndSituacao().equals(DominioSituacaoVinculo.A) || this.getIndSituacao().equals(DominioSituacaoVinculo.P))){
+			if(this.getDtFimVinculo() != null && this.getDtFimVinculo().before(new Date())){
+				return DominioSituacaoVinculo.I.getDescricao();
+			}else{
+				return this.getIndSituacao().equals(DominioSituacaoVinculo.A) ? DominioSituacaoVinculo.A.getDescricao(): DominioSituacaoVinculo.P.getDescricao();
+			}
+		}
+		return DominioSituacaoVinculo.I.getDescricao();
+	}
 	@Transient
 	public String getMatriculaVinculo() {
 		return this.id.getVinCodigo() + "  " + this.id.getMatricula();

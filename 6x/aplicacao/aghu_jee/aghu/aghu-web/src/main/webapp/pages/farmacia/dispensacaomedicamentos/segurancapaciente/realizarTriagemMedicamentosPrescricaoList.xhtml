@@ -216,7 +216,10 @@
               <p:tooltip  for="panelPaciente" value="#{realizarTriagemMedPrescrPaginatorController.prescricaoMedica.atendimento.paciente.nome}" direction="bottom-right" styleClass="tooltip" style="margin-left: -27%" layout="block"></p:tooltip>  
               <mec:inputText label="#{messages.LABEL_PACIENTE}" size="46" maxlengh="50" readonly="true" style="text-transform:uppercase" value="#{realizarTriagemMedPrescrPaginatorController.prescricaoMedica.atendimento.paciente.nome}" id="nome"/> 
             </p:outputPanel>  
-            <mec:inputText label="#{messages.LABEL_LEITO}" size="8" maxlength="14" readonly="true" styleclass="suggestion_input" style="text-transform:uppercase" value="#{realizarTriagemMedPrescrPaginatorController.prescricaoMedica.atendimento.leito.leitoID}" id="leito"/> 
+           </aghu:linha>  
+          <aghu:linha > 
+            <mec:inputText label="#{messages.LABEL_UNIDADE_FUNCIONAL}" size="46" maxlength="50" readonly="true" styleclass="suggestion_input" style="text-transform:uppercase" value="#{realizarTriagemMedPrescrPaginatorController.prescricaoMedica.atendimento.unidadeFuncional.descricao}" id="unidadeFuncional"/> 
+            <mec:inputText label="#{messages.LABEL_LEITO}" size="8" maxlength="14" readonly="true" styleclass="suggestion_input" style="text-transform:uppercase" value="#{realizarTriagemMedPrescrPaginatorController.prescricaoMedica.atendimento.leito.leitoID}" id="leito"/>
           </aghu:linha>  
           <aghu:linha > 
             <p:outputPanel id="panelConvenio" layout="block"> 
