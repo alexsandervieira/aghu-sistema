@@ -48,7 +48,22 @@ public class DataAccessService implements Serializable {
 	
     @PersistenceContext(name="aghu-pu")
     private EntityManager em;	
-
+    
+    public DataAccessService() {
+    	super();
+    }
+    
+    /**
+     * 
+     * @param entityManager
+     */
+    public DataAccessService(EntityManager entityManager) {
+		if (entityManager == null) {
+			throw new IllegalArgumentException("Tentando setar EntityManager null no DataAccessService!!!");
+		}
+    	this.em = entityManager;
+    }
+    
     /**
      * Retrieves a session instance  
     **/

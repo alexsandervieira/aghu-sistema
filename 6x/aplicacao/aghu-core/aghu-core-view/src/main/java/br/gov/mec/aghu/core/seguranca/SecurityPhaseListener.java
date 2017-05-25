@@ -14,14 +14,14 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import br.gov.mec.aghu.core.commons.criptografia.CriptografiaUtil;
+import br.gov.mec.aghu.core.action.SessionAttributes;
+import br.gov.mec.aghu.core.commons.CoreUtil;
 import br.gov.mec.aghu.core.commons.seguranca.AuthorizationException;
 import br.gov.mec.aghu.core.commons.seguranca.IPermissionService;
 import br.gov.mec.aghu.core.exceptioncode.SecurityPhaseListenerExceptionCode;
@@ -54,13 +54,16 @@ public class SecurityPhaseListener implements PhaseListener {
 	@Override
 	@SuppressWarnings("PMD")
 	public void beforePhase(PhaseEvent event) {
-		if (DESABILITA_SEGURANCA){
+		if (DESABILITA_SEGURANCA) {
 			LOG.info("** VERIFICAÇÃO SEGURANÇA DO AGHU DESABILITADA - SecurityPhaseListener **");
 			return;
 		}		
 		FacesContext context = event.getFacesContext();		
 		Principal principal = context.getExternalContext().getUserPrincipal();
-		if (!context.isPostback() && !context.isValidationFailed() && (!context.getPartialViewContext().isAjaxRequest() || !context.getPartialViewContext().isRenderAll())){
+		
+		if (!context.isPostback() 
+				&& !context.isValidationFailed() 
+				&& (!context.getPartialViewContext().isAjaxRequest() || !context.getPartialViewContext().isRenderAll())){
 			UIViewRoot view = event.getFacesContext().getViewRoot();
 			if (view==null){
 				return;
@@ -81,14 +84,28 @@ public class SecurityPhaseListener implements PhaseListener {
 				usuario = principal.getName();
 			}
 			
-			if (autenticacaoViatoken){
+			if (autenticacaoViatoken) {
+				ExternalContext externalContext = context.getExternalContext();
+				HttpServletRequest request = (HttpServletRequest) externalContext.getRequest();					
+				
+				String pagina = (String)request.getAttribute("javax.servlet.forward.servlet_path");
+				if (pagina == null) {
+					pagina = "/trocarSenhaPorToken.xhtml";
+				}
+				
+				String redirectTo = externalContext.getRequestScheme() + "://"
+						+ externalContext.getRequestServerName() + ":"
+						+ externalContext.getRequestServerPort()
+						+ externalContext.getRequestContextPath() + pagina
+						+ "?faces-redirect=true";
 				try {
-					ExternalContext contextoExterno = context.getExternalContext();
-					HttpServletRequest request = (HttpServletRequest) contextoExterno.getRequest();					
-					contextoExterno.dispatch(((String)request.getAttribute("javax.servlet.forward.servlet_path")) + "?" + request.getQueryString());
+					if (!externalContext.isResponseCommitted()) {
+						externalContext.redirect(redirectTo);
+					}
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 				}
+				context.responseComplete();
 			}
 			
 			String viewID = view.getViewId();
@@ -123,7 +140,7 @@ public class SecurityPhaseListener implements PhaseListener {
 		String usuario = null;
 		String tkn = request.getParameter("tkn");
 		if (tkn != null) {
-		//	tkn = CoreUtil.decodeURL(tkn);
+			tkn = CoreUtil.decodeURL(tkn);
 			if (LOG.isInfoEnabled()) {
 				LOG.info(String.format("Realizando autenticacao por token: %s",
 						tkn));
@@ -138,14 +155,9 @@ public class SecurityPhaseListener implements PhaseListener {
 										.getProperty("user.timezone")));
 			}
 			if (token.isValid()) {
-				try {
-					request.login(token.getUsername(), CriptografiaUtil
-							.descriptografar(token.getEncryptedPassword()));
-					usuario = token.getUsername();
-				} catch (ServletException e) {
-					throw new TokenIdentityException(
-							"não foi possível autentucar usuário via token", e);
-				}
+				request.getSession().setAttribute(SessionAttributes.TOKEN_LOGIN.toString(), token);
+				usuario = token.getUsername();
+				LOG.info(String.format("Autenticacao por token realizada com sucesso, para usuario: %s", usuario));
 			} else {
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(String

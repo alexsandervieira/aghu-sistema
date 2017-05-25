@@ -107,14 +107,23 @@ public abstract class QueryBuilder<T> implements Serializable{
 		return this.dataAcess.createQuery(hql);		
 	}
 	
+	protected org.hibernate.Query createHibernateQuery(String hql) {
+		 if (hql == null || "".equals(hql.trim())) {
+			 throw new IllegalArgumentException("QueryBuilder.createHibernateQuery: String informada para criacao a Query nao eh valida!!!");
+		 }
+		 return dataAcess.createHibernateQuery(hql);
+	}
 	
-	 protected org.hibernate.Query createHibernateQuery(String query) {
-		 return dataAcess.createHibernateQuery(query);
-	 }
+	protected org.hibernate.Query createQueryStateless(String hql) {
+		 if (hql == null || "".equals(hql.trim())) {
+			 throw new IllegalArgumentException("QueryBuilder.createQueryStateless: String informada para criacao a Query nao eh valida!!!");
+		 }
+		 return dataAcess.createQueryStateless(hql);
+	}
 	 
-	 protected <T extends BaseEntity> void refresh(T entity) {
+	protected <T extends BaseEntity> void refresh(T entity) {
 		 dataAcess.refresh(entity);
-	 }	
+	}	
 	
 	/**
 	 * Cria um DetachedCriteria para a classe clazz<br>

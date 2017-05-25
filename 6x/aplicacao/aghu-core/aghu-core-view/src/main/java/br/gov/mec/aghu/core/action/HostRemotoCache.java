@@ -3,6 +3,8 @@ package br.gov.mec.aghu.core.action;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
@@ -48,7 +50,26 @@ public class HostRemotoCache implements Serializable {
 	 * @throws UnknownHostException
 	 */
 	public String getEnderecoRedeHostRemoto() throws UnknownHostException {
+		// --[BUSCA CONTEXTO PARA ADQUIRIR IP DO CLIENTE]
+        FacesContext fc = FacesContext.getCurrentInstance();
+        HttpServletRequest request = (HttpServletRequest) fc
+                .getExternalContext().getRequest();
+
+        // Caso não tenha conseguido obter pela forma canônica ou normal,
+        // tenta obter o IP pelo atributo X-Forwarded-For do header HTTP.
+        // Se houver um valor retornado neste atributo e se ele for um IPv4
+        // válido então este será forçado como o endereço do host. Isto serve
+        // para casos onde o AGHU rode com proxy web na frente do servidor
+        // de aplicação.
 		LOG.debug("HostRemotoCache.getEnderecoRedeHostRemoto()");
+		String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()
+                && validarEnderecoIPv4(xForwardedFor)) {
+            LOG.debug("Obteve o seguinte IP pelo atributo X-Forwarded-For do header HTTP: "
+                    + xForwardedFor);
+            return xForwardedFor;
+        }
+        
 		InetAddress hostRemoto = getHostRemoto();
 
 		if (this.isIdentificarHostRemotoPorIp()) {
@@ -57,7 +78,23 @@ public class HostRemotoCache implements Serializable {
 
 		return hostRemoto.getHostName();
 	}
+	/**
+     * Valida se um endereço de rede está no padrão IPv4. Endereços retornados
+     * como válidos por este método incluem: 0.0.0.0 127.0.0.1 255.255.255.255
+     * 192.168.0.1 192.00.0.1 001.0.0.1
+     *
+     * @param enderecoIPv4
+     *            Um endereço de rede padrão IPv4
+     * @return Verdadeiro caso o endereço esteja no padrão IPv4, falso caso
+     *         contrário
+     */
+    private boolean validarEnderecoIPv4(String enderecoIPv4) {
+        Pattern pattern = Pattern
+                .compile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
 
+        Matcher matcher = pattern.matcher(enderecoIPv4);
+        return matcher.find() && matcher.group().equals(enderecoIPv4);
+    }
 	/**
 	 * Retorna o InetAddress do cliente recuperado a partir do requestfornecido.<br />
 	 * Não resolve o endereço e nome do localhost para permitir testes em

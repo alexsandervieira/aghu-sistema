@@ -1,19 +1,15 @@
 package br.gov.mec.aghu.core.business.seguranca;
 
-import java.security.Principal;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.ejb.SessionContext;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
-import javax.naming.InitialContext;
 
 import br.gov.mec.aghu.core.commons.seguranca.AuthorizationException;
 import br.gov.mec.aghu.core.commons.seguranca.IPermissionService;
 import br.gov.mec.aghu.core.exception.BaseRuntimeException;
-import br.gov.mec.aghu.core.exception.UsuarioNaoLogadoException;
 import br.gov.mec.aghu.core.exceptioncode.AghuSecureInterceptorExceptionCode;
 import br.gov.mec.aghu.core.locator.ServiceLocator;
 
@@ -41,20 +37,12 @@ public class AghuSecureInterceptor {
 		if (m.find()) {
 			action = m.group().replace("'", "");
 		}
-		InitialContext ic = new InitialContext();
-		SessionContext sesCtx = (SessionContext) ic
-				.lookup("java:comp/EJBContext");
-		Principal principal = sesCtx.getCallerPrincipal();
-		if (principal == null) {
-			throw new UsuarioNaoLogadoException();
-		}
-		String usuario = principal.getName();
+		IPermissionService permissionService = ServiceLocator.getBeanRemote(IPermissionService.class, "aghu-casca");
+		String usuario = permissionService.obterLoginUsuarioLogado();
 		if (target == null || action == null) {
 			throw new BaseRuntimeException(
 					AghuSecureInterceptorExceptionCode.TARGET_ACTION_NAO_ESPECIFICADA);
 		}
-		
-		IPermissionService permissionService = ServiceLocator.getBeanRemote(IPermissionService.class, "aghu-casca");
 		if (!permissionService.usuarioTemPermissao(usuario, target, action)) {
 			throw new AuthorizationException(
 					AghuSecureInterceptorExceptionCode.ERRO_PERMISSAO, usuario, target,

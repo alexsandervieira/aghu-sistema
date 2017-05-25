@@ -15,7 +15,7 @@
 	</parent>
 
 	<properties>
-		<aghu-core-commons.versao>3.3</aghu-core-commons.versao>
+		<aghu-core-commons.versao>3.8</aghu-core-commons.versao>
 		<aghu-core-service.versao>3.0</aghu-core-service.versao>
 		<powermock.version>1.5.6</powermock.version>
 	</properties>

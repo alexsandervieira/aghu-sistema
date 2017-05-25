@@ -117,7 +117,7 @@ public class PreviousEntitySearcher implements Serializable {
 			if (!this.isProjectedField(field, clazz)) {
 				continue;
 			}
-			if (!this.isModelField(field)) {
+			if (!this.isJoinable(field, clazz)) {
 				hql.append("o.");
 			}
 			hql.append(field.getName());
@@ -129,7 +129,7 @@ public class PreviousEntitySearcher implements Serializable {
 		hql.append("from ").append(clazz.getSimpleName()).append(" o ");
 		for (Field field : fields) {
 			field.setAccessible(true);
-			if (this.isModelField(field)) {
+			if (isJoinable(field, clazz)) {
 				hql.append(" left outer join o.").append(field.getName()).append(' ');
 				hql.append(field.getName()).append(' ');
 			}
@@ -160,6 +160,17 @@ public class PreviousEntitySearcher implements Serializable {
 		}
 		
 		return projectedField;
+	}
+	
+	protected <E extends BaseEntity> boolean isJoinable(Field field, Class<E> clazz) {
+		boolean joinableField = true;
+		if (isTransientField(field)
+				|| hasMethodAnnotationPresent(field, Transient.class, clazz)
+				|| !this.isModelField(field)
+				) {
+			joinableField = false;
+		}
+		return joinableField;
 	}
 	
 	/**
@@ -200,7 +211,12 @@ public class PreviousEntitySearcher implements Serializable {
 		} catch (SecurityException e) {
 			LOG.warn(e.getMessage());
 		} catch (NoSuchMethodException e) {
-			LOG.warn(e.getMessage());
+			LOG.info("Nao encontrou metodo get, buscando por is");
+			try {
+				methodGet = clazz.getMethod("is"+fieldName);
+			} catch (NoSuchMethodException | SecurityException e1) {
+				LOG.warn(e.getMessage());
+			}
 		}
 		
 		if (methodGet != null) {

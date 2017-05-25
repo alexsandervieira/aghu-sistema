@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+	<groupId>br.gov.mec.aghu-core</groupId>
+	<artifactId>dialetosaghu</artifactId>
+	<version>3.1</version>
+	<!-- procurar por '<aghu-core-dialect.versao>' para encontrar os pontos de substituicao 
+		da versao do entidades -->
+	
+	<parent>
+	  <groupId>br.gov.mec</groupId>
+	  <artifactId>aghu-core</artifactId>
+	  <version>3.0</version>
+	</parent>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+	
+	<profiles>
+		<profile>
+			<id>copy</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<tasks>
+										 <delete>
+										 	<fileset dir="${basedir}/../../aghu_jee/aghu/aghu-ear/src/main/config-outside/hibernate-dialetos/main" 
+										 		includes="dialetosaghu.jar"
+										 	/>
+										 </delete>
+										<copy overwrite="true" file="${basedir}/target/dialetosaghu-${project.version}.jar"
+											tofile="${basedir}/../../aghu_jee/aghu/aghu-ear/src/main/config-outside/hibernate-dialetos/main/dialetosaghu.jar" >
+										</copy>											
+									</tasks>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>		
+	</profiles>
+</project>

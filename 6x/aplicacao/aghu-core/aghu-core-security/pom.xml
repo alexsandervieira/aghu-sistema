@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>br.gov.mec.aghu-core</groupId>
   <artifactId>aghu-core-security</artifactId>
-  <version>8.3</version>
+  <version>8.4</version>
   <!-- buscar por '<aghu-core-security.versao>' para atualizar a dependencias -->
 
   <parent>
@@ -55,15 +55,29 @@
 						<artifactId>maven-antrun-plugin</artifactId>
 						<executions>
 							<execution>
-								<phase>initialize</phase>
+								<phase>install</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
 								<configuration>
 									<tasks>
+										 <delete>
+										 	<fileset dir="${basedir}/../../aghu_jee/aghu/aghu-ear/src/main/config-outside/moduloseguranca/br/gov/mec/aghu/security/main" 
+										 		includes="aghu-core-security-*.jar"
+										 	/>
+										 </delete>
 										<copy overwrite="true" todir="${basedir}/../../aghu_jee/aghu/aghu-ear/src/main/config-outside/moduloseguranca/br/gov/mec/aghu/security/main">
 											<fileset file="${basedir}/target/aghu-core-security-${project.version}.jar" />
-										</copy>										
+										</copy>	
+										
+										
+										<filterset id="security.params.module">
+											<filter token="security.version-jar" value="${project.version}" />
+                                        </filterset>
+										<copy overwrite="true" file="${basedir}/src/main/config-outside/module.xml"
+											tofile="${basedir}/../../aghu_jee/aghu/aghu-ear/src/main/config-outside/moduloseguranca/br/gov/mec/aghu/security/main/module.xml">
+											<filterset refid="security.params.module" />
+										</copy> 									
 										
 									</tasks>
 								</configuration>

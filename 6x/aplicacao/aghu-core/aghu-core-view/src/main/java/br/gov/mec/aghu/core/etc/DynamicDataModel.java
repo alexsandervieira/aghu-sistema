@@ -237,7 +237,7 @@ public class DynamicDataModel<T> extends LazyDataModel<T> implements SelectableD
 		LOG.info("carregando imagem da configuracao ...");
 		return ConfigurationUtil.carregarImagemParaItext("logo-hospital.png");
 	}
-		
+	
 	public Boolean getEmpty(){
 		return wrappedData==null || wrappedData.isEmpty();
 	}

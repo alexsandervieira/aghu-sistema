@@ -126,15 +126,18 @@ public class AghuLdapLoginModule extends AghuBaseLoginModule {
 				}
 			}
 		} catch (AuthenticationException ex) {
+			LOG.error(ex.getMessage(), ex);
 			throw new FailedLoginException("Usuário ou senha incorretos");
 		} catch (NamingException ex2) {
-			throw new LoginException("Erro na comunicação com o AD");
+			LOG.error(ex2.getMessage(), ex2);
+			throw new LoginException("Erro na comunicação com o AD / LDAP");
 		} finally { // NOPMD
 			if (ctx != null) {
 				try {
 					ctx.close();
 				} catch (NamingException ex) {
-					throw new LoginException("Erro na comunicação com o AD");
+					LOG.error(ex.getMessage(), ex);
+					throw new LoginException("Erro na comunicação com o AD / LDAP");
 				}
 			}
 		}
@@ -153,16 +156,14 @@ public class AghuLdapLoginModule extends AghuBaseLoginModule {
 	 * @return
 	 * @throws NamingException
 	 */
-	protected final InitialLdapContext initialiseContext(String principal,
-			String credentials) throws NamingException {
+	protected final InitialLdapContext initialiseContext(String principal, String credentials) throws NamingException {
+		LOG.info("Conectando no AD / LDAP ...");
 		Properties env = new Properties();
 
-		env.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-				"com.sun.jndi.ldap.LdapCtxFactory");
+		env.setProperty(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 		env.setProperty(Context.SECURITY_AUTHENTICATION, "simple");
 
-		String providerUrl = String.format("ldap://%s:%d", getServerAddress(),
-				getServerPort());
+		String providerUrl = String.format("ldap://%s:%d", getServerAddress(), getServerPort());
 		env.setProperty(Context.PROVIDER_URL, providerUrl);
 
 		env.setProperty(Context.SECURITY_PRINCIPAL, principal);

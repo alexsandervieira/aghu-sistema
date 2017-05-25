@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>aghu-core-business</artifactId>
 	<groupId>br.gov.mec.aghu-core</groupId>
-	<version>3.5</version>
+	<version>3.9</version>
 	<!-- buscar por '<aghu-core-business.versao>' para atualizar a dependencias -->
 
 	<parent>
@@ -17,6 +17,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.build.timestamp.format>ddMMyyyy'T'HHmmss</maven.build.timestamp.format>
+		<version.picketbox>4.0.21.Beta1</version.picketbox>
 	</properties>
 
 	<dependencies> <!-- provided, compile, runtime, test, system -->
@@ -96,6 +97,13 @@
 			<artifactId>jboss-jsf-api_2.2_spec</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		
+		<dependency>
+        	<groupId>org.picketbox</groupId>
+        	<artifactId>picketbox</artifactId>
+        	<version>${version.picketbox}</version>
+        	<scope>provided</scope>
+        </dependency>		
 
 		<!-- Test scope dependencies -->
 		<dependency>
@@ -104,6 +112,13 @@
 			<version>${aghu-core-test.versao}</version>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>br.gov.mec.aghu-core</groupId>
+			<artifactId>aghu-core-security</artifactId>
+			<version>${aghu-core-security.versao}</version>
+			<scope>provided</scope>
+		</dependency>		
 
 	</dependencies>
 

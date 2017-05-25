@@ -8,7 +8,10 @@ import javax.ejb.SessionContext;
 import javax.inject.Inject;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jboss.security.SecurityContextAssociation;
 
+import br.gov.mec.aghu.casca.autenticacao.AghuQuartzPrincipal;
 import br.gov.mec.aghu.core.business.moduleintegration.HospitalQualifier;
 import br.gov.mec.aghu.core.exception.ApplicationBusinessException;
 import br.gov.mec.aghu.core.exception.BaseException;
@@ -28,6 +31,7 @@ public abstract class BaseBusiness implements Serializable {
 	/**
 	 * 
 	 */
+	private static final Log LOG = LogFactory.getLog(BaseBusiness.class);
 	private static final long serialVersionUID = 4294710148867519816L;
 
 	/**
@@ -74,6 +78,16 @@ public abstract class BaseBusiness implements Serializable {
 		Principal p = ctx.getCallerPrincipal();
 		if (p == null){
 			throw new UsuarioNaoLogadoException();
+		}
+		if (p.getName().equalsIgnoreCase("anonymous")) {
+			Principal principal = SecurityContextAssociation.getPrincipal();
+			if(principal instanceof AghuQuartzPrincipal) {
+				LOG.info("Retornando usuario apartir do SecurityContextAssociantion e nao do contexto do servidor. Usuario :" + principal);
+				return principal.getName();
+			} else {
+				throw new UsuarioNaoLogadoException();
+			}
+			
 		}
 		return p.getName();
 	}

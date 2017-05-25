@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>aghu-core-view</artifactId>
   <groupId>br.gov.mec.aghu-core</groupId>
-  <version>3.7</version>
+  <version>3.10</version>
   <!--  buscar por '<aghu-core-view.versao>' para atualizar a dependencias -->
 
 	<parent>

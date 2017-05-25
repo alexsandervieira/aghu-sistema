@@ -54,7 +54,7 @@ public class HostRemotoUtil {
 		LOG.debug("name após retirada do dominio " + name);
 		
 		if (isIPAddress(name)){
-			LOG.warn("O nome da estação não foi resolvido para o IP " + name);
+			LOG.warn("Usando IP: " + name);
 		}
 
 		result = InetAddress.getByAddress(name, address);

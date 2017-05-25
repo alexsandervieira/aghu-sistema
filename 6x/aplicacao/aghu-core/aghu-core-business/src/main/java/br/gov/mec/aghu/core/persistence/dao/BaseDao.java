@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
 
@@ -75,7 +76,14 @@ public abstract class BaseDao<E extends BaseEntity> implements Serializable {
 	public Boolean isHCPA() {
 		return isHCPA;
 	}
-
+	
+	/**
+	 * Metodo utilizado pelas classes de DAOTest.
+	 * 
+	 */
+	public void doSetDataAccessService(EntityManager entityManager) {
+		this.dataAcess = new DataAccessService(entityManager);
+	}
 	
 	public FullTextQuery createFullTextQuery(org.apache.lucene.search.Query query, Class<?> clazzName) {
 		return dataAcess.createFullTextQuery(query, clazzName);
@@ -573,6 +581,9 @@ public abstract class BaseDao<E extends BaseEntity> implements Serializable {
 	 * A responsabilidade é obter os valores originais de uma entidade antes das mudanças efetuadas pelo sistema / usuário.<br>
 	 * Basicamente usado para comparações de valores atuais com valores anterior de uma entidade.propriedade.<br>
 	 * 
+	 * Este metodo eh o unico metodo que pode ser sobrescrito nas subclasses. Pois nele esta a logica de recuperacao da entidade.<br>
+	 * Casos em que deve ser sobrescrito:<br>
+	 * 1) quando o mapeamento esta com alguma item fora do padrão;
 	 * 
 	 * @param elementoModificado
 	 * @return
@@ -594,7 +605,7 @@ public abstract class BaseDao<E extends BaseEntity> implements Serializable {
 	public E obterOriginal(EntityCompositeId id) {
 		E entity = getEntityPK(id);
 		
-		return this.obterOriginal(entity);
+		return obterOriginal(entity);
 	}
 	
 	/**
@@ -610,7 +621,7 @@ public abstract class BaseDao<E extends BaseEntity> implements Serializable {
 	public E obterOriginal(Number idNumber) {
 		E entity = getEntityPK(idNumber);
 		
-		return this.obterOriginal(entity);		
+		return obterOriginal(entity);		
 	}
 	
 	/**
@@ -626,7 +637,7 @@ public abstract class BaseDao<E extends BaseEntity> implements Serializable {
 	public E obterOriginal(String idString) {
 		E entity = getEntityPK(idString);
 		
-		return this.obterOriginal(entity);		
+		return obterOriginal(entity);		
 	}
 
 	private E getEntityPK(Object pk) {

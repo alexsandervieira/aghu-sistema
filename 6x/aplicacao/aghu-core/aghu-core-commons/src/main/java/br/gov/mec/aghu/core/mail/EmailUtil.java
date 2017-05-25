@@ -3,6 +3,8 @@ package br.gov.mec.aghu.core.mail;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -27,16 +29,83 @@ import br.gov.mec.aghu.core.commons.Parametro;
  */
 public class EmailUtil implements Serializable {
 
+	
 	private static final long serialVersionUID = -520826407924558421L;
 
+	private static final Log LOG = LogFactory.getLog(EmailUtil.class);
+	
+	public static String ofuscarEmail(String email) {
+		if (email == null || "".equalsIgnoreCase(email.trim())) {
+			return null;
+		}
+		
+		if (!isEmailValid(email)) {
+			return null;
+		}
+		
+		String user = email.substring(0, email.indexOf('@'));
+		String twocharIni = user.substring(0,2);
+		String twocharEnd = "";
+		int tamanhoFinal = user.length();
+		if (user.length() > 8) {
+			twocharEnd = user.substring(user.length()-2, user.length());
+			tamanhoFinal = user.length()-2;
+		}
+		
+		StringBuilder ofuscadaFinal = new StringBuilder("");
+		for (int i = 2; i < tamanhoFinal; i++) {
+			ofuscadaFinal.append('*');
+		}
+		
+		String ofuscada = email.replace(user, (twocharIni + ofuscadaFinal.toString() + twocharEnd)); 
+		return ofuscada;
+	}
+
+	public static boolean isEmailValid(String email) {
+        if ((email == null) || ("".equalsIgnoreCase(email.trim()))) {
+        	return false;
+        }
+
+        String emailPattern = "\\b(^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@([A-Za-z0-9-])+(\\.[A-Za-z0-9-]+)*((\\.[A-Za-z0-9]{2,})|(\\.[A-Za-z0-9]{2,}\\.[A-Za-z0-9]{2,}))$)\\b";
+        Pattern pattern = Pattern.compile(emailPattern, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+	
+	
 	private EmailInformation emailInformation;
 	
 	@Inject @Parametro("mail_session_host")
 	private String hostName;
 
-	private static final Log LOG = LogFactory.getLog(EmailUtil.class);
-	
+	/**
+	 * @deprecated usar metodo enviarEmail
+	 * @see EmailUtil#enviarEmail(String, String, String, String, String, AnexoEmail...)
+	 * 
+	 * @param remetente
+	 * @param destinatario
+	 * @param destinatarioOculto
+	 * @param assunto
+	 * @param conteudo
+	 * @param anexos
+	 */
 	public void enviaEmail(String remetente, String destinatario,
+			String destinatarioOculto, String assunto, String conteudo,
+			AnexoEmail... anexos) {
+		//TODO reavaliar uso deste metodo
+	}
+	
+	/**
+	 * Metodo responsavel por envio de e-mail.
+	 * 
+	 * @param remetente
+	 * @param destinatario
+	 * @param destinatarioOculto
+	 * @param assunto
+	 * @param conteudo
+	 * @param anexos
+	 */
+	public void enviarEmail(String remetente, String destinatario,
 			String destinatarioOculto, String assunto, String conteudo,
 			AnexoEmail... anexos) {
 		List<ContatoEmail> destinatarios = new ArrayList<ContatoEmail>(1);
@@ -49,26 +118,8 @@ public class EmailUtil implements Serializable {
 			destinatariosOcultos.add(new ContatoEmail(destinatarioOculto));
 		}
 
-		this.enviaEmail(new ContatoEmail(remetente), destinatarios,
+		this.doEnviaEmail(new ContatoEmail(remetente), destinatarios,
 				destinatariosOcultos, assunto, conteudo, anexos);
-	}
-
-	
-	public void enviaEmail(ContatoEmail remetente, ContatoEmail destinatario,
-			ContatoEmail destinatarioOculto, String assunto, String conteudo,
-			AnexoEmail... anexos) {
-		List<ContatoEmail> destinatarios = new ArrayList<ContatoEmail>(1);
-		if (destinatario != null) {
-			destinatarios.add(destinatario);
-		}
-
-		List<ContatoEmail> destinatariosOcultos = new ArrayList<ContatoEmail>(1);
-		if (destinatarioOculto != null) {
-			destinatariosOcultos.add(destinatarioOculto);
-		}
-
-		this.enviaEmail(remetente, destinatarios, destinatariosOcultos,
-				assunto, conteudo, anexos);
 	}
 
 	
@@ -96,25 +147,77 @@ public class EmailUtil implements Serializable {
 					auxDestinatariosOcultos, assunto, conteudo, anexos);
 		}
 		else {
-		    this.enviaEmail(auxRemetente, auxDestinatarios,
+		    this.doEnviaEmail(auxRemetente, auxDestinatarios,
 				auxDestinatariosOcultos, assunto, conteudo, anexos);
 		}
 	}
 	
-	public void enviaEmail(String remetente, List<String> destinatarios,
+	/**
+	 * 
+	 * @param remetente
+	 * @param destinatarios
+	 * @param destinatariosOcultos
+	 * @param assunto
+	 * @param conteudo
+	 * @param anexos
+	 */
+	public void enviarEmail(String remetente, List<String> destinatarios,
 			List<String> destinatariosOcultos, String assunto, String conteudo,
 			AnexoEmail... anexos) {
 		this.enviaEmail(remetente, destinatarios, destinatariosOcultos, assunto, conteudo, false, anexos);
 	}
-
 	
-	public void enviaEmailHtml(String remetente, List<String> destinatarios,
+	/**
+	 * @deprecated usar enviarEmail
+	 * @see EmailUtil#enviarEmail(String, List, List, String, String, AnexoEmail...)
+	 * 
+	 * @param remetente
+	 * @param destinatarios
+	 * @param destinatariosOcultos
+	 * @param assunto
+	 * @param conteudo
+	 * @param anexos
+	 */
+	public void enviaEmail(String remetente, List<String> destinatarios,
+			List<String> destinatariosOcultos, String assunto, String conteudo,
+			AnexoEmail... anexos) {
+		//TODO reavaliar uso deste metodo
+	}
+
+	/**
+	 * Enviar email HTML.
+	 * 
+	 * @param remetente
+	 * @param destinatarios
+	 * @param destinatariosOcultos
+	 * @param assunto
+	 * @param conteudo
+	 * @param anexos
+	 */
+	public void enviarEmailHtml(String remetente, List<String> destinatarios,
 			List<String> destinatariosOcultos, String assunto, String conteudo,
 			AnexoEmail... anexos) {
 		this.enviaEmail(remetente, destinatarios, destinatariosOcultos, assunto, conteudo, true, anexos);
 	}
+	
+	/**
+	 * @deprecated usar enviarEmailHtml
+	 * @see EmailUtil#enviarEmailHtml(String, List, List, String, String, AnexoEmail...)
+	 * 
+	 * @param remetente
+	 * @param destinatarios
+	 * @param destinatariosOcultos
+	 * @param assunto
+	 * @param conteudo
+	 * @param anexos
+	 */
+	public void enviaEmailHtml(String remetente, List<String> destinatarios,
+			List<String> destinatariosOcultos, String assunto, String conteudo,
+			AnexoEmail... anexos) {
+		//TODO reavaliar uso deste metodo
+	}
 
-	public void enviaEmailHtml(ContatoEmail remetente,
+	private void enviaEmailHtml(ContatoEmail remetente,
 			List<ContatoEmail> destinatarios,
 			List<ContatoEmail> destinatariosOcultos, String assunto,
 			String conteudo, AnexoEmail... anexos) {
@@ -160,10 +263,42 @@ public class EmailUtil implements Serializable {
 		}
 	}
 	
+	/**
+	 * Utilizado para enviar email.
+	 * 
+	 * @param remetente
+	 * @param destinatarios
+	 * @param destinatariosOcultos
+	 * @param assunto
+	 * @param conteudo
+	 * @param anexos
+	 */
+	public void enviarEmail(ContatoEmail remetente,
+			List<ContatoEmail> destinatarios,
+			List<ContatoEmail> destinatariosOcultos, String assunto,
+			String conteudo, AnexoEmail... anexos) {
+		doEnviaEmail(remetente, destinatarios, destinatariosOcultos, assunto, conteudo, anexos);		
+	}
 	
-	
-	
+	/**
+	 * @deprecated usar enviarEmail
+	 * @see EmailUtil#enviarEmail(ContatoEmail, List, List, String, String, AnexoEmail...)
+	 * 
+	 * @param remetente
+	 * @param destinatarios
+	 * @param destinatariosOcultos
+	 * @param assunto
+	 * @param conteudo
+	 * @param anexos
+	 */
 	public void enviaEmail(ContatoEmail remetente,
+			List<ContatoEmail> destinatarios,
+			List<ContatoEmail> destinatariosOcultos, String assunto,
+			String conteudo, AnexoEmail... anexos) {
+		//TODO reavaliar uso deste metodo
+	}
+	
+	private void doEnviaEmail(ContatoEmail remetente,
 			List<ContatoEmail> destinatarios,
 			List<ContatoEmail> destinatariosOcultos, String assunto,
 			String conteudo, AnexoEmail... anexos) {
