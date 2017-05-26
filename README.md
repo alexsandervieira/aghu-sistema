@@ -7,7 +7,8 @@ http://www.ebserh.gov.br/web/aghu/sobre/o-que-e
 
 ## Configuração do Ambiente de Desenvolvimento
 
-	Efetuar clone/download do projeto git http://github.com/ebserhaghu/aghu-sistema.git
+	Efetuar clone/download do projeto git 
+http://github.com/ebserhaghu/aghu-sistema.git
  
  ### Código Fonte
 
