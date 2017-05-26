@@ -20,7 +20,7 @@ https://github.com/ebserhaghu/aghu-sistema.git
 
  ### Configurar Build
  
- * Na IDE acessar configurações de run
+ * Na IDE acessar configurações de run 
  * Configurar o diretório, informar o diretório do projeto Seudiretório/aghu_jee/aghu
  * Informar os comandos no command line: clean install -DskipTests -Dpmd.skip=true 
  * Acessar configurações de run
@@ -29,4 +29,6 @@ https://github.com/ebserhaghu/aghu-sistema.git
 
  #### Depêndencias .m2
 
- 
+ * Para resolução de dependências do projeto.
+ * Adicionar os jars do diretório 6x/dependencias/aghu-dependencias-jar no .m2 do projeto
+
