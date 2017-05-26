@@ -22,26 +22,37 @@ https://github.com/ebserhaghu/aghu-sistema.git
  
  #### Alterar o seuDiretório contidos no command line para o local onde está seus arquivos.
 
- * Na IDE acessar configurações de run 
- * Configurar o diretório, informar o diretório do projeto: seuDiretório/aghu_jee/aghu
+ #### Configurar JAVA_HOME JDK 1.7
+
+ #### Informar o Maven utilizado contido no diretório: seuDiretório/6x/aplicacao/apache-maven/conf/settings.xml
+
+ #### Configurar o arquivo settings contindo no diretório: seuDiretório/6x/aplicacao/apache-maven/conf/settings.xml
+
+ * Na IDE acessar configurações de execução criar novo e nomear aghu-full
+ * Configurar o diretório, informar o diretório do projeto: seuDiretório/6x/aplicacao/aghu_jee/aghu
  * Informar os comandos no command line: clean install -DskipTests -Dpmd.skip=true 
- * Acessar configurações de run
- * Configurar o diretório, informar o diretório do projeto: seuDiretório/aghu_jee/aghu-entidades
+ * Acessar configurações de run criar novo e nomear aghu-entidades-full
+ * Configurar o diretório, informar o diretório do projeto: seuDiretório/6x/aplicacao/aghu_jee/aghu-entidades
  * Informar os comandos no command line: clean install
- * Acessar configurações de run
+ * Acessar configurações de run criar novo e nomear aghu-deploy
  * Configurar o diretório, informar o diretório do projeto: seuDiretório/aghu_jee/aghu/aghu-ear
  * Informar os comandos no command line: wildfly:deploy -Djboss.home=seuDiretório/6x/aplicacao/wildfly
 
  #### Depêndencias .m2
 
  * Para resolução de dependências do projeto.
- * Adicionar os jars do diretório 6x/dependencias/aghu-dependencias-jar no .m2 do projeto
+ * Adicionar os jars do diretório seuDiretório/6x/dependencias/aghu-dependencias-jar no .m2 do projeto
 
  ### Configuração do Banco de dados 
 
-
-
+ * Acessar o arquivo dbaghu.backup contido no diretório: seuDiretório/6x/banco-dados/banco
+ * Restaurar backup do banco em um banco de dados PostgreSql
+ * Executar script pendecias_6x.sql contido no diretório: seuDiretório/6x/banco-dados/scripts no banco restaurado
 
  ### Deploy da Aplicação
 
- * 
+ * Executar aghu-entidades-full
+ * Executar aghu-full
+ * Acessar diretório: seuDiretório/6x/aplicacao/wildfly/bin 
+ * Executar dentro do diretório acima: ./standalone.sh -server-config=standalone-full.xml
+ * Executar aghu-deploy
