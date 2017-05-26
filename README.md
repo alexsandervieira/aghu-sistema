@@ -9,7 +9,7 @@ http://www.ebserh.gov.br/web/aghu/sobre/o-que-e
 
 Efetuar clone/download do projeto git
 https://github.com/ebserhaghu/aghu-sistema.git	
- 
+
  ### Código Fonte
 
  * Na IDE de desenvolvimento criar um projeto a partir de um projeto existente.
@@ -18,6 +18,6 @@ https://github.com/ebserhaghu/aghu-sistema.git
  * Importar um novo módulo dentro deste projeto e selecionar o diretório aghu-sistema/6x/aplicacao/aghu_jee/aghu
  * Informar que é um projeto Maven e importar.
 
+ Garantir que as váriaveis de ambiente estejam setadas corretamente: JAVA_HOME JAVA_HOME (JDK 1.7...)
 
-
- ### 
+ ### Co
