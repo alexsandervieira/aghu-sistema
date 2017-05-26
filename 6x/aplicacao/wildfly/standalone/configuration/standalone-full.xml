@@ -160,7 +160,7 @@
         <subsystem xmlns="urn:jboss:domain:datasources:3.0">
             <datasources>
                 <datasource jndi-name="java:/aghuDatasource" pool-name="aghu" enabled="true" use-java-context="true">
-                    <connection-url>jdbc:postgresql://172.17.62.50:6544/dbaghu-hub</connection-url>
+                    <connection-url>jdbc:postgresql://localhost:6544/dbaghu</connection-url>
                     <driver>PostgresqlDriver</driver>
                     <new-connection-sql>select now()</new-connection-sql>
                     <pool>
