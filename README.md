@@ -18,6 +18,15 @@ https://github.com/ebserhaghu/aghu-sistema.git
  * Importar um novo módulo dentro deste projeto e selecionar o diretório aghu-sistema/6x/aplicacao/aghu_jee/aghu
  * Informar que é um projeto Maven e importar.
 
- Garantir que as váriaveis de ambiente estejam setadas corretamente: JAVA_HOME JAVA_HOME (JDK 1.7...)
+ ### Configurar Build
+ 
+ * Na IDE acessar configurações de run
+ * Configurar o diretório, informar o diretório do projeto Seudiretório/aghu_jee/aghu
+ * Informar os comandos no command line: clean install -DskipTests -Dpmd.skip=true 
+ * Acessar configurações de run
+ * Configurar o diretório, informar o diretório do projetoaghu_jee/aghu-entidades
+ * Informar os comandos no command line: clean install
 
- ### Co
+ #### Depêndencias .m2
+
+ 
