@@ -20,15 +20,28 @@ https://github.com/ebserhaghu/aghu-sistema.git
 
  ### Configurar Build
  
+ #### Alterar o seuDiretório contidos no command line para o local onde está seus arquivos.
+
  * Na IDE acessar configurações de run 
- * Configurar o diretório, informar o diretório do projeto Seudiretório/aghu_jee/aghu
+ * Configurar o diretório, informar o diretório do projeto: seuDiretório/aghu_jee/aghu
  * Informar os comandos no command line: clean install -DskipTests -Dpmd.skip=true 
  * Acessar configurações de run
- * Configurar o diretório, informar o diretório do projetoaghu_jee/aghu-entidades
+ * Configurar o diretório, informar o diretório do projeto: seuDiretório/aghu_jee/aghu-entidades
  * Informar os comandos no command line: clean install
+ * Acessar configurações de run
+ * Configurar o diretório, informar o diretório do projeto: seuDiretório/aghu_jee/aghu/aghu-ear
+ * Informar os comandos no command line: wildfly:deploy -Djboss.home=seuDiretório/6x/aplicacao/wildfly
 
  #### Depêndencias .m2
 
  * Para resolução de dependências do projeto.
  * Adicionar os jars do diretório 6x/dependencias/aghu-dependencias-jar no .m2 do projeto
 
+ ### Configuração do Banco de dados 
+
+
+
+
+ ### Deploy da Aplicação
+
+ * 
