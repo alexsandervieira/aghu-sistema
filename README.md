@@ -56,3 +56,9 @@ https://github.com/ebserhaghu/aghu-sistema.git
  * Acessar diretório: seuDiretório/6x/aplicacao/wildfly/bin 
  * Executar dentro do diretório acima: ./standalone.sh -server-config=standalone-full.xml
  * Executar aghu-deploy
+
+ ### Acesso AGHU
+
+ * Para logar no AGHU
+ * usuário: aghu
+ * senha: qualquerSenha
